@@ -2,32 +2,34 @@
 
 最后更新时间：2026-04-30
 当前阶段：阶段 6 交付加固
-当前任务编号：QA-REPORT-001
-当前任务名称：阶段测试报告
+当前任务编号：DEVOPS-PROD-001 / DEVOPS-NGINX-001 / DEVOPS-BACKUP-001
+当前任务名称：生产部署配置
 当前 Agent：Claude
 任务状态：已完成
 
 ## 本次目标
 
-创建阶段测试报告。
+创建生产 Docker Compose、Nginx 配置和备份恢复脚本。
 
 ## 最近完成
 
-- .agent_workspace/test-reports/phase-all-test-report.md：51/51 通过，按阶段统计，功能覆盖率，安全特性，已知限制
+- deploy/docker-compose.prod.yml：四容器架构（PG + 后端 + 前端构建 + Nginx）
+- deploy/nginx.conf：SPA 路由、API 代理、静态资源缓存
+- deploy/backup.sh / restore.sh：PostgreSQL 备份恢复脚本
+- frontend/Dockerfile：多阶段生产构建
 
 ## 当前正在做
 
-测试报告已完成。下一步继续阶段 6 交付物。
+生产部署配置已完成。阶段 6 仅剩 DOC-WINDOWS-001。
 
 ## 下一步第一动作
 
-1. DEVOPS-PROD-001：生产 Docker Compose
-2. DEVOPS-NGINX-001：Nginx 反向代理配置
-3. DEVOPS-BACKUP-001：备份恢复脚本
+1. DOC-WINDOWS-001：Windows 启动文档
+2. P1 扩展：测试补强、导出审计日志、异常路径
 
 ## 未完成事项
 
-- 生产部署配置（Docker Compose + Nginx + 备份脚本）
+- Windows 启动文档（可选）
 
 ## 阻塞问题
 

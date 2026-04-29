@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-04-30（第十轮）
+
+### 阶段 6 交付物：生产部署配置
+
+- **DEVOPS-PROD-001** 创建生产 Docker Compose（deploy/docker-compose.prod.yml）：
+  - PostgreSQL + 后端 + 前端构建 + Nginx 四容器架构
+  - 环境变量强制设置 POSTGRES_PASSWORD 和 JWT_SECRET_KEY
+  - 后端启动时自动执行数据库迁移
+- **DEVOPS-NGINX-001** 创建 Nginx 反向代理配置（deploy/nginx.conf）：
+  - 前端 SPA 路由支持（try_files fallback）
+  - API 请求代理到后端，传递 X-Real-IP / X-Forwarded-For / X-Request-ID
+  - 静态资源 7 天缓存
+- **DEVOPS-BACKUP-001** 创建备份恢复脚本（deploy/backup.sh、deploy/restore.sh）：
+  - 支持 Docker 和本地两种环境
+  - 自动压缩、30 天清理、恢复前确认
+- 创建前端生产 Dockerfile（多阶段构建）
+
 ## 2026-04-30（第九轮）
 
 ### 阶段 6 交付物：测试报告
