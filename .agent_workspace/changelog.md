@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-04-30（第九十二轮）
+
+### 部署：Docker Compose 同步 MAX_CSV_IMPORT_SIZE_MB
+
+- dev 和 prod Docker Compose 补齐 MAX_CSV_IMPORT_SIZE_MB 环境变量
+
 ## 2026-04-30（第九十一轮）
 
 ### 安全：CSV 导入添加文件大小限制

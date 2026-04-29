@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-92
+当前任务编号：ROUND-93
 当前任务名称：持续质量维护
 当前 Agent：Claude
 任务状态：进行中
 
 ## 最近完成
 
+- Round 92：Docker Compose 同步 MAX_CSV_IMPORT_SIZE_MB 环境变量
 - Round 91：CSV 导入文件大小限制（MAX_CSV_IMPORT_SIZE_MB=10MB）
 - Round 90：生产环境 JWT_SECRET_KEY 启动检查（+1 测试，214/214）
 - Round 89：更新数据库文档索引信息（10 个复合索引 + 权限码数修正）
