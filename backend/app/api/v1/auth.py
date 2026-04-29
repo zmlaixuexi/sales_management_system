@@ -21,6 +21,7 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == req.username, User.deleted_at.is_(None)).first()
     if not user or not verify_password(req.password, user.hashed_password):
         log_action(db, action="login_failed", resource_type="user", actor_name=req.username)
+        db.commit()
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"code": "AUTH_UNAUTHORIZED", "message": "用户名或密码错误"},

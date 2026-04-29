@@ -1,57 +1,58 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：MVP 后续扩展
-当前任务编号：EXT-002
-当前任务名称：数据导出功能
+当前阶段：MVP 后续扩展 — 测试补强完成
+当前任务编号：QA-002
+当前任务名称：审计日志和数据导出集成测试
 当前 Agent：Claude
 任务状态：已完成
 
 ## 本次目标
 
-实现 CSV 数据导出功能：后端流式导出服务、4 个导出 API、前端列表页导出按钮。
+为新增的操作日志和数据导出功能编写集成测试，修复发现的 bug。
 
 ## 最近完成
 
-- 创建 export_service.py：商品/客户/订单/收款 CSV 流式导出（含 BOM 头，Excel 兼容）
-- 创建 exports API（GET /api/v1/exports/products|customers|orders|payments）
-- 前端 downloadCsv 工具函数（fetch + blob 触发浏览器下载）
-- 商品/客户/订单列表页添加"导出"按钮，携带当前筛选条件
-- 后端 34/34 测试通过，前端构建通过
+- 创建 test_audit_log.py：9 个测试覆盖全部审计日志场景
+- 创建 test_export.py：8 个测试覆盖 CSV 导出功能
+- 修复 bug：登录失败时 audit log 调用 flush 后直接抛异常导致回滚 → 改为 commit 后再抛异常
+- 全量测试 51/51 通过（从 34 增至 51）
 
 ## 当前正在做
 
-数据导出功能已完成。准备提交代码并更新文档。
+测试补强已完成。下一步优先处理 P0 缺口。
 
 ## 下一步第一动作
 
-从 P1/P2 扩展 Backlog 选择下一个任务：
-- 批量导入商品和客户
-- 库存预警阈值配置
-- 折扣/低毛利审批
+优先处理 P0 缺口：
+
+1. 实现统一权限依赖：按权限码保护业务接口，普通用户不能访问未授权接口。
+2. 实现数据范围：销售只能看本人客户/订单，主管看团队，管理员/财务按授权看全部。
+3. 实现敏感字段控制：无权限用户不返回成本价、毛利、毛利率、利润报表和导出中的利润字段。
+4. 审计日志查询限制为 `audit:view` 或管理员，并补充 IP、user_agent、request_id。
+5. 补齐文档和交付物。
 
 ## 涉及文件
 
 | 文件 | 状态 | 说明 |
 |---|---|---|
-| backend/app/services/export_service.py | 新建 | CSV 流式导出服务 |
-| backend/app/api/v1/exports.py | 新建 | 4 个导出 API 端点 |
-| backend/app/api/v1/router.py | 更新 | 注册 exports 路由 |
-| frontend/src/utils/index.ts | 更新 | 添加 downloadCsv 工具函数 |
-| frontend/src/pages/Products.tsx | 更新 | 添加导出按钮 |
-| frontend/src/pages/Customers.tsx | 更新 | 添加导出按钮 |
-| frontend/src/pages/Orders.tsx | 更新 | 添加导出按钮 |
+| backend/tests/test_audit_log.py | 新建 | 审计日志集成测试（9 个） |
+| backend/tests/test_export.py | 新建 | 数据导出集成测试（8 个） |
+| backend/app/api/v1/auth.py | 修复 | 登录失败日志未提交 bug |
 
 ## 已执行命令
 
 | 命令 | 结果 | 备注 |
 |---|---|---|
-| pytest tests/ -v | 34/34 通过 | 无回归 |
-| npm run build | 成功 | 前端构建通过 |
+| pytest tests/ -v | 51/51 通过 | 新增 17 个测试 |
 
 ## 未完成事项
 
-- 权限校验细化（数据范围权限、敏感字段权限）。
+- 权限校验细化（API 权限、数据范围权限、敏感字段权限）。
+- 审计日志访问权限、请求 IP、user_agent、request_id。
+- 导出接口权限控制、敏感字段控制和导出审计日志。
+- 阶段 6 交付物：生产 compose、Nginx、备份恢复、Windows 启动文档。
+- 必需文档和测试报告。
 - P1/P2 扩展功能（批量导入、库存预警阈值、折扣审批等）。
 
 ## 阻塞问题
@@ -66,6 +67,7 @@
 4. 库存扣减必须使用 with_for_update() 行锁 → 否则并发超卖。
 5. Ant Design 组件 import 必须使用实际用到的组件 → 否则构建失败。
 6. 测试文件中 app.dependency_overrides[get_db] 必须在 setup_module 中设置、teardown_module 中恢复 → 否则多个测试文件冲突。
+7. log_action 调用后如果抛异常，必须先 commit 审计日志再抛异常 → 否则日志被回滚。
 
 ## 恢复检查清单
 
