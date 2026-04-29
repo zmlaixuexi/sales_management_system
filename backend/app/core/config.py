@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     INVENTORY_WARNING_THRESHOLD: int = 10
     RATE_LIMIT_MAX: int = 1000
     RATE_LIMIT_WINDOW: int = 60
+    SLOW_REQUEST_THRESHOLD_MS: int = 1000
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 

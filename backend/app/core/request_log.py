@@ -7,6 +7,8 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.requests import Request
 from starlette.responses import Response
 
+from app.core.config import settings
+
 logger = logging.getLogger("app.request")
 
 
@@ -21,8 +23,10 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
         # 只记录 API 路径
         path = request.url.path
         if path.startswith("/api/"):
+            is_slow = duration_ms >= settings.SLOW_REQUEST_THRESHOLD_MS
+            level = logging.WARNING if is_slow else logging.INFO
             record = logging.LogRecord(
-                name="app.request", level=logging.INFO,
+                name="app.request", level=level,
                 pathname="", lineno=0, msg="", args=None, exc_info=None,
             )
             record.extra_fields = {  # type: ignore[attr-defined]
@@ -31,8 +35,10 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
                 "status": response.status_code,
                 "duration_ms": duration_ms,
                 "client_ip": request.client.host if request.client else "-",
+                "slow": is_slow,
             }
-            record.msg = f"{request.method} {path} {response.status_code} {duration_ms}ms"
+            label = "SLOW " if is_slow else ""
+            record.msg = f"{label}{request.method} {path} {response.status_code} {duration_ms}ms"
             logger.handle(record)
 
         return response
