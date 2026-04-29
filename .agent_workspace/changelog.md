@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-04-30（第四十二轮）
+
+### 部署：Docker Compose 和 Nginx 配置优化
+
+- 开发环境 docker-compose.dev.yml 补齐 RATE_LIMIT_MAX/WINDOW、INVENTORY_WARNING_THRESHOLD、LOG_FORMAT 环境变量
+- 生产环境 docker-compose.prod.yml 新增 backend 健康检查（/api/v1/health）
+- Nginx 新增安全响应头（X-Content-Type-Options、X-Frame-Options、X-XSS-Protection、Referrer-Policy）
+- .env.example 新增 POSTGRES_USER/PASSWORD/DB 配置
+- 后端 142/142 通过
+
 ## 2026-04-30（第四十一轮）
 
 ### 安全：LIKE 通配符转义防注入
