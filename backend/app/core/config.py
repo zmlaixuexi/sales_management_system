@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     CORS_ORIGINS: str = "http://localhost:5173"
     LOG_LEVEL: str = "INFO"
+    LOG_FORMAT: str = "text"
     UPLOAD_STORAGE_TYPE: str = "local"
     UPLOAD_DIR: str = str(Path(__file__).resolve().parent.parent.parent / "uploads")
     UPLOAD_PUBLIC_BASE_URL: str = "/uploads"

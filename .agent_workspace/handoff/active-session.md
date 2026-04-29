@@ -1,24 +1,26 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：P1 扩展补强
-当前任务编号：EXT-003
-当前任务名称：库存预警阈值可配置
+当前阶段：P1 质量加固
+当前任务编号：OBS-001 / QUALITY-001
+当前任务名称：结构化日志 + TypeScript 严格模式
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- config.py 新增 INVENTORY_WARNING_THRESHOLD 配置项（默认 10，可通过环境变量覆盖）
-- reports.py 库存预警 API 使用配置项作为默认值
-- 前端 Dashboard 不再硬编码阈值，改用 API 返回值展示
+- 前端 tsconfig.app.json 启用 `strict: true`，编译零错误
+- 后端 logging.py 重写为结构化 JSON 日志（通过 LOG_FORMAT=json 启用）
+- config.py 新增 LOG_FORMAT 配置项（默认 text，生产环境设为 json）
+- main.py 显式导入日志模块，确保初始化确定性
+- seed.py 的 print() 改为 logger.info/error
 - 全量测试 87/87 通过
 
 ## 下一步第一动作
 
-1. 代码质量：前端 TypeScript 严格类型检查
-2. 可观测性：结构化日志
-3. 批量导入功能
+1. 批量导入功能
+2. 代码拆分优化（前端 bundle 过大 1.4MB）
+3. 安全加固：速率限制
 
 ## 阻塞问题
 

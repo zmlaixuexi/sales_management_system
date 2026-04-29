@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-04-30（第十六轮）
+
+### 质量加固：TypeScript 严格模式 + 结构化日志
+
+- **QUALITY-001** 前端 tsconfig.app.json 启用 `strict: true`，编译零错误。
+- **OBS-001** 后端结构化日志：
+  - logging.py 重写为支持 JSON/文本双格式，通过 `LOG_FORMAT` 环境变量切换
+  - config.py 新增 `LOG_FORMAT` 配置项（默认 `text`，生产环境设 `json`）
+  - JSON 格式输出 timestamp、level、logger、message、exception 字段
+  - main.py 显式导入日志模块确保初始化
+  - seed.py 的 `print()` 改为 `logger.info/error`
+- 全量测试 87/87 通过。
+
 ## 2026-04-30（第十五轮）
 
 ### 扩展：库存预警阈值可配置

@@ -1,5 +1,6 @@
 """初始化管理员账号和基础角色、权限的种子数据脚本"""
 
+import logging
 import uuid
 
 from sqlalchemy.orm import Session
@@ -7,6 +8,8 @@ from sqlalchemy.orm import Session
 from app.core.security import hash_password
 from app.db.session import SessionLocal
 from app.models.user import User, Role, Permission, UserRole, RolePermission
+
+logger = logging.getLogger(__name__)
 
 
 # 基础权限定义
@@ -101,10 +104,10 @@ def seed_all(db: Session | None = None) -> None:
         _seed_roles(db)
         _seed_admin_user(db)
         db.commit()
-        print("种子数据初始化完成")
+        logger.info("种子数据初始化完成")
     except Exception as e:
         db.rollback()
-        print(f"种子数据初始化失败: {e}")
+        logger.error("种子数据初始化失败: %s", e)
         raise
     finally:
         if close_db:

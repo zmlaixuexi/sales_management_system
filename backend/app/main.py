@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.router import api_router
 from app.core.config import settings
+import app.core.logging  # noqa: F401 — 确保日志初始化
 
 
 @asynccontextmanager
