@@ -169,7 +169,10 @@ npm run build
 | 用户管理 | 10 | 用户列表/搜索、创建（含重复用户名）、编辑、禁用、角色变更、403 权限 |
 | 商品 CRUD | 6 | 商品详情、软删除、列表排除已删除 |
 | 客户 CRUD | 11 | 客户详情、编辑、转移、软删除、来源筛选、关键词搜索 |
-| **合计** | **244** | |
+| 订单 CRUD | 19 | 创建（正常/空明细/客户不存在/商品不存在/零数量）、详情/404/列表/状态筛选、编辑草稿、确认（库存扣减）/重复确认/已确认不可编辑、取消（库存回滚）/重复取消、库存不足确认失败 |
+| 收款 | 11 | 创建（部分收款→完成、超额、零金额、草稿不可收款、订单不存在）、列表/按订单筛选、冲正/重复冲正/不存在 |
+| 库存 | 10 | 手工调整（增加/减少/归零/零调整拒绝/超量拒绝/商品不存在）、流水列表/按商品筛选/按类型筛选/字段完整性 |
+| **合计** | **284** | |
 
 ### 前端测试覆盖
 
@@ -181,16 +184,17 @@ npm run build
 | request 封装 | 5 | get/post/put/del/upload 调用验证 |
 | 状态映射 | 6 | 商品/客户/订单状态映射完整性 |
 | 商品 API | 8 | fetchProducts/fetchProduct/create/update/delete/disable/uploadImage/priceHistory |
-| 客户 API | 7 | fetchCustomers/fetchCustomer/create/update/delete/transfer/import |
+| 客户 API | 7 | fetchCustomers（含无参数）/fetchCustomer/create/update/delete/transfer |
 | 订单 API | 6 | fetchOrders/fetchOrder/create/update/confirm/cancel |
 | 收款 API | 5 | fetchPayments/筛选/createPayment/备注/reversePayment |
-| 报表 API | 6 | fetchSalesSummary/Trend/ProductRanking/InventoryWarning |
+| 报表 API | 6 | fetchSalesSummary（含无参数）/Trend/ProductRanking/InventoryWarning（含无阈值） |
 | 审计日志 API | 5 | fetchAuditLogs/筛选/日期范围/数据解析/fetchAuditActions |
 | auth API | 4 | login/refresh/logout/getMe 路径验证 |
 | auth store | 11 | login/logout/fetchUser/hasPermission/loading 状态 |
 | downloadCsv | 6 | 成功下载、查询参数、过滤、错误、文件名提取 |
 | usePaginatedList | 8 | 初始加载、错误处理、筛选、分页切换、刷新 |
-| **合计** | **90** | |
+| 拦截器 | 7 | 401 刷新重试、401 无 refresh 跳转、403/404/500 错误提示、网络错误、重复 401 防重试 |
+| **合计** | **97** | |
 
 ## API 概览
 
