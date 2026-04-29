@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
 
 
@@ -13,7 +16,7 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = "http://localhost:5173"
     LOG_LEVEL: str = "INFO"
     UPLOAD_STORAGE_TYPE: str = "local"
-    UPLOAD_DIR: str = "/app/uploads"
+    UPLOAD_DIR: str = str(Path(__file__).resolve().parent.parent.parent / "uploads")
     UPLOAD_PUBLIC_BASE_URL: str = "/uploads"
     MAX_IMAGE_SIZE_MB: int = 5
 

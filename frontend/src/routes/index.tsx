@@ -1,29 +1,25 @@
-import { Navigate, type RouteObject } from 'react-router-dom';
-import MainLayout from '../components/MainLayout';
-import LoginPage from '../pages/Login';
-import DashboardPage from '../pages/Dashboard';
-import ProductsPage from '../pages/Products';
-import CustomersPage from '../pages/Customers';
-import OrdersPage from '../pages/Orders';
-import ProtectedRoute from './ProtectedRoute';
+import type { RouteObject } from 'react-router-dom'
+import AppLayout from '@/routes/AppLayout'
+import Dashboard from '@/pages/Dashboard'
+import Login from '@/pages/Login'
+import NotFound from '@/pages/NotFound'
 
 const routes: RouteObject[] = [
-  { path: '/login', element: <LoginPage /> },
+  {
+    path: '/login',
+    element: <Login />,
+  },
   {
     path: '/',
-    element: (
-      <ProtectedRoute>
-        <MainLayout />
-      </ProtectedRoute>
-    ),
+    element: <AppLayout />,
     children: [
-      { index: true, element: <Navigate to="/dashboard" replace /> },
-      { path: 'dashboard', element: <DashboardPage /> },
-      { path: 'products', element: <ProductsPage /> },
-      { path: 'customers', element: <CustomersPage /> },
-      { path: 'sales-orders', element: <OrdersPage /> },
+      { index: true, element: <Dashboard /> },
     ],
   },
-];
+  {
+    path: '*',
+    element: <NotFound />,
+  },
+]
 
-export default routes;
+export default routes
