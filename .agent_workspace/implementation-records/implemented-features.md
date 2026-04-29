@@ -2,6 +2,42 @@
 
 本文件记录已经实现并验证过的功能。
 
+## 功能编号：FEAT-20260430-05
+
+功能名称：报表 API 和首页看板
+所属模块：报表
+关联任务编号：BE-REPORT-001 / FE-REPORT-001
+实现日期：2026-04-30
+实现 Agent：Claude
+当前状态：已测试
+
+### 实现范围
+
+- 后端报表 API：
+  - GET /reports/sales-summary：销售汇总（总额/成本/毛利/毛利率/订单数），支持时间段筛选。
+  - GET /reports/sales-trend：按日销售趋势，自动填充空缺日期。
+  - GET /reports/product-ranking：商品销售排行（按销售额降序），支持 Top N。
+  - GET /reports/inventory-warning：库存预警（低于阈值的活跃商品）。
+  - 时间段：today/7d/30d/this_month/last_month。
+- 首页看板：四个汇总卡片、销售趋势条形图、库存预警表格、商品排行表格。
+- 前端 API 调用层：reports.ts。
+
+### 涉及文件
+
+| 文件 | 变更说明 |
+|---|---|
+| backend/app/api/v1/reports.py | 新建：报表 API |
+| backend/app/api/v1/router.py | 更新：注册报表路由 |
+| frontend/src/api/reports.ts | 新建：报表 API 调用 |
+| frontend/src/pages/Dashboard.tsx | 重写：首页看板 |
+
+### 已执行测试
+
+测试命令：`pytest tests/ -v` + `npx tsc --noEmit` + `npm run build`
+测试结果：后端 10/10 通过，TypeScript 编译通过，前端构建通过
+
+---
+
 ## 功能编号：FEAT-20260430-04
 
 功能名称：订单管理前端页面

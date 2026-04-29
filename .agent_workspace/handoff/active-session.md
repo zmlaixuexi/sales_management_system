@@ -1,65 +1,65 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：阶段 4 已全部完成，阶段 5 待开始
-当前任务编号：FE-ORDER-001
-当前任务名称：订单列表、创建、详情前端页面
+当前阶段：阶段 5 报表与审计（后端+前端已完成），QA-001 待开始
+当前任务编号：BE-REPORT-001 / FE-REPORT-001
+当前任务名称：报表 API 和首页看板
 当前 Agent：Claude
 任务状态：已完成
 
 ## 本次目标
 
-实现阶段 4 前端页面：订单列表、创建、详情页。
+实现阶段 5 报表 API 和首页看板页面。
 
 ## 最近完成
 
-- 创建 frontend/src/api/orders.ts 和 payments.ts API 调用文件。
-- 重写 Orders.tsx 订单列表页：搜索、状态筛选、分页。
-- 创建 OrderForm.tsx 订单创建/编辑页：选择客户、添加商品明细、编辑数量和单价。
-- 创建 OrderDetail.tsx 订单详情页：明细展示、确认/取消状态操作、收款登记/冲正。
-- 更新路由配置添加订单页面路由。
-- 修复侧边栏菜单 key 与路由不匹配（/sales-orders → /orders）。
-- 修复侧边栏选中状态支持子路径高亮。
-- TypeScript 编译通过，前端构建通过，后端测试 10/10 通过。
+- BE-REPORT-001：创建 reports.py 后端报表 API。
+  - GET /reports/sales-summary：销售汇总（总额、总成本、毛利、毛利率、订单数）。
+  - GET /reports/sales-trend：按日销售趋势（填充空缺日期）。
+  - GET /reports/product-ranking：商品销售排行（按销售额排序）。
+  - GET /reports/inventory-warning：库存预警（低于阈值的活跃商品）。
+  - 支持时间段筛选：today/7d/30d/this_month/last_month。
+- FE-REPORT-001：重写 Dashboard.tsx 首页看板。
+  - 四个汇总卡片（销售总额、订单数、毛利、毛利率）。
+  - 销售趋势简易条形图（纯 CSS 实现，不引入图表库）。
+  - 库存预警表格（≤10 的活跃商品）。
+  - 商品销售排行表格（Top 10）。
+  - 时间段切换下拉。
+- 创建 frontend/src/api/reports.ts API 调用层。
+- 前端构建通过，后端测试 10/10 通过。
 
 ## 当前正在做
 
-阶段 4 全部完成（后端 + 前端）。阶段 5 报表与审计待开始。
+阶段 5 报表部分已完成。QA-001 MVP 端到端测试待开始。
 
 ## 下一步第一动作
 
-实现阶段 5 报表与审计：
-1. BE-REPORT-001：实现销售汇总、趋势、排行、库存预警 API。
-2. FE-REPORT-001：实现首页看板和报表页面。
-3. QA-001：MVP 端到端测试。
+实现 QA-001 MVP 端到端测试：
+1. 编写后端 API 集成测试，覆盖完整业务流程。
+2. 或者进入阶段 6 交付加固（DOC-001）。
 
 ## 涉及文件
 
 | 文件 | 状态 | 说明 |
 |---|---|---|
-| frontend/src/api/orders.ts | 新建 | 订单 API 调用 |
-| frontend/src/api/payments.ts | 新建 | 收款 API 调用 |
-| frontend/src/pages/Orders.tsx | 重写 | 订单列表页 |
-| frontend/src/pages/OrderForm.tsx | 新建 | 订单创建/编辑页 |
-| frontend/src/pages/OrderDetail.tsx | 新建 | 订单详情页 |
-| frontend/src/routes/index.tsx | 更新 | 添加订单路由 |
-| frontend/src/components/MainLayout.tsx | 更新 | 修复侧边栏菜单 |
+| backend/app/api/v1/reports.py | 新建 | 报表 API |
+| backend/app/api/v1/router.py | 更新 | 注册报表路由 |
+| frontend/src/api/reports.ts | 新建 | 报表 API 调用 |
+| frontend/src/pages/Dashboard.tsx | 重写 | 首页看板 |
 
 ## 已执行命令
 
 | 命令 | 结果 | 备注 |
 |---|---|---|
+| pytest tests/ -v | 10/10 通过 | |
 | npx tsc --noEmit | 通过 | |
 | npm run build | 通过 | |
-| pytest tests/ -v | 10/10 通过 | |
 
 ## 未完成事项
 
-- BE-REPORT-001：销售汇总、趋势、排行、库存预警 API。
-- FE-REPORT-001：首页看板和报表页面。
 - QA-001：MVP 端到端测试。
 - 操作日志记录。
-- 权限校验细化。
+- 权限校验细化（敏感字段权限：无权限用户看不到利润指标）。
 
 ## 阻塞问题
 
