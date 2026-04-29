@@ -75,7 +75,8 @@ services:
     depends_on:
       backend:
         condition: service_healthy
-      - frontend-build
+      frontend-build:
+        condition: service_started
 
 volumes:
   postgres_data:
