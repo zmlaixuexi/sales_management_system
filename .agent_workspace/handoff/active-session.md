@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-93
+当前任务编号：ROUND-94
 当前任务名称：持续质量维护
 当前 Agent：Claude
 任务状态：进行中
 
 ## 最近完成
 
+- Round 93：部署文档补齐环境变量 + 全量验证通过（311 测试）
 - Round 92：Docker Compose 同步 MAX_CSV_IMPORT_SIZE_MB 环境变量
 - Round 91：CSV 导入文件大小限制（MAX_CSV_IMPORT_SIZE_MB=10MB）
 - Round 90：生产环境 JWT_SECRET_KEY 启动检查（+1 测试，214/214）
@@ -43,16 +44,17 @@
 2. 异常路径测试（并发冲突、边界条件）
 3. 考虑结束循环（系统已非常成熟）
 
-## 当前里程碑总结（Round 15-82）
+## 当前里程碑总结（Round 15-93）
 
-- 后端测试：51 → 213（+162）
-- 前端测试：0 → 90（+90）
+- 后端测试：51 → 214（+163）
+- 前端测试：0 → 97（+97）
+- 总计 311 测试，全部通过
 - 代码质量：ruff 0 + ESLint 0 + build 通过 + tsc 通过 + 代码分割 + 列表页统一 hook
-- 性能：10 个复合索引覆盖高频查询
-- 安全：权限码全量审计通过 + RBAC + 数据范围 + 速率限制 + 敏感字段 + LIKE 转义 + 安全响应头 + 刷新 Token 校验
+- 性能：10 个复合索引 + N+1 查询修复
+- 安全：权限码全量审计 + RBAC + 数据范围 + 速率限制 + 敏感字段 + LIKE 转义 + 安全响应头 + Token 刷新校验 + JWT 密钥启动检查 + CSV 导入大小限制
 - 可观测性：健康检查 + degraded + 请求日志 + 慢请求警告
-- 部署：Docker Compose + Nginx + 备份恢复 + Makefile
-- 文档：deployment.md + architecture.md + api.md 全部完成
+- 部署：Docker Compose + Nginx + 备份恢复 + Makefile + 环境变量完整同步
+- 文档：README + testing.md + database.md + architecture.md + api.md + deployment.md 全部完成
 
 ## 阻塞问题
 
