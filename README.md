@@ -21,6 +21,8 @@
 - **收款管理**：收款登记（自动更新订单状态）、冲正。
 - **库存管理**：库存流水追踪、手工调整。
 - **报表看板**：销售汇总、趋势、商品排行、库存预警。
+- **操作日志**：关键业务操作日志查询。
+- **数据导出**：商品、客户、订单、收款 CSV 导出。
 
 ## 快速启动
 
@@ -43,7 +45,7 @@ docker compose -f docker-compose.dev.yml up -d
 docker compose -f docker-compose.dev.yml exec backend bash
 # 在容器内：
 alembic upgrade head
-python -m app.seed
+python -m app.db.seed
 
 # 4. 访问
 # 前端：http://localhost:5173
@@ -61,7 +63,7 @@ python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 alembic upgrade head
-python -m app.seed  # 初始化种子数据
+python -m app.db.seed  # 初始化种子数据
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -80,11 +82,11 @@ npm run dev
 ```
 ├── backend/                 # FastAPI 后端
 │   ├── app/
-│   │   ├── api/v1/          # API 路由（auth, products, customers, orders, payments, inventory, reports）
+│   │   ├── api/v1/          # API 路由（auth, products, customers, orders, payments, inventory, reports, audit_logs, exports）
 │   │   ├── core/            # 配置、安全工具
 │   │   ├── db/              # 数据库会话
 │   │   ├── models/          # SQLAlchemy 模型
-│   │   ├── services/        # 业务服务（文件上传）
+│   │   ├── services/        # 业务服务（文件上传、审计日志、数据导出）
 │   │   └── main.py          # 应用入口
 │   ├── alembic/             # 数据库迁移
 │   └── tests/               # 测试
@@ -139,6 +141,15 @@ npm run build
 | 收款 | `/api/v1/payments` | 收款登记 + 冲正 |
 | 库存 | `/api/v1/inventory` | 库存流水 + 手工调整 |
 | 报表 | `/api/v1/reports` | 销售汇总、趋势、排行、库存预警 |
+| 操作日志 | `/api/v1/audit-logs` | 操作日志查询 |
+| 数据导出 | `/api/v1/exports` | 商品、客户、订单、收款 CSV 导出 |
+
+## 当前限制
+
+- 现有 RBAC 模型和权限种子已建立，但多数业务接口仍只校验登录态，尚未完整实现权限码校验、数据范围和对象级权限。
+- 成本价、毛利、毛利率、利润报表等敏感字段尚未按角色权限统一裁剪。
+- 当前只提供开发环境 Docker Compose；生产 Compose、Nginx、备份恢复脚本和 Windows 启动文档仍待补齐。
+- `docs/api.md`、`docs/database.md`、`docs/testing.md` 和阶段测试报告仍待补齐。
 
 ## 环境变量
 
