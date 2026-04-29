@@ -1,29 +1,30 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：API 文档增强
-当前任务编号：DOC-005
-当前任务名称：支付/库存响应模型 + 请求模型
+当前阶段：文档完善
+当前任务编号：DOC-006
+当前任务名称：README 更新
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- 新增 PaymentCreate/PaymentCreated/PaymentReversed、InventoryAdjust/InventoryAdjusted
-- 支付 create/reverse、库存 adjust 路由接入 response_model + Pydantic 请求模型
+- README.md 同步最新测试计数（后端 142 / 前端 61）
+- 补充 Pydantic schemas 目录、前端 API 模块测试、auth store 测试
+- 更新 API 概览说明 Swagger 文档和响应模型
 
 ## 下一步第一动作
 
-1. README 更新（测试计数、功能模块同步）
-2. 前端 downloadCsv 工具测试
-3. 后端更多边界测试
+1. 前端 downloadCsv 工具测试
+2. 后端更多边界测试
+3. 安全加固（CSRF、内容安全策略）
 
-## 当前里程碑总结（Round 15-51）
+## 当前里程碑总结（Round 15-52）
 
 - 后端测试：51 → 142（+91）
 - 前端测试：0 → 61（+61）
 - 代码质量：ruff lint 0 错误 + ESLint 0 错误
-- API 文档：5 模块请求模型 + 响应模型 + 错误响应文档
+- API 文档：5 模块请求/响应模型 + 11 模块错误响应文档 + Swagger
 - 可观测性：健康检查含数据库连接探测 + degraded 状态
 - 安全：RBAC + 数据范围 + 速率限制 + 敏感字段 + LIKE 转义 + 安全响应头
 - 部署：Docker Compose 健康检查 + Nginx 安全头 + 环境变量补齐

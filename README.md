@@ -24,7 +24,7 @@
 - **操作日志**：关键业务操作日志查询，记录 IP/user_agent/request_id。
 - **数据导出**：商品、客户、订单、收款 CSV 导出，按权限过滤数据范围。
 - **批量导入**：商品/客户 CSV 批量导入，支持中英文表头，逐行校验和错误收集。
-- **工程化**：前端代码拆分（lazy loading）、TypeScript strict 模式、Vitest 测试框架、ruff lint、结构化 JSON 日志。
+- **工程化**：前端代码拆分（lazy loading）、TypeScript strict 模式、Vitest 测试框架、ruff lint、ESLint、结构化 JSON 日志、Pydantic 请求/响应模型。
 
 ## 快速启动
 
@@ -88,6 +88,7 @@ npm run dev
 │   │   ├── core/            # 配置、安全工具、日志、速率限制
 │   │   ├── db/              # 数据库会话
 │   │   ├── models/          # SQLAlchemy 模型
+│   │   ├── schemas/         # Pydantic 请求/响应模型
 │   │   ├── services/        # 业务服务（文件上传、审计日志、数据导出）
 │   │   └── main.py          # 应用入口
 │   ├── alembic/             # 数据库迁移
@@ -117,12 +118,12 @@ npm run dev
 ## 测试
 
 ```bash
-# 后端测试（136 个）
+# 后端测试（142 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
 
-# 前端测试（23 个）
+# 前端测试（61 个）
 cd frontend
 npm test
 
@@ -147,7 +148,8 @@ npm run build
 | 商品导入 | 8 | CSV 成功/带 SKU/重复 SKU/空名称/非 CSV/认证/中文表头 |
 | 客户导入 | 8 | CSV 成功/带详情/手机号重复/批量内重复/空名称/非 CSV/认证 |
 | 速率限制 | 3 | 响应头验证、429 触发 |
-| **合计** | **136** | |
+| SQL 注入防护 | 6 | escape_like 特殊字符转义 |
+| **合计** | **142** | |
 
 ### 前端测试覆盖
 
@@ -158,9 +160,16 @@ npm run build
 | API client | 3 | baseURL、token 附加、无 token |
 | request 封装 | 4 | get/post/put/del 调用验证 |
 | 状态映射 | 6 | 商品/客户/订单状态映射完整性 |
-| **合计** | **23** | |
+| 商品 API | 7 | fetchProducts/fetchProduct/create/update/delete/disable/uploadImage |
+| 客户 API | 6 | fetchCustomers/fetchCustomer/create/update/delete/transfer |
+| 订单 API | 6 | fetchOrders/fetchOrder/create/update/confirm/cancel |
+| 报表 API | 6 | fetchSalesSummary/Trend/ProductRanking/InventoryWarning |
+| auth store | 11 | login/logout/fetchUser/hasPermission/loading 状态 |
+| **合计** | **61** | |
 
 ## API 概览
+
+所有 API 端点均包含 Swagger 文档（`/api/docs`），支持在线调试。路由使用 Pydantic 请求/响应模型，错误响应（401/403/400/404/409）已文档化。
 
 | 模块 | 路径前缀 | 说明 |
 |---|---|---|
