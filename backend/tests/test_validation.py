@@ -178,10 +178,7 @@ def test_10_product_update_stock_negative():
     resp = client.put(f"/api/v1/products/{_product_id}", json={
         "stock_quantity": -5,
     }, headers=_auth())
-    assert resp.status_code == 400
-
-
-# ─── 客户补充 ─────────────────────────────────────────────
+    assert resp.status_code == 422
 
 def test_11_customer_update_not_found():
     """编辑不存在的客户"""
@@ -213,10 +210,7 @@ def test_14_customer_create_no_name():
     resp = client.post("/api/v1/customers", json={
         "name": "",
     }, headers=_auth())
-    assert resp.status_code == 400
-
-
-# ─── CSV 导入补充 ─────────────────────────────────────────
+    assert resp.status_code == 422
 
 def test_15_product_import_empty_csv():
     """导入空 CSV（只有表头）"""

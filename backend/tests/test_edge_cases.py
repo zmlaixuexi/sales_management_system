@@ -109,8 +109,7 @@ def test_02_product_create_missing_name():
     resp = client.post("/api/v1/products", json={
         "sale_price": "10", "cost_price": "5", "stock_quantity": 1,
     }, headers=_auth())
-    assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
+    assert resp.status_code == 422
 
 
 def test_03_product_create_negative_price():
@@ -184,7 +183,7 @@ def test_11_order_create_no_customer():
     resp = client.post("/api/v1/sales-orders", json={
         "items": [{"product_id": _product_id, "quantity": 1}],
     }, headers=_auth())
-    assert resp.status_code == 400
+    assert resp.status_code == 422
 
 
 def test_12_order_create_empty_items():
@@ -192,8 +191,7 @@ def test_12_order_create_empty_items():
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id, "items": [],
     }, headers=_auth())
-    assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "ORDER_EMPTY_ITEMS"
+    assert resp.status_code == 422
 
 
 def test_13_order_create_invalid_product():
@@ -212,7 +210,7 @@ def test_14_order_create_zero_quantity():
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 0}],
     }, headers=_auth())
-    assert resp.status_code == 400
+    assert resp.status_code == 422
 
 
 def test_15_order_create_negative_price():

@@ -12,6 +12,7 @@ from app.core.sanitize import escape_like
 from app.models.customer import Customer
 from app.models.order import InventoryMovement, SalesOrder, SalesOrderItem
 from app.models.product import Product
+from app.schemas.order import OrderCreate, OrderUpdate
 from app.models.user import User
 from app.services.audit_service import get_request_meta, log_action
 
@@ -213,15 +214,13 @@ def list_orders(
 
 @router.post("")
 def create_order(
-    data: dict,
+    data: OrderCreate,
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("order:create")),
 ):
     """创建草稿订单"""
-    customer_id = data.get("customer_id")
-    if not customer_id:
-        raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "请选择客户"})
+    customer_id = data.customer_id
 
     customer = (
         db.query(Customer)
@@ -231,16 +230,14 @@ def create_order(
     if not customer:
         raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "客户不存在"})
 
-    raw_items = data.get("items", [])
+    raw_items = data.items
     if not raw_items:
         raise HTTPException(status_code=400, detail={"code": "ORDER_EMPTY_ITEMS", "message": "订单明细不能为空"})
 
     # 构建明细行（含快照）
     prepared_items: list[dict] = []
     for ri in raw_items:
-        product_id = ri.get("product_id")
-        if not product_id:
-            raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "明细缺少商品 ID"})
+        product_id = ri.product_id
         product = db.query(Product).filter(
             Product.id == uuid.UUID(str(product_id)), Product.deleted_at.is_(None)
         ).first()
@@ -255,11 +252,11 @@ def create_order(
                 },
             )
 
-        quantity = int(ri.get("quantity", 0))
+        quantity = ri.quantity
         if quantity <= 0:
             raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "数量必须大于 0"})
 
-        unit_price = Decimal(str(ri["unit_price"])) if "unit_price" in ri else None
+        unit_price = Decimal(str(ri.unit_price)) if ri.unit_price is not None else None
         if unit_price is not None and unit_price < 0:
             raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "成交单价不能为负"})
 
@@ -278,7 +275,7 @@ def create_order(
         gross_profit=totals["gross_profit"],
         gross_margin=totals["gross_margin"],
         paid_amount=Decimal("0"),
-        remark=data.get("remark"),
+        remark=data.remark,
         created_by=current_user.id,
         updated_by=current_user.id,
     )
@@ -381,7 +378,7 @@ def get_order(
 @router.put("/{order_id}")
 def update_order(
     order_id: uuid.UUID,
-    data: dict,
+    data: OrderUpdate,
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("order:update")),
@@ -395,7 +392,7 @@ def update_order(
     if order.status != "draft":
         raise HTTPException(status_code=400, detail={"code": "ORDER_INVALID_STATUS", "message": "只有草稿订单可以编辑"})
 
-    raw_items = data.get("items")
+    raw_items = data.items
     if raw_items is not None:
         if not raw_items:
             raise HTTPException(status_code=400, detail={"code": "ORDER_EMPTY_ITEMS", "message": "订单明细不能为空"})
@@ -405,7 +402,7 @@ def update_order(
 
         prepared_items: list[dict] = []
         for ri in raw_items:
-            product_id = ri.get("product_id")
+            product_id = ri.product_id
             product = db.query(Product).filter(
                 Product.id == uuid.UUID(str(product_id)), Product.deleted_at.is_(None)
             ).first()
@@ -420,11 +417,11 @@ def update_order(
                     },
                 )
 
-            quantity = int(ri.get("quantity", 0))
+            quantity = ri.quantity
             if quantity <= 0:
                 raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "数量必须大于 0"})
 
-            unit_price = Decimal(str(ri["unit_price"])) if "unit_price" in ri else None
+            unit_price = Decimal(str(ri.unit_price)) if ri.unit_price is not None else None
             prepared_items.append(_prepare_item(product, quantity, unit_price))
 
         totals = _calc_order_totals(prepared_items)
@@ -436,10 +433,10 @@ def update_order(
         for pi in prepared_items:
             db.add(SalesOrderItem(order_id=order.id, **pi))
 
-    if "remark" in data:
-        order.remark = data["remark"]
-    if "customer_id" in data:
-        order.customer_id = uuid.UUID(str(data["customer_id"]))
+    if data.remark is not None:
+        order.remark = data.remark
+    if data.customer_id is not None:
+        order.customer_id = uuid.UUID(str(data.customer_id))
 
     order.updated_by = current_user.id
     log_action(

@@ -1,28 +1,31 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：代码质量与工程化
-当前任务编号：QUAL-003
-当前任务名称：前端 ESLint 检查和修复
+当前阶段：API 文档增强
+当前任务编号：DOC-001
+当前任务名称：FastAPI API 文档增强
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- 前端 ESLint 0 错误（修复测试文件未使用导入、useCallback 依赖、配置 React Compiler 规则）
-- ESLint 配置优化：忽略 `_` 前缀、关闭不适用规则
+- main.py 新增 description 和 openapi_tags（11 个模块中文描述）
+- 新增 3 个 Pydantic schema 文件：product.py、customer.py、order.py
+- products/customers/orders 路由使用类型化请求模型替代 raw dict
+- Swagger UI 自动生成请求体 Schema，Try it out 功能可用
 
 ## 下一步第一动作
 
-1. API 文档增强（FastAPI 自动文档描述、响应模型）
-2. 可观测性：健康检查增强（含数据库连接状态）
-3. 后端 Pydantic 请求模型替代 raw dict
+1. 可观测性：健康检查增强（含数据库连接状态）
+2. 后端 Pydantic 响应模型 + response_model 装饰器
+3. API 错误响应文档化（responses 参数）
 
-## 当前里程碑总结（Round 15-43）
+## 当前里程碑总结（Round 15-44）
 
 - 后端测试：51 → 142（+91）
 - 前端测试：0 → 23
 - 代码质量：ruff lint 0 错误 + ESLint 0 错误
+- API 文档：openapi_tags + Pydantic 请求模型（3 模块）
 - 安全：RBAC + 数据范围 + 速率限制 + 敏感字段 + LIKE 转义 + 安全响应头
 - 部署：Docker Compose 健康检查 + Nginx 安全头 + 环境变量补齐
 - 后端 142/142 通过，前端 23/23 + TypeScript 通过

@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_db, has_permission, require_permission
 from app.core.sanitize import escape_like
 from app.models.product import Product, ProductCategory, ProductPriceHistory
+from app.schemas.product import ProductCreate, ProductUpdate
 from app.models.user import User
 from app.services.audit_service import get_request_meta, log_action
 
@@ -136,38 +137,38 @@ def list_products(
 
 @router.post("")
 def create_product(
-    data: dict,
+    data: ProductCreate,
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("product:create")),
 ):
     """新增商品"""
-    name = data.get("name", "").strip()
+    name = data.name.strip()
     if not name:
         raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "商品名称不能为空"})
 
     try:
-        cost_price = Decimal(str(data.get("cost_price", "0")))
-        sale_price = Decimal(str(data.get("sale_price", "0")))
+        cost_price = Decimal(str(data.cost_price))
+        sale_price = Decimal(str(data.sale_price))
     except Exception:
         raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "价格格式错误"})
 
     if cost_price < 0 or sale_price < 0:
         raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "价格不能为负"})
 
-    sku = data.get("sku") or _generate_sku(db)
+    sku = data.sku or _generate_sku(db)
 
     existing_sku = db.query(Product).filter(Product.sku == sku, Product.deleted_at.is_(None)).first()
     if existing_sku:
         raise HTTPException(status_code=400, detail={"code": "PRODUCT_SKU_DUPLICATED", "message": "商品编码已存在"})
 
-    category_id = data.get("category_id")
+    category_id = data.category_id
     if not category_id:
         category_id = _get_default_category_id(db)
     else:
         category_id = uuid.UUID(str(category_id))
 
-    main_image_url = data.get("main_image_url")
+    main_image_url = data.main_image_url
 
     product = Product(
         sku=sku,
@@ -176,10 +177,10 @@ def create_product(
         category_id=category_id,
         sale_price=sale_price,
         cost_price=cost_price,
-        stock_quantity=int(data.get("stock_quantity", 0)),
-        status=data.get("status", "active"),
-        sort_weight=int(data.get("sort_weight", 0)),
-        remark=data.get("remark"),
+        stock_quantity=data.stock_quantity,
+        status=data.status,
+        sort_weight=data.sort_weight,
+        remark=data.remark,
         created_by=current_user.id,
         updated_by=current_user.id,
     )
@@ -270,7 +271,7 @@ def get_product(
 @router.put("/{product_id}")
 def update_product(
     product_id: uuid.UUID,
-    data: dict,
+    data: ProductUpdate,
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("product:update")),
@@ -287,53 +288,50 @@ def update_product(
     old_sale_price = product.sale_price
     old_cost_price = product.cost_price
 
-    if "name" in data:
-        name = data["name"].strip()
+    if data.name is not None:
+        name = data.name.strip()
         if not name:
             raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "商品名称不能为空"})
         product.name = name
 
-    if "sale_price" in data:
+    if data.sale_price is not None:
         try:
-            new_sale_price = Decimal(str(data["sale_price"]))
+            new_sale_price = Decimal(str(data.sale_price))
         except Exception:
             raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "销售价格式错误"})
         if new_sale_price < 0:
             raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "销售价不能为负"})
         product.sale_price = new_sale_price
 
-    if "cost_price" in data:
+    if data.cost_price is not None:
         try:
-            new_cost_price = Decimal(str(data["cost_price"]))
+            new_cost_price = Decimal(str(data.cost_price))
         except Exception:
             raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "成本价格式错误"})
         if new_cost_price < 0:
             raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "成本价不能为负"})
         product.cost_price = new_cost_price
 
-    if "main_image_url" in data:
-        product.main_image_url = data["main_image_url"]
+    if data.main_image_url is not None:
+        product.main_image_url = data.main_image_url
 
-    if "category_id" in data:
-        product.category_id = uuid.UUID(str(data["category_id"]))
+    if data.category_id is not None:
+        product.category_id = uuid.UUID(str(data.category_id))
 
-    if "stock_quantity" in data:
-        stock = int(data["stock_quantity"])
-        if stock < 0:
-            raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "库存不能为负"})
-        product.stock_quantity = stock
+    if data.stock_quantity is not None:
+        product.stock_quantity = data.stock_quantity
 
-    if "status" in data:
-        product.status = data["status"]
+    if data.status is not None:
+        product.status = data.status
 
-    if "sort_weight" in data:
-        product.sort_weight = int(data["sort_weight"])
+    if data.sort_weight is not None:
+        product.sort_weight = data.sort_weight
 
-    if "remark" in data:
-        product.remark = data["remark"]
+    if data.remark is not None:
+        product.remark = data.remark
 
-    if "sku" in data:
-        new_sku = data["sku"]
+    if data.sku is not None:
+        new_sku = data.sku
         existing = db.query(Product).filter(
             Product.sku == new_sku, Product.id != product_id, Product.deleted_at.is_(None)
         ).first()

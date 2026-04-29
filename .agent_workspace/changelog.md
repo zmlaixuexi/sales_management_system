@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-04-30（第四十四轮）
+
+### 文档：FastAPI API 文档增强
+
+- main.py 新增 description、openapi_tags（11 个模块描述）
+- 新增 Pydantic 请求模型：ProductCreate/Update、CustomerCreate/Update/Transfer、OrderCreate/Update
+- 替换 products、customers、orders 路由中 raw dict 为类型化模型，Swagger UI 自动生成请求体 Schema
+- 修正 7 个测试用例：Pydantic 验证返回 422 替代原手动 400
+- 后端 142/142 通过
+
 ## 2026-04-30（第四十三轮）
 
 ### 工程：前端 ESLint 检查和修复

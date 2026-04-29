@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_db, has_permission, require_permission
 from app.core.sanitize import escape_like
 from app.models.customer import Customer
+from app.schemas.customer import CustomerCreate, CustomerTransfer, CustomerUpdate
 from app.models.user import User
 from app.services.audit_service import get_request_meta, log_action
 
@@ -83,18 +84,18 @@ def list_customers(
 
 @router.post("")
 def create_customer(
-    data: dict,
+    data: CustomerCreate,
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("customer:create")),
 ):
     """新增客户"""
-    name = data.get("name", "").strip()
+    name = data.name.strip()
     if not name:
         raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "客户名称不能为空"})
 
     # 重复手机号提醒
-    phone = data.get("phone")
+    phone = data.phone
     if phone:
         existing = db.query(Customer).filter(
             Customer.phone == phone, Customer.deleted_at.is_(None)
@@ -110,14 +111,14 @@ def create_customer(
 
     customer = Customer(
         name=name,
-        contact_name=data.get("contact_name"),
+        contact_name=data.contact_name,
         phone=phone,
-        email=data.get("email"),
-        source=data.get("source"),
-        level=data.get("level", "normal"),
-        owner_user_id=uuid.UUID(str(data["owner_user_id"])) if data.get("owner_user_id") else current_user.id,
-        follow_status=data.get("follow_status", "new"),
-        remark=data.get("remark"),
+        email=data.email,
+        source=data.source,
+        level=data.level,
+        owner_user_id=uuid.UUID(str(data.owner_user_id)) if data.owner_user_id else current_user.id,
+        follow_status=data.follow_status,
+        remark=data.remark,
         created_by=current_user.id,
         updated_by=current_user.id,
     )
@@ -188,7 +189,7 @@ def get_customer(
 @router.put("/{customer_id}")
 def update_customer(
     customer_id: uuid.UUID,
-    data: dict,
+    data: CustomerUpdate,
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("customer:update")),
@@ -201,16 +202,16 @@ def update_customer(
     if not customer:
         raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "客户不存在"})
 
-    if "name" in data:
-        name = data["name"].strip()
+    if data.name is not None:
+        name = data.name.strip()
         if not name:
             raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "客户名称不能为空"})
         customer.name = name
 
-    if "contact_name" in data:
-        customer.contact_name = data["contact_name"]
-    if "phone" in data:
-        phone = data["phone"]
+    if data.contact_name is not None:
+        customer.contact_name = data.contact_name
+    if data.phone is not None:
+        phone = data.phone
         if phone:
             existing = db.query(Customer).filter(
                 Customer.phone == phone,
@@ -223,18 +224,18 @@ def update_customer(
                     detail={"code": "CUSTOMER_DUPLICATED_WARNING", "message": f"手机号 {phone} 已被其他客户使用"},
                 )
         customer.phone = phone
-    if "email" in data:
-        customer.email = data["email"]
-    if "source" in data:
-        customer.source = data["source"]
-    if "level" in data:
-        customer.level = data["level"]
-    if "follow_status" in data:
-        customer.follow_status = data["follow_status"]
-    if "owner_user_id" in data:
-        customer.owner_user_id = uuid.UUID(str(data["owner_user_id"]))
-    if "remark" in data:
-        customer.remark = data["remark"]
+    if data.email is not None:
+        customer.email = data.email
+    if data.source is not None:
+        customer.source = data.source
+    if data.level is not None:
+        customer.level = data.level
+    if data.follow_status is not None:
+        customer.follow_status = data.follow_status
+    if data.owner_user_id is not None:
+        customer.owner_user_id = uuid.UUID(str(data.owner_user_id))
+    if data.remark is not None:
+        customer.remark = data.remark
 
     customer.updated_by = current_user.id
     log_action(
@@ -290,7 +291,7 @@ def delete_customer(
 @router.post("/{customer_id}/transfer")
 def transfer_customer(
     customer_id: uuid.UUID,
-    data: dict,
+    data: CustomerTransfer,
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("customer:update")),
@@ -303,9 +304,7 @@ def transfer_customer(
     if not customer:
         raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "客户不存在"})
 
-    new_owner_id = data.get("owner_user_id")
-    if not new_owner_id:
-        raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "必须指定新归属销售"})
+    new_owner_id = data.owner_user_id
 
     customer.owner_user_id = uuid.UUID(str(new_owner_id))
     customer.updated_by = current_user.id

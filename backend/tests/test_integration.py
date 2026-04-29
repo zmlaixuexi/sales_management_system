@@ -217,7 +217,7 @@ class TestOrder:
             "customer_id": _customer_id,
             "items": [],
         }, headers=_auth_header())
-        assert resp.status_code == 400
+        assert resp.status_code == 422
 
     def test_05_confirm_order(self):
         """确认订单 — 扣减库存"""

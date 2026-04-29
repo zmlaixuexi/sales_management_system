@@ -19,12 +19,28 @@ async def lifespan(app: FastAPI):
     yield
 
 
+OPENAPI_TAGS = [
+    {"name": "认证", "description": "用户登录、令牌刷新、获取当前用户信息"},
+    {"name": "用户管理", "description": "用户 CRUD、角色分配"},
+    {"name": "商品管理", "description": "商品 CRUD、批量导入、价格历史"},
+    {"name": "客户管理", "description": "客户 CRUD、批量导入、归属转移"},
+    {"name": "订单管理", "description": "订单 CRUD、确认/取消、库存联动"},
+    {"name": "收款管理", "description": "收款记录 CRUD"},
+    {"name": "库存管理", "description": "库存查询、库存流水"},
+    {"name": "报表", "description": "销售汇总、趋势、商品排名"},
+    {"name": "操作日志", "description": "操作审计日志查询"},
+    {"name": "数据导出", "description": "CSV/Excel 数据导出"},
+    {"name": "文件管理", "description": "文件上传"},
+]
+
 app = FastAPI(
     title="销售管理系统",
+    description="销售管理系统 API — 包含商品、客户、订单、收款、库存、报表等模块",
     version="0.1.0",
     docs_url="/api/docs",
     redoc_url="/api/redoc",
     openapi_url="/api/openapi.json",
+    openapi_tags=OPENAPI_TAGS,
     lifespan=lifespan,
 )
 
