@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第一百一十二轮）
+
+### 重构：提取 getApiErrorMessage，消除 6 个页面 9 处重复错误处理
+
+- utils/index.ts 新增 getApiErrorMessage(e, fallback)：提取 detail.message 路径
+- CustomerForm/ProductForm/OrderForm/Products/Customers/OrderDetail 统一使用
+- 移除所有 `e as { response?: { data?: { detail?... } } }` 类型断言
+- tsc 0 + ESLint 0 + 97/97 + build 通过
+
 ## 2026-04-30（第一百一十一轮）
 
 ### 测试：订单负价校验测试（+2，后端 286/286）
