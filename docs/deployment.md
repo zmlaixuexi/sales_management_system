@@ -107,6 +107,8 @@ make docker-down
 | RATE_LIMIT_WINDOW | 60 | 速率限制窗口（秒） |
 | SLOW_REQUEST_THRESHOLD_MS | 1000 | 慢请求阈值（毫秒，超过后日志升级为 WARNING） |
 | INVENTORY_WARNING_THRESHOLD | 10 | 库存预警阈值 |
+| MAX_IMAGE_SIZE_MB | 5 | 图片上传大小限制（MB） |
+| MAX_CSV_IMPORT_SIZE_MB | 10 | CSV 导入文件大小限制（MB） |
 
 ## Nginx 配置
 
