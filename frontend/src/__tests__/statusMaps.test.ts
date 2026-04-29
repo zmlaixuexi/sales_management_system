@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 
 // 这些是纯数据映射测试，不需要 DOM 渲染
 

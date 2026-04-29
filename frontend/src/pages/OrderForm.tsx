@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Form, Button, Card, Space, InputNumber, Input, Select, Table, message, Image,
 } from 'antd'
@@ -48,7 +48,7 @@ export default function OrderForm() {
   }, [customerSearch])
 
   // 加载商品列表
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     setProductLoading(true)
     try {
       const res = await fetchProducts({ page: 1, page_size: 50, keyword: productSearch || undefined, status: 'active' })
@@ -56,11 +56,11 @@ export default function OrderForm() {
     } finally {
       setProductLoading(false)
     }
-  }
+  }, [productSearch])
 
   useEffect(() => {
     if (productPickerOpen) loadProducts()
-  }, [productPickerOpen, productSearch])
+  }, [productPickerOpen, productSearch, loadProducts])
 
   // 编辑模式加载订单数据
   useEffect(() => {

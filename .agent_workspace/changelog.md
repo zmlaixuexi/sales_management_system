@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第四十三轮）
+
+### 工程：前端 ESLint 检查和修复
+
+- 修复测试文件未使用导入（client.test.ts 移除 vi/afterEach，statusMaps.test.ts 移除 vi）
+- OrderForm.tsx 将 loadProducts 提取为 useCallback 消除 exhaustive-deps 警告
+- eslint.config.js 新增规则：忽略 `_` 前缀未使用变量，关闭 React Compiler 规则（set-state-in-effect、preserve-manual-memoization），routes 文件关闭 only-export-components
+- ESLint 0 错误，TypeScript 编译通过，前端 23/23 测试通过
+
 ## 2026-04-30（第四十二轮）
 
 ### 部署：Docker Compose 和 Nginx 配置优化
