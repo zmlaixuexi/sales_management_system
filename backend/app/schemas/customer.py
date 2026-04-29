@@ -27,3 +27,33 @@ class CustomerUpdate(BaseModel):
 
 class CustomerTransfer(BaseModel):
     owner_user_id: str = Field(..., description="新归属销售 ID")
+
+
+# ── 响应模型 ──
+
+class CustomerBrief(BaseModel):
+    id: str
+    name: str
+    contact_name: str | None = None
+    phone: str | None = None
+    email: str | None = None
+    source: str | None = None
+    level: str | None = None
+    owner_user_id: str | None = None
+    follow_status: str | None = None
+
+
+class CustomerDetail(BaseModel):
+    id: str
+    name: str
+    contact_name: str | None = None
+    phone: str | None = None
+    email: str | None = None
+    source: str | None = None
+    level: str | None = None
+    owner_user_id: str | None = None
+    owner_name: str | None = None
+    follow_status: str | None = None
+    remark: str | None = None
+    created_at: str | None = None
+    updated_at: str | None = None

@@ -13,7 +13,8 @@ from app.models.customer import Customer
 from app.models.order import InventoryMovement, SalesOrder, SalesOrderItem
 from app.models.product import Product
 from app.models.user import User
-from app.schemas.order import OrderCreate, OrderUpdate
+from app.schemas.order import OrderBrief, OrderCreate, OrderDetail, OrderUpdate
+from app.schemas.response import ApiResponse
 from app.services.audit_service import get_request_meta, log_action
 
 router = APIRouter(prefix="/sales-orders", tags=["订单管理"])
@@ -212,7 +213,7 @@ def list_orders(
     }
 
 
-@router.post("")
+@router.post("", response_model=ApiResponse[OrderBrief])
 def create_order(
     data: OrderCreate,
     request: Request,
@@ -309,7 +310,7 @@ def create_order(
     }
 
 
-@router.get("/{order_id}")
+@router.get("/{order_id}", response_model=ApiResponse[OrderDetail])
 def get_order(
     order_id: uuid.UUID,
     db: Session = Depends(get_db),

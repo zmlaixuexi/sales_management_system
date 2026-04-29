@@ -12,7 +12,14 @@ from app.api.deps import get_db, has_permission, require_permission
 from app.core.sanitize import escape_like
 from app.models.customer import Customer
 from app.models.user import User
-from app.schemas.customer import CustomerCreate, CustomerTransfer, CustomerUpdate
+from app.schemas.customer import (
+    CustomerBrief,
+    CustomerCreate,
+    CustomerDetail,
+    CustomerTransfer,
+    CustomerUpdate,
+)
+from app.schemas.response import ApiResponse
 from app.services.audit_service import get_request_meta, log_action
 
 router = APIRouter(prefix="/customers", tags=["客户管理"])
@@ -82,7 +89,7 @@ def list_customers(
     }
 
 
-@router.post("")
+@router.post("", response_model=ApiResponse[CustomerBrief])
 def create_customer(
     data: CustomerCreate,
     request: Request,
@@ -151,7 +158,7 @@ def create_customer(
     }
 
 
-@router.get("/{customer_id}")
+@router.get("/{customer_id}", response_model=ApiResponse[CustomerDetail])
 def get_customer(
     customer_id: uuid.UUID,
     db: Session = Depends(get_db),
