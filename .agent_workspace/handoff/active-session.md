@@ -1,35 +1,27 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：阶段 6 交付加固
-当前任务编号：DEVOPS-PROD-001 / DEVOPS-NGINX-001 / DEVOPS-BACKUP-001
-当前任务名称：生产部署配置
+当前阶段：MVP 全部完成（阶段 0-6）
+当前任务编号：—
+当前任务名称：—
 当前 Agent：Claude
-任务状态：已完成
-
-## 本次目标
-
-创建生产 Docker Compose、Nginx 配置和备份恢复脚本。
+任务状态：阶段 6 全部完成
 
 ## 最近完成
 
-- deploy/docker-compose.prod.yml：四容器架构（PG + 后端 + 前端构建 + Nginx）
-- deploy/nginx.conf：SPA 路由、API 代理、静态资源缓存
-- deploy/backup.sh / restore.sh：PostgreSQL 备份恢复脚本
-- frontend/Dockerfile：多阶段生产构建
+- DOC-WINDOWS-001：Windows 启动文档
+- 更新 README.md：修正测试数、项目结构、当前限制
+- 更新 backlog：阶段 2/3/5/6 全部标记为已完成
 
 ## 当前正在做
 
-生产部署配置已完成。阶段 6 仅剩 DOC-WINDOWS-001。
+MVP 全部完成，进入 P1 扩展阶段。
 
 ## 下一步第一动作
 
-1. DOC-WINDOWS-001：Windows 启动文档
-2. P1 扩展：测试补强、导出审计日志、异常路径
-
-## 未完成事项
-
-- Windows 启动文档（可选）
+1. 测试补强：数据范围权限、文件上传、异常路径独立测试
+2. 前端审计日志页面展示 IP/request_id
+3. 批量导入、库存预警阈值配置
 
 ## 阻塞问题
 

@@ -101,7 +101,11 @@ npm run dev
 │   │   └── utils/           # 工具函数
 │   └── vite.config.ts
 ├── deploy/                  # 部署配置
-│   └── docker-compose.dev.yml
+│   ├── docker-compose.dev.yml
+│   ├── docker-compose.prod.yml
+│   ├── nginx.conf
+│   ├── backup.sh
+│   └── restore.sh
 ├── docs/                    # 文档
 └── .env.example             # 环境变量示例
 ```
@@ -109,7 +113,7 @@ npm run dev
 ## 测试
 
 ```bash
-# 后端测试（全部 34 个）
+# 后端测试（全部 51 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
@@ -124,9 +128,12 @@ npm run build
 
 | 模块 | 测试数 | 覆盖内容 |
 |---|---|---|
-| 认证 | 8 | 登录、Token 刷新、当前用户、权限校验 |
+| 认证 | 7 | 登录成功/失败、Token 刷新、当前用户、权限校验 |
 | 健康检查 | 2 | 健康状态、版本信息 |
 | 集成（端到端） | 24 | 完整业务流程：商品→客户→订单→库存→收款→报表 |
+| 审计日志 | 9 | 全操作类型日志、筛选、操作类型列表 |
+| 数据导出 | 8 | 四模块 CSV 导出、筛选、空数据、认证 |
+| **合计** | **51** | |
 
 ## API 概览
 
@@ -146,10 +153,10 @@ npm run build
 
 ## 当前限制
 
-- 现有 RBAC 模型和权限种子已建立，但多数业务接口仍只校验登录态，尚未完整实现权限码校验、数据范围和对象级权限。
-- 成本价、毛利、毛利率、利润报表等敏感字段尚未按角色权限统一裁剪。
-- 当前只提供开发环境 Docker Compose；生产 Compose、Nginx、备份恢复脚本和 Windows 启动文档仍待补齐。
-- `docs/api.md`、`docs/database.md`、`docs/testing.md` 和阶段测试报告仍待补齐。
+- 前端尚无自动化测试。
+- 数据范围权限仅支持"本人"和"全部"两级，暂无"团队"级别。
+- 报表 API 尚未应用数据范围过滤。
+- 文件上传仅支持本地存储，未接入对象存储（S3/OSS）。
 
 ## 环境变量
 
