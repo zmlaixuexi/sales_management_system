@@ -8,6 +8,7 @@ from typing import Any
 from fastapi import Request
 from sqlalchemy.orm import Session
 
+from app.core.request_id import request_id_ctx
 from app.models.audit import AuditLog
 
 logger = logging.getLogger(__name__)
@@ -20,7 +21,7 @@ def get_request_meta(request: Request) -> dict:
     """从 FastAPI Request 对象提取 IP、user_agent、request_id"""
     ip = request.client.host if request.client else None
     ua = request.headers.get("user-agent")
-    rid = request.headers.get("x-request-id") or str(uuid.uuid4())[:8]
+    rid = request_id_ctx.get("") or request.headers.get("x-request-id") or str(uuid.uuid4())[:8]
     return {"ip_address": ip, "user_agent": ua, "request_id": rid}
 
 

@@ -8,6 +8,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from app.core.config import settings
+from app.core.request_id import request_id_ctx
 
 logger = logging.getLogger("app.request")
 
@@ -36,6 +37,7 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
                 "duration_ms": duration_ms,
                 "client_ip": request.client.host if request.client else "-",
                 "slow": is_slow,
+                "request_id": request_id_ctx.get(""),
             }
             label = "SLOW " if is_slow else ""
             record.msg = f"{label}{request.method} {path} {response.status_code} {duration_ms}ms"
