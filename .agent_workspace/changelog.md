@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第一百一十九轮）
+
+### 前端：提取 useSubmit hook，统一表单提交逻辑并防重复提交
+
+- 新增 `useSubmit` hook：loading 状态 + ref 防重锁 + Ant Design 校验错误静默 + 统一 getApiErrorMessage
+- CustomerForm/ProductForm/OrderForm 迁移至 useSubmit，消除 3 处重复 try/catch/finally
+- 新增 5 个 useSubmit 测试（成功/提交中状态/错误提示/表单校验/防重）
+- 前端 105/105 + tsc 0 + build 通过
+
 ## 2026-04-30（第一百一十八轮）
 
 ### 安全：Pydantic schema 级别金融字段校验（防御深度）

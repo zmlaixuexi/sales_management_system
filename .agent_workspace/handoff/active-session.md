@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-118
-当前任务名称：Pydantic schema 金融字段校验
+当前任务编号：ROUND-119
+当前任务名称：useSubmit hook 提取
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 119：提取 useSubmit hook（loading 管理 + ref 防重锁 + 统一错误提示），3 个表单页迁移，5 个测试，前端 105/105
 - Round 118：Pydantic field_validator 防御深度 — OrderItemInput.unit_price 非负 + PaymentCreate.amount 正数，6 个测试同步 400→422
 - Round 117：新增 frontend/.env.example 和 CONTRIBUTING.md，完善开发者引导体验
 - Round 116：文档同步测试数至 386（286 后端 + 100 前端）+ README/testing.md 订单负价测试条目更新
@@ -37,7 +38,7 @@
 ## 当前测试状态
 
 - 后端：286/286 通过
-- 前端：100/100 通过
+- 前端：105/105 通过
 - ruff：0 issues
 - ESLint：0 warnings
 - build：通过

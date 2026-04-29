@@ -6,6 +6,15 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的“已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-29
+
+### 前端 useSubmit hook — 表单提交统一逻辑 + 防重复提交
+
+- **文件**: `frontend/src/hooks/useSubmit.ts`, `frontend/src/__tests__/useSubmit.test.ts`
+- **内容**: 提取 useSubmit hook 替代 3 个表单页重复的 try/catch/finally + loading 管理
+- **验证**: 105 前端 + tsc 0 + ESLint 0 + build 通过
+- **测试**: 5 个（成功调用/提交中状态/错误提示/Ant Design 校验静默/防重）
+
 ## 功能编号：FEAT-20260430-28
 
 ### Pydantic schema 级别金融字段校验（防御深度）
