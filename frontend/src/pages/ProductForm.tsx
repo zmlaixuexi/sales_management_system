@@ -26,7 +26,7 @@ export default function ProductForm() {
             setMainImageUrl(res.data.main_image_url)
             form.setFieldsValue({
               name: res.data.name,
-              cost_price: parseFloat(res.data.cost_price),
+              cost_price: res.data.cost_price ? parseFloat(res.data.cost_price) : undefined,
               sale_price: parseFloat(res.data.sale_price),
               sku: res.data.sku,
               stock_quantity: res.data.stock_quantity,

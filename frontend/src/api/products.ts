@@ -9,9 +9,9 @@ export interface Product {
   category_id: string | null
   category_name: string | null
   sale_price: string
-  cost_price: string
-  unit_profit: string
-  gross_margin: string
+  cost_price?: string
+  unit_profit?: string
+  gross_margin?: string
   stock_quantity: number
   status: string
   sort_weight: number

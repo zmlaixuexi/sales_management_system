@@ -37,7 +37,7 @@ export interface Order {
   gross_profit: string
   gross_margin: string
   paid_amount: string
-  item_count: number
+  item_count?: number
   remark: string | null
   created_at: string | null
   updated_at: string | null
