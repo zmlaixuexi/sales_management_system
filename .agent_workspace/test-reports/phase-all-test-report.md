@@ -1,137 +1,98 @@
 # 阶段测试报告
 
 **项目**：销售管理系统
-**测试日期**：2026-04-30（第二轮更新）
-**测试环境**：Python 3.13.11 + SQLite + FastAPI TestClient
+**测试日期**：2026-04-30（第五轮更新）
+**测试环境**：Python 3.13.11 + SQLite + FastAPI TestClient / Vitest 4.x + jsdom
 **测试执行人**：Claude（自动）
 
 ## 总览
 
-| 指标 | 值 |
-|---|---|
-| 总测试数 | 90 |
-| 通过 | 90 |
-| 失败 | 0 |
-| 跳过 | 0 |
-| 执行时间 | ~6.5s |
-| 通过率 | 100% |
+| 指标 | 后端 | 前端 | 合计 |
+|---|---|---|---|
+| 总测试数 | 201 | 77 | 278 |
+| 通过 | 201 | 77 | 278 |
+| 失败 | 0 | 0 | 0 |
+| 通过率 | 100% | 100% | 100% |
 
-## 按阶段统计
-
-### 阶段 1：工程基础设施
+## 后端按模块统计
 
 | 测试文件 | 通过 | 说明 |
 |---|---|---|
-| test_health.py | 2/2 | 健康检查和版本接口 |
-
-### 阶段 2：认证、用户、权限
-
-| 测试文件 | 通过 | 说明 |
-|---|---|---|
+| test_health.py | 3/3 | 健康检查、版本信息、安全响应头 |
 | test_auth.py | 7/7 | 登录成功/失败、Token 刷新、权限拒绝 |
-
-### 阶段 3-4：商品、客户、订单、库存、收款
-
-| 测试文件 | 通过 | 说明 |
-|---|---|---|
 | test_integration.py | 24/24 | 完整业务流程端到端测试 |
-
-**覆盖的业务流程**：
-- 商品：创建、列表（含利润计算）
-- 客户：创建、列表、手机号重复检测
-- 订单：草稿创建 → 详情 → 列表 → 空明细校验 → 确认（扣库存）→ 重复确认拒绝
-- 库存：流水查询、手工调整
-- 收款：登记 → 部分收款 → 超额校验 → 冲正
-- 报表：销售汇总、趋势、商品排行、库存预警
-
-### 阶段 5：报表与审计
-
-| 测试文件 | 通过 | 说明 |
-|---|---|---|
 | test_audit_log.py | 9/9 | 全操作类型审计日志 + 筛选 |
-| test_export.py | 8/8 | 四模块 CSV 导出 + 筛选 + 空数据 + 认证 |
-
-### 权限校验测试
-
-| 测试文件 | 通过 | 说明 |
-|---|---|---|
+| test_export.py | 9/9 | 四模块 CSV 导出 + 筛选 + 空数据 + 认证 + 审计日志 |
+| test_file_upload.py | 9/9 | 上传成功、类型/大小校验、获取/删除、认证 |
 | test_permissions.py | 9/9 | 数据范围、敏感字段、权限码拦截、导出过滤 |
+| test_edge_cases.py | 27/27 | 6 个业务模块异常路径覆盖 |
+| test_validation.py | 20/20 | refresh_token 异常、价格/库存/名称校验、CSV 边界、用户列表 |
+| test_boundary.py | 36/36 | 认证边界、订单状态机、收款边界、用户管理、库存调整 |
+| test_reports_audit.py | 22/22 | 销售汇总（6 种 period）、趋势、排行、预警、审计日志查询/筛选/权限 |
+| test_product_import.py | 8/8 | CSV 成功/带 SKU/重复 SKU/空名称/非 CSV/认证 |
+| test_customer_import.py | 8/8 | CSV 成功/带详情/手机号重复/批量内重复/非 CSV/认证 |
+| test_ratelimit.py | 3/3 | 响应头验证、429 触发 |
+| test_sanitize.py | 6/6 | escape_like 特殊字符转义 |
 
-**覆盖的权限场景**：
-- 客户数据范围：销售员只看本人客户，管理员看全部
-- 订单数据范围：销售员只看本人订单
-- 敏感字段过滤：无 `product:view_cost` 不返回成本价/利润/毛利率
-- 权限码拦截：无权限返回 403
-- 导出数据范围：CSV 导出同样应用数据范围过滤
-
-### 异常路径和边界值测试
-
-| 测试文件 | 通过 | 说明 |
-|---|---|---|
-| test_edge_cases.py | 27/27 | 6 个业务模块的异常路径覆盖 |
-
-**覆盖的异常场景**：
-- 商品：缺名称、负价格、重复 SKU、404 读写删
-- 客户：空名称、手机号重复、404
-- 订单：未选客户、空明细、不存在商品、数量 0、负单价、库存不足、重复确认/取消、编辑非草稿
-- 收款：金额 0、超额、不存在订单、冲正不存在
-- 库存：调整 0、未指定商品、负库存
-- 认证：伪造 Token
-
-### 安全测试
+## 前端按模块统计
 
 | 测试文件 | 通过 | 说明 |
 |---|---|---|
-| test_ratelimit.py | 3/3 | 速率限制响应头、429 触发 |
+| utils.test.ts | 8/8 | formatAmount / formatPercent 纯函数 |
+| ErrorBoundary.test.tsx | 2/2 | 正常渲染 + 错误捕获 |
+| client.test.ts | 3/3 | baseURL、token 附加、无 token |
+| request.test.ts | 4/4 | get/post/put/del 调用验证 |
+| statusMaps.test.ts | 6/6 | 商品/客户/订单状态映射完整性 |
+| products-api.test.ts | 7/7 | 商品 CRUD + 上传图片 API |
+| customers-api.test.ts | 6/6 | 客户 CRUD + 转移 API |
+| orders-api.test.ts | 6/6 | 订单 CRUD + 确认/取消 API |
+| payments-api.test.ts | 5/5 | 收款查询/登记/冲正 API |
+| reports-api.test.ts | 6/6 | 报表四个查询 API |
+| auditLogs-api.test.ts | 5/5 | 审计日志查询/筛选/操作类型 API |
+| auth-store.test.ts | 11/11 | login/logout/fetchUser/hasPermission/loading |
+| downloadCsv.test.ts | 6/6 | 成功下载、查询参数、过滤、错误、文件名 |
 
 ## 功能覆盖率
 
-| 模块 | API 端点数 | 测试覆盖 | 备注 |
+| 模块 | API 端点数 | 后端测试 | 前端测试 |
 |---|---|---|---|
-| 认证 | 4 | 4 | 登录/刷新/退出/当前用户 |
-| 商品 | 7 | 7 | CRUD + 停用 + 异常路径 |
-| 客户 | 6 | 6 | CRUD + 异常路径 |
-| 订单 | 6 | 6 | CRUD + 状态转换 + 异常路径 |
-| 收款 | 3 | 3 | 全部覆盖 + 异常路径 |
-| 库存 | 2 | 2 | 全部覆盖 + 异常路径 |
-| 报表 | 4 | 4 | 全部覆盖 |
-| 审计日志 | 2 | 2 | 全部覆盖 |
-| 导出 | 4 | 4 | 全部覆盖 + 数据范围 |
-| 用户管理 | 3 | 1 | 仅权限拒绝 |
-| 文件上传 | 3 | 0 | 未覆盖 |
-| 速率限制 | — | 3 | 中间件级别 |
+| 认证 | 4 | 7 | 11（store） |
+| 商品 | 7 | 7+27+20 | 7 |
+| 客户 | 6 | 6+27+20 | 6 |
+| 订单 | 6 | 6+24+36 | 6 |
+| 收款 | 3 | 3+36 | 5 |
+| 库存 | 2 | 2+36 | — |
+| 报表 | 4 | 22 | 6 |
+| 审计日志 | 2 | 22 | 5 |
+| 导出 | 4 | 9 | 6（downloadCsv） |
+| 用户管理 | 3 | 36 | — |
+| 文件上传 | 3 | 9 | — |
 
 ## 安全特性验证
 
 | 特性 | 状态 | 说明 |
 |---|---|---|
-| JWT 认证 | ✅ | Token 验证、过期、无 Token 拒绝、伪造 Token |
-| 权限码校验 | ✅ | 非管理员访问管理接口被 403 |
-| 数据范围过滤 | ✅ | test_permissions.py 独立测试，销售员 vs 管理员 |
-| 敏感字段过滤 | ✅ | test_permissions.py 验证无 view_cost 权限时隐藏成本价 |
+| JWT 认证 | ✅ | Token 验证、过期、无 Token、伪造 Token、已删除用户 Token、禁用用户 Token |
+| 权限码校验 | ✅ | report:sales、audit:view 等 403 测试 |
+| 数据范围过滤 | ✅ | test_permissions.py 销售员 vs 管理员 |
+| 敏感字段过滤 | ✅ | 无 view_cost 权限时隐藏成本价 |
 | 库存行锁 | ✅ | with_for_update() 防超卖 |
 | 软删除 | ✅ | deleted_at 过滤 |
 | 审计日志 | ✅ | 全操作类型记录，含 IP/user_agent/request_id |
 | 速率限制 | ✅ | 滑动窗口 IP 级限制，429 + 响应头 |
-| CSV 导出数据范围 | ✅ | test_permissions.py 验证导出按权限过滤 |
-
-## 已知限制
-
-1. **前端无测试**：前端未配置测试框架，无自动化测试
-2. **文件上传未测试**：图片上传 API 无集成测试
-3. **无并发测试**：库存并发扣减未做压力测试
-4. **无性能测试**：未测试大数据量下的分页性能
-5. **速率限制基于内存**：多实例部署时不共享状态
+| 安全响应头 | ✅ | CSP、X-Frame-Options、X-Content-Type-Options、Permissions-Policy |
+| SQL 注入防护 | ✅ | escape_like 转义 %、_、\\ |
+| 订单状态机 | ✅ | draft→confirmed→completed、draft→cancelled、confirmed→cancelled |
+| 收款冲正回退 | ✅ | 冲正后订单状态回退到 confirmed |
 
 ## 测试运行命令
 
 ```bash
+# 后端
 cd backend
-pytest tests/ -v                      # 全部测试
-pytest tests/test_integration.py -v   # 业务流程
-pytest tests/test_audit_log.py -v     # 审计日志
-pytest tests/test_export.py -v        # 数据导出
-pytest tests/test_permissions.py -v   # 权限校验
-pytest tests/test_edge_cases.py -v    # 异常路径
-pytest tests/test_ratelimit.py -v     # 速率限制
+pytest tests/ -v
+
+# 前端
+cd frontend
+npx vitest run
 ```

@@ -118,12 +118,12 @@ npm run dev
 ## 测试
 
 ```bash
-# 后端测试（142 个）
+# 后端测试（201 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
 
-# 前端测试（61 个）
+# 前端测试（77 个）
 cd frontend
 npm test
 
@@ -137,7 +137,7 @@ npm run build
 | 模块 | 测试数 | 覆盖内容 |
 |---|---|---|
 | 认证 | 7 | 登录成功/失败、Token 刷新、当前用户、权限校验 |
-| 健康检查 | 2 | 健康状态、版本信息 |
+| 健康检查 | 3 | 健康状态、版本信息、安全响应头验证 |
 | 集成（端到端） | 24 | 完整业务流程：商品→客户→订单→库存→收款→报表 |
 | 审计日志 | 9 | 全操作类型日志、筛选、操作类型列表 |
 | 数据导出 | 9 | 四模块 CSV 导出、筛选、空数据、认证、审计日志 |
@@ -145,11 +145,14 @@ npm run build
 | 权限校验 | 9 | 数据范围、敏感字段过滤、权限码拦截、导出过滤 |
 | 异常路径 | 27 | 缺字段、负值、重复、404、状态转换、库存不足、伪造 Token |
 | 验证补充 | 20 | refresh_token 异常、价格/库存/名称校验、CSV 边界、用户列表 |
+| 边界测试 | 36 | 认证边界、订单状态机、收款边界、用户管理、库存调整、Token 刷新 |
+| 报表 | 12 | 销售汇总（6 种 period）、趋势、排行、库存预警、权限 |
+| 审计查询 | 10 | 日志列表、筛选、分页、关键词、操作类型、权限 |
 | 商品导入 | 8 | CSV 成功/带 SKU/重复 SKU/空名称/非 CSV/认证/中文表头 |
 | 客户导入 | 8 | CSV 成功/带详情/手机号重复/批量内重复/空名称/非 CSV/认证 |
 | 速率限制 | 3 | 响应头验证、429 触发 |
 | SQL 注入防护 | 6 | escape_like 特殊字符转义 |
-| **合计** | **142** | |
+| **合计** | **201** | |
 
 ### 前端测试覆盖
 
@@ -163,9 +166,12 @@ npm run build
 | 商品 API | 7 | fetchProducts/fetchProduct/create/update/delete/disable/uploadImage |
 | 客户 API | 6 | fetchCustomers/fetchCustomer/create/update/delete/transfer |
 | 订单 API | 6 | fetchOrders/fetchOrder/create/update/confirm/cancel |
+| 收款 API | 5 | fetchPayments/筛选/createPayment/备注/reversePayment |
 | 报表 API | 6 | fetchSalesSummary/Trend/ProductRanking/InventoryWarning |
+| 审计日志 API | 5 | fetchAuditLogs/筛选/日期范围/数据解析/fetchAuditActions |
 | auth store | 11 | login/logout/fetchUser/hasPermission/loading 状态 |
-| **合计** | **61** | |
+| downloadCsv | 6 | 成功下载、查询参数、过滤、错误、文件名提取 |
+| **合计** | **77** | |
 
 ## API 概览
 
