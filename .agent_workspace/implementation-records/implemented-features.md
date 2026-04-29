@@ -6,6 +6,25 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的“已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-25
+
+功能名称：数据库复合索引优化
+所属模块：性能优化
+实现日期：2026-04-30
+实现 Agent：Claude
+
+### 实现范围
+
+- 新建 Alembic 迁移添加 10 个复合索引：
+  - sales_orders：(status, created_at)、(sales_user_id, created_at)
+  - customers：(owner_user_id, created_at)
+  - audit_logs：(action, resource_type, created_at)、(actor_id, created_at)
+  - payments：(status, order_id, created_at)
+  - inventory_movements：(product_id, movement_type, created_at)、(created_at)
+  - sales_order_items：(product_id)
+  - products：(status, stock_quantity)
+- 覆盖列表页筛选排序、数据范围查询、报表聚合、库存预警等高频查询模式
+
 ## 功能编号：FEAT-20260430-24
 
 功能名称：前端列表页分页 hook 重构
