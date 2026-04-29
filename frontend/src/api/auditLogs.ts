@@ -10,6 +10,8 @@ export interface AuditLogItem {
   before_data: Record<string, unknown> | null;
   after_data: Record<string, unknown> | null;
   ip_address: string | null;
+  user_agent: string | null;
+  request_id: string | null;
   created_at: string | null;
 }
 

@@ -66,6 +66,8 @@ def list_audit_logs(
             "before_data": json.loads(item.before_data) if item.before_data else None,
             "after_data": json.loads(item.after_data) if item.after_data else None,
             "ip_address": item.ip_address,
+            "user_agent": item.user_agent,
+            "request_id": item.request_id,
             "created_at": item.created_at.isoformat() if item.created_at else None,
         }
         result_items.append(row)

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Table, Select, DatePicker, Input, Tag, Space, Typography } from 'antd';
+import { Table, Select, DatePicker, Input, Tag, Space, Typography, Tooltip } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { fetchAuditLogs, fetchAuditActions, type AuditLogItem } from '@/api/auditLogs';
@@ -129,7 +129,17 @@ export default function AuditLogs() {
       title: 'IP',
       dataIndex: 'ip_address',
       width: 130,
-      render: (v: string) => v || '-',
+      render: (v: string, record: AuditLogItem) => {
+        if (!v) return '-';
+        const details: string[] = [];
+        if (record.request_id) details.push(`RID: ${record.request_id}`);
+        if (record.user_agent) details.push(`UA: ${record.user_agent.slice(0, 50)}`);
+        return details.length > 0 ? (
+          <Tooltip title={details.join('\n')}>
+            <Text style={{ fontSize: 12 }}>{v}</Text>
+          </Tooltip>
+        ) : <Text style={{ fontSize: 12 }}>{v}</Text>;
+      },
     },
   ];
 
