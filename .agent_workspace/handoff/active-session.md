@@ -1,37 +1,38 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：P1 前端体验 / 扩展功能
-当前任务编号：UX-007
-当前任务名称：前端测试补强
+当前阶段：测试补强 / 质量加固
+当前任务编号：QA-001
+当前任务名称：后端测试补强
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- 新增 3 个测试文件（client/request/statusMaps），前端测试 10 → 23
-- 覆盖 API 客户端拦截器、请求封装函数、业务状态映射
+- 新增 test_validation.py（20 个验证和异常路径测试）
+- 新增 conftest.py 确保速率限制测试最后运行（根治 429 干扰问题）
+- 后端 136/136 通过，前端 23/23 通过
 
 ## 下一步第一动作
 
-1. 仪表盘数据可视化增强
-2. 代码质量：ESLint 规则完善
-3. 后端测试补强（边界条件、并发场景）
-4. 文档完善（API 文档更新）
+1. 文档完善（README / API 文档更新）
+2. 代码质量：ruff lint 检查和修复
+3. 安全加固：输入 sanitization 增强
+4. 部署体验优化
 
-## 当前里程碑总结（Round 15-37）
+## 当前里程碑总结（Round 15-38）
 
-- 后端测试：51 → 116（+65）
+- 后端测试：51 → 136（+85）
 - 前端测试：0 → 23（框架搭建 + 补强）
 - 安全：RBAC 权限、数据范围过滤、速率限制、敏感字段控制、logout token 清理
 - 可观测性：结构化 JSON 日志（LOG_FORMAT）、审计日志请求元数据
 - 性能：前端代码拆分（1.4MB → 40+ chunk）、TypeScript strict 模式
 - 前端体验：统一错误提示、429 重试、ErrorBoundary、菜单修复、用户名/角色展示、空状态引导
 - 功能：商品/客户 CSV 批量导入、4 种数据导出
-- 工程化：Vitest + Testing Library 测试框架、23 个前端测试
+- 工程化：Vitest + Testing Library 测试框架、conftest.py 测试排序
 - 文档：API 文档、README、.env.example、测试报告全部更新
 - 配置：INVENTORY_WARNING_THRESHOLD、LOG_FORMAT、RATE_LIMIT_MAX/WINDOW
-- 后端 116/116 通过，前端 23/23 + TypeScript 通过
+- 后端 136/136 通过，前端 23/23 + TypeScript 通过
 
 ## 阻塞问题
 
@@ -49,7 +50,7 @@
 8. 测试业务流程的用户必须是 is_superuser=True，否则新权限校验会拦截请求。
 9. logout 必须同时清除 access_token 和 refresh_token。
 10. file_service.py 的 MAX_SIZE_BYTES 是模块级变量，修改限制需直接 patch 模块变量而非 settings。
-11. 测试速率限制时，test_ratelimit.py 的 429 压力测试必须放在最后，否则耗尽 IP 配额影响后续测试。
+11. test_ratelimit.py 必须最后运行 → conftest.py 钩子排序。
 12. 批量导入中调用 _generate_sku() 会因未提交而重复 → 必须在导入函数内自维护序号计数器。
 13. 批量导入客户手机号需同时检查数据库和批量内去重（used_phones set）。
 
