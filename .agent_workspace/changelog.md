@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第一百二十轮）
+
+### 前端：ErrorBoundary 路由感知重置 — 切换页面自动恢复
+
+- ErrorBoundary 从 RouterProvider 外层移入内部，获取路由上下文
+- 新增 resetKey（pathname）prop，componentDidUpdate 检测路由变化自动清除错误状态
+- 拆分为函数式 ErrorBoundary（useLocation hook）+ 类组件 ErrorBoundaryInner
+- 新增重试按钮恢复测试（测试 +1），前端 106/106
+
 ## 2026-04-30（第一百一十九轮）
 
 ### 前端：提取 useSubmit hook，统一表单提交逻辑并防重复提交
