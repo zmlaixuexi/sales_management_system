@@ -7,6 +7,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db, require_permission
+from app.core.config import settings
 from app.models.order import SalesOrder, SalesOrderItem
 from app.models.product import Product
 from app.models.user import User
@@ -182,11 +183,13 @@ def product_ranking(
 
 @router.get("/inventory-warning")
 def inventory_warning(
-    threshold: int = Query(10, ge=0, description="库存预警阈值"),
+    threshold: int = Query(None, ge=0, description="库存预警阈值"),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("report:sales")),
 ):
     """库存预警：低于阈值的商品列表"""
+    if threshold is None:
+        threshold = settings.INVENTORY_WARNING_THRESHOLD
     rows = (
         db.query(Product)
         .filter(

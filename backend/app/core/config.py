@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = str(Path(__file__).resolve().parent.parent.parent / "uploads")
     UPLOAD_PUBLIC_BASE_URL: str = "/uploads"
     MAX_IMAGE_SIZE_MB: int = 5
+    INVENTORY_WARNING_THRESHOLD: int = 10
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 

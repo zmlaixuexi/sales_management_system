@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-04-30（第十五轮）
+
+### 扩展：库存预警阈值可配置
+
+- **EXT-003** 库存预警阈值可配置：
+  - config.py 新增 `INVENTORY_WARNING_THRESHOLD` 配置项（默认 10，支持环境变量覆盖）
+  - reports.py 库存预警 API 默认值改为读取配置项，前端不传 threshold 时使用服务端默认值
+  - 前端 Dashboard 不再硬编码阈值，改用 API 返回的 threshold 值动态显示卡片标题
+  - 前端 reports.ts 优化：仅在明确传参时才附带 threshold 查询参数
+- 全量测试 87/87 通过，前端 TypeScript 编译通过。
+
 ## 2026-04-30（第十四轮）
 
 ### 测试补强：异常路径和边界值集成测试

@@ -48,5 +48,7 @@ export async function fetchProductRanking(params?: { period?: string; limit?: nu
 }
 
 export async function fetchInventoryWarning(threshold?: number) {
-  return get<{ items: InventoryWarningItem[]; threshold: number; total: number }>('/reports/inventory-warning', { threshold })
+  const params: Record<string, unknown> = {}
+  if (threshold !== undefined) params.threshold = threshold
+  return get<{ items: InventoryWarningItem[]; threshold: number; total: number }>('/reports/inventory-warning', params)
 }

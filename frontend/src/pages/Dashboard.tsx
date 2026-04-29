@@ -28,6 +28,7 @@ export default function Dashboard() {
   const [trend, setTrend] = useState<SalesTrendItem[]>([])
   const [ranking, setRanking] = useState<ProductRankingItem[]>([])
   const [warnings, setWarnings] = useState<InventoryWarningItem[]>([])
+  const [warningThreshold, setWarningThreshold] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
 
   const loadData = useCallback(async () => {
@@ -37,12 +38,15 @@ export default function Dashboard() {
         fetchSalesSummary(period),
         fetchSalesTrend(period),
         fetchProductRanking({ period, limit: 10 }),
-        fetchInventoryWarning(10),
+        fetchInventoryWarning(),
       ])
       if (summaryRes.success) setSummary(summaryRes.data)
       if (trendRes.success) setTrend(trendRes.data.items)
       if (rankRes.success) setRanking(rankRes.data.items)
-      if (warnRes.success) setWarnings(warnRes.data.items)
+      if (warnRes.success) {
+        setWarnings(warnRes.data.items)
+        setWarningThreshold(warnRes.data.threshold)
+      }
     } catch {
       // 静默处理
     } finally {
@@ -200,7 +204,7 @@ export default function Dashboard() {
           </Col>
           <Col span={12}>
             <Card
-              title={<span><AlertOutlined style={{ marginRight: 8, color: '#fa8c16' }} />库存预警（≤10）</span>}
+              title={<span><AlertOutlined style={{ marginRight: 8, color: '#fa8c16' }} />库存预警（≤{warningThreshold ?? '—'}）</span>}
               size="small"
             >
               {warnings.length === 0 ? (

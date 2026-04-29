@@ -6,6 +6,37 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的“已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-11
+
+功能名称：库存预警阈值可配置
+所属模块：报表
+关联任务编号：EXT-003
+实现日期：2026-04-30
+实现 Agent：Claude
+当前状态：已测试
+
+### 实现范围
+
+- config.py 新增 `INVENTORY_WARNING_THRESHOLD` 配置项（默认 10，支持环境变量覆盖）
+- reports.py 库存预警 API：threshold 参数默认值改为从配置读取，前端不传时使用服务端默认
+- 前端 Dashboard：不再硬编码阈值，从 API 返回值动态显示"库存预警（≤N）"
+- 前端 reports.ts：仅在明确传参时才附带 threshold 查询参数
+
+### 涉及文件
+
+| 文件 | 变更说明 |
+|---|---|
+| backend/app/core/config.py | 新增 INVENTORY_WARNING_THRESHOLD 配置项 |
+| backend/app/api/v1/reports.py | threshold 默认值改为从 settings 读取 |
+| frontend/src/api/reports.ts | 优化参数传递逻辑 |
+| frontend/src/pages/Dashboard.tsx | 动态显示阈值 |
+
+### 测试状态
+
+- 后端 87/87 测试通过，前端 TypeScript 编译通过
+
+---
+
 ## 功能编号：FEAT-20260430-10
 
 功能名称：审计日志请求元数据
