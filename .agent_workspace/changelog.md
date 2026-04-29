@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-04-30（第一百一十七轮）
+
+### 工程：新增 frontend/.env.example 和 CONTRIBUTING.md
+
+- frontend/.env.example：文档化 VITE_API_BASE_URL 和 VITE_PROXY_TARGET 两个环境变量
+- CONTRIBUTING.md：开发环境搭建步骤、后端/前端代码规范、测试和迁移指引
+
 ## 2026-04-30（第一百一十六轮）
 
 ### 文档：同步测试数至 386（286 后端 + 100 前端）
