@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-04-30（第一百二十四轮）
+
+### 清理：移除未使用的 SuccessResponse / ErrorResponse schema
+
+- schemas/response.py 中 SuccessResponse 和 ErrorResponse 仅定义未使用，已移除
+- 后端 289/289 + ruff 0 通过
+
 ## 2026-04-30（第一百二十三轮）
 
 ### 安全：后端容器以非 root 用户运行
