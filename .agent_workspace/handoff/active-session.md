@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-124
-当前任务名称：移除未使用 schema 死代码
+当前任务编号：ROUND-125
+当前任务名称：resp() 响应构造函数
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 125：提取 resp() 响应构造函数，11 个 API 文件 44 处迁移，净减 60 行，后端 289/289
 - Round 124：移除未使用的 SuccessResponse / ErrorResponse schema，ruff 0 + 后端 289/289
 - Round 123：后端 Dockerfile 以非 root 用户运行（appuser UID 999），Docker 构建和运行验证通过
 - Round 122：请求 ID 中间件测试（+3）— 自动生成/透传/日志写入验证，后端 289/289

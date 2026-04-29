@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百二十五轮）
+
+### 重构：提取 resp() 响应构造函数，消除 44 处重复响应字典
+
+- 新增 `deps.resp(data, message)` — 统一构造 `{"success": True, "data": ..., "message": ...}`
+- 11 个 API 路由文件全部迁移至 resp()，v1 目录零残留手动字典
+- 后端 289/289 + ruff 0 通过
+
 ## 2026-04-30（第一百二十四轮）
 
 ### 清理：移除未使用的 SuccessResponse / ErrorResponse schema
