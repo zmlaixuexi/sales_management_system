@@ -84,8 +84,8 @@ export default function ProductForm() {
         }
       }
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { error?: { message?: string } } } }
-      message.error(err.response?.data?.error?.message || '操作失败')
+      const err = e as { response?: { data?: { detail?: { message?: string } } } }
+      message.error(err.response?.data?.detail?.message || '操作失败')
     } finally {
       setLoading(false)
     }

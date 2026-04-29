@@ -67,6 +67,8 @@ apiClient.interceptors.response.use(
       message.error('请求的资源不存在')
     } else if (error.response?.status === 500) {
       message.error('服务器错误，请稍后重试')
+    } else if (error.response?.data?.detail?.message && error.response?.status !== 401) {
+      message.error(error.response.data.detail.message)
     } else if (error.response?.data?.message && error.response?.status !== 401) {
       message.error(error.response.data.message)
     } else if (!error.response) {

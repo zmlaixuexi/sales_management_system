@@ -64,8 +64,8 @@ export default function OrderDetail() {
         loadOrder()
       }
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { error?: { message?: string } } } }
-      message.error(err.response?.data?.error?.message || '确认失败')
+      const err = e as { response?: { data?: { detail?: { message?: string } } } }
+      message.error(err.response?.data?.detail?.message || '确认失败')
     }
   }
 
@@ -78,8 +78,8 @@ export default function OrderDetail() {
         loadOrder()
       }
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { error?: { message?: string } } } }
-      message.error(err.response?.data?.error?.message || '取消失败')
+      const err = e as { response?: { data?: { detail?: { message?: string } } } }
+      message.error(err.response?.data?.detail?.message || '取消失败')
     }
   }
 
@@ -103,8 +103,8 @@ export default function OrderDetail() {
         loadOrder()
       }
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { error?: { message?: string } } } }
-      message.error(err.response?.data?.error?.message || '收款登记失败')
+      const err = e as { response?: { data?: { detail?: { message?: string } } } }
+      message.error(err.response?.data?.detail?.message || '收款登记失败')
     } finally {
       setPayLoading(false)
     }
@@ -118,8 +118,8 @@ export default function OrderDetail() {
         loadOrder()
       }
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { error?: { message?: string } } } }
-      message.error(err.response?.data?.error?.message || '冲正失败')
+      const err = e as { response?: { data?: { detail?: { message?: string } } } }
+      message.error(err.response?.data?.detail?.message || '冲正失败')
     }
   }
 

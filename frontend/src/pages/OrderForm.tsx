@@ -163,8 +163,8 @@ export default function OrderForm() {
       }
     } catch (e: unknown) {
       if (e && typeof e === 'object' && 'errorFields' in e) return
-      const err = e as { response?: { data?: { error?: { message?: string } } } }
-      message.error(err.response?.data?.error?.message || '操作失败')
+      const err = e as { response?: { data?: { detail?: { message?: string } } } }
+      message.error(err.response?.data?.detail?.message || '操作失败')
     } finally {
       setLoading(false)
     }

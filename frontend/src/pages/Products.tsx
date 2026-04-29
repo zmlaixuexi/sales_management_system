@@ -51,8 +51,8 @@ export default function ProductsPage() {
       message.success('删除成功')
       loadData()
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { error?: { message?: string } } } }
-      message.error(err.response?.data?.error?.message || '删除失败')
+      const err = e as { response?: { data?: { detail?: { message?: string } } } }
+      message.error(err.response?.data?.detail?.message || '删除失败')
     }
   }
 
