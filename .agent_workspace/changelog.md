@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第一百二十一轮）
+
+### 可观测性：请求 ID 中间件 — 全链路追踪日志和审计关联
+
+- 新增 `RequestIDMiddleware`：生成/透传 `X-Request-ID`，通过 `contextvars` 下游可用
+- `RequestLogMiddleware` 结构化日志增加 `request_id` 字段
+- `audit_service.get_request_meta` 优先从 `contextvars` 读取 request_id
+- 后端 286/286 + 前端 106/106 + ruff 0 通过
+
 ## 2026-04-30（第一百二十轮）
 
 ### 前端：ErrorBoundary 路由感知重置 — 切换页面自动恢复

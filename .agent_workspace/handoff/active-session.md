@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-120
-当前任务名称：ErrorBoundary 路由感知重置
+当前任务编号：ROUND-121
+当前任务名称：请求 ID 中间件
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 121：RequestIDMiddleware 全链路追踪 — X-Request-ID 透传/生成 + contextvars + 日志 + 审计关联
 - Round 120：ErrorBoundary 移入 RouterProvider 内部，新增 resetKey（pathname）路由变化自动重置，前端 106/106
 - Round 119：提取 useSubmit hook（loading 管理 + ref 防重锁 + 统一错误提示），3 个表单页迁移，5 个测试，前端 105/105
 - Round 118：Pydantic field_validator 防御深度 — OrderItemInput.unit_price 非负 + PaymentCreate.amount 正数，6 个测试同步 400→422

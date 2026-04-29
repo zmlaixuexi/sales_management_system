@@ -6,6 +6,15 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的“已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-31
+
+### 请求 ID 中间件 — 全链路追踪
+
+- **文件**: `backend/app/core/request_id.py`, `backend/app/core/request_log.py`, `backend/app/services/audit_service.py`, `backend/app/main.py`
+- **内容**: RequestIDMiddleware 生成/透传 X-Request-ID，contextvars 存储供日志和审计使用
+- **验证**: 286 后端 + 106 前端 + ruff 0 通过
+- **效果**: 每个请求有唯一 ID，日志和审计记录可通过 request_id 关联
+
 ## 功能编号：FEAT-20260430-30
 
 ### 前端 ErrorBoundary 路由感知重置
