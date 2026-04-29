@@ -6,6 +6,47 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的“已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-12
+
+功能名称：API 速率限制
+所属模块：安全
+关联任务编号：SEC-003
+实现日期：2026-04-30
+实现 Agent：Claude
+当前状态：已测试
+
+### 实现范围
+
+- 新增 `app/core/ratelimit.py`：基于滑动窗口的 IP 级速率限制中间件
+  - 按客户端 IP 地址维护滑动窗口计数器
+  - 超限返回 429 + RATE_LIMIT_EXCEEDED 错误码
+  - 正常请求返回 X-RateLimit-Limit / X-RateLimit-Remaining 响应头
+  - 线程安全（Lock 保护）
+  - 非 API 路径不受限制
+- config.py 新增 `RATE_LIMIT_MAX`（默认 1000）和 `RATE_LIMIT_WINDOW`（默认 60s）
+- main.py 注册中间件
+- test_ratelimit.py：3 个测试（登录、响应头验证、429 触发）
+
+### 涉及文件
+
+| 文件 | 变更说明 |
+|---|---|
+| backend/app/core/ratelimit.py | 新建：速率限制中间件 |
+| backend/app/core/config.py | 更新：新增 RATE_LIMIT_MAX、RATE_LIMIT_WINDOW |
+| backend/app/main.py | 更新：注册速率限制中间件 |
+| backend/tests/test_ratelimit.py | 新建：速率限制测试 |
+
+### 测试状态
+
+- 后端 90/90 测试通过
+
+### 已知限制
+
+- 速率限制基于内存，多实例部署时不共享状态
+- 当前仅按 IP 限制，未区分登录用户和匿名用户
+
+---
+
 ## 功能编号：FEAT-20260430-11
 
 功能名称：库存预警阈值可配置

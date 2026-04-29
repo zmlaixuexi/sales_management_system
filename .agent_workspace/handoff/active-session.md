@@ -1,26 +1,25 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：P1 质量加固
-当前任务编号：OBS-001 / QUALITY-001
-当前任务名称：结构化日志 + TypeScript 严格模式
+当前阶段：P1 安全加固
+当前任务编号：SEC-003
+当前任务名称：API 速率限制
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- 前端 tsconfig.app.json 启用 `strict: true`，编译零错误
-- 后端 logging.py 重写为结构化 JSON 日志（通过 LOG_FORMAT=json 启用）
-- config.py 新增 LOG_FORMAT 配置项（默认 text，生产环境设为 json）
-- main.py 显式导入日志模块，确保初始化确定性
-- seed.py 的 print() 改为 logger.info/error
-- 全量测试 87/87 通过
+- 实现基于滑动窗口的 IP 级速率限制中间件（stdlib，无外部依赖）
+- config.py 新增 RATE_LIMIT_MAX（默认 1000）和 RATE_LIMIT_WINDOW（默认 60s）
+- 受限时返回 429 + RATE_LIMIT_EXCEEDED 错误码
+- 正常请求返回 X-RateLimit-Limit / X-RateLimit-Remaining 响应头
+- 新增 3 个速率限制测试（90/90 全量通过）
 
 ## 下一步第一动作
 
 1. 批量导入功能
 2. 代码拆分优化（前端 bundle 过大 1.4MB）
-3. 安全加固：速率限制
+3. 前端错误边界和 loading 状态统一
 
 ## 阻塞问题
 

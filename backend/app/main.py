@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.router import api_router
 from app.core.config import settings
+from app.core.ratelimit import add_rate_limit
 import app.core.logging  # noqa: F401 — 确保日志初始化
 
 
@@ -37,6 +38,9 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix="/api/v1")
+
+# 速率限制（注册在路由之后，中间件执行顺序为后注册先执行）
+add_rate_limit(app)
 
 # 静态文件服务：上传的图片
 upload_path = Path(settings.UPLOAD_DIR)

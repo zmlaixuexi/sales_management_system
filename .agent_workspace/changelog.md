@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-04-30（第十七轮）
+
+### 安全加固：API 速率限制
+
+- **SEC-003** 实现基于滑动窗口的 IP 级速率限制：
+  - 新增 `app/core/ratelimit.py`：RateLimitMiddleware（stdlib 实现，无外部依赖）
+  - 按 IP 地址滑动窗口计数，超限返回 429 + `RATE_LIMIT_EXCEEDED`
+  - 正常请求返回 `X-RateLimit-Limit` 和 `X-RateLimit-Remaining` 响应头
+  - 非 API 路径（静态文件等）不受限制
+  - config.py 新增 `RATE_LIMIT_MAX`（默认 1000）和 `RATE_LIMIT_WINDOW`（默认 60s）
+  - main.py 注册中间件
+- 新增 test_ratelimit.py（3 个测试）：响应头验证、429 触发验证
+- 全量测试从 87 增至 90，全部通过。
+
 ## 2026-04-30（第十六轮）
 
 ### 质量加固：TypeScript 严格模式 + 结构化日志

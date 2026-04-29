@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     UPLOAD_PUBLIC_BASE_URL: str = "/uploads"
     MAX_IMAGE_SIZE_MB: int = 5
     INVENTORY_WARNING_THRESHOLD: int = 10
+    RATE_LIMIT_MAX: int = 1000
+    RATE_LIMIT_WINDOW: int = 60
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
