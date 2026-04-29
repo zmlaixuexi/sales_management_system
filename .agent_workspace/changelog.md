@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第二十五轮）
+
+### 文档：环境变量和部署配置更新
+
+- .env.example 新增 5 个配置项：LOG_FORMAT、INVENTORY_WARNING_THRESHOLD、RATE_LIMIT_MAX、RATE_LIMIT_WINDOW
+- deploy/docker-compose.prod.yml 添加新配置项，速率限制默认 100/60s（生产更保守）
+- 生产环境默认 LOG_FORMAT=json
+
 ## 2026-04-30（第二十四轮）
 
 ### 测试补强：文件上传集成测试
