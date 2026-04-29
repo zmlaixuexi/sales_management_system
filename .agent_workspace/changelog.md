@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-04-30（第二十六轮）
+
+### 审计完善：导出操作记录审计日志
+
+- **AUDIT-EXP-001** 导出端点集成审计日志：
+  - exports.py 4 个导出端点添加 Request 参数，调用 log_action 记录操作
+  - 记录操作者、筛选条件、IP、user_agent、request_id
+  - 前端 AuditLogs.tsx 添加 export_products/customers/orders/payments 标签（青色）
+- 后端 99/99 通过，前端 TypeScript 编译通过。
+
 ## 2026-04-30（第二十五轮）
 
 ### 文档：环境变量和部署配置更新

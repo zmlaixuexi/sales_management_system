@@ -25,6 +25,10 @@ const ACTION_LABELS: Record<string, { label: string; color: string }> = {
   payment_create: { label: '登记收款', color: 'green' },
   payment_reverse: { label: '冲正收款', color: 'red' },
   inventory_adjust: { label: '库存调整', color: 'orange' },
+  export_products: { label: '导出商品', color: 'cyan' },
+  export_customers: { label: '导出客户', color: 'cyan' },
+  export_orders: { label: '导出订单', color: 'cyan' },
+  export_payments: { label: '导出收款', color: 'cyan' },
 };
 
 const RESOURCE_LABELS: Record<string, string> = {
