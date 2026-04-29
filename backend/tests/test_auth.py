@@ -107,6 +107,27 @@ def test_refresh_token():
     assert "access_token" in data["data"]
 
 
+def test_refresh_rejected_for_inactive_user():
+    """已禁用用户的 Refresh Token 应被拒绝"""
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    refresh_token = login_resp.json()["data"]["refresh_token"]
+
+    db = TestSession()
+    user = db.query(User).filter(User.username == "testuser").first()
+    user.is_active = False
+    db.commit()
+    db.close()
+
+    response = client.post("/api/v1/auth/refresh", json={"refresh_token": refresh_token})
+    assert response.status_code == 401
+
+    db = TestSession()
+    user = db.query(User).filter(User.username == "testuser").first()
+    user.is_active = True
+    db.commit()
+    db.close()
+
+
 def test_logout():
     response = client.post("/api/v1/auth/logout")
     assert response.status_code == 200
