@@ -56,6 +56,15 @@ Authorization: Bearer <access_token>
 | 403 | AUTH_FORBIDDEN | 无权限执行此操作 |
 | 404 | RESOURCE_NOT_FOUND | 资源不存在 |
 | 409 | CUSTOMER_DUPLICATED_WARNING | 客户手机号重复 |
+| 429 | RATE_LIMIT_EXCEEDED | 请求过于频繁，请稍后再试 |
+
+## 速率限制
+
+所有 `/api/` 路径受 IP 级速率限制保护（滑动窗口算法）。
+
+- 默认限制：1000 请求 / 60 秒（可通过 `RATE_LIMIT_MAX` 和 `RATE_LIMIT_WINDOW` 环境变量配置）
+- 正常响应头：`X-RateLimit-Limit`（窗口上限）、`X-RateLimit-Remaining`（剩余次数）
+- 超限返回 429 + `RATE_LIMIT_EXCEEDED` 错误码
 
 ---
 
@@ -418,7 +427,7 @@ Authorization: Bearer <access_token>
 
 销售汇总。
 
-**查询参数**：`start_date`, `end_date`
+**查询参数**：`period`（可选，默认 `30d`，可选值：`today`/`7d`/`30d`/`this_month`/`last_month`）
 
 **响应**：总销售额、总成本、毛利、毛利率、订单数。
 
@@ -426,25 +435,27 @@ Authorization: Bearer <access_token>
 
 ### GET /reports/sales-trend
 
-按日销售趋势。
+按日销售趋势（自动填充空缺日期）。
 
-**查询参数**：`start_date`, `end_date`
+**查询参数**：`period`（同上）
 
 **权限**：`report:sales`
 
 ### GET /reports/product-ranking
 
-商品销售排行。
+商品销售排行（按销售额降序）。
 
-**查询参数**：`start_date`, `end_date`, `limit`
+**查询参数**：`period`（同上）、`limit`（可选，默认 10，最大 50）
 
 **权限**：`report:sales`
 
 ### GET /reports/inventory-warning
 
-库存预警（低于阈值的商品）。
+库存预警（低于阈值的活跃商品）。
 
-**查询参数**：`threshold`（默认 10）
+**查询参数**：`threshold`（可选，默认从 `INVENTORY_WARNING_THRESHOLD` 环境变量读取，默认 10）
+
+**响应**：`items`（商品列表）、`threshold`（使用的阈值）、`total`（预警数量）
 
 **权限**：`report:sales`
 
@@ -458,7 +469,11 @@ Authorization: Bearer <access_token>
 
 **查询参数**：`page`, `page_size`, `action`, `resource_type`, `actor_id`, `start_date`, `end_date`, `keyword`
 
+**响应字段**：每条日志包含 `ip_address`、`user_agent`、`request_id`（请求元数据）。
+
 **权限**：`audit:view`
+
+**操作类型**：`login_success`/`login_failed`/`product_create`/`product_update`/`product_delete`/`product_disable`/`customer_create`/`customer_update`/`customer_delete`/`customer_transfer`/`order_create`/`order_update`/`order_confirm`/`order_cancel`/`payment_create`/`payment_reverse`/`inventory_adjust`/`export_products`/`export_customers`/`export_orders`/`export_payments`
 
 ### GET /audit-logs/actions
 
@@ -470,29 +485,31 @@ Authorization: Bearer <access_token>
 
 ## 数据导出
 
-所有导出接口返回 CSV 文件流（`text/csv; charset=utf-8`，含 BOM 头）。
+所有导出接口返回 CSV 文件流（`text/csv; charset=utf-8`，含 BOM 头），响应头包含 `Content-Disposition` 文件名。
+
+每次导出自动生成审计日志记录。
 
 ### GET /exports/products
 
-导出商品。查询参数同商品列表。
+导出商品。查询参数同商品列表（`keyword`、`status`、`category_id`）。
 
 **权限**：`product:list`
 
 ### GET /exports/customers
 
-导出客户。无 `customer:view_all` 时只导出本人客户。
+导出客户。无 `customer:view_all` 时只导出本人客户。查询参数：`keyword`、`source`。
 
 **权限**：`customer:list`
 
 ### GET /exports/orders
 
-导出订单。无 `order:view_all` 时只导出本人订单。
+导出订单。无 `order:view_all` 时只导出本人订单。查询参数：`keyword`、`status`、`customer_id`、`start_date`、`end_date`。
 
 **权限**：`order:list`
 
 ### GET /exports/payments
 
-导出收款记录。
+导出收款记录。查询参数：`order_id`、`start_date`、`end_date`。
 
 **权限**：`payment:list`
 
@@ -525,3 +542,23 @@ Authorization: Bearer <access_token>
 | inventory:adjust | 手工调整库存 |
 | report:sales | 查看报表 |
 | audit:view | 查看审计日志 |
+
+---
+
+## 环境变量
+
+| 变量 | 默认值 | 说明 |
+|---|---|---|
+| `APP_ENV` | `development` | 应用环境 |
+| `DATABASE_URL` | (localhost) | 数据库同步连接 |
+| `JWT_SECRET_KEY` | `change-me` | JWT 签名密钥（生产必须修改） |
+| `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` | `30` | 访问令牌有效期（分钟） |
+| `JWT_REFRESH_TOKEN_EXPIRE_DAYS` | `7` | 刷新令牌有效期（天） |
+| `CORS_ORIGINS` | `http://localhost:5173` | CORS 允许的前端地址（逗号分隔） |
+| `LOG_LEVEL` | `INFO` | 日志级别 |
+| `LOG_FORMAT` | `text` | 日志格式（`text` 或 `json`） |
+| `UPLOAD_DIR` | `uploads` | 上传文件目录 |
+| `MAX_IMAGE_SIZE_MB` | `5` | 图片上传大小限制 |
+| `INVENTORY_WARNING_THRESHOLD` | `10` | 库存预警默认阈值 |
+| `RATE_LIMIT_MAX` | `1000` | API 速率限制（每窗口请求数） |
+| `RATE_LIMIT_WINDOW` | `60` | 速率限制窗口（秒） |
