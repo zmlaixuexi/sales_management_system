@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_db, require_permission
 from app.models.order import Payment, SalesOrder
 from app.models.user import User
+from app.schemas.payment import PaymentCreate, PaymentCreated, PaymentReversed
+from app.schemas.response import ApiResponse
 from app.services.audit_service import get_request_meta, log_action
 
 router = APIRouter(
@@ -63,10 +65,10 @@ def list_payments(
     }
 
 
-@router.post("/orders/{order_id}/payments")
+@router.post("/orders/{order_id}/payments", response_model=ApiResponse[PaymentCreated])
 def create_payment(
     order_id: uuid.UUID,
-    data: dict,
+    data: PaymentCreate,
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("payment:create")),
@@ -87,7 +89,7 @@ def create_payment(
             },
         )
 
-    amount = Decimal(str(data.get("amount", "0")))
+    amount = Decimal(str(data.amount))
     if amount <= 0:
         raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "收款金额必须大于 0"})
 
@@ -101,10 +103,10 @@ def create_payment(
     payment = Payment(
         order_id=order.id,
         amount=amount,
-        payment_method=data.get("payment_method", "cash"),
+        payment_method=data.payment_method,
         operator_id=current_user.id,
         status="normal",
-        remark=data.get("remark"),
+        remark=data.remark,
     )
     db.add(payment)
 
@@ -121,7 +123,7 @@ def create_payment(
         db, action="payment_create", resource_type="payment",
         resource_id=str(payment.id), actor_id=current_user.id,
         actor_name=current_user.display_name or current_user.username,
-        after_data={"order_id": str(order.id), "amount": str(amount), "method": data.get("payment_method", "cash")},
+        after_data={"order_id": str(order.id), "amount": str(amount), "method": data.payment_method},
         **get_request_meta(request),
     )
     db.commit()
@@ -139,7 +141,7 @@ def create_payment(
     }
 
 
-@router.post("/{payment_id}/reverse")
+@router.post("/{payment_id}/reverse", response_model=ApiResponse[PaymentReversed])
 def reverse_payment(
     payment_id: uuid.UUID,
     request: Request,

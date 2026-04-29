@@ -9,6 +9,8 @@ from app.api.deps import get_db, require_permission
 from app.models.order import InventoryMovement
 from app.models.product import Product
 from app.models.user import User
+from app.schemas.inventory import InventoryAdjust, InventoryAdjusted
+from app.schemas.response import ApiResponse
 from app.services.audit_service import get_request_meta, log_action
 
 router = APIRouter(
@@ -68,19 +70,16 @@ def list_movements(
     }
 
 
-@router.post("/adjustments")
+@router.post("/adjustments", response_model=ApiResponse[InventoryAdjusted])
 def adjust_inventory(
-    data: dict,
+    data: InventoryAdjust,
     request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("inventory:adjust")),
 ):
     """手工库存调整"""
-    product_id = data.get("product_id")
-    if not product_id:
-        raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "必须指定商品"})
-
-    quantity_change = int(data.get("quantity_change", 0))
+    product_id = data.product_id
+    quantity_change = data.quantity_change
     if quantity_change == 0:
         raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "调整数量不能为 0"})
 
@@ -110,7 +109,7 @@ def adjust_inventory(
         quantity_change=quantity_change,
         quantity_after=after,
         operator_id=current_user.id,
-        remark=data.get("remark"),
+        remark=data.remark,
     )
     db.add(movement)
     log_action(

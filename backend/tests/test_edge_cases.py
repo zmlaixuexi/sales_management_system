@@ -334,7 +334,7 @@ def test_25_inventory_adjust_no_product():
     resp = client.post("/api/v1/inventory/adjustments", json={
         "quantity_change": 10,
     }, headers=_auth())
-    assert resp.status_code == 400
+    assert resp.status_code == 422
 
 
 def test_26_inventory_adjust_below_zero():
