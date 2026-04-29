@@ -33,9 +33,13 @@
 6. 测试文件中 app.dependency_overrides[get_db] 必须在 setup_module 中设置、teardown_module 中恢复。
 7. log_action 调用后如果抛异常，必须先 commit 审计日志再抛异常。
 8. 测试业务流程的用户必须是 is_superuser=True，否则新权限校验会拦截请求。
+9. logout 必须同时清除 access_token 和 refresh_token。
+10. file_service.py 的 MAX_SIZE_BYTES 是模块级变量，修改限制需直接 patch 模块变量而非 settings。
+11. 测试速率限制时，test_ratelimit.py 的 429 压力测试必须放在最后，否则耗尽 IP 配额影响后续测试。
 
 ## 恢复检查清单
 
 - [x] 已阅读 active-session
 - [x] 已阅读任务文件
 - [x] 已确认下一步第一动作
+- [x] 已阅读重复问题列表（11 条）
