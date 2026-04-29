@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第一百一十八轮）
+
+### 安全：Pydantic schema 级别金融字段校验（防御深度）
+
+- OrderItemInput.unit_price 添加非负 field_validator（Pydantic 层拦截，返回 422）
+- PaymentCreate.amount 添加正数 field_validator（Pydantic 层拦截，返回 422）
+- 更新 6 个测试断言：业务逻辑 400 → Pydantic 422
+- 后端 286/286 + 前端 100/100 + ruff 0 + ESLint 0 + tsc 0 + build 通过
+
 ## 2026-04-30（第一百一十七轮）
 
 ### 工程：新增 frontend/.env.example 和 CONTRIBUTING.md

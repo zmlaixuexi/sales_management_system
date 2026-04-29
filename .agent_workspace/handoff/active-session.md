@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-117
-当前任务名称：部署引导文档
+当前任务编号：ROUND-118
+当前任务名称：Pydantic schema 金融字段校验
 当前 Agent：Claude
-任务状态：进行中
+任务状态：完成
 
 ## 最近完成
 
+- Round 118：Pydantic field_validator 防御深度 — OrderItemInput.unit_price 非负 + PaymentCreate.amount 正数，6 个测试同步 400→422
 - Round 117：新增 frontend/.env.example 和 CONTRIBUTING.md，完善开发者引导体验
 - Round 116：文档同步测试数至 386（286 后端 + 100 前端）+ README/testing.md 订单负价测试条目更新
 - Round 115：getApiErrorMessage 工具函数测试（+3），前端突破 100 大关（100/100），全量验证通过

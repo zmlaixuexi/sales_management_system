@@ -6,6 +6,15 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的“已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-28
+
+### Pydantic schema 级别金融字段校验（防御深度）
+
+- **文件**: `backend/app/schemas/order.py`, `backend/app/schemas/payment.py`
+- **内容**: OrderItemInput.unit_price 非负校验 + PaymentCreate.amount 正数校验 field_validator
+- **验证**: 286 后端 + 100 前端 + ruff 0 + ESLint 0 + tsc 0 + build 通过
+- **测试**: 6 个测试从 400 更新为 422（Pydantic 验证层拦截）
+
 ## 功能编号：FEAT-20260430-27
 
 功能名称：CSV 导出内容格式验证测试
