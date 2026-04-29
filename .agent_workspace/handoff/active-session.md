@@ -1,23 +1,23 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：P1 测试补强
-当前任务编号：QA-006
-当前任务名称：导出审计日志测试
+当前阶段：P1 安全加固
+当前任务编号：SEC-004
+当前任务名称：修复 logout Token 清理
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- test_export.py 新增导出审计日志验证测试
-- 验证导出操作生成正确的审计记录（action、resource_type、actor_name、ip_address）
-- 全量测试 100/100 通过（从 99 增至 100）
+- 修复 AppLayout logout 未清除 refresh_token 的 bug
+- 修复 client.ts 401 无 refresh_token 分支未清除 token 的 bug
+- 后端 100/100 通过，前端 TypeScript 编译通过
 
 ## 下一步第一动作
 
 1. 批量导入功能
 2. 前端自动化测试框架搭建
-3. 数据库文档更新
+3. 用户显示名称和角色展示（Header 区域）
 
 ## 阻塞问题
 

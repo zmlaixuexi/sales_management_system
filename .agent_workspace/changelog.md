@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第二十九轮）
+
+### 安全修复：logout 清理 refresh_token
+
+- **SEC-004** 修复前端 logout 未清除 refresh_token 的 bug：
+  - AppLayout logout 同时清除 access_token 和 refresh_token
+  - client.ts 401 无 refresh_token 分支也清除 token 后再跳转登录页
+- 后端 100/100 通过，前端 TypeScript 编译通过。
+
 ## 2026-04-30（第二十八轮）
 
 ### 文档：API 文档更新
