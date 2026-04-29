@@ -550,7 +550,7 @@ JSON 日志格式示例：
 
 **权限**：`audit:view`
 
-**操作类型**：`login_success`/`login_failed`/`product_create`/`product_update`/`product_delete`/`product_disable`/`customer_create`/`customer_update`/`customer_delete`/`customer_transfer`/`order_create`/`order_update`/`order_confirm`/`order_cancel`/`payment_create`/`payment_reverse`/`inventory_adjust`/`export_products`/`export_customers`/`export_orders`/`export_payments`
+**操作类型**：`login_success`/`login_failed`/`product_create`/`product_update`/`product_delete`/`product_disable`/`product_import`/`customer_create`/`customer_update`/`customer_delete`/`customer_transfer`/`customer_import`/`order_create`/`order_update`/`order_confirm`/`order_cancel`/`payment_create`/`payment_reverse`/`inventory_adjust`/`export_products`/`export_customers`/`export_orders`/`export_payments`
 
 ### GET /audit-logs/actions
 

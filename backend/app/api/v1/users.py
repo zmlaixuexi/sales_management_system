@@ -91,7 +91,7 @@ def create_user(req: UserCreate, db: Session = Depends(get_db), current_user: Us
 
     if req.role_ids:
         for rid in req.role_ids:
-            db.add(UserRole(user_id=user.id, role_id=rid))
+            db.add(UserRole(user_id=user.id, role_id=uuid.UUID(rid)))
 
     db.commit()
     db.refresh(user)
@@ -135,7 +135,7 @@ def update_user(
     if req.role_ids is not None:
         db.query(UserRole).filter(UserRole.user_id == user.id).delete()
         for rid in req.role_ids:
-            db.add(UserRole(user_id=user.id, role_id=rid))
+            db.add(UserRole(user_id=user.id, role_id=uuid.UUID(rid)))
 
     db.commit()
 
