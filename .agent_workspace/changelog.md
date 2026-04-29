@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百零四轮）
+
+### 修复：ESLint 清零，usePaginatedList ref 更正 + 测试文件移除未用变量
+
+- usePaginatedList.ts：fetchFnRef 赋值从渲染期移入 useEffect，避免 React 规则违反
+- client-interceptor.test.ts：移除未使用的 origRequest 变量
+- 全量验证：ESLint 0 + tsc 0 + 244/244 + 97/97 + build 通过
+
 ## 2026-04-30（第一百零三轮）
 
 ### 修复：前端错误消息路径修正，正确读取 detail.message
