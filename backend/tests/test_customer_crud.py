@@ -128,6 +128,24 @@ def test_03_get_customer_not_found():
     assert resp.status_code == 404
 
 
+def test_03b_list_customers_by_source():
+    """按来源筛选客户"""
+    resp = client.get("/api/v1/customers", params={"source": "online"}, headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    assert all(c["source"] == "online" for c in items)
+
+
+def test_03c_list_customers_by_keyword():
+    """关键词搜索客户"""
+    resp = client.get("/api/v1/customers", params={"keyword": "测试"}, headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    assert any("测试" in c["name"] for c in items)
+
+
 def test_04_update_customer():
     """编辑客户"""
     resp = client.put(f"/api/v1/customers/{_customer_id}", json={

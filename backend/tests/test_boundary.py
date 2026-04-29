@@ -603,6 +603,21 @@ def test_34_inventory_movements_by_product():
     assert resp.status_code == 200
 
 
+def test_34b_inventory_movements_by_type():
+    """按类型筛选库存流水"""
+    # 先做一次手工调整，确保有 manual_adjust 类型记录
+    resp = client.post("/api/v1/inventory/adjustments", json={
+        "product_id": _product_id, "quantity_change": 5, "remark": "筛选测试",
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/inventory/movements?movement_type=manual_adjust", headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    assert all(m["movement_type"] == "manual_adjust" for m in items)
+
+
 # ─── 订单编辑边界 ────────────────────────────────────────────
 
 def test_35_order_update_remark_only():
