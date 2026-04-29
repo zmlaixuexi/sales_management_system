@@ -8,7 +8,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, has_permission, require_permission
+from app.api.deps import get_db, get_or_404, has_permission, require_permission
 from app.core.config import settings
 from app.core.sanitize import escape_like
 from app.models.customer import Customer
@@ -175,12 +175,7 @@ def get_customer(
     current_user: User = Depends(require_permission("customer:list")),
 ):
     """客户详情"""
-    customer = db.query(Customer).filter(
-        Customer.id == customer_id, Customer.deleted_at.is_(None)
-    ).first()
-
-    if not customer:
-        raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "客户不存在"})
+    customer = get_or_404(db, Customer, customer_id, "客户")
 
     return {
         "success": True,
@@ -212,12 +207,7 @@ def update_customer(
     current_user: User = Depends(require_permission("customer:update")),
 ):
     """编辑客户"""
-    customer = db.query(Customer).filter(
-        Customer.id == customer_id, Customer.deleted_at.is_(None)
-    ).first()
-
-    if not customer:
-        raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "客户不存在"})
+    customer = get_or_404(db, Customer, customer_id, "客户")
 
     if data.name is not None:
         name = data.name.strip()
@@ -284,12 +274,7 @@ def delete_customer(
     current_user: User = Depends(require_permission("customer:delete")),
 ):
     """删除客户（软删除）"""
-    customer = db.query(Customer).filter(
-        Customer.id == customer_id, Customer.deleted_at.is_(None)
-    ).first()
-
-    if not customer:
-        raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "客户不存在"})
+    customer = get_or_404(db, Customer, customer_id, "客户")
 
     customer.deleted_at = datetime.now()
     customer.updated_by = current_user.id
@@ -314,12 +299,7 @@ def transfer_customer(
     current_user: User = Depends(require_permission("customer:update")),
 ):
     """转移客户归属销售"""
-    customer = db.query(Customer).filter(
-        Customer.id == customer_id, Customer.deleted_at.is_(None)
-    ).first()
-
-    if not customer:
-        raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "客户不存在"})
+    customer = get_or_404(db, Customer, customer_id, "客户")
 
     new_owner_id = data.owner_user_id
 

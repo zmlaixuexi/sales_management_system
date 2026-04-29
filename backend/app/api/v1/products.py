@@ -9,7 +9,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, has_permission, require_permission
+from app.api.deps import get_db, get_or_404, has_permission, require_permission
 from app.core.config import settings
 from app.core.sanitize import escape_like
 from app.models.product import Product, ProductCategory, ProductPriceHistory
@@ -240,12 +240,7 @@ def get_product(
     current_user: User = Depends(require_permission("product:list")),
 ):
     """商品详情"""
-    product = db.query(Product).filter(
-        Product.id == product_id, Product.deleted_at.is_(None)
-    ).first()
-
-    if not product:
-        raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "商品不存在"})
+    product = get_or_404(db, Product, product_id, "商品")
 
     unit_profit, gross_margin = _calc_profit(product.sale_price, product.cost_price)
 
@@ -292,12 +287,7 @@ def update_product(
     current_user: User = Depends(require_permission("product:update")),
 ):
     """编辑商品"""
-    product = db.query(Product).filter(
-        Product.id == product_id, Product.deleted_at.is_(None)
-    ).first()
-
-    if not product:
-        raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "商品不存在"})
+    product = get_or_404(db, Product, product_id, "商品")
 
     # 检查价格变更，记录价格历史
     old_sale_price = product.sale_price
@@ -405,12 +395,7 @@ def delete_product(
     current_user: User = Depends(require_permission("product:delete")),
 ):
     """删除或软删除商品"""
-    product = db.query(Product).filter(
-        Product.id == product_id, Product.deleted_at.is_(None)
-    ).first()
-
-    if not product:
-        raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "商品不存在"})
+    product = get_or_404(db, Product, product_id, "商品")
 
     # MVP：直接软删除，后续检查是否有订单引用
     product.deleted_at = datetime.now()
@@ -435,12 +420,7 @@ def disable_product(
     current_user: User = Depends(require_permission("product:update")),
 ):
     """停用商品"""
-    product = db.query(Product).filter(
-        Product.id == product_id, Product.deleted_at.is_(None)
-    ).first()
-
-    if not product:
-        raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "商品不存在"})
+    product = get_or_404(db, Product, product_id, "商品")
 
     product.status = "disabled"
     product.updated_by = current_user.id

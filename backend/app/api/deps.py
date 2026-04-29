@@ -73,3 +73,18 @@ def has_permission(user: User, permission_code: str) -> bool:
     if user.is_superuser:
         return True
     return permission_code in _get_user_permissions(user)
+
+
+def get_or_404(db: Session, model: type, entity_id: uuid.UUID | str, label: str = "资源"):
+    """按 ID 查询实体，不存在则抛 404。自动过滤软删除。"""
+    uid = uuid.UUID(str(entity_id))
+    query = db.query(model).filter(model.id == uid)
+    if hasattr(model, "deleted_at"):
+        query = query.filter(model.deleted_at.is_(None))
+    obj = query.first()
+    if not obj:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "RESOURCE_NOT_FOUND", "message": f"{label}不存在"},
+        )
+    return obj

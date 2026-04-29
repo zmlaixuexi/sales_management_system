@@ -7,7 +7,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, has_permission, require_permission
+from app.api.deps import get_db, get_or_404, has_permission, require_permission
 from app.core.sanitize import escape_like
 from app.models.customer import Customer
 from app.models.order import InventoryMovement, SalesOrder, SalesOrderItem
@@ -231,13 +231,7 @@ def create_order(
     """创建草稿订单"""
     customer_id = data.customer_id
 
-    customer = (
-        db.query(Customer)
-        .filter(Customer.id == uuid.UUID(str(customer_id)), Customer.deleted_at.is_(None))
-        .first()
-    )
-    if not customer:
-        raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "客户不存在"})
+    get_or_404(db, Customer, str(customer_id), "客户")  # validate customer exists
 
     raw_items = data.items
     if not raw_items:
@@ -247,11 +241,7 @@ def create_order(
     prepared_items: list[dict] = []
     for ri in raw_items:
         product_id = ri.product_id
-        product = db.query(Product).filter(
-            Product.id == uuid.UUID(str(product_id)), Product.deleted_at.is_(None)
-        ).first()
-        if not product:
-            raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "商品不存在"})
+        product = get_or_404(db, Product, str(product_id), "商品")
         if product.status != "active":
             raise HTTPException(
                 status_code=400,
@@ -325,11 +315,7 @@ def get_order(
     current_user: User = Depends(require_permission("order:list")),
 ):
     """订单详情"""
-    order = db.query(SalesOrder).filter(
-        SalesOrder.id == order_id, SalesOrder.deleted_at.is_(None)
-    ).first()
-    if not order:
-        raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "订单不存在"})
+    order = get_or_404(db, SalesOrder, order_id, "订单")
 
     items_out = []
     for item in order.items:
@@ -393,11 +379,7 @@ def update_order(
     current_user: User = Depends(require_permission("order:update")),
 ):
     """编辑草稿订单"""
-    order = db.query(SalesOrder).filter(
-        SalesOrder.id == order_id, SalesOrder.deleted_at.is_(None)
-    ).first()
-    if not order:
-        raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "订单不存在"})
+    order = get_or_404(db, SalesOrder, order_id, "订单")
     if order.status != "draft":
         raise HTTPException(status_code=400, detail={"code": "ORDER_INVALID_STATUS", "message": "只有草稿订单可以编辑"})
 
@@ -412,11 +394,7 @@ def update_order(
         prepared_items: list[dict] = []
         for ri in raw_items:
             product_id = ri.product_id
-            product = db.query(Product).filter(
-                Product.id == uuid.UUID(str(product_id)), Product.deleted_at.is_(None)
-            ).first()
-            if not product:
-                raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "商品不存在"})
+            product = get_or_404(db, Product, str(product_id), "商品")
             if product.status != "active":
                 raise HTTPException(
                     status_code=400,
@@ -468,11 +446,7 @@ def confirm_order(
     current_user: User = Depends(require_permission("order:confirm")),
 ):
     """确认订单 — 扣减库存"""
-    order = db.query(SalesOrder).filter(
-        SalesOrder.id == order_id, SalesOrder.deleted_at.is_(None)
-    ).first()
-    if not order:
-        raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "订单不存在"})
+    order = get_or_404(db, SalesOrder, order_id, "订单")
     if order.status != "draft":
         raise HTTPException(status_code=400, detail={"code": "ORDER_INVALID_STATUS", "message": "只有草稿订单可以确认"})
 
@@ -501,11 +475,7 @@ def cancel_order(
     current_user: User = Depends(require_permission("order:cancel")),
 ):
     """取消订单 — 回滚库存"""
-    order = db.query(SalesOrder).filter(
-        SalesOrder.id == order_id, SalesOrder.deleted_at.is_(None)
-    ).first()
-    if not order:
-        raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "订单不存在"})
+    order = get_or_404(db, SalesOrder, order_id, "订单")
 
     allowed = VALID_TRANSITIONS.get(order.status, set())
     if "cancelled" not in allowed:

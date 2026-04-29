@@ -6,7 +6,7 @@ from decimal import Decimal
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, require_permission
+from app.api.deps import get_db, get_or_404, require_permission
 from app.models.order import Payment, SalesOrder
 from app.models.user import User
 from app.schemas.payment import PaymentCreate, PaymentCreated, PaymentReversed
@@ -74,11 +74,7 @@ def create_payment(
     current_user: User = Depends(require_permission("payment:create")),
 ):
     """登记订单收款"""
-    order = db.query(SalesOrder).filter(
-        SalesOrder.id == order_id, SalesOrder.deleted_at.is_(None)
-    ).first()
-    if not order:
-        raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "订单不存在"})
+    order = get_or_404(db, SalesOrder, order_id, "订单")
 
     if order.status not in ("confirmed", "partially_paid"):
         raise HTTPException(
