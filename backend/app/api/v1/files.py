@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db
+from app.api.deps import get_current_user, get_db, resp
 from app.models.user import User
 from app.services.file_service import delete_file, upload_image
 
@@ -36,17 +36,13 @@ async def upload_image_api(
             detail={"code": "FILE_INVALID_TYPE", "message": str(e)},
         )
 
-    return {
-        "success": True,
-        "data": {
-            "id": str(file_record.id),
-            "url": file_record.public_url,
-            "original_name": file_record.original_name,
-            "content_type": file_record.content_type,
-            "size_bytes": file_record.size_bytes,
-        },
-        "message": "上传成功",
-    }
+    return resp({
+        "id": str(file_record.id),
+        "url": file_record.public_url,
+        "original_name": file_record.original_name,
+        "content_type": file_record.content_type,
+        "size_bytes": file_record.size_bytes,
+    }, "上传成功")
 
 
 @router.get("/images/{file_id}")
@@ -65,17 +61,13 @@ def get_image(
             detail={"code": "FILE_NOT_FOUND", "message": "文件不存在"},
         )
 
-    return {
-        "success": True,
-        "data": {
-            "id": str(file_record.id),
-            "url": file_record.public_url,
-            "original_name": file_record.original_name,
-            "content_type": file_record.content_type,
-            "size_bytes": file_record.size_bytes,
-        },
-        "message": "查询成功",
-    }
+    return resp({
+        "id": str(file_record.id),
+        "url": file_record.public_url,
+        "original_name": file_record.original_name,
+        "content_type": file_record.content_type,
+        "size_bytes": file_record.size_bytes,
+    })
 
 
 @router.delete("/images/{file_id}")
@@ -92,4 +84,4 @@ def delete_image(
         )
     db.commit()
 
-    return {"success": True, "data": None, "message": "删除成功"}
+    return resp(None, "删除成功")

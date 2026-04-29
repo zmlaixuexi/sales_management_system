@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.api.deps import resp
 from app.db.session import SessionLocal
 
 router = APIRouter(tags=["健康检查"])
@@ -26,9 +27,9 @@ def health_check():
     if not db_ok:
         checks["status"] = "degraded"
 
-    return {"success": True, "data": checks, "message": "服务正常" if db_ok else "数据库连接异常"}
+    return resp(checks, "服务正常" if db_ok else "数据库连接异常")
 
 
 @router.get("/version")
 def version():
-    return {"success": True, "data": {"version": "0.1.0"}, "message": "查询成功"}
+    return resp({"version": "0.1.0"}, "查询成功")

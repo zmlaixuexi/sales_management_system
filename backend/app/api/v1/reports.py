@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, require_permission
+from app.api.deps import get_db, require_permission, resp
 from app.core.config import settings
 from app.models.order import SalesOrder, SalesOrderItem
 from app.models.product import Product
@@ -73,20 +73,16 @@ def sales_summary(
         __import__("decimal").Decimal("0.01")
     ) if total_amount and total_amount > 0 else 0
 
-    return {
-        "success": True,
-        "data": {
-            "total_amount": str(total_amount),
-            "total_cost": str(total_cost),
-            "gross_profit": str(gross_profit),
-            "gross_margin": str(gross_margin),
-            "order_count": order_count,
-            "period": period,
-            "start_date": start.isoformat(),
-            "end_date": end.isoformat(),
-        },
-        "message": "查询成功",
-    }
+    return resp({
+        "total_amount": str(total_amount),
+        "total_cost": str(total_cost),
+        "gross_profit": str(gross_profit),
+        "gross_margin": str(gross_margin),
+        "order_count": order_count,
+        "period": period,
+        "start_date": start.isoformat(),
+        "end_date": end.isoformat(),
+    })
 
 
 @router.get("/sales-trend")
@@ -127,11 +123,7 @@ def sales_trend(
         items.append({"date": key, "amount": val["amount"], "order_count": val["count"]})
         current += timedelta(days=1)
 
-    return {
-        "success": True,
-        "data": {"items": items, "period": period},
-        "message": "查询成功",
-    }
+    return resp({"items": items, "period": period})
 
 
 @router.get("/product-ranking")
@@ -184,7 +176,7 @@ def product_ranking(
             "total_quantity": r.total_quantity,
         })
 
-    return {"success": True, "data": {"items": items, "period": period}, "message": "查询成功"}
+    return resp({"items": items, "period": period})
 
 
 @router.get("/inventory-warning")
@@ -218,8 +210,4 @@ def inventory_warning(
         for p in rows
     ]
 
-    return {
-        "success": True,
-        "data": {"items": items, "threshold": threshold, "total": len(items)},
-        "message": "查询成功",
-    }
+    return resp({"items": items, "threshold": threshold, "total": len(items)})

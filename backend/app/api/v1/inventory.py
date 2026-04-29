@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, require_permission
+from app.api.deps import get_db, require_permission, resp
 from app.models.order import InventoryMovement
 from app.models.product import Product
 from app.models.user import User
@@ -44,30 +44,26 @@ def list_movements(
     total = query.count()
     items = query.offset((page - 1) * page_size).limit(page_size).all()
 
-    return {
-        "success": True,
-        "data": {
-            "items": [
-                {
-                    "id": str(m.id),
-                    "product_id": str(m.product_id),
-                    "movement_type": m.movement_type,
-                    "quantity_before": m.quantity_before,
-                    "quantity_change": m.quantity_change,
-                    "quantity_after": m.quantity_after,
-                    "related_type": m.related_type,
-                    "related_id": str(m.related_id) if m.related_id else None,
-                    "remark": m.remark,
-                    "created_at": m.created_at.isoformat() if m.created_at else None,
-                }
-                for m in items
-            ],
-            "page": page,
-            "page_size": page_size,
-            "total": total,
-        },
-        "message": "查询成功",
-    }
+    return resp({
+        "items": [
+            {
+                "id": str(m.id),
+                "product_id": str(m.product_id),
+                "movement_type": m.movement_type,
+                "quantity_before": m.quantity_before,
+                "quantity_change": m.quantity_change,
+                "quantity_after": m.quantity_after,
+                "related_type": m.related_type,
+                "related_id": str(m.related_id) if m.related_id else None,
+                "remark": m.remark,
+                "created_at": m.created_at.isoformat() if m.created_at else None,
+            }
+            for m in items
+        ],
+        "page": page,
+        "page_size": page_size,
+        "total": total,
+    })
 
 
 @router.post("/adjustments", response_model=ApiResponse[InventoryAdjusted])
@@ -122,13 +118,9 @@ def adjust_inventory(
     )
     db.commit()
 
-    return {
-        "success": True,
-        "data": {
-            "product_id": str(product.id),
-            "quantity_before": before,
-            "quantity_change": quantity_change,
-            "quantity_after": after,
-        },
-        "message": "调整成功",
-    }
+    return resp({
+        "product_id": str(product.id),
+        "quantity_before": before,
+        "quantity_change": quantity_change,
+        "quantity_after": after,
+    }, "调整成功")

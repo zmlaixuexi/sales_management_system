@@ -8,7 +8,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, get_or_404, has_permission, require_permission
+from app.api.deps import get_db, get_or_404, has_permission, require_permission, resp
 from app.core.config import settings
 from app.core.sanitize import escape_like
 from app.models.customer import Customer
@@ -87,16 +87,15 @@ def list_customers(
             "updated_at": c.updated_at.isoformat() if c.updated_at else None,
         })
 
-    return {
-        "success": True,
-        "data": {
+    return resp(
+        data={
             "items": result_items,
             "page": page,
             "page_size": page_size,
             "total": total,
         },
-        "message": "查询成功",
-    }
+        message="查询成功",
+    )
 
 
 @router.post("", response_model=ApiResponse[CustomerBrief])
@@ -151,9 +150,8 @@ def create_customer(
     )
     db.commit()
 
-    return {
-        "success": True,
-        "data": {
+    return resp(
+        data={
             "id": str(customer.id),
             "name": customer.name,
             "contact_name": customer.contact_name,
@@ -164,8 +162,8 @@ def create_customer(
             "owner_user_id": str(customer.owner_user_id) if customer.owner_user_id else None,
             "follow_status": customer.follow_status,
         },
-        "message": "创建成功",
-    }
+        message="创建成功",
+    )
 
 
 @router.get("/{customer_id}", response_model=ApiResponse[CustomerDetail])
@@ -177,9 +175,8 @@ def get_customer(
     """客户详情"""
     customer = get_or_404(db, Customer, customer_id, "客户")
 
-    return {
-        "success": True,
-        "data": {
+    return resp(
+        data={
             "id": str(customer.id),
             "name": customer.name,
             "contact_name": customer.contact_name,
@@ -194,8 +191,8 @@ def get_customer(
             "created_at": customer.created_at.isoformat() if customer.created_at else None,
             "updated_at": customer.updated_at.isoformat() if customer.updated_at else None,
         },
-        "message": "查询成功",
-    }
+        message="查询成功",
+    )
 
 
 @router.put("/{customer_id}")
@@ -254,16 +251,15 @@ def update_customer(
     )
     db.commit()
 
-    return {
-        "success": True,
-        "data": {
+    return resp(
+        data={
             "id": str(customer.id),
             "name": customer.name,
             "contact_name": customer.contact_name,
             "phone": customer.phone,
         },
-        "message": "更新成功",
-    }
+        message="更新成功",
+    )
 
 
 @router.delete("/{customer_id}")
@@ -287,7 +283,7 @@ def delete_customer(
     )
     db.commit()
 
-    return {"success": True, "data": None, "message": "删除成功"}
+    return resp(data=None, message="删除成功")
 
 
 @router.post("/{customer_id}/transfer")
@@ -314,11 +310,10 @@ def transfer_customer(
     )
     db.commit()
 
-    return {
-        "success": True,
-        "data": {"id": str(customer.id), "owner_user_id": str(customer.owner_user_id)},
-        "message": "转移成功",
-    }
+    return resp(
+        data={"id": str(customer.id), "owner_user_id": str(customer.owner_user_id)},
+        message="转移成功",
+    )
 
 
 @router.post("/import")
@@ -411,8 +406,7 @@ async def import_customers_csv(
                **get_request_meta(request))
     db.commit()
 
-    return {
-        "success": True,
-        "data": {"created": created, "errors": errors},
-        "message": f"成功导入 {created} 个客户" + (f"，{len(errors)} 行跳过" if errors else ""),
-    }
+    return resp(
+        data={"created": created, "errors": errors},
+        message=f"成功导入 {created} 个客户" + (f"，{len(errors)} 行跳过" if errors else ""),
+    )

@@ -3,7 +3,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db
+from app.api.deps import get_current_user, get_db, resp
 from app.core.sanitize import escape_like
 from app.core.security import hash_password
 from app.models.user import User, UserRole
@@ -57,11 +57,7 @@ def list_users(
             "updated_at": u.updated_at.isoformat() if u.updated_at else None,
         })
 
-    return {
-        "success": True,
-        "data": {"items": items, "page": page, "page_size": page_size, "total": total},
-        "message": "查询成功",
-    }
+    return resp({"items": items, "page": page, "page_size": page_size, "total": total})
 
 
 @router.post("")
@@ -96,11 +92,7 @@ def create_user(req: UserCreate, db: Session = Depends(get_db), current_user: Us
     db.commit()
     db.refresh(user)
 
-    return {
-        "success": True,
-        "data": {"id": str(user.id), "username": user.username},
-        "message": "创建成功",
-    }
+    return resp({"id": str(user.id), "username": user.username}, "创建成功")
 
 
 @router.put("/{user_id}")
@@ -139,4 +131,4 @@ def update_user(
 
     db.commit()
 
-    return {"success": True, "message": "更新成功"}
+    return resp(message="更新成功")

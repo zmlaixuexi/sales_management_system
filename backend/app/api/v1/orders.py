@@ -7,7 +7,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, get_or_404, has_permission, require_permission
+from app.api.deps import get_db, get_or_404, has_permission, require_permission, resp
 from app.core.sanitize import escape_like
 from app.models.customer import Customer
 from app.models.order import InventoryMovement, SalesOrder, SalesOrderItem
@@ -233,11 +233,10 @@ def list_orders(
             "updated_at": o.updated_at.isoformat() if o.updated_at else None,
         })
 
-    return {
-        "success": True,
-        "data": {"items": items_out, "page": page, "page_size": page_size, "total": total},
-        "message": "查询成功",
-    }
+    return resp(
+        data={"items": items_out, "page": page, "page_size": page_size, "total": total},
+        message="查询成功",
+    )
 
 
 @router.post("", response_model=ApiResponse[OrderBrief])
@@ -291,9 +290,8 @@ def create_order(
     )
     db.commit()
 
-    return {
-        "success": True,
-        "data": {
+    return resp(
+        data={
             "id": str(order.id),
             "order_no": order.order_no,
             "status": order.status,
@@ -302,8 +300,8 @@ def create_order(
             "gross_profit": str(order.gross_profit),
             "gross_margin": str(order.gross_margin),
         },
-        "message": "创建成功",
-    }
+        message="创建成功",
+    )
 
 
 @router.get("/{order_id}", response_model=ApiResponse[OrderDetail])
@@ -344,9 +342,8 @@ def get_order(
                 "created_at": p.created_at.isoformat() if p.created_at else None,
             })
 
-    return {
-        "success": True,
-        "data": {
+    return resp(
+        data={
             "id": str(order.id),
             "order_no": order.order_no,
             "customer_id": str(order.customer_id),
@@ -364,8 +361,8 @@ def get_order(
             "created_at": order.created_at.isoformat() if order.created_at else None,
             "updated_at": order.updated_at.isoformat() if order.updated_at else None,
         },
-        "message": "查询成功",
-    }
+        message="查询成功",
+    )
 
 
 @router.put("/{order_id}")
@@ -415,7 +412,7 @@ def update_order(
     )
     db.commit()
 
-    return {"success": True, "data": {"id": str(order.id), "order_no": order.order_no}, "message": "更新成功"}
+    return resp(data={"id": str(order.id), "order_no": order.order_no}, message="更新成功")
 
 
 @router.post("/{order_id}/confirm")
@@ -444,7 +441,7 @@ def confirm_order(
     )
     db.commit()
 
-    return {"success": True, "data": {"id": str(order.id), "status": order.status}, "message": "确认成功"}
+    return resp(data={"id": str(order.id), "status": order.status}, message="确认成功")
 
 
 @router.post("/{order_id}/cancel")
@@ -485,4 +482,4 @@ def cancel_order(
     )
     db.commit()
 
-    return {"success": True, "data": {"id": str(order.id), "status": order.status}, "message": "取消成功"}
+    return resp(data={"id": str(order.id), "status": order.status}, message="取消成功")

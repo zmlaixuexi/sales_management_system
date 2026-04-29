@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db
+from app.api.deps import get_current_user, get_db, resp
 from app.core.config import settings
 from app.core.security import create_access_token, create_refresh_token, verify_password
 from app.models.user import User
@@ -49,15 +49,11 @@ def login(request: Request, req: LoginRequest, db: Session = Depends(get_db)):
     )
     db.commit()
 
-    return {
-        "success": True,
-        "data": {
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-            "token_type": "bearer",
-        },
-        "message": "登录成功",
-    }
+    return resp({
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+    }, "登录成功")
 
 
 @router.post("/refresh")
@@ -83,21 +79,17 @@ def refresh_token(req: RefreshRequest, db: Session = Depends(get_db)):
     access_token = create_access_token(subject=user_id)
     refresh_token = create_refresh_token(subject=user_id)
 
-    return {
-        "success": True,
-        "data": {
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-            "token_type": "bearer",
-        },
-        "message": "刷新成功",
-    }
+    return resp({
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+    }, "刷新成功")
 
 
 @router.post("/logout")
 def logout():
     """退出登录（前端清除 Token 即可）"""
-    return {"success": True, "message": "已退出登录"}
+    return resp(message="已退出登录")
 
 
 @router.get("/me")
@@ -113,16 +105,12 @@ def get_me(current_user: User = Depends(get_current_user)):
         for p in r.permissions
     })
 
-    return {
-        "success": True,
-        "data": {
-            "id": str(current_user.id),
-            "username": current_user.username,
-            "display_name": current_user.display_name,
-            "is_active": current_user.is_active,
-            "is_superuser": current_user.is_superuser,
-            "roles": [r.model_dump() for r in roles],
-            "permissions": permissions,
-        },
-        "message": "查询成功",
-    }
+    return resp({
+        "id": str(current_user.id),
+        "username": current_user.username,
+        "display_name": current_user.display_name,
+        "is_active": current_user.is_active,
+        "is_superuser": current_user.is_superuser,
+        "roles": [r.model_dump() for r in roles],
+        "permissions": permissions,
+    }, "查询成功")

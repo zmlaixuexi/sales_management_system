@@ -88,3 +88,8 @@ def get_or_404(db: Session, model: type, entity_id: uuid.UUID | str, label: str 
             detail={"code": "RESOURCE_NOT_FOUND", "message": f"{label}不存在"},
         )
     return obj
+
+
+def resp(data=None, message: str = "操作成功") -> dict:
+    """构建标准成功响应字典。"""
+    return {"success": True, "data": data, "message": message}

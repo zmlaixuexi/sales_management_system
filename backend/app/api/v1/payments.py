@@ -6,7 +6,7 @@ from decimal import Decimal
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, get_or_404, require_permission
+from app.api.deps import get_db, get_or_404, require_permission, resp
 from app.models.order import Payment, SalesOrder
 from app.models.user import User
 from app.schemas.payment import PaymentCreate, PaymentCreated, PaymentReversed
@@ -41,9 +41,8 @@ def list_payments(
     total = query.count()
     items = query.offset((page - 1) * page_size).limit(page_size).all()
 
-    return {
-        "success": True,
-        "data": {
+    return resp(
+        data={
             "items": [
                 {
                     "id": str(p.id),
@@ -61,8 +60,8 @@ def list_payments(
             "page_size": page_size,
             "total": total,
         },
-        "message": "查询成功",
-    }
+        message="查询成功",
+    )
 
 
 @router.post("/orders/{order_id}/payments", response_model=ApiResponse[PaymentCreated])
@@ -124,17 +123,16 @@ def create_payment(
     )
     db.commit()
 
-    return {
-        "success": True,
-        "data": {
+    return resp(
+        data={
             "id": str(payment.id),
             "order_id": str(order.id),
             "amount": str(payment.amount),
             "payment_method": payment.payment_method,
             "order_status": order.status,
         },
-        "message": "收款登记成功",
-    }
+        message="收款登记成功",
+    )
 
 
 @router.post("/{payment_id}/reverse", response_model=ApiResponse[PaymentReversed])
@@ -173,4 +171,4 @@ def reverse_payment(
     )
     db.commit()
 
-    return {"success": True, "data": {"id": str(payment.id), "status": "reversed"}, "message": "冲正成功"}
+    return resp(data={"id": str(payment.id), "status": "reversed"}, message="冲正成功")

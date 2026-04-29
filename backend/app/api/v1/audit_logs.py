@@ -6,7 +6,7 @@ import uuid
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, require_permission
+from app.api.deps import get_db, require_permission, resp
 from app.core.sanitize import escape_like
 from app.models.audit import AuditLog
 from app.models.user import User
@@ -79,16 +79,15 @@ def list_audit_logs(
         }
         result_items.append(row)
 
-    return {
-        "success": True,
-        "data": {
+    return resp(
+        data={
             "items": result_items,
             "page": page,
             "page_size": page_size,
             "total": total,
         },
-        "message": "查询成功",
-    }
+        message="查询成功",
+    )
 
 
 @router.get("/actions")
@@ -99,11 +98,10 @@ def list_audit_actions(
     """获取所有操作类型列表（用于筛选）"""
     actions = db.query(AuditLog.action).distinct().order_by(AuditLog.action).all()
     resource_types = db.query(AuditLog.resource_type).distinct().order_by(AuditLog.resource_type).all()
-    return {
-        "success": True,
-        "data": {
+    return resp(
+        data={
             "actions": [a[0] for a in actions if a[0]],
             "resource_types": [r[0] for r in resource_types if r[0]],
         },
-        "message": "查询成功",
-    }
+        message="查询成功",
+    )

@@ -9,7 +9,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, get_or_404, has_permission, require_permission
+from app.api.deps import get_db, get_or_404, has_permission, require_permission, resp
 from app.core.config import settings
 from app.core.sanitize import escape_like
 from app.models.product import Product, ProductCategory, ProductPriceHistory
@@ -138,16 +138,15 @@ def list_products(
             row["gross_margin"] = str(gross_margin)
         result_items.append(row)
 
-    return {
-        "success": True,
-        "data": {
+    return resp(
+        data={
             "items": result_items,
             "page": page,
             "page_size": page_size,
             "total": total,
         },
-        "message": "查询成功",
-    }
+        message="查询成功",
+    )
 
 
 @router.post("", response_model=ApiResponse[ProductBrief])
@@ -213,9 +212,8 @@ def create_product(
     )
     db.commit()
 
-    return {
-        "success": True,
-        "data": {
+    return resp(
+        data={
             "id": str(product.id),
             "sku": product.sku,
             "name": product.name,
@@ -229,8 +227,8 @@ def create_product(
             "status": product.status,
             "sort_weight": product.sort_weight,
         },
-        "message": "创建成功",
-    }
+        message="创建成功",
+    )
 
 
 @router.get("/{product_id}", response_model=ApiResponse[ProductDetail])
@@ -244,9 +242,8 @@ def get_product(
 
     unit_profit, gross_margin = _calc_profit(product.sale_price, product.cost_price)
 
-    return {
-        "success": True,
-        "data": {
+    return resp(
+        data={
             "id": str(product.id),
             "sku": product.sku,
             "name": product.name,
@@ -274,8 +271,8 @@ def get_product(
             "created_at": product.created_at.isoformat() if product.created_at else None,
             "updated_at": product.updated_at.isoformat() if product.updated_at else None,
         },
-        "message": "查询成功",
-    }
+        message="查询成功",
+    )
 
 
 @router.put("/{product_id}", response_model=ApiResponse[ProductBrief])
@@ -369,9 +366,8 @@ def update_product(
 
     unit_profit, gross_margin = _calc_profit(product.sale_price, product.cost_price)
 
-    return {
-        "success": True,
-        "data": {
+    return resp(
+        data={
             "id": str(product.id),
             "sku": product.sku,
             "name": product.name,
@@ -383,8 +379,8 @@ def update_product(
             "stock_quantity": product.stock_quantity,
             "status": product.status,
         },
-        "message": "更新成功",
-    }
+        message="更新成功",
+    )
 
 
 @router.delete("/{product_id}")
@@ -409,7 +405,7 @@ def delete_product(
     )
     db.commit()
 
-    return {"success": True, "data": None, "message": "删除成功"}
+    return resp(data=None, message="删除成功")
 
 
 @router.post("/{product_id}/disable")
@@ -433,7 +429,7 @@ def disable_product(
     )
     db.commit()
 
-    return {"success": True, "data": {"id": str(product.id), "status": product.status}, "message": "停用成功"}
+    return resp(data={"id": str(product.id), "status": product.status}, message="停用成功")
 
 
 @router.get("/{product_id}/price-history", response_model=ApiResponse[dict])
@@ -458,7 +454,7 @@ def price_history(
             "created_at": h.created_at.isoformat() if h.created_at else None,
         })
 
-    return {"success": True, "data": {"items": items}, "message": "查询成功"}
+    return resp(data={"items": items}, message="查询成功")
 
 
 @router.post("/import")
@@ -587,8 +583,7 @@ async def import_products_csv(
                **get_request_meta(request))
     db.commit()
 
-    return {
-        "success": True,
-        "data": {"created": created, "errors": errors},
-        "message": f"成功导入 {created} 个商品" + (f"，{len(errors)} 行跳过" if errors else ""),
-    }
+    return resp(
+        data={"created": created, "errors": errors},
+        message=f"成功导入 {created} 个商品" + (f"，{len(errors)} 行跳过" if errors else ""),
+    )
