@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第五十八轮）
+
+### 测试：前端收款和审计日志 API 测试（67→77）
+
+- 新建 payments-api.test.ts（5 个）：fetchPayments、按订单筛选、createPayment、备注、reversePayment
+- 新建 auditLogs-api.test.ts（5 个）：fetchAuditLogs 基础查询、筛选参数、日期范围、数据解析、fetchAuditActions
+- 前端 77/77 通过，build 成功
+
 ## 2026-04-30（第五十七轮）
 
 ### 测试：报表和审计日志端点测试（179→201）
