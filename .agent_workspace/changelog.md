@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-04-30（第六十一轮）
+
+### 测试：前端 upload 函数测试 + 问题台账更新
+
+- request.test.ts 新增 upload 函数测试（FormData POST + multipart/form-data）
+- issue-register.md 标记两个 P0 问题为已解决（RBAC 权限和 Backlog 状态）
+- 前端 78/78 通过
+
+## 2026-04-30（第六十一轮·续）
+
+### 工程：修复 test_boundary 未使用导入
+
+- ruff check 修复 2 个未使用导入（create_refresh_token、Payment）
+- ruff 0 错误，后端 201/201 通过
+
 ## 2026-04-30（第五十九轮）
 
 ### 文档：README 和测试报告更新

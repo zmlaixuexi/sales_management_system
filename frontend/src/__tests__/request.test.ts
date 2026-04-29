@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { get, post, put, del } from '@/api/request'
+import { get, post, put, del, upload } from '@/api/request'
 
 // 模拟 apiClient
 vi.mock('@/api/client', () => ({
@@ -55,5 +55,19 @@ describe('request 封装函数', () => {
     const result = await del('/products/123')
     expect(mockClient.delete).toHaveBeenCalledWith('/products/123')
     expect(result.success).toBe(true)
+  })
+
+  it('upload 发起 FormData POST 请求', async () => {
+    mockClient.post.mockResolvedValueOnce({
+      data: { success: true, data: { id: 'file1', url: '/uploads/1.png' }, message: 'ok' },
+    })
+    const file = new File(['content'], 'test.png', { type: 'image/png' })
+    const result = await upload('/files/images', file)
+    expect(mockClient.post).toHaveBeenCalledWith(
+      '/files/images',
+      expect.any(FormData),
+      { headers: { 'Content-Type': 'multipart/form-data' } },
+    )
+    expect(result.data.id).toBe('file1')
   })
 })
