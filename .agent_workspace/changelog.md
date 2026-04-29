@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-04-30（第七十八轮）
+
+### 工程：修复 test_health.py 未使用导入
+
+- 移除 unittest.mock.patch 未使用导入（ruff F401）
+- 后端 204/204，ruff 0，ESLint 0，build 通过
+
 ## 2026-04-30（第七十七轮）
 
 ### 测试：新增 Token 刷新安全测试
