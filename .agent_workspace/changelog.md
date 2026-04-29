@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-04-30（第二十轮）
+
+### 前端体验：错误边界 ErrorBoundary
+
+- **UX-002** 前端错误边界：
+  - 新增 `components/ErrorBoundary.tsx`：class component + getDerivedStateFromError
+  - 渲染崩溃时显示 Result error 页面（错误信息 + 重试按钮 + 返回首页按钮）
+  - main.tsx 包裹 RouterProvider，全局兜底未捕获的渲染错误
+- TypeScript 编译通过，前端构建通过。
+
 ## 2026-04-30（第十九轮）
 
 ### 前端体验：请求层 429 重试和统一错误提示
