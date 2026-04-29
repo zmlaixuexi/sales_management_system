@@ -163,13 +163,13 @@ class TestOrderCreate:
         }, headers=_auth())
         assert resp.status_code == 422
 
-    def test_05b_create_order_negative_price_400(self):
+    def test_05b_create_order_negative_price_422(self):
         resp = client.post("/api/v1/sales-orders", json={
             "customer_id": _customer_id,
             "items": [{"product_id": _product_id, "quantity": 1, "unit_price": "-10.00"}],
         }, headers=_auth())
-        assert resp.status_code == 400
-        assert "不能为负" in resp.json()["detail"]["message"]
+        assert resp.status_code == 422
+        assert "不能为负" in resp.json()["detail"][0]["msg"]
 
 
 class TestOrderRead:
@@ -224,7 +224,7 @@ class TestOrderUpdate:
         # 5*85 + 2*200 = 425 + 400 = 825
         assert data["total_amount"] == "825.00"
 
-    def test_11b_update_order_negative_price_400(self):
+    def test_11b_update_order_negative_price_422(self):
         """验证 update_order 也拒绝负价（之前遗漏的 bug）"""
         # 先创建一个新草稿订单
         resp = client.post("/api/v1/sales-orders", json={
@@ -237,8 +237,8 @@ class TestOrderUpdate:
         resp = client.put(f"/api/v1/sales-orders/{draft_id}", json={
             "items": [{"product_id": _product_id, "quantity": 1, "unit_price": "-5.00"}],
         }, headers=_auth())
-        assert resp.status_code == 400
-        assert "不能为负" in resp.json()["detail"]["message"]
+        assert resp.status_code == 422
+        assert "不能为负" in resp.json()["detail"][0]["msg"]
 
 
 class TestOrderConfirm:

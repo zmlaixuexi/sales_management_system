@@ -201,12 +201,12 @@ class TestPaymentCreate:
         assert resp.status_code == 400
         assert "超过剩余应收" in resp.json()["detail"]["message"]
 
-    def test_04_payment_zero_amount_400(self):
+    def test_04_payment_zero_amount_422(self):
         resp = client.post(f"/api/v1/payments/orders/{_confirmed_order_id}/payments", json={
             "amount": "0",
             "payment_method": "cash",
         }, headers=_auth())
-        assert resp.status_code == 400
+        assert resp.status_code == 422
 
     def test_05_payment_draft_order_400(self):
         resp = client.post(f"/api/v1/payments/orders/{_draft_order_id}/payments", json={

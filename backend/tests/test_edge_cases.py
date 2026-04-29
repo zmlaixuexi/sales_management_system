@@ -219,7 +219,7 @@ def test_15_order_create_negative_price():
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 1, "unit_price": "-10"}],
     }, headers=_auth())
-    assert resp.status_code == 400
+    assert resp.status_code == 422
 
 
 def test_16_order_confirm_insufficient_stock():
@@ -291,7 +291,7 @@ def test_20_payment_zero_amount():
     resp = client.post(f"/api/v1/payments/orders/{_order_id}/payments", json={
         "amount": "0", "payment_method": "cash",
     }, headers=_auth())
-    assert resp.status_code == 400
+    assert resp.status_code == 422
 
 
 def test_21_payment_exceed_remaining():

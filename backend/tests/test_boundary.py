@@ -470,7 +470,7 @@ def test_22_payment_negative_amount():
     resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
         "amount": "-50", "payment_method": "cash",
     }, headers=_auth())
-    assert resp.status_code == 400
+    assert resp.status_code == 422
 
 
 def test_23_payment_list():
