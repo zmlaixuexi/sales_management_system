@@ -1,3 +1,6 @@
+import logging
+from unittest.mock import patch
+
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -30,3 +33,17 @@ def test_security_headers():
     assert response.headers["referrer-policy"] == "strict-origin-when-cross-origin"
     assert "content-security-policy" in response.headers
     assert "permissions-policy" in response.headers
+
+
+def test_request_log_records_api_calls(caplog):
+    """验证 API 请求被日志记录"""
+    with caplog.at_level(logging.INFO, logger="app.request"):
+        client.get("/api/v1/health")
+    assert any("GET /api/v1/health" in r.message for r in caplog.records)
+
+
+def test_request_log_ignores_non_api(caplog):
+    """验证非 API 路径不记录请求日志"""
+    with caplog.at_level(logging.INFO, logger="app.request"):
+        client.get("/")
+    assert not any("GET /" == r.message.split()[0:2] for r in caplog.records)
