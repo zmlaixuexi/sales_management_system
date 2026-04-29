@@ -13,6 +13,7 @@ from app.models.customer import Customer
 from app.models.order import SalesOrder, SalesOrderItem, InventoryMovement, Payment
 from app.models.product import Product
 from app.models.user import User
+from app.services.audit_service import log_action
 
 router = APIRouter(prefix="/sales-orders", tags=["订单管理"])
 
@@ -260,6 +261,12 @@ def create_order(
     for pi in prepared_items:
         db.add(SalesOrderItem(order_id=order.id, **pi))
 
+    log_action(
+        db, action="order_create", resource_type="order",
+        resource_id=str(order.id), actor_id=current_user.id,
+        actor_name=current_user.display_name or current_user.username,
+        after_data={"order_no": order_no, "total_amount": str(order.total_amount)},
+    )
     db.commit()
 
     return {
@@ -400,6 +407,12 @@ def update_order(
         order.customer_id = uuid.UUID(str(data["customer_id"]))
 
     order.updated_by = current_user.id
+    log_action(
+        db, action="order_update", resource_type="order",
+        resource_id=str(order.id), actor_id=current_user.id,
+        actor_name=current_user.display_name or current_user.username,
+        after_data={"order_no": order.order_no},
+    )
     db.commit()
 
     return {"success": True, "data": {"id": str(order.id), "order_no": order.order_no}, "message": "更新成功"}
@@ -425,6 +438,12 @@ def confirm_order(
 
     order.status = "confirmed"
     order.updated_by = current_user.id
+    log_action(
+        db, action="order_confirm", resource_type="order",
+        resource_id=str(order.id), actor_id=current_user.id,
+        actor_name=current_user.display_name or current_user.username,
+        after_data={"order_no": order.order_no, "status": "confirmed"},
+    )
     db.commit()
 
     return {"success": True, "data": {"id": str(order.id), "status": order.status}, "message": "确认成功"}
@@ -454,6 +473,12 @@ def cancel_order(
 
     order.status = "cancelled"
     order.updated_by = current_user.id
+    log_action(
+        db, action="order_cancel", resource_type="order",
+        resource_id=str(order.id), actor_id=current_user.id,
+        actor_name=current_user.display_name or current_user.username,
+        after_data={"order_no": order.order_no, "status": "cancelled"},
+    )
     db.commit()
 
     return {"success": True, "data": {"id": str(order.id), "status": order.status}, "message": "取消成功"}

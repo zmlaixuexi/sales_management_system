@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.api.deps import get_current_user, get_db
 from app.models.product import Product, ProductCategory, ProductPriceHistory
 from app.models.user import User
+from app.services.audit_service import log_action, model_to_dict
 
 router = APIRouter(prefix="/products", tags=["商品管理"])
 
@@ -181,6 +182,12 @@ def create_product(
 
     unit_profit, gross_margin = _calc_profit(sale_price, cost_price)
 
+    log_action(
+        db, action="product_create", resource_type="product",
+        resource_id=str(product.id), actor_id=current_user.id,
+        actor_name=current_user.display_name or current_user.username,
+        after_data={"name": name, "sku": sku, "sale_price": str(sale_price), "cost_price": str(cost_price)},
+    )
     db.commit()
 
     return {
@@ -339,6 +346,13 @@ def update_product(
             changed_by=current_user.id,
         ))
 
+    log_action(
+        db, action="product_update", resource_type="product",
+        resource_id=str(product.id), actor_id=current_user.id,
+        actor_name=current_user.display_name or current_user.username,
+        before_data={"name": product.name, "sale_price": str(old_sale_price), "cost_price": str(old_cost_price)},
+        after_data={"name": product.name, "sale_price": str(product.sale_price), "cost_price": str(product.cost_price)},
+    )
     db.commit()
 
     unit_profit, gross_margin = _calc_profit(product.sale_price, product.cost_price)
@@ -378,6 +392,12 @@ def delete_product(
     # MVP：直接软删除，后续检查是否有订单引用
     product.deleted_at = datetime.now()
     product.updated_by = current_user.id
+    log_action(
+        db, action="product_delete", resource_type="product",
+        resource_id=str(product.id), actor_id=current_user.id,
+        actor_name=current_user.display_name or current_user.username,
+        before_data={"name": product.name, "sku": product.sku},
+    )
     db.commit()
 
     return {"success": True, "data": None, "message": "删除成功"}
@@ -399,6 +419,12 @@ def disable_product(
 
     product.status = "disabled"
     product.updated_by = current_user.id
+    log_action(
+        db, action="product_disable", resource_type="product",
+        resource_id=str(product.id), actor_id=current_user.id,
+        actor_name=current_user.display_name or current_user.username,
+        before_data={"status": "active"}, after_data={"status": "disabled"},
+    )
     db.commit()
 
     return {"success": True, "data": {"id": str(product.id), "status": product.status}, "message": "停用成功"}

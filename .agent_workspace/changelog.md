@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-04-30（第二轮）
+
+### MVP 后续扩展：操作日志系统
+
+- **EXT-001** 实现操作日志（Audit Log）系统：
+  - 后端 AuditLog 模型、迁移（baf204f3ea66）、日志服务（audit_service.py）
+  - GET /api/v1/audit-logs 查询接口（支持操作类型/资源类型/日期/关键词筛选）
+  - GET /api/v1/audit-logs/actions 获取筛选选项
+  - 集成到所有业务 API：认证、商品、客户、订单、收款、库存
+  - 前端审计日志页面（AuditLogs.tsx）、侧边栏菜单、路由
+  - 日志自动脱敏敏感字段（password/token 等）
+- 后端 34/34 测试通过，前端构建通过。
+
 ## 2026-04-30
 
 ### 阶段 6：交付加固

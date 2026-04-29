@@ -2,6 +2,73 @@
 
 本文件记录已经实现并验证过的功能。
 
+## 功能编号：FEAT-20260430-06
+
+功能名称：操作日志（Audit Log）系统
+所属模块：审计日志
+关联任务编号：EXT-001
+实现日期：2026-04-30
+实现 Agent：Claude
+当前状态：已测试
+
+### 实现范围
+
+- AuditLog 数据模型：actor_id、actor_name、action、resource_type、resource_id、before_data、after_data、ip_address、user_agent、request_id、created_at
+- Alembic 迁移：audit_logs 表（含复合索引 action+resource_type）
+- audit_service.py：log_action 通用日志记录函数、model_to_dict 辅助函数、敏感字段自动脱敏
+- GET /api/v1/audit-logs：分页查询，支持 action、resource_type、actor_id、start_date、end_date、keyword 筛选
+- GET /api/v1/audit-logs/actions：获取所有操作类型和资源类型列表
+- 集成到全部业务 API：
+  - auth.py：login_success、login_failed
+  - products.py：product_create、product_update、product_delete、product_disable
+  - customers.py：customer_create、customer_update、customer_delete、customer_transfer
+  - orders.py：order_create、order_update、order_confirm、order_cancel
+  - payments.py：payment_create、payment_reverse
+  - inventory.py：inventory_adjust
+- 前端审计日志页面：操作类型/资源类型/日期范围/关键词筛选，分页表格
+- 侧边栏菜单：添加"操作日志"入口
+
+### 涉及文件
+
+| 文件 | 变更说明 |
+|---|---|
+| backend/app/models/audit.py | 新建：AuditLog 模型 |
+| backend/app/models/__init__.py | 更新：导入 AuditLog |
+| backend/alembic/versions/baf204f3ea66_*.py | 新建：audit_logs 表迁移 |
+| backend/app/services/audit_service.py | 新建：日志记录服务 |
+| backend/app/api/v1/audit_logs.py | 新建：日志查询 API |
+| backend/app/api/v1/router.py | 更新：注册 audit_logs 路由 |
+| backend/app/api/v1/auth.py | 更新：集成登录日志 |
+| backend/app/api/v1/products.py | 更新：集成商品操作日志 |
+| backend/app/api/v1/customers.py | 更新：集成客户操作日志 |
+| backend/app/api/v1/orders.py | 更新：集成订单操作日志 |
+| backend/app/api/v1/payments.py | 更新：集成收款操作日志 |
+| backend/app/api/v1/inventory.py | 更新：集成库存调整日志 |
+| frontend/src/api/auditLogs.ts | 新建：日志 API 调用 |
+| frontend/src/pages/AuditLogs.tsx | 新建：审计日志页面 |
+| frontend/src/routes/index.tsx | 更新：添加路由 |
+| frontend/src/components/MainLayout.tsx | 更新：添加菜单项 |
+
+### API 变更
+
+| 方法 | 路径 | 说明 | 权限 |
+|---|---|---|---|
+| GET | /api/v1/audit-logs | 操作日志查询 | 登录 |
+| GET | /api/v1/audit-logs/actions | 操作类型列表 | 登录 |
+
+### 已执行测试
+
+测试命令：`pytest tests/ -v` + `npm run build`
+测试结果：后端 34/34 通过，前端构建通过
+
+### 已知限制
+
+- 审计日志查询暂未做角色权限限制（任何登录用户可查）。
+- 日志不记录请求 IP 和 user_agent（需从 Request 对象提取，待后续集成 FastAPI Request）。
+- 暂无日志保留策略（需定期清理历史日志）。
+
+---
+
 ## 功能编号：FEAT-20260430-05
 
 功能名称：报表 API 和首页看板

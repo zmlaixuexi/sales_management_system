@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user, get_db
 from app.models.customer import Customer
 from app.models.user import User
+from app.services.audit_service import log_action
 
 router = APIRouter(prefix="/customers", tags=["客户管理"])
 
@@ -109,6 +110,14 @@ def create_customer(
         updated_by=current_user.id,
     )
     db.add(customer)
+    db.flush()
+
+    log_action(
+        db, action="customer_create", resource_type="customer",
+        resource_id=str(customer.id), actor_id=current_user.id,
+        actor_name=current_user.display_name or current_user.username,
+        after_data={"name": name, "phone": phone},
+    )
     db.commit()
 
     return {
@@ -214,6 +223,12 @@ def update_customer(
         customer.remark = data["remark"]
 
     customer.updated_by = current_user.id
+    log_action(
+        db, action="customer_update", resource_type="customer",
+        resource_id=str(customer.id), actor_id=current_user.id,
+        actor_name=current_user.display_name or current_user.username,
+        after_data={"name": customer.name, "phone": customer.phone},
+    )
     db.commit()
 
     return {
@@ -244,6 +259,12 @@ def delete_customer(
 
     customer.deleted_at = datetime.now()
     customer.updated_by = current_user.id
+    log_action(
+        db, action="customer_delete", resource_type="customer",
+        resource_id=str(customer.id), actor_id=current_user.id,
+        actor_name=current_user.display_name or current_user.username,
+        before_data={"name": customer.name, "phone": customer.phone},
+    )
     db.commit()
 
     return {"success": True, "data": None, "message": "删除成功"}
@@ -270,6 +291,12 @@ def transfer_customer(
 
     customer.owner_user_id = uuid.UUID(str(new_owner_id))
     customer.updated_by = current_user.id
+    log_action(
+        db, action="customer_transfer", resource_type="customer",
+        resource_id=str(customer.id), actor_id=current_user.id,
+        actor_name=current_user.display_name or current_user.username,
+        after_data={"owner_user_id": str(new_owner_id)},
+    )
     db.commit()
 
     return {"success": True, "data": {"id": str(customer.id), "owner_user_id": str(customer.owner_user_id)}, "message": "转移成功"}

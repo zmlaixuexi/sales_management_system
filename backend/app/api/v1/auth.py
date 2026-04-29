@@ -10,6 +10,7 @@ from app.core.config import settings
 from app.core.security import verify_password, hash_password, create_access_token, create_refresh_token
 from app.models.user import User
 from app.schemas.auth import LoginRequest, TokenResponse, RefreshRequest, CurrentUser, RoleBrief
+from app.services.audit_service import log_action
 
 router = APIRouter(prefix="/auth", tags=["认证"])
 
@@ -19,6 +20,7 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
     """用户名密码登录"""
     user = db.query(User).filter(User.username == req.username, User.deleted_at.is_(None)).first()
     if not user or not verify_password(req.password, user.hashed_password):
+        log_action(db, action="login_failed", resource_type="user", actor_name=req.username)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"code": "AUTH_UNAUTHORIZED", "message": "用户名或密码错误"},
@@ -31,6 +33,12 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
 
     access_token = create_access_token(subject=str(user.id))
     refresh_token = create_refresh_token(subject=str(user.id))
+
+    log_action(
+        db, action="login_success", resource_type="user",
+        resource_id=str(user.id), actor_id=user.id, actor_name=user.display_name or user.username,
+    )
+    db.commit()
 
     return {
         "success": True,

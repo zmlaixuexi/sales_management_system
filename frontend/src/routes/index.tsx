@@ -10,6 +10,7 @@ import CustomerForm from '@/pages/CustomerForm'
 import Orders from '@/pages/Orders'
 import OrderForm from '@/pages/OrderForm'
 import OrderDetail from '@/pages/OrderDetail'
+import AuditLogs from '@/pages/AuditLogs'
 
 const routes: RouteObject[] = [
   {
@@ -31,6 +32,7 @@ const routes: RouteObject[] = [
       { path: 'orders/new', element: <OrderForm /> },
       { path: 'orders/:id', element: <OrderDetail /> },
       { path: 'orders/:id/edit', element: <OrderForm /> },
+      { path: 'audit-logs', element: <AuditLogs /> },
     ],
   },
   {

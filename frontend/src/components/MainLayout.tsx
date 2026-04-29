@@ -8,6 +8,7 @@ import {
   FileTextOutlined,
   UserOutlined,
   LogoutOutlined,
+  AuditOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '../stores/auth';
 
@@ -18,6 +19,7 @@ const menuItems = [
   { key: '/products', icon: <ShoppingOutlined />, label: '商品管理' },
   { key: '/customers', icon: <TeamOutlined />, label: '客户管理' },
   { key: '/orders', icon: <FileTextOutlined />, label: '销售订单' },
+  { key: '/audit-logs', icon: <AuditOutlined />, label: '操作日志' },
 ];
 
 export default function MainLayout() {

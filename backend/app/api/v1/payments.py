@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user, get_db
 from app.models.order import Payment, SalesOrder
 from app.models.user import User
+from app.services.audit_service import log_action
 
 router = APIRouter(prefix="/payments", tags=["收款管理"])
 
@@ -102,6 +103,12 @@ def create_payment(
         order.status = "partially_paid"
 
     order.updated_by = current_user.id
+    log_action(
+        db, action="payment_create", resource_type="payment",
+        resource_id=str(payment.id), actor_id=current_user.id,
+        actor_name=current_user.display_name or current_user.username,
+        after_data={"order_id": str(order.id), "amount": str(amount), "method": data.get("payment_method", "cash")},
+    )
     db.commit()
 
     return {
@@ -142,6 +149,13 @@ def reverse_payment(
 
     payment.status = "reversed"
     order.updated_by = current_user.id
+    log_action(
+        db, action="payment_reverse", resource_type="payment",
+        resource_id=str(payment.id), actor_id=current_user.id,
+        actor_name=current_user.display_name or current_user.username,
+        before_data={"amount": str(payment.amount), "status": "normal"},
+        after_data={"status": "reversed"},
+    )
     db.commit()
 
     return {"success": True, "data": {"id": str(payment.id), "status": "reversed"}, "message": "冲正成功"}
