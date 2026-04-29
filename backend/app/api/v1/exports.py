@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db
+from app.api.deps import get_current_user, get_db, require_permission
 from app.models.user import User
 from app.services.export_service import (
     export_customers,
@@ -30,7 +30,7 @@ def export_products_csv(
     status: str | None = None,
     category_id: uuid.UUID | None = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("product:list")),
 ):
     """导出商品列表为 CSV"""
     generator = export_products(db, keyword=keyword, status=status, category_id=category_id)
@@ -46,7 +46,7 @@ def export_customers_csv(
     keyword: str | None = None,
     source: str | None = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("customer:list")),
 ):
     """导出客户列表为 CSV"""
     generator = export_customers(db, keyword=keyword, source=source)
@@ -65,7 +65,7 @@ def export_orders_csv(
     start_date: str | None = None,
     end_date: str | None = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("order:list")),
 ):
     """导出订单列表为 CSV"""
     generator = export_orders(
@@ -85,7 +85,7 @@ def export_payments_csv(
     start_date: str | None = None,
     end_date: str | None = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("payment:list")),
 ):
     """导出收款记录为 CSV"""
     generator = export_payments(db, order_id=order_id, start_date=start_date, end_date=end_date)

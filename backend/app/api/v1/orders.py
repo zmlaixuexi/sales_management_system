@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db
+from app.api.deps import get_current_user, get_db, require_permission
 from app.models.customer import Customer
 from app.models.order import SalesOrder, SalesOrderItem, InventoryMovement, Payment
 from app.models.product import Product
@@ -153,7 +153,7 @@ def list_orders(
     status: str | None = None,
     customer_id: uuid.UUID | None = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("order:list")),
 ):
     """订单列表"""
     query = db.query(SalesOrder).filter(SalesOrder.deleted_at.is_(None))
@@ -199,7 +199,7 @@ def list_orders(
 def create_order(
     data: dict,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("order:create")),
 ):
     """创建草稿订单"""
     customer_id = data.get("customer_id")
@@ -288,7 +288,7 @@ def create_order(
 def get_order(
     order_id: uuid.UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("order:list")),
 ):
     """订单详情"""
     order = db.query(SalesOrder).filter(
@@ -355,7 +355,7 @@ def update_order(
     order_id: uuid.UUID,
     data: dict,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("order:update")),
 ):
     """编辑草稿订单"""
     order = db.query(SalesOrder).filter(
@@ -422,7 +422,7 @@ def update_order(
 def confirm_order(
     order_id: uuid.UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("order:confirm")),
 ):
     """确认订单 — 扣减库存"""
     order = db.query(SalesOrder).filter(
@@ -453,7 +453,7 @@ def confirm_order(
 def cancel_order(
     order_id: uuid.UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("order:cancel")),
 ):
     """取消订单 — 回滚库存"""
     order = db.query(SalesOrder).filter(

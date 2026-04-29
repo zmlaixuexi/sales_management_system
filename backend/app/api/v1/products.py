@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
-from app.api.deps import get_current_user, get_db
+from app.api.deps import get_current_user, get_db, require_permission, has_permission
 from app.models.product import Product, ProductCategory, ProductPriceHistory
 from app.models.user import User
 from app.services.audit_service import log_action, model_to_dict
@@ -71,9 +71,10 @@ def list_products(
     sort_by: str = Query("sort_weight"),
     sort_order: str = Query("desc"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("product:list")),
 ):
     """商品列表"""
+    can_view_cost = has_permission(current_user, "product:view_cost")
     query = db.query(Product).filter(Product.deleted_at.is_(None))
 
     if keyword:
@@ -98,7 +99,7 @@ def list_products(
     result_items = []
     for p in items:
         unit_profit, gross_margin = _calc_profit(p.sale_price, p.cost_price)
-        result_items.append({
+        row: dict = {
             "id": str(p.id),
             "sku": p.sku,
             "name": p.name,
@@ -106,16 +107,18 @@ def list_products(
             "category_id": str(p.category_id) if p.category_id else None,
             "category_name": p.category.name if p.category else None,
             "sale_price": str(p.sale_price),
-            "cost_price": str(p.cost_price),
-            "unit_profit": str(unit_profit),
-            "gross_margin": str(gross_margin),
             "stock_quantity": p.stock_quantity,
             "status": p.status,
             "sort_weight": p.sort_weight,
             "remark": p.remark,
             "created_at": p.created_at.isoformat() if p.created_at else None,
             "updated_at": p.updated_at.isoformat() if p.updated_at else None,
-        })
+        }
+        if can_view_cost:
+            row["cost_price"] = str(p.cost_price)
+            row["unit_profit"] = str(unit_profit)
+            row["gross_margin"] = str(gross_margin)
+        result_items.append(row)
 
     return {
         "success": True,
@@ -133,7 +136,7 @@ def list_products(
 def create_product(
     data: dict,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("product:create")),
 ):
     """新增商品"""
     name = data.get("name", "").strip()
@@ -214,7 +217,7 @@ def create_product(
 def get_product(
     product_id: uuid.UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("product:list")),
 ):
     """商品详情"""
     product = db.query(Product).filter(
@@ -265,7 +268,7 @@ def update_product(
     product_id: uuid.UUID,
     data: dict,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("product:update")),
 ):
     """编辑商品"""
     product = db.query(Product).filter(
@@ -379,7 +382,7 @@ def update_product(
 def delete_product(
     product_id: uuid.UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("product:delete")),
 ):
     """删除或软删除商品"""
     product = db.query(Product).filter(
@@ -407,7 +410,7 @@ def delete_product(
 def disable_product(
     product_id: uuid.UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("product:update")),
 ):
     """停用商品"""
     product = db.query(Product).filter(
@@ -434,7 +437,7 @@ def disable_product(
 def price_history(
     product_id: uuid.UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("product:list")),
 ):
     """查看价格变更记录"""
     history = db.query(ProductPriceHistory).filter(

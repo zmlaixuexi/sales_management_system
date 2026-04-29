@@ -7,7 +7,7 @@ from decimal import Decimal
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db
+from app.api.deps import get_current_user, get_db, require_permission
 from app.models.order import Payment, SalesOrder
 from app.models.user import User
 from app.services.audit_service import log_action
@@ -21,7 +21,7 @@ def list_payments(
     page_size: int = Query(20, ge=1, le=100),
     order_id: uuid.UUID | None = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("payment:list")),
 ):
     """收款列表"""
     query = db.query(Payment).filter(Payment.status == "normal")
@@ -61,7 +61,7 @@ def create_payment(
     order_id: uuid.UUID,
     data: dict,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("payment:create")),
 ):
     """登记订单收款"""
     order = db.query(SalesOrder).filter(
@@ -128,7 +128,7 @@ def create_payment(
 def reverse_payment(
     payment_id: uuid.UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("payment:reverse")),
 ):
     """冲正收款"""
     payment = db.query(Payment).filter(Payment.id == payment_id, Payment.status == "normal").first()

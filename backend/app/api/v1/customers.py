@@ -6,7 +6,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db
+from app.api.deps import get_current_user, get_db, require_permission
 from app.models.customer import Customer
 from app.models.user import User
 from app.services.audit_service import log_action
@@ -22,7 +22,7 @@ def list_customers(
     source: str | None = None,
     owner_user_id: uuid.UUID | None = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("customer:list")),
 ):
     """客户列表"""
     query = db.query(Customer).filter(Customer.deleted_at.is_(None))
@@ -77,7 +77,7 @@ def list_customers(
 def create_customer(
     data: dict,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("customer:create")),
 ):
     """新增客户"""
     name = data.get("name", "").strip()
@@ -141,7 +141,7 @@ def create_customer(
 def get_customer(
     customer_id: uuid.UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("customer:list")),
 ):
     """客户详情"""
     customer = db.query(Customer).filter(
@@ -177,7 +177,7 @@ def update_customer(
     customer_id: uuid.UUID,
     data: dict,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("customer:update")),
 ):
     """编辑客户"""
     customer = db.query(Customer).filter(
@@ -247,7 +247,7 @@ def update_customer(
 def delete_customer(
     customer_id: uuid.UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("customer:delete")),
 ):
     """删除客户（软删除）"""
     customer = db.query(Customer).filter(
@@ -275,7 +275,7 @@ def transfer_customer(
     customer_id: uuid.UUID,
     data: dict,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("customer:update")),
 ):
     """转移客户归属销售"""
     customer = db.query(Customer).filter(

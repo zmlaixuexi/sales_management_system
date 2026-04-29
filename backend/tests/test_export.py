@@ -45,7 +45,7 @@ def setup_module(module):
             hashed_password=hash_password("testpass123"),
             display_name="导出测试员",
             is_active=True,
-            is_superuser=False,
+            is_superuser=True,
         )
         db.add(user)
         cat = ProductCategory(id=uuid.uuid4(), name="未分类", sort_order=0)

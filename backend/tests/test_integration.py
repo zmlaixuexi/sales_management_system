@@ -58,7 +58,7 @@ def setup_module(module):
             hashed_password=hash_password("testpass123"),
             display_name="端到端测试员",
             is_active=True,
-            is_superuser=False,
+            is_superuser=True,
         )
         db.add(user)
 

@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db
+from app.api.deps import get_current_user, get_db, require_permission
 from app.models.order import InventoryMovement
 from app.models.product import Product
 from app.models.user import User
@@ -21,7 +21,7 @@ def list_movements(
     product_id: uuid.UUID | None = None,
     movement_type: str | None = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("inventory:list")),
 ):
     """库存流水"""
     query = db.query(InventoryMovement)
@@ -64,7 +64,7 @@ def list_movements(
 def adjust_inventory(
     data: dict,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("inventory:adjust")),
 ):
     """手工库存调整"""
     product_id = data.get("product_id")

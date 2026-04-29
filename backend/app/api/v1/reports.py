@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db
+from app.api.deps import get_current_user, get_db, require_permission
 from app.models.order import SalesOrder, SalesOrderItem
 from app.models.product import Product
 from app.models.user import User
@@ -38,7 +38,7 @@ def _date_range(period: str):
 def sales_summary(
     period: str = Query("30d", description="时间段: today, 7d, 30d, this_month, last_month"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("report:sales")),
 ):
     """销售汇总：总销售额、总成本、毛利、订单数"""
     start, end = _date_range(period)
@@ -86,7 +86,7 @@ def sales_summary(
 def sales_trend(
     period: str = Query("30d"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("report:sales")),
 ):
     """销售趋势：按日统计销售额和订单数"""
     start, end = _date_range(period)
@@ -132,7 +132,7 @@ def product_ranking(
     period: str = Query("30d"),
     limit: int = Query(10, ge=1, le=50),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("report:sales")),
 ):
     """商品销售排行：按销售额排序"""
     start, end = _date_range(period)
@@ -184,7 +184,7 @@ def product_ranking(
 def inventory_warning(
     threshold: int = Query(10, ge=0, description="库存预警阈值"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("report:sales")),
 ):
     """库存预警：低于阈值的商品列表"""
     rows = (
