@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-87
+当前任务编号：ROUND-88
 当前任务名称：持续质量维护
 当前 Agent：Claude
 任务状态：进行中
 
 ## 最近完成
 
+- Round 87：更新 docs/testing.md（303 测试详列）
 - Round 86：更新 README 测试数（213+90=303）
 - Round 85：auth API 前端测试（+4，前端 90/90，全部 API 模块已覆盖）
 - Round 84：修复订单导出 N+1 查询（selectinload）
