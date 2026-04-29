@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-115
-当前任务名称：前端工具函数测试
+当前任务编号：ROUND-116
+当前任务名称：文档同步测试数
 当前 Agent：Claude
 任务状态：进行中
 
 ## 最近完成
 
+- Round 116：文档同步测试数至 386（286 后端 + 100 前端）+ README/testing.md 订单负价测试条目更新
 - Round 115：getApiErrorMessage 工具函数测试（+3），前端突破 100 大关（100/100），全量验证通过
 - Round 114：修复 docker-compose.prod.yml nginx depends_on 混用 mapping/list 语法错误，dev/prod 配置均已验证通过
 - Round 113：后端 Dockerfile 改为多阶段构建，builder 阶段编译依赖，runtime 仅含运行时库
