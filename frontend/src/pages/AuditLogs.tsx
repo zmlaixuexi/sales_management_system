@@ -185,11 +185,13 @@ export default function AuditLogs() {
         columns={columns}
         dataSource={logs}
         loading={loading}
+        locale={{ emptyText: loading ? '加载中...' : '暂无操作日志' }}
         pagination={{
           current: page,
           pageSize,
           total,
           showSizeChanger: true,
+          pageSizeOptions: [10, 20, 50, 100],
           showTotal: (t) => `共 ${t} 条`,
           onChange: (p, ps) => { setPage(p); setPageSize(ps); },
         }}

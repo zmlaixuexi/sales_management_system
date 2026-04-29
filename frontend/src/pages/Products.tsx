@@ -187,11 +187,13 @@ export default function ProductsPage() {
         dataSource={data}
         rowKey="id"
         loading={loading}
+        locale={{ emptyText: loading ? '加载中...' : keyword || statusFilter ? '没有匹配的商品' : '暂无商品，点击"新增商品"添加' }}
         pagination={{
           current: page,
           pageSize,
           total,
           showSizeChanger: true,
+          pageSizeOptions: [10, 20, 50, 100],
           showTotal: (t) => `共 ${t} 条`,
           onChange: (p, ps) => { setPage(p); setPageSize(ps) },
         }}

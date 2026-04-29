@@ -147,11 +147,13 @@ export default function OrdersPage() {
         dataSource={data}
         rowKey="id"
         loading={loading}
+        locale={{ emptyText: loading ? '加载中...' : keyword || statusFilter ? '没有匹配的订单' : '暂无订单，点击"新建订单"添加' }}
         pagination={{
           current: page,
           pageSize,
           total,
           showSizeChanger: true,
+          pageSizeOptions: [10, 20, 50, 100],
           showTotal: (t) => `共 ${t} 条`,
           onChange: (p, ps) => { setPage(p); setPageSize(ps) },
         }}

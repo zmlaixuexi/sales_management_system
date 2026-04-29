@@ -164,11 +164,13 @@ export default function CustomersPage() {
         dataSource={data}
         rowKey="id"
         loading={loading}
+        locale={{ emptyText: loading ? '加载中...' : keyword || sourceFilter ? '没有匹配的客户' : '暂无客户，点击"新增客户"添加' }}
         pagination={{
           current: page,
           pageSize,
           total,
           showSizeChanger: true,
+          pageSizeOptions: [10, 20, 50, 100],
           showTotal: (t) => `共 ${t} 条`,
           onChange: (p, ps) => { setPage(p); setPageSize(ps) },
         }}
