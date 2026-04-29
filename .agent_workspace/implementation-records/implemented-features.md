@@ -6,6 +6,44 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的“已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-13
+
+功能名称：商品 CSV 批量导入
+所属模块：商品管理
+关联任务编号：EXT-005
+实现日期：2026-04-30
+实现 Agent：Claude
+当前状态：已测试
+
+### 实现范围
+
+- 后端 `POST /products/import`：接受 CSV 文件，支持中英文表头
+  - 批量内 SKU 自动递增序号（`SPU-YYYYMMDD-NNNN`），避免碰撞
+  - 验证：名称必填、价格格式/非负、SKU 唯一性（含 CSV 内去重）
+  - 错误逐行收集，返回 `{created, errors: [{row, message}]}`
+  - 记录 `product_import` 审计日志
+- 前端商品列表页新增"导入"按钮（UploadOutlined + hidden file input）
+- 修复 `price_history` 端点缺失 return 语句
+
+### 涉及文件
+
+| 文件 | 变更说明 |
+|---|---|
+| backend/app/api/v1/products.py | 新增 import 端点 + 修复 price_history |
+| frontend/src/pages/Products.tsx | 新增导入按钮 |
+| frontend/src/pages/AuditLogs.tsx | 新增 product_import 标签 |
+| backend/tests/test_product_import.py | 新增：8 个导入测试 |
+
+### 测试状态
+
+- 后端 108/108 测试通过（含 8 个导入测试）
+- 前端 TypeScript 编译通过
+
+### 已知限制
+
+- 未支持分类映射（所有导入商品归入"未分类"）
+- 未支持图片导入
+
 ## 功能编号：FEAT-20260430-12
 
 功能名称：API 速率限制

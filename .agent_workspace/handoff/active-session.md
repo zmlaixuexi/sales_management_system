@@ -1,34 +1,37 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：P1 前端体验
-当前任务编号：UX-004
-当前任务名称：Header 用户名和角色展示
+当前阶段：P1 前端体验 / 扩展功能
+当前任务编号：EXT-005
+当前任务名称：商品 CSV 批量导入
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- AppLayout 加载时调用 /auth/me 获取当前用户信息
-- Header 区域显示用户名 + 角色标签 + 退出按钮
-- TypeScript 编译通过，构建成功
+- 后端 `POST /products/import` 批量导入端点（中英文 CSV 表头、SKU 自动递增、验证、审计日志）
+- 前端商品列表页"导入"按钮
+- 修复 SKU 批量碰撞：导入函数内自维护序号计数器
+- 修复 `price_history` 端点缺失 return
+- 后端 108/108 测试通过，前端 TypeScript 编译通过
 
 ## 下一步第一动作
 
-1. 批量导入功能（商品/客户 CSV 上传）
+1. 客户 CSV 批量导入（类似商品的导入功能）
 2. 前端自动化测试框架搭建（Vitest + Testing Library）
 3. 前端列表页空状态和分页大小选择器
 
-## 当前里程碑总结（Round 15-31）
+## 当前里程碑总结（Round 15-33）
 
-- 测试：51 → 100（+49，覆盖权限、异常路径、速率限制、文件上传、导出审计）
+- 测试：51 → 108（+57，覆盖权限、异常路径、速率限制、文件上传、导出审计、CSV 导入）
 - 安全：RBAC 权限、数据范围过滤、速率限制、敏感字段控制、logout token 清理
 - 可观测性：结构化 JSON 日志（LOG_FORMAT）、审计日志请求元数据
 - 性能：前端代码拆分（1.4MB → 40+ chunk）、TypeScript strict 模式
 - 前端体验：统一错误提示、429 重试、ErrorBoundary、菜单修复、用户名/角色展示
+- 功能：商品 CSV 批量导入、4 种数据导出
 - 文档：API 文档、README、.env.example、测试报告全部更新
 - 配置：INVENTORY_WARNING_THRESHOLD、LOG_FORMAT、RATE_LIMIT_MAX/WINDOW
-- 后端 100/100 通过，前端 TypeScript + 构建通过
+- 后端 108/108 通过，前端 TypeScript + 构建通过
 
 ## 阻塞问题
 
@@ -47,10 +50,11 @@
 9. logout 必须同时清除 access_token 和 refresh_token。
 10. file_service.py 的 MAX_SIZE_BYTES 是模块级变量，修改限制需直接 patch 模块变量而非 settings。
 11. 测试速率限制时，test_ratelimit.py 的 429 压力测试必须放在最后，否则耗尽 IP 配额影响后续测试。
+12. 批量导入中调用 _generate_sku() 会因未提交而重复 → 必须在导入函数内自维护序号计数器。
 
 ## 恢复检查清单
 
 - [x] 已阅读 active-session
 - [x] 已阅读任务文件
 - [x] 已确认下一步第一动作
-- [x] 已阅读重复问题列表（11 条）
+- [x] 已阅读重复问题列表（12 条）

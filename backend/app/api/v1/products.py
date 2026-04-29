@@ -1,10 +1,12 @@
 """商品 CRUD API"""
 
+import csv
+import io
 import uuid
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
@@ -464,3 +466,129 @@ def price_history(
         })
 
     return {"success": True, "data": {"items": items}, "message": "查询成功"}
+
+
+@router.post("/import")
+async def import_products_csv(
+    request: Request,
+    file: UploadFile,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("product:create")),
+):
+    """批量导入商品（CSV 格式）"""
+    if not file.filename or not file.filename.endswith(".csv"):
+        raise HTTPException(status_code=400, detail={
+            "code": "VALIDATION_FAILED", "message": "请上传 CSV 文件",
+        })
+
+    content = await file.read()
+    try:
+        text = content.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        raise HTTPException(status_code=400, detail={
+            "code": "VALIDATION_FAILED", "message": "文件编码错误，请使用 UTF-8",
+        })
+
+    reader = csv.DictReader(io.StringIO(text))
+    if not reader.fieldnames:
+        raise HTTPException(status_code=400, detail={
+            "code": "VALIDATION_FAILED", "message": "CSV 文件为空或缺少表头",
+        })
+
+    # 获取默认分类
+    default_cat = db.query(ProductCategory).filter(
+        ProductCategory.name == DEFAULT_CATEGORY_NAME,
+    ).first()
+
+    created = 0
+    errors: list[dict] = []
+    used_skus: set[str] = set()
+
+    # 预计算批量 SKU 前缀和起始序号
+    today = datetime.now().strftime("%Y%m%d")
+    sku_prefix = f"SPU-{today}-"
+    last_product = (
+        db.query(Product)
+        .filter(Product.sku.like(f"{sku_prefix}%"))
+        .order_by(Product.sku.desc())
+        .first()
+    )
+    sku_seq = 1
+    if last_product and last_product.sku.startswith(sku_prefix):
+        try:
+            sku_seq = int(last_product.sku[len(sku_prefix):]) + 1
+        except ValueError:
+            sku_seq = 1
+
+    for row_num, row in enumerate(reader, start=2):
+        name = (row.get("商品名称") or row.get("name") or "").strip()
+        if not name:
+            errors.append({"row": row_num, "message": "商品名称不能为空"})
+            continue
+
+        # 解析字段
+        sku = (row.get("SKU") or row.get("sku") or "").strip() or None
+        try:
+            sale_price = Decimal(row.get("销售价") or row.get("sale_price") or "0")
+        except Exception:
+            errors.append({"row": row_num, "message": "销售价格式错误"})
+            continue
+        try:
+            cost_price = Decimal(row.get("成本价") or row.get("cost_price") or "0")
+        except Exception:
+            errors.append({"row": row_num, "message": "成本价格式错误"})
+            continue
+
+        if sale_price < 0 or cost_price < 0:
+            errors.append({"row": row_num, "message": "价格不能为负"})
+            continue
+
+        # SKU 唯一性检查
+        if sku:
+            if sku in used_skus:
+                errors.append({"row": row_num, "message": f"SKU {sku} 已存在"})
+                continue
+            existing = db.query(Product).filter(
+                Product.sku == sku, Product.deleted_at.is_(None),
+            ).first()
+            if existing:
+                errors.append({"row": row_num, "message": f"SKU {sku} 已存在"})
+                continue
+        else:
+            sku = f"{sku_prefix}{sku_seq:04d}"
+            sku_seq += 1
+        used_skus.add(sku)
+
+        try:
+            stock = int(row.get("库存数量") or row.get("stock_quantity") or "0")
+        except ValueError:
+            stock = 0
+
+        product = Product(
+            id=uuid.uuid4(),
+            sku=sku,
+            name=name,
+            sale_price=sale_price,
+            cost_price=cost_price,
+            stock_quantity=stock,
+            category_id=default_cat.id if default_cat else None,
+            status="active",
+            created_by=current_user.id,
+            updated_by=current_user.id,
+        )
+        db.add(product)
+        created += 1
+
+    db.commit()
+
+    log_action(db, actor_id=current_user.id, actor_name=current_user.display_name,
+               action="product_import", resource_type="product",
+               after_data={"created": created, "errors": len(errors)},
+               **get_request_meta(request))
+    db.commit()
+
+    return {
+        "success": True,
+        "data": {"created": created, "errors": errors},
+        "message": f"成功导入 {created} 个商品" + (f"，{len(errors)} 行跳过" if errors else ""),
+    }

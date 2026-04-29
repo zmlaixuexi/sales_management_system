@@ -29,6 +29,7 @@ const ACTION_LABELS: Record<string, { label: string; color: string }> = {
   export_customers: { label: '导出客户', color: 'cyan' },
   export_orders: { label: '导出订单', color: 'cyan' },
   export_payments: { label: '导出收款', color: 'cyan' },
+  product_import: { label: '批量导入商品', color: 'geekblue' },
 };
 
 const RESOURCE_LABELS: Record<string, string> = {

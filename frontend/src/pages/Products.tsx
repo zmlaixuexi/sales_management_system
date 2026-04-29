@@ -1,13 +1,14 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import {
   Table, Button, Input, Select, Space, Tag, Popconfirm, message, Image,
 } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, StopOutlined, SearchOutlined, DownloadOutlined } from '@ant-design/icons'
+import { PlusOutlined, EditOutlined, DeleteOutlined, StopOutlined, SearchOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
 import { fetchProducts, deleteProduct, disableProduct } from '@/api/products'
 import type { Product } from '@/api/products'
 import { formatAmount, formatPercent, downloadCsv } from '@/utils'
+import apiClient from '@/api/client'
 
 const statusMap: Record<string, { color: string; label: string }> = {
   active: { color: 'green', label: '上架' },
@@ -24,6 +25,24 @@ export default function ProductsPage() {
   const [pageSize, setPageSize] = useState(20)
   const [keyword, setKeyword] = useState('')
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const formData = new FormData()
+    formData.append('file', file)
+    try {
+      const { data: res } = await apiClient.post('/products/import', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      if (res.success) {
+        message.success(res.message)
+        loadData()
+      }
+    } catch { /* 统一错误提示 */ }
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -151,6 +170,10 @@ export default function ProductsPage() {
           />
         </Space>
         <Space>
+          <Button icon={<UploadOutlined />} onClick={() => fileInputRef.current?.click()}>
+            导入
+          </Button>
+          <input ref={fileInputRef} type="file" accept=".csv" style={{ display: 'none' }} onChange={handleImport} />
           <Button icon={<DownloadOutlined />} onClick={() => downloadCsv('/exports/products', { keyword: keyword || undefined, status: statusFilter })}>
             导出
           </Button>
