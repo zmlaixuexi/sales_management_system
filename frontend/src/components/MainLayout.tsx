@@ -17,7 +17,7 @@ const menuItems = [
   { key: '/dashboard', icon: <DashboardOutlined />, label: '首页看板' },
   { key: '/products', icon: <ShoppingOutlined />, label: '商品管理' },
   { key: '/customers', icon: <TeamOutlined />, label: '客户管理' },
-  { key: '/sales-orders', icon: <FileTextOutlined />, label: '销售订单' },
+  { key: '/orders', icon: <FileTextOutlined />, label: '销售订单' },
 ];
 
 export default function MainLayout() {
@@ -52,7 +52,7 @@ export default function MainLayout() {
         <Menu
           theme="dark"
           mode="inline"
-          selectedKeys={[location.pathname]}
+          selectedKeys={[menuItems.find(m => location.pathname.startsWith(m.key))?.key || '']}
           items={menuItems}
           onClick={handleMenuClick}
         />

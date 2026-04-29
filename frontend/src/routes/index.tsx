@@ -7,6 +7,9 @@ import Products from '@/pages/Products'
 import ProductForm from '@/pages/ProductForm'
 import Customers from '@/pages/Customers'
 import CustomerForm from '@/pages/CustomerForm'
+import Orders from '@/pages/Orders'
+import OrderForm from '@/pages/OrderForm'
+import OrderDetail from '@/pages/OrderDetail'
 
 const routes: RouteObject[] = [
   {
@@ -24,6 +27,10 @@ const routes: RouteObject[] = [
       { path: 'customers', element: <Customers /> },
       { path: 'customers/new', element: <CustomerForm /> },
       { path: 'customers/:id/edit', element: <CustomerForm /> },
+      { path: 'orders', element: <Orders /> },
+      { path: 'orders/new', element: <OrderForm /> },
+      { path: 'orders/:id', element: <OrderDetail /> },
+      { path: 'orders/:id/edit', element: <OrderForm /> },
     ],
   },
   {
