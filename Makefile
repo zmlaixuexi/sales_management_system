@@ -12,7 +12,7 @@ dev-frontend: ## 启动前端开发服务器
 	cd frontend && npm run dev
 
 dev: ## 启动 Docker 开发环境
-	docker compose -f docker-compose.dev.yml up --build
+	docker compose -f deploy/docker-compose.dev.yml up --build
 
 # ─── 安装 ─────────────────────────────────────────────────
 
