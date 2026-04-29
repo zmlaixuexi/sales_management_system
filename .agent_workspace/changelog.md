@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第九十四轮）
+
+### 文档：API 文档补齐批量导入端点和环境变量
+
+- 新增 POST /products/import 和 POST /customers/import 端点文档
+- 补充 MAX_CSV_IMPORT_SIZE_MB 和 SLOW_REQUEST_THRESHOLD_MS 环境变量
+- 代码干净：0 console.log、0 print、0 debug 语句
+
 ## 2026-04-30（第九十二轮）
 
 ### 部署：Docker Compose 同步 MAX_CSV_IMPORT_SIZE_MB

@@ -281,6 +281,28 @@ JSON 日志格式示例：
 
 **权限**：`product:list`
 
+### POST /products/import
+
+批量导入商品（CSV 格式）。
+
+**请求**：`multipart/form-data`，字段 `file` 为 CSV 文件。大小限制 `MAX_CSV_IMPORT_SIZE_MB`（默认 10MB）。
+
+**CSV 表头**（支持中英文）：`商品名称` / `name`（必填）、`销售价` / `sale_price`、`成本价` / `cost_price`、`库存数量` / `stock_quantity`。
+
+**响应**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "created": 5,
+    "errors": [{"row": 3, "message": "销售价格式错误"}]
+  }
+}
+```
+
+**权限**：`product:create`
+
 ---
 
 ## 客户管理
@@ -336,6 +358,28 @@ JSON 日志格式示例：
 **请求体**：`{ "owner_user_id": "uuid" }`
 
 **权限**：`customer:update`
+
+### POST /customers/import
+
+批量导入客户（CSV 格式）。
+
+**请求**：`multipart/form-data`，字段 `file` 为 CSV 文件。大小限制 `MAX_CSV_IMPORT_SIZE_MB`（默认 10MB）。
+
+**CSV 表头**（支持中英文）：`客户名称` / `name`（必填）、`电话` / `phone`、`联系人` / `contact_name`、`邮箱` / `email`、`来源` / `source`、`等级` / `level`、`备注` / `remark`。
+
+**响应**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "created": 3,
+    "errors": [{"row": 2, "message": "手机号重复"}]
+  }
+}
+```
+
+**权限**：`customer:create`
 
 ---
 
@@ -592,6 +636,8 @@ JSON 日志格式示例：
 | `LOG_FORMAT` | `text` | 日志格式（`text` 或 `json`） |
 | `UPLOAD_DIR` | `uploads` | 上传文件目录 |
 | `MAX_IMAGE_SIZE_MB` | `5` | 图片上传大小限制 |
+| `MAX_CSV_IMPORT_SIZE_MB` | `10` | CSV 导入文件大小限制 |
+| `SLOW_REQUEST_THRESHOLD_MS` | `1000` | 慢请求阈值（毫秒） |
 | `INVENTORY_WARNING_THRESHOLD` | `10` | 库存预警默认阈值 |
 | `RATE_LIMIT_MAX` | `1000` | API 速率限制（每窗口请求数） |
 | `RATE_LIMIT_WINDOW` | `60` | 速率限制窗口（秒） |

@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-94
+当前任务编号：ROUND-95
 当前任务名称：持续质量维护
 当前 Agent：Claude
 任务状态：进行中
 
 ## 最近完成
 
+- Round 94：API 文档补齐批量导入端点和环境变量
 - Round 93：部署文档补齐环境变量 + 全量验证通过（311 测试）
 - Round 92：Docker Compose 同步 MAX_CSV_IMPORT_SIZE_MB 环境变量
 - Round 91：CSV 导入文件大小限制（MAX_CSV_IMPORT_SIZE_MB=10MB）
