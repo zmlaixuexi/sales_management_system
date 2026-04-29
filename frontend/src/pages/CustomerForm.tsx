@@ -3,7 +3,7 @@ import { Form, Input, Button, Card, Space, Select, message } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import { fetchCustomer, createCustomer, updateCustomer } from '@/api/customers'
-import { getApiErrorMessage } from '@/utils'
+import { useSubmit } from '@/hooks/useSubmit'
 
 export default function CustomerForm() {
   const navigate = useNavigate()
@@ -34,35 +34,28 @@ export default function CustomerForm() {
     }
   }, [id, form])
 
-  const handleSubmit = async (values: Record<string, unknown>) => {
-    setLoading(true)
-    try {
-      if (isEdit && id) {
-        const res = await updateCustomer(id, values)
-        if (res.success) {
-          message.success('更新成功')
-          navigate('/customers')
-        }
-      } else {
-        const res = await createCustomer(values as unknown as Parameters<typeof createCustomer>[0])
-        if (res.success) {
-          message.success('创建成功')
-          navigate('/customers')
-        }
+  const { submitting, handleSubmit } = useSubmit(async (values: Record<string, unknown>) => {
+    if (isEdit && id) {
+      const res = await updateCustomer(id, values)
+      if (res.success) {
+        message.success('更新成功')
+        navigate('/customers')
       }
-    } catch (e: unknown) {
-      message.error(getApiErrorMessage(e))
-    } finally {
-      setLoading(false)
+    } else {
+      const res = await createCustomer(values as unknown as Parameters<typeof createCustomer>[0])
+      if (res.success) {
+        message.success('创建成功')
+        navigate('/customers')
+      }
     }
-  }
+  })
 
   return (
     <div>
       <div style={{ marginBottom: 16 }}>
         <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/customers')}>返回列表</Button>
       </div>
-      <Card title={isEdit ? '编辑客户' : '新增客户'} loading={loading}>
+      <Card title={isEdit ? '编辑客户' : '新增客户'} loading={loading || submitting}>
         <Form
           form={form}
           layout="vertical"
@@ -131,7 +124,7 @@ export default function CustomerForm() {
 
           <Form.Item>
             <Space>
-              <Button type="primary" htmlType="submit" loading={loading}>
+              <Button type="primary" htmlType="submit" loading={loading || submitting}>
                 {isEdit ? '保存修改' : '创建客户'}
               </Button>
               <Button onClick={() => navigate('/customers')}>取消</Button>

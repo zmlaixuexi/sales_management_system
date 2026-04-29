@@ -4,7 +4,7 @@ import { PlusOutlined, ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import { fetchProduct, createProduct, updateProduct, uploadImage } from '@/api/products'
 import type { ProductDetail } from '@/api/products'
-import { getApiErrorMessage } from '@/utils'
+import { useSubmit } from '@/hooks/useSubmit'
 
 export default function ProductForm() {
   const navigate = useNavigate()
@@ -57,46 +57,39 @@ export default function ProductForm() {
     return false
   }
 
-  const handleSubmit = async (values: Record<string, unknown>) => {
-    setLoading(true)
-    try {
-      const payload = {
-        name: values.name as string,
-        cost_price: String(values.cost_price),
-        sale_price: String(values.sale_price),
-        main_image_url: mainImageUrl ?? undefined,
-        sku: values.sku as string | undefined,
-        stock_quantity: values.stock_quantity as number | undefined,
-        status: values.status as string | undefined,
-        sort_weight: values.sort_weight as number | undefined,
-        remark: values.remark as string | undefined,
-      }
-      if (isEdit && id) {
-        const res = await updateProduct(id, payload)
-        if (res.success) {
-          message.success('更新成功')
-          navigate('/products')
-        }
-      } else {
-        const res = await createProduct(payload)
-        if (res.success) {
-          message.success('创建成功')
-          navigate('/products')
-        }
-      }
-    } catch (e: unknown) {
-      message.error(getApiErrorMessage(e))
-    } finally {
-      setLoading(false)
+  const { submitting, handleSubmit } = useSubmit(async (values: Record<string, unknown>) => {
+    const payload = {
+      name: values.name as string,
+      cost_price: String(values.cost_price),
+      sale_price: String(values.sale_price),
+      main_image_url: mainImageUrl ?? undefined,
+      sku: values.sku as string | undefined,
+      stock_quantity: values.stock_quantity as number | undefined,
+      status: values.status as string | undefined,
+      sort_weight: values.sort_weight as number | undefined,
+      remark: values.remark as string | undefined,
     }
-  }
+    if (isEdit && id) {
+      const res = await updateProduct(id, payload)
+      if (res.success) {
+        message.success('更新成功')
+        navigate('/products')
+      }
+    } else {
+      const res = await createProduct(payload)
+      if (res.success) {
+        message.success('创建成功')
+        navigate('/products')
+      }
+    }
+  })
 
   return (
     <div>
       <div style={{ marginBottom: 16 }}>
         <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/products')}>返回列表</Button>
       </div>
-      <Card title={isEdit ? '编辑商品' : '新增商品'} loading={loading}>
+      <Card title={isEdit ? '编辑商品' : '新增商品'} loading={loading || submitting}>
         <Form
           form={form}
           layout="vertical"
@@ -169,7 +162,7 @@ export default function ProductForm() {
 
           <Form.Item>
             <Space>
-              <Button type="primary" htmlType="submit" loading={loading}>
+              <Button type="primary" htmlType="submit" loading={loading || submitting}>
                 {isEdit ? '保存修改' : '创建商品'}
               </Button>
               <Button onClick={() => navigate('/products')}>取消</Button>

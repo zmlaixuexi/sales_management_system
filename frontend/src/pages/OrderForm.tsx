@@ -7,7 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
 import { fetchOrder, createOrder, updateOrder } from '@/api/orders'
 import type { OrderDetail } from '@/api/orders'
-import { getApiErrorMessage } from '@/utils'
+import { useSubmit } from '@/hooks/useSubmit'
 import { fetchCustomers } from '@/api/customers'
 import type { Customer } from '@/api/customers'
 import { fetchProducts } from '@/api/products'
@@ -132,43 +132,35 @@ export default function OrderForm() {
 
   const totalAmount = lines.reduce((sum, l) => sum + l.subtotal, 0)
 
-  const handleSubmit = async () => {
-    try {
-      const values = await form.validateFields()
-      if (lines.length === 0) {
-        message.error('请添加至少一个商品')
-        return
-      }
-      setLoading(true)
-      const payload = {
-        customer_id: values.customer_id,
-        items: lines.map((l) => ({
-          product_id: l.product_id,
-          quantity: l.quantity,
-          unit_price: String(l.unit_price),
-        })),
-        remark: values.remark,
-      }
-      if (isEdit && id) {
-        const res = await updateOrder(id, payload)
-        if (res.success) {
-          message.success('更新成功')
-          navigate(`/orders/${id}`)
-        }
-      } else {
-        const res = await createOrder(payload)
-        if (res.success) {
-          message.success('创建成功')
-          navigate(`/orders/${res.data.id}`)
-        }
-      }
-    } catch (e: unknown) {
-      if (e && typeof e === 'object' && 'errorFields' in e) return
-      message.error(getApiErrorMessage(e))
-    } finally {
-      setLoading(false)
+  const { submitting, handleSubmit: submitOrder } = useSubmit(async () => {
+    const values = await form.validateFields()
+    if (lines.length === 0) {
+      message.error('请添加至少一个商品')
+      return
     }
-  }
+    const payload = {
+      customer_id: values.customer_id,
+      items: lines.map((l) => ({
+        product_id: l.product_id,
+        quantity: l.quantity,
+        unit_price: String(l.unit_price),
+      })),
+      remark: values.remark,
+    }
+    if (isEdit && id) {
+      const res = await updateOrder(id, payload)
+      if (res.success) {
+        message.success('更新成功')
+        navigate(`/orders/${id}`)
+      }
+    } else {
+      const res = await createOrder(payload)
+      if (res.success) {
+        message.success('创建成功')
+        navigate(`/orders/${res.data.id}`)
+      }
+    }
+  })
 
   const lineColumns: ColumnsType<OrderLine> = [
     {
@@ -231,7 +223,7 @@ export default function OrderForm() {
         <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/orders')}>返回列表</Button>
       </div>
 
-      <Card title={isEdit ? '编辑订单' : '新建订单'} loading={loading}>
+      <Card title={isEdit ? '编辑订单' : '新建订单'} loading={loading || submitting}>
         <Form form={form} layout="vertical" style={{ maxWidth: 600 }}>
           <Form.Item label="客户" name="customer_id" rules={[{ required: true, message: '请选择客户' }]}>
             <Select
@@ -277,7 +269,7 @@ export default function OrderForm() {
 
         <Form.Item>
           <Space>
-            <Button type="primary" onClick={handleSubmit} loading={loading}>
+            <Button type="primary" onClick={submitOrder} loading={loading || submitting}>
               {isEdit ? '保存修改' : '创建订单'}
             </Button>
             <Button onClick={() => navigate('/orders')}>取消</Button>
