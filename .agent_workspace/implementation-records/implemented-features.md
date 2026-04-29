@@ -2,6 +2,64 @@
 
 本文件记录已经实现并验证过的功能。
 
+## 功能编号：FEAT-20260430-07
+
+功能名称：数据导出功能
+所属模块：数据导出
+关联任务编号：EXT-002
+实现日期：2026-04-30
+实现 Agent：Claude
+当前状态：已测试
+
+### 实现范围
+
+- export_service.py：商品/客户/订单/收款 CSV 流式导出
+  - 使用 Python csv 模块 + StringIO 逐行生成，支持 yield_per(500) 流式输出
+  - UTF-8 BOM 头确保 Excel 正确识别编码
+  - 中文字段头：SKU、商品名称、客户名称、订单号等
+  - 状态字段中文映射（active→上架、confirmed→已确认等）
+- 4 个导出 API 端点：
+  - GET /api/v1/exports/products：支持 keyword/status/category_id 筛选
+  - GET /api/v1/exports/customers：支持 keyword/source 筛选
+  - GET /api/v1/exports/orders：支持 keyword/status/customer_id/start_date/end_date 筛选
+  - GET /api/v1/exports/payments：支持 order_id/start_date/end_date 筛选
+- 前端 downloadCsv 工具函数：fetch + Blob 触发浏览器下载，携带 Token 认证
+- 商品/客户/订单列表页添加"导出"按钮，携带当前筛选条件
+
+### 涉及文件
+
+| 文件 | 变更说明 |
+|---|---|
+| backend/app/services/export_service.py | 新建：CSV 流式导出服务 |
+| backend/app/api/v1/exports.py | 新建：4 个导出 API 端点 |
+| backend/app/api/v1/router.py | 更新：注册 exports 路由 |
+| frontend/src/utils/index.ts | 更新：添加 downloadCsv 工具函数 |
+| frontend/src/pages/Products.tsx | 更新：添加导出按钮 |
+| frontend/src/pages/Customers.tsx | 更新：添加导出按钮 |
+| frontend/src/pages/Orders.tsx | 更新：添加导出按钮 |
+
+### API 变更
+
+| 方法 | 路径 | 说明 | 权限 |
+|---|---|---|---|
+| GET | /api/v1/exports/products | 导出商品 CSV | 登录 |
+| GET | /api/v1/exports/customers | 导出客户 CSV | 登录 |
+| GET | /api/v1/exports/orders | 导出订单 CSV | 登录 |
+| GET | /api/v1/exports/payments | 导出收款 CSV | 登录 |
+
+### 已执行测试
+
+测试命令：`pytest tests/ -v` + `npm run build`
+测试结果：后端 34/34 通过，前端构建通过
+
+### 已知限制
+
+- 导出功能暂无角色权限限制（任何登录用户可导出）。
+- 暂不支持 Excel (.xlsx) 格式。
+- 大量数据导出时暂无进度提示。
+
+---
+
 ## 功能编号：FEAT-20260430-06
 
 功能名称：操作日志（Audit Log）系统

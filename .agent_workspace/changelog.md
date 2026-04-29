@@ -2,6 +2,15 @@
 
 ## 2026-04-30（第二轮）
 
+### MVP 后续扩展：数据导出功能
+
+- **EXT-002** 实现 CSV 数据导出功能：
+  - 后端 export_service.py：商品/客户/订单/收款 CSV 流式导出（BOM 头，Excel 兼容）
+  - GET /api/v1/exports/products|customers|orders|payments 四个导出端点
+  - 前端 downloadCsv 工具函数（fetch + blob 触发浏览器下载）
+  - 商品/客户/订单列表页添加"导出"按钮，携带当前筛选条件
+- 后端 34/34 测试通过，前端构建通过。
+
 ### MVP 后续扩展：操作日志系统
 
 - **EXT-001** 实现操作日志（Audit Log）系统：

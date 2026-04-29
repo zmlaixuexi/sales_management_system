@@ -2,12 +2,12 @@ import { useState, useEffect, useCallback } from 'react'
 import {
   Table, Button, Input, Select, Space, Tag, Popconfirm, message, Image,
 } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, StopOutlined, SearchOutlined } from '@ant-design/icons'
+import { PlusOutlined, EditOutlined, DeleteOutlined, StopOutlined, SearchOutlined, DownloadOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
 import { fetchProducts, deleteProduct, disableProduct } from '@/api/products'
 import type { Product } from '@/api/products'
-import { formatAmount, formatPercent } from '@/utils'
+import { formatAmount, formatPercent, downloadCsv } from '@/utils'
 
 const statusMap: Record<string, { color: string; label: string }> = {
   active: { color: 'green', label: '上架' },
@@ -150,9 +150,14 @@ export default function ProductsPage() {
             ]}
           />
         </Space>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/products/new')}>
-          新增商品
-        </Button>
+        <Space>
+          <Button icon={<DownloadOutlined />} onClick={() => downloadCsv('/exports/products', { keyword: keyword || undefined, status: statusFilter })}>
+            导出
+          </Button>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/products/new')}>
+            新增商品
+          </Button>
+        </Space>
       </div>
       <Table
         columns={columns}

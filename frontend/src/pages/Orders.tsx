@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Table, Button, Input, Select, Space, Tag, message } from 'antd'
-import { PlusOutlined, SearchOutlined, EyeOutlined } from '@ant-design/icons'
+import { PlusOutlined, SearchOutlined, EyeOutlined, DownloadOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
 import { fetchOrders } from '@/api/orders'
 import type { Order } from '@/api/orders'
-import { formatAmount, formatPercent } from '@/utils'
+import { formatAmount, formatPercent, downloadCsv } from '@/utils'
 
 const statusMap: Record<string, { color: string; label: string }> = {
   draft: { color: 'default', label: '草稿' },
@@ -133,9 +133,14 @@ export default function OrdersPage() {
             options={Object.entries(statusMap).map(([value, { label }]) => ({ label, value }))}
           />
         </Space>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/orders/new')}>
-          新建订单
-        </Button>
+        <Space>
+          <Button icon={<DownloadOutlined />} onClick={() => downloadCsv('/exports/orders', { keyword: keyword || undefined, status: statusFilter })}>
+            导出
+          </Button>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/orders/new')}>
+            新建订单
+          </Button>
+        </Space>
       </div>
       <Table
         columns={columns}

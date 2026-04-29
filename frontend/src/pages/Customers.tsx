@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Table, Button, Input, Space, Tag, Popconfirm, message, Select } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons'
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, DownloadOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
 import { fetchCustomers, deleteCustomer } from '@/api/customers'
 import type { Customer } from '@/api/customers'
+import { downloadCsv } from '@/utils'
 
 const sourceMap: Record<string, string> = {
   referral: '转介绍',
@@ -126,9 +127,14 @@ export default function CustomersPage() {
             options={Object.entries(sourceMap).map(([value, label]) => ({ value, label }))}
           />
         </Space>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/customers/new')}>
-          新增客户
-        </Button>
+        <Space>
+          <Button icon={<DownloadOutlined />} onClick={() => downloadCsv('/exports/customers', { keyword: keyword || undefined, source: sourceFilter })}>
+            导出
+          </Button>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/customers/new')}>
+            新增客户
+          </Button>
+        </Space>
       </div>
       <Table
         columns={columns}
