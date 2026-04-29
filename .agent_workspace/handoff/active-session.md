@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-102
+当前任务编号：ROUND-103
 当前任务名称：持续质量维护
 当前 Agent：Claude
 任务状态：进行中
 
 ## 最近完成
 
+- Round 103：前端错误消息路径修正（6 个页面 + 拦截器），修复后端 detail.message 无法正确展示的 bug
 - Round 102：Makefile 新增 db-backup/db-restore 命令
 - Round 101：前端类型修正，成本价/毛利率标记为可选字段，修复 ProductForm 潜在 NaN bug
 - Round 100：文档同步测试数至 341（244+97）+ README/testing.md 补齐新测试文件条目

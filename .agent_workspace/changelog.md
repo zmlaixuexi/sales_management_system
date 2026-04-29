@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百零三轮）
+
+### 修复：前端错误消息路径修正，正确读取 detail.message
+
+- 拦截器增加 detail.message 提取路径（409 重复手机号、400 库存不足等错误现在能正确显示）
+- 6 个页面组件的错误类型断言统一改为 detail.message
+- Alembic 迁移验证通过：16 个表全部覆盖
+
 ## 2026-04-30（第一百零二轮）
 
 ### 工程：Makefile 新增 db-backup 和 db-restore 命令
