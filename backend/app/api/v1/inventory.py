@@ -2,14 +2,14 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db, require_permission
 from app.models.order import InventoryMovement
 from app.models.product import Product
 from app.models.user import User
-from app.services.audit_service import log_action
+from app.services.audit_service import log_action, get_request_meta
 
 router = APIRouter(prefix="/inventory", tags=["库存管理"])
 
@@ -63,6 +63,7 @@ def list_movements(
 @router.post("/adjustments")
 def adjust_inventory(
     data: dict,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("inventory:adjust")),
 ):
@@ -104,6 +105,7 @@ def adjust_inventory(
         actor_name=current_user.display_name or current_user.username,
         before_data={"stock_quantity": before},
         after_data={"stock_quantity": after, "change": quantity_change},
+        **get_request_meta(request),
     )
     db.commit()
 

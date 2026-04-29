@@ -4,13 +4,13 @@ import uuid
 from datetime import datetime
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db, require_permission
 from app.models.order import Payment, SalesOrder
 from app.models.user import User
-from app.services.audit_service import log_action
+from app.services.audit_service import log_action, get_request_meta
 
 router = APIRouter(prefix="/payments", tags=["收款管理"])
 
@@ -60,6 +60,7 @@ def list_payments(
 def create_payment(
     order_id: uuid.UUID,
     data: dict,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("payment:create")),
 ):
@@ -108,6 +109,7 @@ def create_payment(
         resource_id=str(payment.id), actor_id=current_user.id,
         actor_name=current_user.display_name or current_user.username,
         after_data={"order_id": str(order.id), "amount": str(amount), "method": data.get("payment_method", "cash")},
+        **get_request_meta(request),
     )
     db.commit()
 
@@ -127,6 +129,7 @@ def create_payment(
 @router.post("/{payment_id}/reverse")
 def reverse_payment(
     payment_id: uuid.UUID,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("payment:reverse")),
 ):
@@ -155,6 +158,7 @@ def reverse_payment(
         actor_name=current_user.display_name or current_user.username,
         before_data={"amount": str(payment.amount), "status": "normal"},
         after_data={"status": "reversed"},
+        **get_request_meta(request),
     )
     db.commit()
 

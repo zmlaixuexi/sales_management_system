@@ -5,6 +5,7 @@ import logging
 import uuid
 from typing import Any
 
+from fastapi import Request
 from sqlalchemy.orm import Session
 
 from app.models.audit import AuditLog
@@ -13,6 +14,14 @@ logger = logging.getLogger(__name__)
 
 # 敏感字段列表，记录日志时自动脱敏
 SENSITIVE_FIELDS = {"password", "hashed_password", "token", "secret", "credit_card"}
+
+
+def get_request_meta(request: Request) -> dict:
+    """从 FastAPI Request 对象提取 IP、user_agent、request_id"""
+    ip = request.client.host if request.client else None
+    ua = request.headers.get("user-agent")
+    rid = request.headers.get("x-request-id") or str(uuid.uuid4())[:8]
+    return {"ip_address": ip, "user_agent": ua, "request_id": rid}
 
 
 def _mask_sensitive(data: dict | None) -> dict | None:

@@ -4,14 +4,14 @@ import uuid
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
 from app.api.deps import get_current_user, get_db, require_permission, has_permission
 from app.models.product import Product, ProductCategory, ProductPriceHistory
 from app.models.user import User
-from app.services.audit_service import log_action, model_to_dict
+from app.services.audit_service import log_action, get_request_meta, model_to_dict
 
 router = APIRouter(prefix="/products", tags=["商品管理"])
 
@@ -135,6 +135,7 @@ def list_products(
 @router.post("")
 def create_product(
     data: dict,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("product:create")),
 ):
@@ -190,6 +191,7 @@ def create_product(
         resource_id=str(product.id), actor_id=current_user.id,
         actor_name=current_user.display_name or current_user.username,
         after_data={"name": name, "sku": sku, "sale_price": str(sale_price), "cost_price": str(cost_price)},
+        **get_request_meta(request),
     )
     db.commit()
 
@@ -267,6 +269,7 @@ def get_product(
 def update_product(
     product_id: uuid.UUID,
     data: dict,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("product:update")),
 ):
@@ -355,6 +358,7 @@ def update_product(
         actor_name=current_user.display_name or current_user.username,
         before_data={"name": product.name, "sale_price": str(old_sale_price), "cost_price": str(old_cost_price)},
         after_data={"name": product.name, "sale_price": str(product.sale_price), "cost_price": str(product.cost_price)},
+        **get_request_meta(request),
     )
     db.commit()
 
@@ -381,6 +385,7 @@ def update_product(
 @router.delete("/{product_id}")
 def delete_product(
     product_id: uuid.UUID,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("product:delete")),
 ):
@@ -400,6 +405,7 @@ def delete_product(
         resource_id=str(product.id), actor_id=current_user.id,
         actor_name=current_user.display_name or current_user.username,
         before_data={"name": product.name, "sku": product.sku},
+        **get_request_meta(request),
     )
     db.commit()
 
@@ -409,6 +415,7 @@ def delete_product(
 @router.post("/{product_id}/disable")
 def disable_product(
     product_id: uuid.UUID,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("product:update")),
 ):
@@ -427,6 +434,7 @@ def disable_product(
         resource_id=str(product.id), actor_id=current_user.id,
         actor_name=current_user.display_name or current_user.username,
         before_data={"status": "active"}, after_data={"status": "disabled"},
+        **get_request_meta(request),
     )
     db.commit()
 

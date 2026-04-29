@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-04-30（第六轮）
+
+### 审计日志：记录请求元数据
+
+- **AUDIT-REQ-001** 审计日志补充 IP、user_agent、request_id：
+  - audit_service.py 新增 `get_request_meta(request)` 辅助函数
+  - 6 个 API 模块共 17 个 log_action 调用全部传入请求元数据
+  - request_id 优先从 `x-request-id` 请求头获取，否则自动生成短 UUID
+- 后端 51/51 测试通过。
+
 ## 2026-04-30（第五轮）
 
 ### 安全加固：数据范围权限

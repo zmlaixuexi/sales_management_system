@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -13,7 +13,7 @@ from app.models.customer import Customer
 from app.models.order import SalesOrder, SalesOrderItem, InventoryMovement, Payment
 from app.models.product import Product
 from app.models.user import User
-from app.services.audit_service import log_action
+from app.services.audit_service import log_action, get_request_meta
 
 router = APIRouter(prefix="/sales-orders", tags=["订单管理"])
 
@@ -202,6 +202,7 @@ def list_orders(
 @router.post("")
 def create_order(
     data: dict,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("order:create")),
 ):
@@ -270,6 +271,7 @@ def create_order(
         resource_id=str(order.id), actor_id=current_user.id,
         actor_name=current_user.display_name or current_user.username,
         after_data={"order_no": order_no, "total_amount": str(order.total_amount)},
+        **get_request_meta(request),
     )
     db.commit()
 
@@ -358,6 +360,7 @@ def get_order(
 def update_order(
     order_id: uuid.UUID,
     data: dict,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("order:update")),
 ):
@@ -416,6 +419,7 @@ def update_order(
         resource_id=str(order.id), actor_id=current_user.id,
         actor_name=current_user.display_name or current_user.username,
         after_data={"order_no": order.order_no},
+        **get_request_meta(request),
     )
     db.commit()
 
@@ -425,6 +429,7 @@ def update_order(
 @router.post("/{order_id}/confirm")
 def confirm_order(
     order_id: uuid.UUID,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("order:confirm")),
 ):
@@ -447,6 +452,7 @@ def confirm_order(
         resource_id=str(order.id), actor_id=current_user.id,
         actor_name=current_user.display_name or current_user.username,
         after_data={"order_no": order.order_no, "status": "confirmed"},
+        **get_request_meta(request),
     )
     db.commit()
 
@@ -456,6 +462,7 @@ def confirm_order(
 @router.post("/{order_id}/cancel")
 def cancel_order(
     order_id: uuid.UUID,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("order:cancel")),
 ):
@@ -482,6 +489,7 @@ def cancel_order(
         resource_id=str(order.id), actor_id=current_user.id,
         actor_name=current_user.display_name or current_user.username,
         after_data={"order_no": order.order_no, "status": "cancelled"},
+        **get_request_meta(request),
     )
     db.commit()
 

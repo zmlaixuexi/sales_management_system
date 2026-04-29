@@ -3,13 +3,13 @@
 import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db, require_permission, has_permission
 from app.models.customer import Customer
 from app.models.user import User
-from app.services.audit_service import log_action
+from app.services.audit_service import log_action, get_request_meta
 
 router = APIRouter(prefix="/customers", tags=["客户管理"])
 
@@ -80,6 +80,7 @@ def list_customers(
 @router.post("")
 def create_customer(
     data: dict,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("customer:create")),
 ):
@@ -121,6 +122,7 @@ def create_customer(
         resource_id=str(customer.id), actor_id=current_user.id,
         actor_name=current_user.display_name or current_user.username,
         after_data={"name": name, "phone": phone},
+        **get_request_meta(request),
     )
     db.commit()
 
@@ -180,6 +182,7 @@ def get_customer(
 def update_customer(
     customer_id: uuid.UUID,
     data: dict,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("customer:update")),
 ):
@@ -232,6 +235,7 @@ def update_customer(
         resource_id=str(customer.id), actor_id=current_user.id,
         actor_name=current_user.display_name or current_user.username,
         after_data={"name": customer.name, "phone": customer.phone},
+        **get_request_meta(request),
     )
     db.commit()
 
@@ -250,6 +254,7 @@ def update_customer(
 @router.delete("/{customer_id}")
 def delete_customer(
     customer_id: uuid.UUID,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("customer:delete")),
 ):
@@ -268,6 +273,7 @@ def delete_customer(
         resource_id=str(customer.id), actor_id=current_user.id,
         actor_name=current_user.display_name or current_user.username,
         before_data={"name": customer.name, "phone": customer.phone},
+        **get_request_meta(request),
     )
     db.commit()
 
@@ -278,6 +284,7 @@ def delete_customer(
 def transfer_customer(
     customer_id: uuid.UUID,
     data: dict,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("customer:update")),
 ):
@@ -300,6 +307,7 @@ def transfer_customer(
         resource_id=str(customer.id), actor_id=current_user.id,
         actor_name=current_user.display_name or current_user.username,
         after_data={"owner_user_id": str(new_owner_id)},
+        **get_request_meta(request),
     )
     db.commit()
 

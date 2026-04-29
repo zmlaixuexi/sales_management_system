@@ -1,41 +1,43 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：安全加固 — 数据范围权限
-当前任务编号：SEC-002
-当前任务名称：数据范围权限和导出过滤
+当前阶段：安全加固 — 审计日志请求元数据
+当前任务编号：AUDIT-REQ-001
+当前任务名称：审计日志记录 IP/user_agent/request_id
 当前 Agent：Claude
 任务状态：已完成
 
 ## 本次目标
 
-实现客户/订单数据范围权限（销售只能看本人数据），并在导出 CSV 时同样过滤。
+为所有审计日志补充记录请求 IP、user_agent 和 request_id。
 
 ## 最近完成
 
-- 客户列表 API：无 `customer:view_all` 权限时只返回 `owner_user_id == current_user.id` 的客户
-- 订单列表 API：无 `order:view_all` 权限时只返回 `sales_user_id == current_user.id` 的订单
-- 客户导出 CSV：同样应用 `owner_user_id` 过滤
-- 订单导出 CSV：同样应用 `sales_user_id` 过滤
+- audit_service.py 新增 `get_request_meta(request)` 辅助函数
+- 6 个 API 模块共 17 个 log_action 调用全部传入请求元数据
+- request_id 优先从 `x-request-id` 请求头获取，否则自动生成短 UUID
 - 后端 51/51 测试通过
 
 ## 当前正在做
 
-数据范围权限已完成。下一步继续 P0 缺口。
+审计日志请求元数据已完成。下一步继续待办。
 
 ## 下一步第一动作
 
-1. 审计日志补充 IP、user_agent、request_id（AUDIT-REQ-001）
-2. 补齐阶段 6 交付物和文档
+1. 补齐阶段 6 交付物：docs/api.md、docs/database.md、docs/testing.md
+2. 生产 Docker Compose 和 Nginx 配置
 
 ## 涉及文件
 
 | 文件 | 状态 | 说明 |
 |---|---|---|
-| backend/app/api/v1/customers.py | 更新 | 数据范围过滤 |
-| backend/app/api/v1/orders.py | 更新 | 数据范围过滤 |
-| backend/app/api/v1/exports.py | 更新 | 导出数据范围过滤 |
-| backend/app/services/export_service.py | 更新 | 导出函数增加 owner_user_id/sales_user_id 参数 |
+| backend/app/services/audit_service.py | 更新 | 新增 get_request_meta 函数 |
+| backend/app/api/v1/auth.py | 更新 | 传入请求元数据 |
+| backend/app/api/v1/products.py | 更新 | 传入请求元数据 |
+| backend/app/api/v1/customers.py | 更新 | 传入请求元数据 |
+| backend/app/api/v1/orders.py | 更新 | 传入请求元数据 |
+| backend/app/api/v1/payments.py | 更新 | 传入请求元数据 |
+| backend/app/api/v1/inventory.py | 更新 | 传入请求元数据 |
 
 ## 已执行命令
 
@@ -45,8 +47,8 @@
 
 ## 未完成事项
 
-- 审计日志补充 IP、user_agent、request_id。
-- 补齐文档和交付物。
+- 补齐阶段 6 交付物和文档。
+- 生产部署配置。
 
 ## 阻塞问题
 
