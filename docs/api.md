@@ -596,6 +596,14 @@ JSON 日志格式示例：
 
 | 权限码 | 说明 |
 |---|---|
+| user:list | 查看用户列表 |
+| user:create | 创建用户 |
+| user:update | 编辑用户 |
+| user:delete | 删除用户 |
+| role:list | 查看角色列表 |
+| role:create | 创建角色 |
+| role:update | 编辑角色 |
+| role:delete | 删除角色 |
 | product:list | 商品列表和详情 |
 | product:create | 新增商品 |
 | product:update | 编辑和停用商品 |
@@ -617,7 +625,9 @@ JSON 日志格式示例：
 | payment:reverse | 冲正收款 |
 | inventory:list | 库存流水 |
 | inventory:adjust | 手工调整库存 |
-| report:sales | 查看报表 |
+| report:sales | 查看销售报表 |
+| report:profit | 查看利润报表 |
+| report:ranking | 查看排行榜 |
 | audit:view | 查看审计日志 |
 
 ---
