@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-04-30（第六十九轮）
+
+### 文档：新增部署指南
+
+- 新建 docs/deployment.md：覆盖开发环境、生产部署、环境变量、Nginx 配置、数据库备份恢复、健康检查、运维命令
+- 补齐 DoD 文档缺口
+
+## 2026-04-30（第六十八轮）
+
+### 工程：修复 Makefile docker-compose 路径
+
+- dev 命令路径从 `docker-compose.dev.yml` 修正为 `deploy/docker-compose.dev.yml`
+
 ## 2026-04-30（第六十七轮）
 
 ### 工程：代码审查和小改进
