@@ -29,8 +29,12 @@ COPY app/ app/
 COPY alembic/ alembic/
 COPY alembic.ini .
 
-# 创建上传目录
-RUN mkdir -p /app/uploads/products
+# 创建非 root 用户和上传目录
+RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin appuser \
+    && mkdir -p /app/uploads/products \
+    && chown -R appuser:appuser /app/uploads
+
+USER appuser
 
 EXPOSE 8000
 
