@@ -1,67 +1,63 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：阶段 4 后端已完成，前端页面待实现
-当前任务编号：DB-ORDER-001 / BE-ORDER-001 / BE-PAYMENT-001
-当前任务名称：订单、库存、收款后端 API
+当前阶段：阶段 4 已全部完成，阶段 5 待开始
+当前任务编号：FE-ORDER-001
+当前任务名称：订单列表、创建、详情前端页面
 当前 Agent：Claude
 任务状态：已完成
 
 ## 本次目标
 
-实现阶段 4 后端 API：订单创建/确认/取消、库存扣减/回滚、收款登记。
+实现阶段 4 前端页面：订单列表、创建、详情页。
 
 ## 最近完成
 
-- 创建 SalesOrder/SalesOrderItem/InventoryMovement/Payment 四个模型和 Alembic 迁移。
-- 实现订单 API：创建草稿（含商品快照）、编辑草稿、确认（扣减库存）、取消（回滚库存）。
-- 订单状态机：draft → confirmed → partially_paid → completed；draft/confirmed → cancelled。
-- 实现收款 API：登记收款（自动更新订单状态到 partially_paid/completed）、冲正收款。
-- 实现库存 API：库存流水查询、手工库存调整。
-- 库存扣减/回滚使用行锁（with_for_update）保护并发安全。
-- 订单明细保存商品快照（名称/SKU/图片/成本价），商品改价不影响历史订单。
-- 金额使用 Decimal，折扣金额/折扣率由后端自动计算。
-- 完整订单流程实测通过：创建 → 确认 → 收款 → 完成。
-- 后端测试 10/10 通过。
+- 创建 frontend/src/api/orders.ts 和 payments.ts API 调用文件。
+- 重写 Orders.tsx 订单列表页：搜索、状态筛选、分页。
+- 创建 OrderForm.tsx 订单创建/编辑页：选择客户、添加商品明细、编辑数量和单价。
+- 创建 OrderDetail.tsx 订单详情页：明细展示、确认/取消状态操作、收款登记/冲正。
+- 更新路由配置添加订单页面路由。
+- 修复侧边栏菜单 key 与路由不匹配（/sales-orders → /orders）。
+- 修复侧边栏选中状态支持子路径高亮。
+- TypeScript 编译通过，前端构建通过，后端测试 10/10 通过。
 
 ## 当前正在做
 
-阶段 4 后端 API 全部完成。前端订单页面（FE-ORDER-001）待下一轮实现。
+阶段 4 全部完成（后端 + 前端）。阶段 5 报表与审计待开始。
 
 ## 下一步第一动作
 
-实现阶段 4 前端页面：
-1. 在 `frontend/src/api/` 创建 orders.ts 和 payments.ts API 调用。
-2. 在 `frontend/src/pages/Orders.tsx` 实现订单列表页。
-3. 创建 `frontend/src/pages/OrderForm.tsx` 实现订单创建页（选择客户 + 添加商品明细）。
-4. 创建 `frontend/src/pages/OrderDetail.tsx` 实现订单详情页（明细/收款/状态操作）。
-5. 更新路由配置添加订单页面路由。
+实现阶段 5 报表与审计：
+1. BE-REPORT-001：实现销售汇总、趋势、排行、库存预警 API。
+2. FE-REPORT-001：实现首页看板和报表页面。
+3. QA-001：MVP 端到端测试。
 
 ## 涉及文件
 
 | 文件 | 状态 | 说明 |
 |---|---|---|
-| backend/app/models/order.py | 新建 | 订单、明细、库存流水、收款模型 |
-| backend/app/api/v1/orders.py | 新建 | 订单 CRUD + 状态操作 API |
-| backend/app/api/v1/payments.py | 新建 | 收款登记和冲正 API |
-| backend/app/api/v1/inventory.py | 新建 | 库存流水和调整 API |
-| backend/app/api/v1/router.py | 已更新 | 注册新路由 |
-| backend/alembic/versions/eb6a1ce2c197_*.py | 新建 | 订单相关表迁移 |
+| frontend/src/api/orders.ts | 新建 | 订单 API 调用 |
+| frontend/src/api/payments.ts | 新建 | 收款 API 调用 |
+| frontend/src/pages/Orders.tsx | 重写 | 订单列表页 |
+| frontend/src/pages/OrderForm.tsx | 新建 | 订单创建/编辑页 |
+| frontend/src/pages/OrderDetail.tsx | 新建 | 订单详情页 |
+| frontend/src/routes/index.tsx | 更新 | 添加订单路由 |
+| frontend/src/components/MainLayout.tsx | 更新 | 修复侧边栏菜单 |
 
 ## 已执行命令
 
 | 命令 | 结果 | 备注 |
 |---|---|---|
-| alembic revision --autogenerate | 通过 | 检测到 4 张新表 |
-| alembic upgrade head | 通过 | 16 张表已创建 |
+| npx tsc --noEmit | 通过 | |
+| npm run build | 通过 | |
 | pytest tests/ -v | 10/10 通过 | |
-| curl POST /sales-orders | 通过 | 订单创建成功 |
-| curl POST /{id}/confirm | 通过 | 库存扣减正确 |
-| curl POST /payments | 通过 | 收款登记成功，订单完成 |
 
 ## 未完成事项
 
-- FE-ORDER-001：订单列表、创建、详情前端页面。
+- BE-REPORT-001：销售汇总、趋势、排行、库存预警 API。
+- FE-REPORT-001：首页看板和报表页面。
+- QA-001：MVP 端到端测试。
 - 操作日志记录。
 - 权限校验细化。
 
@@ -75,6 +71,7 @@
 2. JWT 存储用户 ID 是 string → 查询时需 uuid.UUID(user_id) 转换。
 3. Alembic env.py 必须导入所有模型 → 否则自动生成空迁移。
 4. 库存扣减必须使用 with_for_update() 行锁 → 否则并发超卖。
+5. Ant Design 组件 import 必须使用实际用到的组件 → 否则构建失败。
 
 ## 恢复检查清单
 

@@ -2,6 +2,80 @@
 
 本文件记录已经实现并验证过的功能。
 
+## 功能编号：FEAT-20260430-04
+
+功能名称：订单管理前端页面
+所属模块：订单管理
+关联任务编号：FE-ORDER-001
+实现日期：2026-04-30
+实现 Agent：Claude
+当前状态：已测试
+
+### 实现范围
+
+- 订单列表页（Orders.tsx）：订单号搜索、状态筛选、分页、金额/毛利/毛利率/收款展示。
+- 订单创建/编辑页（OrderForm.tsx）：选择客户（搜索下拉）、添加商品明细（内嵌商品选择器）、编辑数量和成交单价、实时小计和合计。
+- 订单详情页（OrderDetail.tsx）：明细展示、确认订单（扣减库存）、取消订单（回滚库存）、收款登记弹窗（金额/方式/备注）、收款冲正。
+- API 调用层：orders.ts（CRUD + 确认/取消）、payments.ts（收款登记/冲正/列表）。
+- 路由配置：/orders、/orders/new、/orders/:id、/orders/:id/edit。
+- 侧边栏菜单修复：key 从 /sales-orders 改为 /orders，支持子路径高亮。
+
+### 涉及文件
+
+| 文件 | 变更说明 |
+|---|---|
+| frontend/src/api/orders.ts | 新建：订单 API 调用 |
+| frontend/src/api/payments.ts | 新建：收款 API 调用 |
+| frontend/src/pages/Orders.tsx | 重写：订单列表页 |
+| frontend/src/pages/OrderForm.tsx | 新建：订单创建/编辑页 |
+| frontend/src/pages/OrderDetail.tsx | 新建：订单详情页 |
+| frontend/src/routes/index.tsx | 更新：添加订单路由 |
+| frontend/src/components/MainLayout.tsx | 更新：修复侧边栏菜单 |
+
+### 已执行测试
+
+测试命令：`npx tsc --noEmit` + `npm run build` + `pytest tests/ -v`
+测试结果：TypeScript 编译通过，前端构建通过，后端测试 10/10 通过
+
+---
+
+## 功能编号：FEAT-20260430-03
+
+功能名称：订单、库存、收款后端 API
+所属模块：订单管理
+关联任务编号：DB-ORDER-001 / BE-ORDER-001 / BE-PAYMENT-001
+实现日期：2026-04-30
+实现 Agent：Claude
+当前状态：已测试
+
+### 实现范围
+
+- 订单模型：SalesOrder、SalesOrderItem、InventoryMovement、Payment。
+- 订单 CRUD API：创建草稿（含商品快照）、编辑草稿、确认（扣减库存）、取消（回滚库存）。
+- 订单状态机：draft → confirmed → partially_paid → completed；draft/confirmed → cancelled。
+- 收款 API：登记收款（自动更新订单状态）、冲正收款。
+- 库存 API：库存流水查询、手工库存调整。
+- 库存扣减/回滚使用行锁（with_for_update）保护并发安全。
+
+### 涉及文件
+
+| 文件 | 变更说明 |
+|---|---|
+| backend/app/models/order.py | 新建：订单相关模型 |
+| backend/app/api/v1/orders.py | 新建：订单 CRUD + 状态操作 API |
+| backend/app/api/v1/payments.py | 新建：收款登记和冲正 API |
+| backend/app/api/v1/inventory.py | 新建：库存流水和调整 API |
+| backend/app/api/v1/router.py | 更新：注册新路由 |
+| backend/alembic/versions/eb6a1ce2c197_*.py | 新建：订单相关表迁移 |
+
+### 已执行测试
+
+测试命令：`pytest tests/ -v`
+测试结果：10/10 通过
+API 实测：创建 → 确认 → 收款 → 完成流程通过
+
+---
+
 ## 功能编号：FEAT-20260430-02
 
 功能名称：商品管理、文件上传和客户管理后端 API
