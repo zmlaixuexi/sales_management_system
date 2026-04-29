@@ -1,0 +1,208 @@
+"""文件上传集成测试 — 覆盖上传、校验、查询、删除"""
+
+import os
+import uuid
+import tempfile
+from pathlib import Path
+
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from app.db.session import Base
+from app.main import app
+from app.api.deps import get_db
+from app.core.security import hash_password
+from app.models.user import User
+
+TEST_DB_URL = "sqlite:///./test_file_upload.db"
+engine = create_engine(TEST_DB_URL, connect_args={"check_same_thread": False})
+TestSession = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+
+_original_override = None
+_original_upload_dir = None
+_tokens: dict = {}
+_file_id: str = ""
+
+
+def override_get_db():
+    db = TestSession()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+def setup_module(module):
+    global _original_override, _original_upload_dir
+    _original_override = app.dependency_overrides.get(get_db)
+    app.dependency_overrides[get_db] = override_get_db
+    Base.metadata.create_all(bind=engine)
+
+    # 创建临时上传目录
+    _original_upload_dir = tempfile.mkdtemp()
+    from app.core import config
+    config.settings.UPLOAD_DIR = _original_upload_dir
+
+    db = TestSession()
+    try:
+        user = User(
+            id=uuid.uuid4(),
+            username="file_tester",
+            hashed_password=hash_password("testpass123"),
+            display_name="文件测试员",
+            is_active=True,
+            is_superuser=True,
+        )
+        db.add(user)
+        db.commit()
+    finally:
+        db.close()
+
+
+def teardown_module(module):
+    import shutil
+    Base.metadata.drop_all(bind=engine)
+    if os.path.exists("./test_file_upload.db"):
+        os.remove("./test_file_upload.db")
+    # 清理临时上传目录
+    if _original_upload_dir and os.path.exists(_original_upload_dir):
+        shutil.rmtree(_original_upload_dir, ignore_errors=True)
+    if _original_override is not None:
+        app.dependency_overrides[get_db] = _original_override
+    elif get_db in app.dependency_overrides:
+        del app.dependency_overrides[get_db]
+
+
+client = TestClient(app)
+
+
+def _auth():
+    return {"Authorization": f"Bearer {_tokens.get('access', '')}"}
+
+
+def _make_png_bytes(size_kb: int = 1) -> bytes:
+    """生成最小有效 PNG 字节"""
+    # PNG 签名 + IHDR + IDAT + IEND（最小有效 PNG）
+    import struct
+    import zlib
+
+    png_sig = b"\x89PNG\r\n\x1a\n"
+    # IHDR: 1x1, 8bit RGB
+    ihdr_data = struct.pack(">IIBBBBB", 1, 1, 8, 2, 0, 0, 0)
+    ihdr_crc = zlib.crc32(b"IHDR" + ihdr_data) & 0xFFFFFFFF
+    ihdr = struct.pack(">I", 13) + b"IHDR" + ihdr_data + struct.pack(">I", ihdr_crc)
+    # IDAT
+    raw = zlib.compress(b"\x00\x00\x00\x00")
+    idat_crc = zlib.crc32(b"IDAT" + raw) & 0xFFFFFFFF
+    idat = struct.pack(">I", len(raw)) + b"IDAT" + raw + struct.pack(">I", idat_crc)
+    # IEND
+    iend_crc = zlib.crc32(b"IEND") & 0xFFFFFFFF
+    iend = struct.pack(">I", 0) + b"IEND" + struct.pack(">I", iend_crc)
+
+    png = png_sig + ihdr + idat + iend
+    # 如果需要更大文件，填充 IDAT
+    if size_kb > 1:
+        padding = b"\x00" * (size_kb * 1024 - len(png))
+        raw2 = zlib.compress(b"\x00" + padding)
+        idat_crc2 = zlib.crc32(b"IDAT" + raw2) & 0xFFFFFFFF
+        idat2 = struct.pack(">I", len(raw2)) + b"IDAT" + raw2 + struct.pack(">I", idat_crc2)
+        png = png_sig + ihdr + idat2 + iend
+    return png
+
+
+def test_01_login():
+    """登录获取 Token"""
+    resp = client.post("/api/v1/auth/login", json={
+        "username": "file_tester", "password": "testpass123",
+    })
+    assert resp.status_code == 200
+    _tokens["access"] = resp.json()["data"]["access_token"]
+
+
+def test_02_upload_image_success():
+    """上传 PNG 图片成功"""
+    png_bytes = _make_png_bytes()
+    resp = client.post(
+        "/api/v1/files/images",
+        files={"file": ("test.png", png_bytes, "image/png")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["original_name"] == "test.png"
+    assert data["content_type"] == "image/png"
+    assert data["size_bytes"] > 0
+    assert "/uploads/" in data["url"]
+    global _file_id
+    _file_id = data["id"]
+
+
+def test_03_get_image_info():
+    """查询图片信息"""
+    resp = client.get(f"/api/v1/files/images/{_file_id}", headers=_auth())
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["id"] == _file_id
+    assert data["original_name"] == "test.png"
+
+
+def test_04_upload_invalid_type():
+    """上传不支持的文件类型"""
+    resp = client.post(
+        "/api/v1/files/images",
+        files={"file": ("test.txt", b"hello", "text/plain")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 400
+    assert resp.json()["detail"]["code"] == "FILE_INVALID_TYPE"
+
+
+def test_05_upload_oversized():
+    """上传超过大小限制的图片"""
+    import app.services.file_service as fs
+    old_max = fs.MAX_SIZE_BYTES
+    fs.MAX_SIZE_BYTES = 10  # 10 字节限制
+    png_bytes = _make_png_bytes(size_kb=1)
+    resp = client.post(
+        "/api/v1/files/images",
+        files={"file": ("big.png", png_bytes, "image/png")},
+        headers=_auth(),
+    )
+    fs.MAX_SIZE_BYTES = old_max
+    assert resp.status_code == 400
+    assert resp.json()["detail"]["code"] == "FILE_INVALID_TYPE"
+
+
+def test_06_get_image_not_found():
+    """查询不存在的文件"""
+    fake_id = str(uuid.uuid4())
+    resp = client.get(f"/api/v1/files/images/{fake_id}", headers=_auth())
+    assert resp.status_code == 404
+    assert resp.json()["detail"]["code"] == "FILE_NOT_FOUND"
+
+
+def test_07_delete_image():
+    """删除已上传的图片"""
+    resp = client.delete(f"/api/v1/files/images/{_file_id}", headers=_auth())
+    assert resp.status_code == 200
+    # 删除后再查询应 404
+    resp = client.get(f"/api/v1/files/images/{_file_id}", headers=_auth())
+    assert resp.status_code == 404
+
+
+def test_08_delete_not_found():
+    """删除不存在的文件"""
+    fake_id = str(uuid.uuid4())
+    resp = client.delete(f"/api/v1/files/images/{fake_id}", headers=_auth())
+    assert resp.status_code == 404
+
+
+def test_09_upload_requires_auth():
+    """上传需要认证"""
+    png_bytes = _make_png_bytes()
+    resp = client.post(
+        "/api/v1/files/images",
+        files={"file": ("test.png", png_bytes, "image/png")},
+    )
+    assert resp.status_code == 401
