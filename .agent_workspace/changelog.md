@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-04-30（第一百零二轮）
+
+### 工程：Makefile 新增 db-backup 和 db-restore 命令
+
+- db-backup：调用 deploy/backup.sh 备份 PostgreSQL
+- db-restore：调用 deploy/restore.sh 恢复，支持 BACKUP_FILE 参数
+
 ## 2026-04-30（第一百零一轮）
 
 ### 修复：前端类型修正，成本价/毛利率标记为可选字段
