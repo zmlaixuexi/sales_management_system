@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-04-30（第十八轮）
+
+### 性能优化：前端路由级代码拆分
+
+- **PERF-001** 前端代码拆分：
+  - routes/index.tsx 改为 React.lazy + Suspense 动态导入
+  - 所有页面组件（Dashboard、Products、Orders、Customers 等）按路由独立 chunk
+  - 新增 lazyPage 辅助函数和全屏 Spin 加载占位
+  - bundle 从单个 1,452KB 拆分为 40+ 个按需加载 chunk
+  - 页面级模块独立：Dashboard 11KB、Products 4.5KB、Orders 3KB、AuditLogs 206KB
+- TypeScript 编译通过，构建成功。
+
 ## 2026-04-30（第十七轮）
 
 ### 安全加固：API 速率限制

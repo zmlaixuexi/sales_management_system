@@ -1,25 +1,25 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：P1 安全加固
-当前任务编号：SEC-003
-当前任务名称：API 速率限制
+当前阶段：P1 性能优化
+当前任务编号：PERF-001
+当前任务名称：前端路由级代码拆分
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- 实现基于滑动窗口的 IP 级速率限制中间件（stdlib，无外部依赖）
-- config.py 新增 RATE_LIMIT_MAX（默认 1000）和 RATE_LIMIT_WINDOW（默认 60s）
-- 受限时返回 429 + RATE_LIMIT_EXCEEDED 错误码
-- 正常请求返回 X-RateLimit-Limit / X-RateLimit-Remaining 响应头
-- 新增 3 个速率限制测试（90/90 全量通过）
+- 路由配置改为 React.lazy + Suspense 动态导入
+- bundle 从单个 1,452KB 拆分为 40+ 个按需加载 chunk
+- 页面级模块独立：Dashboard 11KB、Products 4.5KB、Orders 3KB 等
+- 加载中显示 Spin 全屏占位
+- TypeScript 编译通过，构建成功
 
 ## 下一步第一动作
 
 1. 批量导入功能
-2. 代码拆分优化（前端 bundle 过大 1.4MB）
-3. 前端错误边界和 loading 状态统一
+2. 前端错误边界和 loading 状态统一
+3. 前端请求层 429 重试和错误提示
 
 ## 阻塞问题
 

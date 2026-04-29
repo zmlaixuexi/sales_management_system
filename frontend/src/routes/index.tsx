@@ -1,43 +1,49 @@
+import { lazy, Suspense, type ComponentType } from 'react'
+import { Spin } from 'antd'
 import type { RouteObject } from 'react-router-dom'
 import AppLayout from '@/routes/AppLayout'
-import Dashboard from '@/pages/Dashboard'
-import Login from '@/pages/Login'
-import NotFound from '@/pages/NotFound'
-import Products from '@/pages/Products'
-import ProductForm from '@/pages/ProductForm'
-import Customers from '@/pages/Customers'
-import CustomerForm from '@/pages/CustomerForm'
-import Orders from '@/pages/Orders'
-import OrderForm from '@/pages/OrderForm'
-import OrderDetail from '@/pages/OrderDetail'
-import AuditLogs from '@/pages/AuditLogs'
+
+const Loading = () => (
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+    <Spin size="large" />
+  </div>
+)
+
+function lazyPage(load: () => Promise<{ default: ComponentType }>) {
+  const Component = lazy(load)
+  return (
+    <Suspense fallback={<Loading />}>
+      <Component />
+    </Suspense>
+  )
+}
 
 const routes: RouteObject[] = [
   {
     path: '/login',
-    element: <Login />,
+    element: lazyPage(() => import('@/pages/Login')),
   },
   {
     path: '/',
     element: <AppLayout />,
     children: [
-      { index: true, element: <Dashboard /> },
-      { path: 'products', element: <Products /> },
-      { path: 'products/new', element: <ProductForm /> },
-      { path: 'products/:id/edit', element: <ProductForm /> },
-      { path: 'customers', element: <Customers /> },
-      { path: 'customers/new', element: <CustomerForm /> },
-      { path: 'customers/:id/edit', element: <CustomerForm /> },
-      { path: 'orders', element: <Orders /> },
-      { path: 'orders/new', element: <OrderForm /> },
-      { path: 'orders/:id', element: <OrderDetail /> },
-      { path: 'orders/:id/edit', element: <OrderForm /> },
-      { path: 'audit-logs', element: <AuditLogs /> },
+      { index: true, element: lazyPage(() => import('@/pages/Dashboard')) },
+      { path: 'products', element: lazyPage(() => import('@/pages/Products')) },
+      { path: 'products/new', element: lazyPage(() => import('@/pages/ProductForm')) },
+      { path: 'products/:id/edit', element: lazyPage(() => import('@/pages/ProductForm')) },
+      { path: 'customers', element: lazyPage(() => import('@/pages/Customers')) },
+      { path: 'customers/new', element: lazyPage(() => import('@/pages/CustomerForm')) },
+      { path: 'customers/:id/edit', element: lazyPage(() => import('@/pages/CustomerForm')) },
+      { path: 'orders', element: lazyPage(() => import('@/pages/Orders')) },
+      { path: 'orders/new', element: lazyPage(() => import('@/pages/OrderForm')) },
+      { path: 'orders/:id', element: lazyPage(() => import('@/pages/OrderDetail')) },
+      { path: 'orders/:id/edit', element: lazyPage(() => import('@/pages/OrderForm')) },
+      { path: 'audit-logs', element: lazyPage(() => import('@/pages/AuditLogs')) },
     ],
   },
   {
     path: '*',
-    element: <NotFound />,
+    element: lazyPage(() => import('@/pages/NotFound')),
   },
 ]
 
