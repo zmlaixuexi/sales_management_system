@@ -66,15 +66,45 @@ Authorization: Bearer <access_token>
 - 正常响应头：`X-RateLimit-Limit`（窗口上限）、`X-RateLimit-Remaining`（剩余次数）
 - 超限返回 429 + `RATE_LIMIT_EXCEEDED` 错误码
 
+## 安全响应头
+
+所有 API 响应自动附加以下安全头：
+
+| 响应头 | 值 | 说明 |
+|---|---|---|
+| X-Content-Type-Options | nosniff | 防止 MIME 类型嗅探 |
+| X-Frame-Options | DENY | 禁止 iframe 嵌入 |
+| X-XSS-Protection | 1; mode=block | XSS 过滤 |
+| Referrer-Policy | strict-origin-when-cross-origin | 限制 Referer 泄露 |
+| Content-Security-Policy | default-src 'none'; frame-ancestors 'none' | API 严格 CSP |
+| Permissions-Policy | camera=(), microphone=(), geolocation=() | 禁用浏览器特性 |
+
+## 请求日志
+
+所有 `/api/` 请求自动记录结构化日志，包含：
+
+- `method`：请求方法（GET/POST/PUT/DELETE）
+- `path`：请求路径
+- `status`：响应状态码
+- `duration_ms`：请求耗时（毫秒）
+- `client_ip`：客户端 IP 地址
+
+JSON 日志格式示例：
+
+```json
+{"timestamp":"2026-04-30T12:00:00Z","level":"INFO","logger":"app.request","message":"GET /api/v1/health 200 3.5ms","method":"GET","path":"/api/v1/health","status":200,"duration_ms":3.5,"client_ip":"127.0.0.1"}
+```
+
 ---
 
 ## 健康检查
 
 ### GET /health
 
-健康检查，无需认证。
+健康检查，无需认证。包含数据库连接探测。
 
-**响应**：`{"status": "ok"}`
+**响应**（正常）：`{"status": "ok"}`
+**响应**（数据库不可用）：`{"status": "degraded"}`
 
 ### GET /version
 
