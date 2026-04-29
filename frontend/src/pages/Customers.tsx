@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
 import { fetchCustomers, deleteCustomer } from '@/api/customers'
 import type { Customer } from '@/api/customers'
-import { downloadCsv } from '@/utils'
+import { downloadCsv, getApiErrorMessage } from '@/utils'
 import apiClient from '@/api/client'
 import { usePaginatedList } from '@/hooks/usePaginatedList'
 
@@ -58,8 +58,7 @@ export default function CustomersPage() {
       message.success('删除成功')
       loadData()
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { detail?: { message?: string } } } }
-      message.error(err.response?.data?.detail?.message || '删除失败')
+      message.error(getApiErrorMessage(e, '删除失败'))
     }
   }
 

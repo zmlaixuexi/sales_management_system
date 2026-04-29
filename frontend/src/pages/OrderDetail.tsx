@@ -9,7 +9,7 @@ import type { ColumnsType } from 'antd/es/table'
 import { fetchOrder, confirmOrder, cancelOrder } from '@/api/orders'
 import type { OrderDetail, OrderItem, OrderPayment } from '@/api/orders'
 import { createPayment, reversePayment } from '@/api/payments'
-import { formatAmount, formatPercent } from '@/utils'
+import { formatAmount, formatPercent, getApiErrorMessage } from '@/utils'
 
 const statusMap: Record<string, { color: string; label: string }> = {
   draft: { color: 'default', label: '草稿' },
@@ -64,8 +64,7 @@ export default function OrderDetail() {
         loadOrder()
       }
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { detail?: { message?: string } } } }
-      message.error(err.response?.data?.detail?.message || '确认失败')
+      message.error(getApiErrorMessage(e, '确认失败'))
     }
   }
 
@@ -78,8 +77,7 @@ export default function OrderDetail() {
         loadOrder()
       }
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { detail?: { message?: string } } } }
-      message.error(err.response?.data?.detail?.message || '取消失败')
+      message.error(getApiErrorMessage(e, '取消失败'))
     }
   }
 
@@ -103,8 +101,7 @@ export default function OrderDetail() {
         loadOrder()
       }
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { detail?: { message?: string } } } }
-      message.error(err.response?.data?.detail?.message || '收款登记失败')
+      message.error(getApiErrorMessage(e, '收款登记失败'))
     } finally {
       setPayLoading(false)
     }
@@ -118,8 +115,7 @@ export default function OrderDetail() {
         loadOrder()
       }
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { detail?: { message?: string } } } }
-      message.error(err.response?.data?.detail?.message || '冲正失败')
+      message.error(getApiErrorMessage(e, '冲正失败'))
     }
   }
 

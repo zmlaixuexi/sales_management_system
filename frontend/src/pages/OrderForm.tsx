@@ -7,6 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
 import { fetchOrder, createOrder, updateOrder } from '@/api/orders'
 import type { OrderDetail } from '@/api/orders'
+import { getApiErrorMessage } from '@/utils'
 import { fetchCustomers } from '@/api/customers'
 import type { Customer } from '@/api/customers'
 import { fetchProducts } from '@/api/products'
@@ -163,8 +164,7 @@ export default function OrderForm() {
       }
     } catch (e: unknown) {
       if (e && typeof e === 'object' && 'errorFields' in e) return
-      const err = e as { response?: { data?: { detail?: { message?: string } } } }
-      message.error(err.response?.data?.detail?.message || '操作失败')
+      message.error(getApiErrorMessage(e))
     } finally {
       setLoading(false)
     }

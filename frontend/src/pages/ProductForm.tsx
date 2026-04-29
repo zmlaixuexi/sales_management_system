@@ -4,6 +4,7 @@ import { PlusOutlined, ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import { fetchProduct, createProduct, updateProduct, uploadImage } from '@/api/products'
 import type { ProductDetail } from '@/api/products'
+import { getApiErrorMessage } from '@/utils'
 
 export default function ProductForm() {
   const navigate = useNavigate()
@@ -84,8 +85,7 @@ export default function ProductForm() {
         }
       }
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { detail?: { message?: string } } } }
-      message.error(err.response?.data?.detail?.message || '操作失败')
+      message.error(getApiErrorMessage(e))
     } finally {
       setLoading(false)
     }

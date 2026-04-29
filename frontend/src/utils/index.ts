@@ -21,6 +21,14 @@ export function formatPercent(value: number | string | null | undefined): string
 /**
  * 触发 CSV 文件下载
  */
+/**
+ * 显示 API 错误消息（提取后端 detail.message）
+ */
+export function getApiErrorMessage(e: unknown, fallback = '操作失败'): string {
+  const err = e as { response?: { data?: { detail?: { message?: string } } } }
+  return err.response?.data?.detail?.message || fallback
+}
+
 export async function downloadCsv(path: string, params: Record<string, string | undefined> = {}): Promise<void> {
   const token = localStorage.getItem('access_token')
   const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1'

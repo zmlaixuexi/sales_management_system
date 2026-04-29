@@ -3,6 +3,7 @@ import { Form, Input, Button, Card, Space, Select, message } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import { fetchCustomer, createCustomer, updateCustomer } from '@/api/customers'
+import { getApiErrorMessage } from '@/utils'
 
 export default function CustomerForm() {
   const navigate = useNavigate()
@@ -50,8 +51,7 @@ export default function CustomerForm() {
         }
       }
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { detail?: { message?: string } } } }
-      message.error(err.response?.data?.detail?.message || '操作失败')
+      message.error(getApiErrorMessage(e))
     } finally {
       setLoading(false)
     }
