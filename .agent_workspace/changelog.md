@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-04-30（第八十一轮）
+
+### 工程：全量验证通过
+
+- 后端 204/204、前端 86/86、tsc 0 errors、ruff 0、ESLint 0、build 通过
+- 全面审查代码质量：无裸 except、无 TODO/FIXME、无 any 类型、无未使用导入
+- 导出服务已使用 yield_per(500) 防止内存过载
+- Docker Compose 环境变量已与 config.py 完全同步
+
+## 2026-04-30（第八十轮）
+
+### 部署：Docker Compose 补齐 SLOW_REQUEST_THRESHOLD_MS 环境变量
+
+## 2026-04-30（第七十九轮）
+
+### 工程：同步 active-session 交接文档
+
 ## 2026-04-30（第七十八轮）
 
 ### 工程：修复 test_health.py 未使用导入
