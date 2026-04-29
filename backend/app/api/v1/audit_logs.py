@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, require_permission
+from app.core.sanitize import escape_like
 from app.models.audit import AuditLog
 from app.models.user import User
 
@@ -40,9 +41,10 @@ def list_audit_logs(
     if end_date:
         query = query.filter(AuditLog.created_at <= end_date)
     if keyword:
+        escaped = escape_like(keyword)
         query = query.filter(
-            AuditLog.actor_name.ilike(f"%{keyword}%")
-            | AuditLog.resource_id.ilike(f"%{keyword}%")
+            AuditLog.actor_name.ilike(f"%{escaped}%", escape="\\")
+            | AuditLog.resource_id.ilike(f"%{escaped}%", escape="\\")
         )
 
     total = query.count()

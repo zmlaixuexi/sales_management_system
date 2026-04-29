@@ -8,6 +8,7 @@ from typing import Generator
 
 from sqlalchemy.orm import Session
 
+from app.core.sanitize import escape_like
 from app.models.customer import Customer
 from app.models.order import Payment, SalesOrder
 from app.models.product import Product
@@ -65,7 +66,7 @@ def export_products(
 ) -> Generator[str, None, None]:
     query = db.query(Product).filter(Product.deleted_at.is_(None))
     if keyword:
-        query = query.filter(Product.name.ilike(f"%{keyword}%"))
+        query = query.filter(Product.name.ilike(f"%{escape_like(keyword)}%", escape="\\"))
     if status:
         query = query.filter(Product.status == status)
     if category_id:
@@ -114,10 +115,11 @@ def export_customers(
 ) -> Generator[str, None, None]:
     query = db.query(Customer).filter(Customer.deleted_at.is_(None))
     if keyword:
+        escaped = escape_like(keyword)
         query = query.filter(
-            (Customer.name.ilike(f"%{keyword}%"))
-            | (Customer.phone.ilike(f"%{keyword}%"))
-            | (Customer.contact_name.ilike(f"%{keyword}%"))
+            (Customer.name.ilike(f"%{escaped}%", escape="\\"))
+            | (Customer.phone.ilike(f"%{escaped}%", escape="\\"))
+            | (Customer.contact_name.ilike(f"%{escaped}%", escape="\\"))
         )
     if source:
         query = query.filter(Customer.source == source)
@@ -181,7 +183,7 @@ def export_orders(
 ) -> Generator[str, None, None]:
     query = db.query(SalesOrder).filter(SalesOrder.deleted_at.is_(None))
     if keyword:
-        query = query.filter(SalesOrder.order_no.ilike(f"%{keyword}%"))
+        query = query.filter(SalesOrder.order_no.ilike(f"%{escape_like(keyword)}%", escape="\\"))
     if status:
         query = query.filter(SalesOrder.status == status)
     if customer_id:

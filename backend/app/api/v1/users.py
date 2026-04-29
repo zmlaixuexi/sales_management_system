@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db
+from app.core.sanitize import escape_like
 from app.core.security import hash_password
 from app.models.user import User, UserRole
 from app.schemas.auth import RoleBrief, UserCreate, UserUpdate
@@ -27,7 +28,7 @@ def list_users(
 
     query = db.query(User).filter(User.deleted_at.is_(None))
     if keyword:
-        query = query.filter(User.username.ilike(f"%{keyword}%"))
+        query = query.filter(User.username.ilike(f"%{escape_like(keyword)}%", escape="\\"))
 
     total = query.count()
     users = query.order_by(User.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()

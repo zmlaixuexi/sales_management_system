@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFil
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, has_permission, require_permission
+from app.core.sanitize import escape_like
 from app.models.customer import Customer
 from app.models.user import User
 from app.services.audit_service import get_request_meta, log_action
@@ -34,10 +35,11 @@ def list_customers(
         query = query.filter(Customer.owner_user_id == current_user.id)
 
     if keyword:
+        escaped = escape_like(keyword)
         query = query.filter(
-            (Customer.name.ilike(f"%{keyword}%")) |
-            (Customer.phone.ilike(f"%{keyword}%")) |
-            (Customer.contact_name.ilike(f"%{keyword}%"))
+            (Customer.name.ilike(f"%{escaped}%", escape="\\")) |
+            (Customer.phone.ilike(f"%{escaped}%", escape="\\")) |
+            (Customer.contact_name.ilike(f"%{escaped}%", escape="\\"))
         )
     if source:
         query = query.filter(Customer.source == source)

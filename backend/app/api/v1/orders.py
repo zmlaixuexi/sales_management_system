@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, has_permission, require_permission
+from app.core.sanitize import escape_like
 from app.models.customer import Customer
 from app.models.order import InventoryMovement, SalesOrder, SalesOrderItem
 from app.models.product import Product
@@ -173,7 +174,7 @@ def list_orders(
     if not has_permission(current_user, "order:view_all"):
         query = query.filter(SalesOrder.sales_user_id == current_user.id)
     if keyword:
-        query = query.filter(SalesOrder.order_no.ilike(f"%{keyword}%"))
+        query = query.filter(SalesOrder.order_no.ilike(f"%{escape_like(keyword)}%", escape="\\"))
     if status:
         query = query.filter(SalesOrder.status == status)
     if customer_id:

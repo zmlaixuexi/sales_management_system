@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第四十一轮）
+
+### 安全：LIKE 通配符转义防注入
+
+- 新增 `app/core/sanitize.py`：`escape_like()` 转义 %、_、\\
+- 所有 `ilike` 查询统一使用 `escape_like` + `escape="\\"` 参数
+- 覆盖 6 个模块：products、customers、orders、audit_logs、users、export_service
+- 新增 6 个转义函数测试，后端 142/142 通过
+
 ## 2026-04-30（第四十轮）
 
 ### 文档：README 更新

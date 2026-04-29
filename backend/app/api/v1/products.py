@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFil
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, has_permission, require_permission
+from app.core.sanitize import escape_like
 from app.models.product import Product, ProductCategory, ProductPriceHistory
 from app.models.user import User
 from app.services.audit_service import get_request_meta, log_action
@@ -79,7 +80,7 @@ def list_products(
     query = db.query(Product).filter(Product.deleted_at.is_(None))
 
     if keyword:
-        query = query.filter(Product.name.ilike(f"%{keyword}%"))
+        query = query.filter(Product.name.ilike(f"%{escape_like(keyword)}%", escape="\\"))
     if status:
         query = query.filter(Product.status == status)
     if category_id:
