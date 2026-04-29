@@ -11,4 +11,16 @@
 scripts/claude-agent-loop.sh --max-rounds 50 --budget-usd 20
 ```
 
-5. 结束后汇总 `.agent_workspace/loop/latest.log` 中的最终状态、已完成任务和下一步。
+5. 如果用户想在终端中实时旁观输出，推荐用前台可视化命令：
+
+```bash
+script -f .agent_workspace/loop/terminal.log -c 'scripts/claude-agent-loop.sh --task "持续完成销售管理系统 MVP 开发" --max-rounds 999999 --budget-usd 10 --continue-session --auto-commit'
+```
+
+6. 如果系统安装了 tmux，推荐用 tmux 长期运行并随时 attach：
+
+```bash
+tmux new -s claude-loop 'scripts/claude-agent-loop.sh --task "持续完成销售管理系统 MVP 开发" --max-rounds 999999 --budget-usd 10 --continue-session --auto-commit 2>&1 | tee -a .agent_workspace/loop/terminal.log'
+```
+
+7. 结束后汇总 `.agent_workspace/loop/latest.log` 中的最终状态、已完成任务和下一步。

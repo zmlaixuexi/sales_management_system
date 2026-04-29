@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sales_management
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/sales_management
+      DATABASE_ASYNC_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/sales_management
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-me}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      UPLOAD_DIR: /app/uploads
+      UPLOAD_PUBLIC_BASE_URL: /uploads
+      MAX_IMAGE_SIZE_MB: ${MAX_IMAGE_SIZE_MB:-5}
+    volumes:
+      - ../backend/app:/app/app
+      - uploads_data:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    volumes:
+      - ../frontend/src:/app/src
+      - ../frontend/public:/app/public
+    environment:
+      - VITE_API_BASE_URL=http://localhost:${BACKEND_PORT:-8000}/api/v1
+
+volumes:
+  postgres_data:
+  uploads_data:
