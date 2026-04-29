@@ -79,6 +79,20 @@ npm run dev
 
 数据库需要 PostgreSQL 运行在 localhost:5432，或修改 `.env` 中的 `DATABASE_URL`。
 
+### 常用命令（Makefile）
+
+```bash
+make help              # 查看所有可用命令
+make dev               # 启动 Docker 开发环境
+make dev-backend       # 启动后端开发服务器
+make dev-frontend      # 启动前端开发服务器
+make test              # 运行全部测试（后端 + 前端）
+make lint              # 运行全部 lint 检查
+make build             # 完整构建（lint + test + build）
+make db-migrate        # 运行数据库迁移
+make db-seed           # 初始化种子数据
+```
+
 ## 项目结构
 
 ```

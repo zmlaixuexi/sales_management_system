@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第六十三轮）
+
+### 部署：Makefile 开发命令简化
+
+- 新建 Makefile（17 个命令）：dev、dev-backend、dev-frontend、install、test、test-backend、test-frontend、lint、lint-backend、lint-frontend、build、build-frontend、db-migrate、db-seed、docker-up、docker-down、clean
+- README 新增 Makefile 常用命令说明
+- `make lint` 验证通过
+
 ## 2026-04-30（第六十二轮）
 
 ### 可观测性：请求日志中间件
