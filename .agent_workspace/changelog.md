@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-04-30（第三十五轮）
+
+### 工程：前端自动化测试框架搭建
+
+- 安装 Vitest + @testing-library/react + @testing-library/jest-dom + @testing-library/user-event + jsdom
+- 配置 vite.config.ts 的 test 块（globals、jsdom、setupFiles、css）
+- 创建 src/test/setup.ts 初始化 jest-dom 匹配器
+- 新增 10 个前端测试：
+  - utils.test.ts（8 个）：formatAmount / formatPercent 纯函数测试
+  - ErrorBoundary.test.tsx（2 个）：正常渲染 + 错误捕获
+- package.json 新增 test / test:watch 脚本
+- 前端 10/10 测试通过，TypeScript 编译通过
+
 ## 2026-04-30（第三十四轮）
 
 ### 功能：客户 CSV 批量导入

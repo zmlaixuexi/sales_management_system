@@ -2,34 +2,38 @@
 
 最后更新时间：2026-04-30
 当前阶段：P1 前端体验 / 扩展功能
-当前任务编号：EXT-006
-当前任务名称：客户 CSV 批量导入
+当前任务编号：UX-005
+当前任务名称：前端自动化测试框架搭建
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- 后端 `POST /customers/import` 批量导入端点（中英文 CSV 表头、手机号去重、验证、审计日志）
-- 前端客户列表页"导入"按钮
-- 后端 116/116 测试通过，前端 TypeScript 编译通过
+- 安装 Vitest 4.x + Testing Library + jsdom
+- 配置 vite.config.ts test 块、setup.ts
+- 10 个前端测试（utils 纯函数 8 + ErrorBoundary 2）
+- 前端 10/10 测试通过，TypeScript 编译通过
 
 ## 下一步第一动作
 
-1. 前端自动化测试框架搭建（Vitest + Testing Library）
-2. 前端列表页空状态和分页大小选择器
+1. 前端列表页空状态和分页大小选择器
+2. 前端测试补强（更多组件测试、API mock）
 3. 订单 CSV 批量导入
+4. 代码质量：ESLint 规则完善
 
-## 当前里程碑总结（Round 15-34）
+## 当前里程碑总结（Round 15-35）
 
-- 测试：51 → 116（+65，覆盖权限、异常路径、速率限制、文件上传、导出审计、CSV 导入）
+- 后端测试：51 → 116（+65）
+- 前端测试：0 → 10（框架搭建完成）
 - 安全：RBAC 权限、数据范围过滤、速率限制、敏感字段控制、logout token 清理
 - 可观测性：结构化 JSON 日志（LOG_FORMAT）、审计日志请求元数据
 - 性能：前端代码拆分（1.4MB → 40+ chunk）、TypeScript strict 模式
 - 前端体验：统一错误提示、429 重试、ErrorBoundary、菜单修复、用户名/角色展示
 - 功能：商品/客户 CSV 批量导入、4 种数据导出
+- 工程化：Vitest + Testing Library 测试框架
 - 文档：API 文档、README、.env.example、测试报告全部更新
 - 配置：INVENTORY_WARNING_THRESHOLD、LOG_FORMAT、RATE_LIMIT_MAX/WINDOW
-- 后端 116/116 通过，前端 TypeScript + 构建通过
+- 后端 116/116 通过，前端 10/10 + TypeScript 通过
 
 ## 阻塞问题
 

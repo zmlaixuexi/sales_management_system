@@ -6,6 +6,42 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的“已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-15
+
+功能名称：前端自动化测试框架
+所属模块：前端工程化
+关联任务编号：UX-005
+实现日期：2026-04-30
+实现 Agent：Claude
+当前状态：已测试
+
+### 实现范围
+
+- 安装 Vitest 4.x + @testing-library/react + @testing-library/jest-dom + jsdom
+- 配置 vite.config.ts test 块（globals、jsdom 环境、setupFiles）
+- src/test/setup.ts 初始化 jest-dom 匹配器
+- 10 个示例测试验证框架可用
+- package.json 新增 test / test:watch 脚本
+
+### 涉及文件
+
+| 文件 | 变更说明 |
+|---|---|
+| frontend/vite.config.ts | 新增 test 配置块 |
+| frontend/src/test/setup.ts | 新建：测试环境初始化 |
+| frontend/src/__tests__/utils.test.ts | 新建：utils 纯函数测试 |
+| frontend/src/__tests__/ErrorBoundary.test.tsx | 新建：ErrorBoundary 组件测试 |
+| frontend/package.json | 新增依赖和 test 脚本 |
+
+### 测试状态
+
+- 前端 10/10 测试通过
+- TypeScript 编译通过
+
+### 已知限制
+
+- 尚未覆盖 API 调用和路由相关组件（需 MSW 或路由 mock）
+
 ## 功能编号：FEAT-20260430-14
 
 功能名称：客户 CSV 批量导入
