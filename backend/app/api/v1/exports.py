@@ -17,7 +17,13 @@ from app.services.export_service import (
     export_products,
 )
 
-router = APIRouter(prefix="/exports", tags=["数据导出"])
+router = APIRouter(
+    prefix="/exports", tags=["数据导出"],
+    responses={
+        401: {"description": "未认证"},
+        403: {"description": "无权限"},
+    },
+)
 
 
 def _csv_filename(prefix: str) -> str:

@@ -12,7 +12,13 @@ from app.models.order import SalesOrder, SalesOrderItem
 from app.models.product import Product
 from app.models.user import User
 
-router = APIRouter(prefix="/reports", tags=["报表"])
+router = APIRouter(
+    prefix="/reports", tags=["报表"],
+    responses={
+        401: {"description": "未认证"},
+        403: {"description": "无权限"},
+    },
+)
 
 
 def _date_range(period: str):

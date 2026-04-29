@@ -8,7 +8,14 @@ from app.core.security import hash_password
 from app.models.user import User, UserRole
 from app.schemas.auth import RoleBrief, UserCreate, UserUpdate
 
-router = APIRouter(prefix="/users", tags=["用户管理"])
+router = APIRouter(
+    prefix="/users", tags=["用户管理"],
+    responses={
+        401: {"description": "未认证"},
+        403: {"description": "仅超级管理员可操作"},
+        404: {"description": "用户不存在"},
+    },
+)
 
 
 @router.get("")

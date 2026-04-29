@@ -11,7 +11,15 @@ from app.models.product import Product
 from app.models.user import User
 from app.services.audit_service import get_request_meta, log_action
 
-router = APIRouter(prefix="/inventory", tags=["库存管理"])
+router = APIRouter(
+    prefix="/inventory", tags=["库存管理"],
+    responses={
+        401: {"description": "未认证"},
+        403: {"description": "无权限"},
+        400: {"description": "参数验证失败"},
+        404: {"description": "商品不存在"},
+    },
+)
 
 
 @router.get("/movements")

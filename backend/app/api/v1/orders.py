@@ -17,7 +17,15 @@ from app.schemas.order import OrderBrief, OrderCreate, OrderDetail, OrderUpdate
 from app.schemas.response import ApiResponse
 from app.services.audit_service import get_request_meta, log_action
 
-router = APIRouter(prefix="/sales-orders", tags=["订单管理"])
+router = APIRouter(
+    prefix="/sales-orders", tags=["订单管理"],
+    responses={
+        401: {"description": "未认证"},
+        403: {"description": "无权限"},
+        400: {"description": "参数验证失败或库存不足"},
+        404: {"description": "订单或商品不存在"},
+    },
+)
 
 # 允许的状态流转
 VALID_TRANSITIONS: dict[str, set[str]] = {

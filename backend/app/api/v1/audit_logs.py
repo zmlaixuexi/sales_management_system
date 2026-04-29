@@ -11,7 +11,13 @@ from app.core.sanitize import escape_like
 from app.models.audit import AuditLog
 from app.models.user import User
 
-router = APIRouter(prefix="/audit-logs", tags=["操作日志"])
+router = APIRouter(
+    prefix="/audit-logs", tags=["操作日志"],
+    responses={
+        401: {"description": "未认证"},
+        403: {"description": "无权限"},
+    },
+)
 
 
 @router.get("")

@@ -11,7 +11,15 @@ from app.models.order import Payment, SalesOrder
 from app.models.user import User
 from app.services.audit_service import get_request_meta, log_action
 
-router = APIRouter(prefix="/payments", tags=["收款管理"])
+router = APIRouter(
+    prefix="/payments", tags=["收款管理"],
+    responses={
+        401: {"description": "未认证"},
+        403: {"description": "无权限"},
+        400: {"description": "金额无效或订单状态不允许"},
+        404: {"description": "订单或收款记录不存在"},
+    },
+)
 
 
 @router.get("")

@@ -22,7 +22,16 @@ from app.schemas.customer import (
 from app.schemas.response import ApiResponse
 from app.services.audit_service import get_request_meta, log_action
 
-router = APIRouter(prefix="/customers", tags=["客户管理"])
+router = APIRouter(
+    prefix="/customers", tags=["客户管理"],
+    responses={
+        401: {"description": "未认证"},
+        403: {"description": "无权限"},
+        400: {"description": "参数验证失败"},
+        404: {"description": "客户不存在"},
+        409: {"description": "手机号重复"},
+    },
+)
 
 
 @router.get("")

@@ -10,7 +10,13 @@ from app.models.user import User
 from app.schemas.auth import LoginRequest, RefreshRequest, RoleBrief
 from app.services.audit_service import get_request_meta, log_action
 
-router = APIRouter(prefix="/auth", tags=["认证"])
+router = APIRouter(
+    prefix="/auth", tags=["认证"],
+    responses={
+        401: {"description": "用户名或密码错误"},
+        403: {"description": "账户已禁用"},
+    },
+)
 
 
 @router.post("/login")

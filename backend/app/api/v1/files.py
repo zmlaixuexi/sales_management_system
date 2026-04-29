@@ -9,7 +9,15 @@ from app.api.deps import get_current_user, get_db
 from app.models.user import User
 from app.services.file_service import delete_file, upload_image
 
-router = APIRouter(prefix="/files", tags=["文件管理"])
+router = APIRouter(
+    prefix="/files", tags=["文件管理"],
+    responses={
+        401: {"description": "未认证"},
+        403: {"description": "无权限"},
+        400: {"description": "文件类型不支持"},
+        404: {"description": "文件不存在"},
+    },
+)
 
 
 @router.post("/images")
