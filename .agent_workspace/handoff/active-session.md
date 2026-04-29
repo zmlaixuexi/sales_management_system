@@ -9,17 +9,12 @@
 
 ## 最近完成
 
-- Round 100：库存流水类型筛选 + 客户列表筛选测试（+3，后端 244/244）
-- Round 99：客户/商品 CRUD 成功路径测试（+15，后端 241/241）
-- Round 98：用户管理 CRUD 测试（+10）+ role_ids UUID 转换 bug 修复 + API 文档补齐 import 操作类型（后端 226/226）
-- Round 97：CSV 导入大小限制测试（+2，后端 216/216）
-- Round 96：全量验证通过（214/214 + 97/97 + ruff 0 + tsc 0 + build 通过）
-- Round 95：API 文档补齐完整权限码列表（32 个）
-- Round 94：API 文档补齐批量导入端点和环境变量
-- Round 93：部署文档补齐环境变量 + 全量验证通过（311 测试）
-- Round 92：Docker Compose 同步 MAX_CSV_IMPORT_SIZE_MB 环境变量
-- Round 91：CSV 导入文件大小限制（MAX_CSV_IMPORT_SIZE_MB=10MB）
-- Round 90：生产环境 JWT_SECRET_KEY 启动检查（+1 测试，214/214）
+- Round 100：文档同步测试数至 341（244+97）+ README/testing.md 补齐新测试文件条目
+- Round 99（上轮）：库存流水类型筛选 + 客户列表筛选测试（+3，后端 244/244）
+- Round 98（上轮）：客户/商品 CRUD 成功路径测试（+15，后端 241/241）
+- Round 97（上轮）：用户管理 CRUD 测试（+10）+ role_ids UUID 转换 bug 修复（后端 226/226）
+- Round 96：CSV 导入大小限制测试（+2，后端 216/216）
+- Round 95：全量验证通过（214/214 + 97/97 + ruff 0 + tsc 0 + build 通过）
 
 ## 当前测试状态
 
