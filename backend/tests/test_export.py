@@ -210,3 +210,142 @@ def test_09_export_creates_audit_log():
     assert log["resource_type"] == "product"
     assert log["actor_name"] == "导出测试员"
     assert log["ip_address"] is not None
+
+
+# ── CSV 内容格式验证测试 ──────────────────────────────────────
+
+
+def test_10_export_products_csv_has_bom():
+    """验证商品 CSV 以 UTF-8 BOM 开头"""
+    resp = client.get("/api/v1/exports/products", headers=_auth())
+    assert resp.status_code == 200
+    assert resp.text.startswith("﻿")
+
+
+def test_11_export_products_csv_header_and_fields():
+    """验证商品 CSV 表头顺序和每行字段数一致"""
+    import csv
+    import io
+
+    resp = client.get("/api/v1/exports/products", headers=_auth())
+    assert resp.status_code == 200
+    text = resp.text.lstrip("﻿")
+
+    reader = csv.reader(io.StringIO(text))
+    rows = list(reader)
+    assert len(rows) >= 2  # 表头 + 至少一行数据
+
+    expected_headers = ["SKU", "商品名称", "销售价", "成本价", "库存", "状态", "分类", "备注", "创建时间"]
+    assert rows[0] == expected_headers
+
+    for i, row in enumerate(rows[1:], start=2):
+        assert len(row) == len(expected_headers), f"第 {i} 行字段数不匹配: {row}"
+
+
+def test_12_export_products_status_in_chinese():
+    """验证商品 CSV 中状态字段为中文"""
+    resp = client.get("/api/v1/exports/products", headers=_auth())
+    assert resp.status_code == 200
+    content = resp.text
+    assert "上架" in content
+
+
+def test_13_export_customers_csv_header_and_fields():
+    """验证客户 CSV 表头顺序和每行字段数"""
+    import csv
+    import io
+
+    resp = client.get("/api/v1/exports/customers", headers=_auth())
+    assert resp.status_code == 200
+    text = resp.text.lstrip("﻿")
+
+    reader = csv.reader(io.StringIO(text))
+    rows = list(reader)
+    assert len(rows) >= 2
+
+    expected_headers = [
+        "客户名称", "联系人", "电话", "邮箱", "来源",
+        "等级", "归属销售", "跟进状态", "备注", "创建时间",
+    ]
+    assert rows[0] == expected_headers
+
+    for i, row in enumerate(rows[1:], start=2):
+        assert len(row) == len(expected_headers), f"第 {i} 行字段数不匹配: {row}"
+
+
+def test_14_export_customers_csv_has_owner():
+    """验证客户 CSV 包含归属销售名称"""
+    resp = client.get("/api/v1/exports/customers", headers=_auth())
+    assert resp.status_code == 200
+    content = resp.text
+    assert "导出测试员" in content
+
+
+def test_15_export_orders_csv_header_and_fields():
+    """验证订单 CSV 表头顺序和每行字段数"""
+    import csv
+    import io
+
+    resp = client.get("/api/v1/exports/orders", headers=_auth())
+    assert resp.status_code == 200
+    text = resp.text.lstrip("﻿")
+
+    reader = csv.reader(io.StringIO(text))
+    rows = list(reader)
+    assert len(rows) >= 2
+
+    expected_headers = ["订单号", "客户ID", "状态", "销售额", "成本", "毛利", "毛利率",
+                        "已收金额", "明细数", "备注", "创建时间"]
+    assert rows[0] == expected_headers
+
+    for i, row in enumerate(rows[1:], start=2):
+        assert len(row) == len(expected_headers), f"第 {i} 行字段数不匹配: {row}"
+
+
+def test_16_export_orders_status_in_chinese():
+    """验证订单 CSV 中状态为中文"""
+    resp = client.get("/api/v1/exports/orders", headers=_auth())
+    assert resp.status_code == 200
+    content = resp.text
+    assert "已完成" in content
+
+
+def test_17_export_payments_csv_header_and_fields():
+    """验证收款 CSV 表头顺序和每行字段数"""
+    import csv
+    import io
+
+    resp = client.get("/api/v1/exports/payments", headers=_auth())
+    assert resp.status_code == 200
+    text = resp.text.lstrip("﻿")
+
+    reader = csv.reader(io.StringIO(text))
+    rows = list(reader)
+    assert len(rows) >= 2
+
+    expected_headers = ["收款ID", "订单ID", "金额", "收款方式", "状态", "收款时间", "备注", "创建时间"]
+    assert rows[0] == expected_headers
+
+    for i, row in enumerate(rows[1:], start=2):
+        assert len(row) == len(expected_headers), f"第 {i} 行字段数不匹配: {row}"
+
+
+def test_18_export_products_csv_values():
+    """验证商品 CSV 数据行具体值"""
+    import csv
+    import io
+
+    resp = client.get("/api/v1/exports/products", headers=_auth())
+    assert resp.status_code == 200
+    text = resp.text.lstrip("﻿")
+
+    reader = csv.reader(io.StringIO(text))
+    rows = list(reader)
+    # 找到导出测试商品行
+    data_rows = [r for r in rows[1:] if r[1] == "导出测试商品"]
+    assert len(data_rows) == 1
+    row = data_rows[0]
+    assert row[2] == "100.00"  # 销售价
+    assert row[4] == "25"      # 库存（原始30 - 订单5）
+    assert row[5] == "上架"     # 状态映射
+    assert row[6] == "未分类"   # 分类
