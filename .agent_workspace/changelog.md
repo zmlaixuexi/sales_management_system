@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第二十七轮）
+
+### 测试补强：导出审计日志测试
+
+- **QA-006** test_export.py 新增审计日志验证测试：
+  - 验证导出操作生成正确的审计记录
+  - 检查 action=export_products、resource_type=product、actor_name、ip_address
+- 全量测试从 99 增至 100，全部通过。
+
 ## 2026-04-30（第二十六轮）
 
 ### 审计完善：导出操作记录审计日志

@@ -191,3 +191,23 @@ def test_08_export_empty_filter():
     # 只有一行表头
     lines = [l for l in content.strip().split("\n") if l.strip()]
     assert len(lines) == 1
+
+
+def test_09_export_creates_audit_log():
+    """导出操作生成审计日志"""
+    from app.models.audit import AuditLog
+
+    # 执行导出
+    resp = client.get("/api/v1/exports/products?status=active", headers=_auth())
+    assert resp.status_code == 200
+
+    # 查询审计日志
+    resp = client.get("/api/v1/audit-logs?action=export_products", headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    log = items[0]
+    assert log["action"] == "export_products"
+    assert log["resource_type"] == "product"
+    assert log["actor_name"] == "导出测试员"
+    assert log["ip_address"] is not None

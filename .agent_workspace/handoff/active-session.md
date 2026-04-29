@@ -1,23 +1,23 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：P1 审计完善
-当前任务编号：AUDIT-EXP-001
-当前任务名称：审计日志记录导出操作
+当前阶段：P1 测试补强
+当前任务编号：QA-006
+当前任务名称：导出审计日志测试
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- exports.py 4 个导出端点集成 audit_service，记录 IP/user_agent/request_id
-- 前端 AuditLogs.tsx 添加 4 个导出操作标签
-- 后端 99/99 通过，前端 TypeScript 编译通过
+- test_export.py 新增导出审计日志验证测试
+- 验证导出操作生成正确的审计记录（action、resource_type、actor_name、ip_address）
+- 全量测试 100/100 通过（从 99 增至 100）
 
 ## 下一步第一动作
 
 1. 批量导入功能
 2. 前端自动化测试框架搭建
-3. 导出审计日志测试覆盖
+3. API 文档更新
 
 ## 阻塞问题
 
