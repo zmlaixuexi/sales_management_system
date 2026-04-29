@@ -16,6 +16,7 @@ PERMISSION_MODE="bypassPermissions"
 CONTINUE_SESSION=0
 AUTO_COMMIT=0
 DRY_RUN=0
+KEEP_GOING=0
 
 usage() {
   cat <<'USAGE'
@@ -31,12 +32,13 @@ Options:
   --permission-mode MODE      Claude permission mode. Default: bypassPermissions.
   --continue-session          Add --continue after the first round.
   --auto-commit               Commit changes after rounds that report progress. Commit messages are Chinese.
+  --keep-going                Do not stop on DONE; continue with follow-up backlog, hardening, tests, and docs.
   --dry-run                   Print the generated prompt and exit.
   -h, --help                  Show this help.
 
 Examples:
   scripts/claude-agent-loop.sh --task "完成阶段 1 工程基础设施" --max-rounds 20 --budget-usd 10
-  scripts/claude-agent-loop.sh --max-rounds 50 --budget-usd 20 --auto-commit
+  scripts/claude-agent-loop.sh --max-rounds 999999 --budget-usd 20 --auto-commit --keep-going
 USAGE
 }
 
@@ -79,6 +81,10 @@ while [[ $# -gt 0 ]]; do
       AUTO_COMMIT=1
       shift
       ;;
+    --keep-going)
+      KEEP_GOING=1
+      shift
+      ;;
     --dry-run)
       DRY_RUN=1
       shift
@@ -110,8 +116,14 @@ mkdir -p "$LOG_DIR"
 build_prompt() {
   local round="$1"
   local goal="$TASK"
+  local done_rule
   if [[ -z "$goal" ]]; then
     goal="继续推进本仓库销售管理系统，从 active-session 和 Backlog 中选择下一步，直到 MVP 或当前可执行目标完成。"
+  fi
+  if [[ "$KEEP_GOING" -eq 1 ]]; then
+    done_rule="当前脚本启用了 keep-going 模式：即使 MVP 或当前目标已完成，也不要输出 DONE。继续从后续扩展 Backlog、测试补强、代码质量、异常路径、文档完善、安全加固、可观测性、部署体验中选择一个安全且有价值的下一步。只有遇到必须用户决策的阻塞时才输出 BLOCKED；否则输出 CONTINUE。"
+  else
+    done_rule="如果目标或 MVP Backlog 已全部完成，且测试和交接记录已更新，最后输出 AGENT_LOOP_STATUS: DONE。"
   fi
 
   cat <<PROMPT
@@ -128,7 +140,7 @@ ${goal}
 5. 更新 .agent_workspace/handoff/active-session.md、changelog.md、implementation-records/implemented-features.md、issues/issue-register.md；如果同类问题第二次出现，更新 recurring-issues.md。
 6. 如果本轮执行 git commit，提交记录描述必须使用中文，推荐格式为“类型：简短说明”。
 7. 如果任务完成且仍有下一步，最后输出 AGENT_LOOP_STATUS: CONTINUE。
-8. 如果目标或 MVP Backlog 已全部完成，且测试和交接记录已更新，最后输出 AGENT_LOOP_STATUS: DONE。
+8. ${done_rule}
 9. 如果必须等待用户提供密钥、账号、产品决策或外部权限，记录阻塞原因，最后输出 AGENT_LOOP_STATUS: BLOCKED。
 
 最后一行必须且只能是：
@@ -212,8 +224,12 @@ for round in $(seq 1 "$MAX_ROUNDS"); do
 
   case "$status" in
     DONE)
-      echo "Claude agent loop completed." | tee -a "$LATEST_LOG"
-      exit 0
+      if [[ "$KEEP_GOING" -eq 1 ]]; then
+        echo "DONE received but --keep-going is enabled; continuing with follow-up work." | tee -a "$LATEST_LOG"
+      else
+        echo "Claude agent loop completed." | tee -a "$LATEST_LOG"
+        exit 0
+      fi
       ;;
     BLOCKED)
       echo "Claude agent loop blocked. Read $log_file for the blocking question." | tee -a "$LATEST_LOG"
