@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第三十轮）
+
+### 前端体验：Header 显示当前用户名和角色
+
+- **UX-004** AppLayout 加载时调用 `/auth/me` 获取当前用户信息
+- Header 区域显示：用户图标 + 用户名 + 角色标签 + 退出登录按钮
+- TypeScript 编译通过，构建成功。
+
 ## 2026-04-30（第二十九轮）
 
 ### 安全修复：logout 清理 refresh_token

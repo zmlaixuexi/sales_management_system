@@ -1,23 +1,23 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：P1 安全加固
-当前任务编号：SEC-004
-当前任务名称：修复 logout Token 清理
+当前阶段：P1 前端体验
+当前任务编号：UX-004
+当前任务名称：Header 用户名和角色展示
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- 修复 AppLayout logout 未清除 refresh_token 的 bug
-- 修复 client.ts 401 无 refresh_token 分支未清除 token 的 bug
-- 后端 100/100 通过，前端 TypeScript 编译通过
+- AppLayout 加载时调用 /auth/me 获取当前用户信息
+- Header 区域显示用户名 + 角色标签 + 退出按钮
+- TypeScript 编译通过，构建成功
 
 ## 下一步第一动作
 
 1. 批量导入功能
 2. 前端自动化测试框架搭建
-3. 用户显示名称和角色展示（Header 区域）
+3. 前端商品/客户列表页空状态优化
 
 ## 阻塞问题
 
