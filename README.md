@@ -132,12 +132,12 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（201 个）
+# 后端测试（213 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
 
-# 前端测试（77 个）
+# 前端测试（90 个）
 cd frontend
 npm test
 
@@ -150,11 +150,11 @@ npm run build
 
 | 模块 | 测试数 | 覆盖内容 |
 |---|---|---|
-| 认证 | 7 | 登录成功/失败、Token 刷新、当前用户、权限校验 |
-| 健康检查 | 3 | 健康状态、版本信息、安全响应头验证 |
+| 认证 | 8 | 登录成功/失败、Token 刷新、当前用户、权限校验、禁用用户刷新被拒 |
+| 健康检查 | 5 | 健康状态、版本信息、安全响应头、请求日志记录 |
 | 集成（端到端） | 24 | 完整业务流程：商品→客户→订单→库存→收款→报表 |
 | 审计日志 | 9 | 全操作类型日志、筛选、操作类型列表 |
-| 数据导出 | 9 | 四模块 CSV 导出、筛选、空数据、认证、审计日志 |
+| 数据导出 | 18 | 四模块 CSV 导出、筛选、空数据、认证、审计日志、BOM/表头/字段数/状态映射验证 |
 | 文件上传 | 9 | 上传成功、类型/大小校验、获取/删除、认证 |
 | 权限校验 | 9 | 数据范围、敏感字段过滤、权限码拦截、导出过滤 |
 | 异常路径 | 27 | 缺字段、负值、重复、404、状态转换、库存不足、伪造 Token |
@@ -166,7 +166,8 @@ npm run build
 | 客户导入 | 8 | CSV 成功/带详情/手机号重复/批量内重复/空名称/非 CSV/认证 |
 | 速率限制 | 3 | 响应头验证、429 触发 |
 | SQL 注入防护 | 6 | escape_like 特殊字符转义 |
-| **合计** | **201** | |
+| Token 刷新安全 | 1 | 已禁用用户刷新 Token 被拒绝 |
+| **合计** | **213** | |
 
 ### 前端测试覆盖
 
@@ -175,17 +176,19 @@ npm run build
 | utils | 8 | formatAmount / formatPercent 纯函数 |
 | ErrorBoundary | 2 | 正常渲染 + 错误捕获 |
 | API client | 3 | baseURL、token 附加、无 token |
-| request 封装 | 4 | get/post/put/del 调用验证 |
+| request 封装 | 5 | get/post/put/del/upload 调用验证 |
 | 状态映射 | 6 | 商品/客户/订单状态映射完整性 |
-| 商品 API | 7 | fetchProducts/fetchProduct/create/update/delete/disable/uploadImage |
-| 客户 API | 6 | fetchCustomers/fetchCustomer/create/update/delete/transfer |
+| 商品 API | 8 | fetchProducts/fetchProduct/create/update/delete/disable/uploadImage/priceHistory |
+| 客户 API | 7 | fetchCustomers/fetchCustomer/create/update/delete/transfer/import |
 | 订单 API | 6 | fetchOrders/fetchOrder/create/update/confirm/cancel |
 | 收款 API | 5 | fetchPayments/筛选/createPayment/备注/reversePayment |
 | 报表 API | 6 | fetchSalesSummary/Trend/ProductRanking/InventoryWarning |
 | 审计日志 API | 5 | fetchAuditLogs/筛选/日期范围/数据解析/fetchAuditActions |
+| auth API | 4 | login/refresh/logout/getMe 路径验证 |
 | auth store | 11 | login/logout/fetchUser/hasPermission/loading 状态 |
 | downloadCsv | 6 | 成功下载、查询参数、过滤、错误、文件名提取 |
-| **合计** | **77** | |
+| usePaginatedList | 8 | 初始加载、错误处理、筛选、分页切换、刷新 |
+| **合计** | **90** | |
 
 ## API 概览
 
