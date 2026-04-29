@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百一十轮）
+
+### 重构：提取 _validate_and_prepare_items，修复 update_order 缺少负价校验 bug
+
+- 新增 _validate_and_prepare_items(db, raw_items) 辅助函数，统一校验商品状态、数量、单价
+- create_order 和 update_order 共用同一校验逻辑（-41 行 +21 行）
+- 修复 update_order 缺少成交单价不能为负的校验（create_order 有，update_order 遗漏）
+
 ## 2026-04-30（第一百零九轮）
 
 ### 重构：提取 get_or_404 辅助函数，消除 19 处重复查询模式
