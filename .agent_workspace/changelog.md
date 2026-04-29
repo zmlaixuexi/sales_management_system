@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百零一轮）
+
+### 修复：前端类型修正，成本价/毛利率标记为可选字段
+
+- Product 接口 cost_price/unit_profit/gross_margin 改为可选（无 view_cost 权限时后端不返回）
+- Order 接口 item_count 改为可选（详情端点不返回此字段）
+- ProductForm 编辑时安全处理 cost_price 为 undefined 的场景
+
 ## 2026-04-30（第一百轮）
 
 ### 文档：同步测试数至 341（244 后端 + 97 前端）
