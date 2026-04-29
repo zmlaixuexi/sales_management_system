@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第一百零九轮）
+
+### 重构：提取 get_or_404 辅助函数，消除 19 处重复查询模式
+
+- deps.py 新增 get_or_404(db, model, id, label)：自动过滤软删除，不存在则抛标准 404
+- orders.py 替换 7 处、customers.py 4 处、products.py 4 处、payments.py 1 处
+- 保留 with_for_update 和非标准过滤器（如 Payment.status=="normal"）的原始写法
+- 净减 59 行代码，无行为变更，284/284 测试全部通过
+
 ## 2026-04-30（第一百零八轮）
 
 ### 文档：同步测试数至 381（284 后端 + 97 前端）
