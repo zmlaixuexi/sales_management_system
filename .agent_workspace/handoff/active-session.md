@@ -1,83 +1,94 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：阶段 2 已完成，准备进入阶段 3
-当前任务编号：阶段 2 整体
-当前任务名称：认证、用户、权限系统
-当前 Agent：Claude Code
-任务状态：已完成
+当前阶段：阶段 3，商品与客户（后端 API 已完成，前端页面待实现）
+当前任务编号：BE-PRODUCT-001 / BE-FILE-001 / BE-CUSTOMER-001
+当前任务名称：商品、文件上传、客户管理后端 API
+当前 Agent：Claude
+任务状态：后端已完成，前端页面待实现
 
 ## 本次目标
 
-完成阶段 2：认证、用户、权限系统，包含后端认证 API、前端登录页和受保护路由。
+完成阶段 3 后端 API：商品 CRUD、文件上传、客户管理。同时补全前端基础结构。
 
 ## 最近完成
 
-- **阶段 1**：后端 FastAPI 骨架、前端 Vite React 工程、Alembic 配置、Docker Compose。
-- **阶段 2 后端**：
-  - 创建 User/Role/Permission/UserRole/RolePermission 五张表的 SQLAlchemy 模型。
-  - 实现登录（login）、Token 刷新（refresh）、退出（logout）、当前用户（me）API。
-  - 实现用户列表和用户管理 API（创建、编辑），含权限校验。
-  - 创建权限依赖注入（get_current_user、get_db）。
-  - 创建种子数据脚本（管理员 admin/admin123、6 种角色、32 项权限）。
-  - 后端测试 10/10 通过（健康检查 2 + 认证 8）。
-- **阶段 2 前端**：
-  - 配置 Ant Design、react-router-dom、zustand、axios。
-  - 实现登录页（LoginPage）、受保护路由（ProtectedRoute）、主布局（MainLayout）。
-  - 创建 API 请求层和认证 store。
-  - 前端构建成功。
+- 创建 Product/ProductCategory/File/ProductImage/ProductPriceHistory/Customer 六个 SQLAlchemy 模型。
+- 生成并执行两条 Alembic 迁移（全部初始表 + 客户表），数据库共 12 张表。
+- 修复 Alembic env.py 未导入模型导致自动生成空迁移的问题。
+- 实现文件上传 API（POST /files/images），含类型/大小校验和本地存储。
+- 实现商品 CRUD API（列表/创建/详情/编辑/删除/停用/价格历史），含 SKU 自动生成、利润/毛利率计算。
+- 实现客户 CRUD API（列表/创建/详情/编辑/删除/转移归属），含手机号重复检测。
+- 静态文件服务（/uploads）挂载到 FastAPI。
+- 修复配置：UPLOAD_DIR 默认值从绝对路径改为相对于 backend 的路径。
+- 前端：安装 Ant Design / react-router-dom / axios / zustand / dayjs。
+- 前端：创建 API 请求层、类型定义、工具函数、404 页面、侧边栏布局。
+- 前端：配置 Vite 路径别名 @/、API 代理（本地 + Docker）、TypeScript 路径别名。
+- 修复 Docker 前端 API 代理 502（使用 VITE_PROXY_TARGET + Docker 服务名 backend:8000）。
+- 后端测试 10/10 通过。
+- 商品创建 API 实测通过：自动生成 SKU、默认分类、利润指标正确。
+- 已执行种子数据：管理员 admin/admin123、6 角色、32 权限、默认分类。
 
 ## 当前正在做
 
-阶段 2 已全部完成并提交。准备进入阶段 3：商品与客户。
+阶段 3 后端 API 全部完成。前端页面（FE-PRODUCT-001 / FE-FILE-001 / FE-CUSTOMER-001）待下一轮实现。
 
 ## 下一步第一动作
 
-进入阶段 3，从 Backlog 选择以下任务开始：
-1. `DB-PRODUCT-001` + `DB-FILE-001`：创建商品表、文件表、商品图片表的 Alembic 迁移。
-2. `BE-FILE-001`：实现图片上传、校验、存储和访问 API。
-3. `BE-PRODUCT-001`：实现商品 CRUD API（含 SKU 自动生成、利润计算）。
-4. `FE-PRODUCT-001` + `FE-FILE-001`：实现商品列表、编辑页和图片上传交互。
-
-建议先创建商品相关表的迁移，然后实现文件上传 API，再实现商品 CRUD。
+实现阶段 3 前端页面：
+1. 在 `frontend/src/pages/Products.tsx` 实现商品列表页（Ant Design Table + 搜索/筛选/分页）。
+2. 创建 `frontend/src/pages/ProductForm.tsx` 实现商品新增/编辑页（4 必填字段 + 折叠高级字段）。
+3. 在 `frontend/src/pages/Customers.tsx` 实现客户列表页。
+4. 创建 `frontend/src/pages/CustomerForm.tsx` 实现客户新增/编辑页。
+5. 在 `frontend/src/api/` 创建 products.ts 和 customers.ts API 调用。
+6. 更新路由配置添加商品和客户页面路由。
 
 ## 涉及文件
 
 | 文件 | 状态 | 说明 |
 |---|---|---|
-| backend/app/models/user.py | 已创建 | 用户、角色、权限模型 |
-| backend/app/api/v1/auth.py | 已创建 | 认证 API |
-| backend/app/api/v1/users.py | 已创建 | 用户管理 API |
-| backend/app/api/deps.py | 已创建 | 依赖注入（认证、DB） |
-| backend/app/db/seed.py | 已创建 | 种子数据脚本 |
-| backend/app/schemas/auth.py | 已创建 | 认证相关 Schema |
-| backend/app/schemas/response.py | 已创建 | 通用响应 Schema |
-| backend/tests/test_auth.py | 已创建 | 认证测试（8 用例） |
-| frontend/src/api/client.ts | 已创建 | Axios 请求客户端 |
-| frontend/src/api/auth.ts | 已创建 | 认证 API |
-| frontend/src/stores/auth.ts | 已创建 | 认证状态管理 |
-| frontend/src/routes/index.tsx | 已创建 | 路由配置 |
-| frontend/src/routes/ProtectedRoute.tsx | 已创建 | 受保护路由 |
-| frontend/src/pages/Login.tsx | 已创建 | 登录页 |
-| frontend/src/pages/Dashboard.tsx | 已创建 | 首页看板占位 |
-| frontend/src/pages/Products.tsx | 已创建 | 商品页占位 |
-| frontend/src/pages/Customers.tsx | 已创建 | 客户页占位 |
-| frontend/src/pages/Orders.tsx | 已创建 | 订单页占位 |
-| frontend/src/components/MainLayout.tsx | 已创建 | 主布局 |
+| backend/app/models/product.py | 新建 | 商品、分类、文件、图片、价格历史模型 |
+| backend/app/models/customer.py | 新建 | 客户模型 |
+| backend/app/api/v1/products.py | 新建 | 商品 CRUD API |
+| backend/app/api/v1/files.py | 新建 | 文件上传 API |
+| backend/app/api/v1/customers.py | 新建 | 客户 CRUD API |
+| backend/app/services/file_service.py | 新建 | 文件上传服务 |
+| backend/app/api/v1/router.py | 已更新 | 注册新路由 |
+| backend/app/main.py | 已更新 | 添加静态文件挂载 |
+| backend/app/core/config.py | 已更新 | UPLOAD_DIR 默认值改为相对路径 |
+| backend/app/db/session.py | 已验证 | 数据库会话 |
+| backend/alembic/env.py | 已修复 | 导入所有模型 |
+| backend/alembic/versions/6800eb76fb83_*.py | 新建 | 全部初始表迁移 |
+| backend/alembic/versions/67fdb7b8db27_*.py | 新建 | 客户表迁移 |
+| frontend/vite.config.ts | 已更新 | 路径别名 + API 代理 |
+| frontend/tsconfig.app.json | 已更新 | 路径别名 |
+| frontend/src/routes/index.tsx | 已更新 | 路由配置 |
+| frontend/src/routes/AppLayout.tsx | 新建 | Ant Design 侧边栏布局 |
+| frontend/src/api/request.ts | 新建 | Axios 请求封装 |
+| frontend/src/types/index.ts | 新建 | TypeScript 类型定义 |
+| frontend/src/utils/index.ts | 新建 | 金额/百分比格式化 |
+| deploy/docker-compose.dev.yml | 已更新 | VITE_PROXY_TARGET |
 
 ## 已执行命令
 
 | 命令 | 结果 | 备注 |
 |---|---|---|
 | pytest tests/ -v | 10/10 通过 | 健康检查 + 认证测试 |
-| npm run build (frontend) | 通过 | 前端构建成功 |
-| git commit | e4780b8 | 阶段 2 全部提交 |
+| npm run build | 通过 | 前端构建成功 |
+| docker compose up -d | 通过 | 三服务全部运行 |
+| curl POST /products | 通过 | 商品创建成功，SKU 自动生成 |
+| curl GET /products | 通过 | 商品列表返回正确 |
+| curl GET /products/{id} | 通过 | 商品详情返回正确 |
+| alembic upgrade head | 通过 | 12 张表已创建 |
+| seed_all() | 通过 | 管理员+角色+权限+默认分类 |
 
 ## 未完成事项
 
-- 尚未创建商品、文件、客户相关表的数据库迁移。
-- 尚未实现商品 CRUD、图片上传、客户管理等阶段 3 功能。
-- Docker Compose 尚未实际启动验证（需要 PostgreSQL）。
+- FE-PRODUCT-001：商品列表页和编辑页前端实现。
+- FE-FILE-001：商品图片上传交互。
+- FE-CUSTOMER-001：客户列表页和详情页前端实现。
+- 操作日志记录（阶段 3 的通用功能）。
+- 权限校验细化（目前仅 admin 角色）。
 
 ## 阻塞问题
 
@@ -85,8 +96,9 @@
 
 ## 需要优先避免的重复问题
 
-1. passlib 与 bcrypt 5.x 不兼容 → 已改用 bcrypt 直接调用。
-2. JWT 存储的用户 ID 是 string，查询 UUID 字段时需 `uuid.UUID(user_id)` 转换。
+1. passlib 与 bcrypt 5.x 不兼容 → 使用 bcrypt 直接调用。
+2. JWT 存储用户 ID 是 string → 查询时需 uuid.UUID(user_id) 转换。
+3. Alembic env.py 必须导入所有模型 → 否则自动生成空迁移。
 
 ## 恢复检查清单
 
