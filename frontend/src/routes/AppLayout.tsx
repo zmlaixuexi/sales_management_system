@@ -4,7 +4,7 @@ import {
   ShoppingCartOutlined,
   TeamOutlined,
   ShopOutlined,
-  SettingOutlined,
+  FileTextOutlined,
   LogoutOutlined,
 } from '@ant-design/icons'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
@@ -15,8 +15,8 @@ const menuItems = [
   { key: '/', icon: <DashboardOutlined />, label: '首页看板' },
   { key: '/products', icon: <ShopOutlined />, label: '商品管理' },
   { key: '/customers', icon: <TeamOutlined />, label: '客户管理' },
-  { key: '/sales-orders', icon: <ShoppingCartOutlined />, label: '销售订单' },
-  { key: '/settings', icon: <SettingOutlined />, label: '系统设置' },
+  { key: '/orders', icon: <ShoppingCartOutlined />, label: '销售订单' },
+  { key: '/audit-logs', icon: <FileTextOutlined />, label: '操作日志' },
 ]
 
 export default function AppLayout() {
@@ -32,6 +32,9 @@ export default function AppLayout() {
     navigate('/login')
   }
 
+  // 匹配子路径高亮：/orders/123 → /orders
+  const selectedKey = '/' + location.pathname.split('/').filter(Boolean)[0]
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider theme="light" width={200}>
@@ -40,7 +43,7 @@ export default function AppLayout() {
         </div>
         <Menu
           mode="inline"
-          selectedKeys={[location.pathname]}
+          selectedKeys={[selectedKey]}
           items={menuItems}
           onClick={handleMenuClick}
         />

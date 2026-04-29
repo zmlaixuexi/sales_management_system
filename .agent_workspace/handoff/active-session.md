@@ -2,23 +2,24 @@
 
 最后更新时间：2026-04-30
 当前阶段：P1 前端体验
-当前任务编号：UX-002
-当前任务名称：前端错误边界 ErrorBoundary
+当前任务编号：UX-003
+当前任务名称：侧边栏菜单修复
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- 新增 ErrorBoundary 组件（class component，getDerivedStateFromError）
-- 渲染崩溃时显示 Result error 页面，支持重试和返回首页
-- main.tsx 包裹 RouterProvider，全局兜底
-- TypeScript 编译通过，前端构建通过
+- 修复侧边栏菜单路径 /sales-orders → /orders
+- 添加操作日志菜单项
+- 移除未实现的系统设置菜单
+- 修复子路径高亮（/orders/123 → 高亮 /orders）
+- TypeScript 编译通过，前端构建通过，后端 90/90 通过
 
 ## 下一步第一动作
 
 1. 批量导入功能
 2. 部署文档完善
-3. 前端 404 菜单路径修正（/sales-orders → /orders）
+3. README 更新（反映最近 5 轮改进）
 
 ## 阻塞问题
 
