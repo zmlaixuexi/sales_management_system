@@ -1,4 +1,6 @@
 
+import uuid
+
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
@@ -59,7 +61,7 @@ def login(request: Request, req: LoginRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/refresh")
-def refresh_token(req: RefreshRequest):
+def refresh_token(req: RefreshRequest, db: Session = Depends(get_db)):
     """刷新 Token"""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -72,6 +74,10 @@ def refresh_token(req: RefreshRequest):
         if user_id is None or token_type != "refresh":
             raise credentials_exception
     except JWTError:
+        raise credentials_exception
+
+    user = db.query(User).filter(User.id == uuid.UUID(user_id), User.deleted_at.is_(None)).first()
+    if user is None or not user.is_active:
         raise credentials_exception
 
     access_token = create_access_token(subject=user_id)

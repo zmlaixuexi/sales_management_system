@@ -2,15 +2,15 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：TEST-MW-001
-当前任务名称：请求日志中间件测试
+当前任务编号：SEC-REFRESH-001
+当前任务名称：Token 刷新安全修复
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- 新增请求日志中间件测试（API 请求记录、非 API 路径忽略）
-- 文档同步（.env.example、deployment.md、api.md）
+- 修复 /auth/refresh 不校验用户存在性和 is_active 的安全漏洞
+- 禁用/删除用户无法继续刷新 Token
 - 后端 203/203，前端 86/86，build 通过
 
 ## 下一步第一动作
@@ -19,14 +19,14 @@
 2. 异常路径测试（并发冲突、边界条件）
 3. 系统已达到高质量水平，可考虑结束循环
 
-## 当前里程碑总结（Round 15-75）
+## 当前里程碑总结（Round 15-76）
 
 - 后端测试：51 → 203（+152）
 - 前端测试：0 → 86（+86）
 - 代码质量：ruff 0 + ESLint 0 + build 通过 + tsc 通过 + 代码分割 + 列表页统一 hook
 - 性能：10 个复合索引覆盖高频查询
 - 可观测性：健康检查 + degraded + 请求日志 + 慢请求警告
-- 安全：RBAC + 数据范围 + 速率限制 + 敏感字段 + LIKE 转义 + 安全响应头
+- 安全：RBAC + 数据范围 + 速率限制 + 敏感字段 + LIKE 转义 + 安全响应头 + 刷新 Token 校验
 - 部署：Docker Compose + Nginx + 备份恢复 + Makefile
 - 文档：deployment.md + architecture.md + api.md 全部完成
 
