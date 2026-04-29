@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百一十三轮）
+
+### 部署：后端 Dockerfile 改为多阶段构建，减小运行时镜像体积
+
+- builder 阶段：安装 gcc/libpq-dev 编译依赖，pip install 到独立前缀
+- runtime 阶段：仅安装 libpq5 运行时库，从 builder 复制 Python 包
+- 运行时镜像不含 gcc 等编译工具，显著减小体积
+
 ## 2026-04-30（第一百一十二轮）
 
 ### 重构：提取 getApiErrorMessage，消除 6 个页面 9 处重复错误处理

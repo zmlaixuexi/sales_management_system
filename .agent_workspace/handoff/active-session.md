@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-112
-当前任务名称：前端错误处理重构
+当前任务编号：ROUND-113
+当前任务名称：后端 Dockerfile 多阶段构建
 当前 Agent：Claude
 任务状态：进行中
 
 ## 最近完成
 
+- Round 113：后端 Dockerfile 改为多阶段构建，builder 阶段编译依赖，runtime 仅含运行时库
 - Round 112：提取 getApiErrorMessage 工具函数，消除 6 个页面 9 处重复错误处理，tsc/ESLint/97 测试/build 全通过
 - Round 111：订单负价校验测试（+2），覆盖 create/update 负单价拒绝，后端 286/286
 - Round 110：提取 _validate_and_prepare_items，修复 update_order 缺少负价校验 bug（-41 行 +21 行），284/284 通过
