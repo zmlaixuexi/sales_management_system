@@ -6,6 +6,20 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的“已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-24
+
+功能名称：前端列表页分页 hook 重构
+所属模块：前端工程化
+实现日期：2026-04-30
+实现 Agent：Claude
+
+### 实现范围
+
+- 新建 `frontend/src/hooks/usePaginatedList.ts`：统一管理分页列表的 data/total/loading/page/pageSize/keyword 状态
+- 8 个单元测试验证 hook 行为（初始加载、错误处理、筛选参数、分页切换、刷新、空结果）
+- 重构 Products/Customers/Orders/AuditLogs 四个列表页使用新 hook
+- 每个页面减少约 20 行重复样板代码
+
 ## 功能编号：FEAT-20260430-23
 
 功能名称：架构文档

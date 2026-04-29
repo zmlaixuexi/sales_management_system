@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { Table, Button, Input, Space, Tag, Popconfirm, message, Select } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
@@ -7,6 +7,7 @@ import { fetchCustomers, deleteCustomer } from '@/api/customers'
 import type { Customer } from '@/api/customers'
 import { downloadCsv } from '@/utils'
 import apiClient from '@/api/client'
+import { usePaginatedList } from '@/hooks/usePaginatedList'
 
 const sourceMap: Record<string, string> = {
   referral: '转介绍',
@@ -25,14 +26,14 @@ const levelMap: Record<string, { color: string; label: string }> = {
 
 export default function CustomersPage() {
   const navigate = useNavigate()
-  const [data, setData] = useState<Customer[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(false)
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
-  const [keyword, setKeyword] = useState('')
   const [sourceFilter, setSourceFilter] = useState<string | undefined>(undefined)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const { data, total, loading, page, pageSize, keyword, setPage, setKeyword, onPageChange, refresh: loadData } = usePaginatedList<Customer>(
+    (params) => fetchCustomers(params).then(r => r.data),
+    { source: sourceFilter },
+    '加载客户列表失败',
+  )
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -50,28 +51,6 @@ export default function CustomersPage() {
     } catch { /* 统一错误提示 */ }
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
-
-  const loadData = useCallback(async () => {
-    setLoading(true)
-    try {
-      const res = await fetchCustomers({
-        page,
-        page_size: pageSize,
-        keyword: keyword || undefined,
-        source: sourceFilter,
-      })
-      if (res.success) {
-        setData(res.data.items)
-        setTotal(res.data.total)
-      }
-    } catch {
-      message.error('加载客户列表失败')
-    } finally {
-      setLoading(false)
-    }
-  }, [page, pageSize, keyword, sourceFilter])
-
-  useEffect(() => { loadData() }, [loadData])
 
   const handleDelete = async (id: string) => {
     try {
@@ -133,7 +112,7 @@ export default function CustomersPage() {
             placeholder="搜索客户名称/电话"
             prefix={<SearchOutlined />}
             value={keyword}
-            onChange={(e) => { setKeyword(e.target.value); setPage(1) }}
+            onChange={(e) => setKeyword(e.target.value)}
             style={{ width: 240 }}
             allowClear
           />
@@ -172,7 +151,7 @@ export default function CustomersPage() {
           showSizeChanger: true,
           pageSizeOptions: [10, 20, 50, 100],
           showTotal: (t) => `共 ${t} 条`,
-          onChange: (p, ps) => { setPage(p); setPageSize(ps) },
+          onChange: onPageChange,
         }}
       />
     </div>

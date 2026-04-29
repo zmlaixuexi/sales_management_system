@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useRef } from 'react'
 import {
   Table, Button, Input, Select, Space, Tag, Popconfirm, message, Image,
 } from 'antd'
@@ -9,6 +9,7 @@ import { fetchProducts, deleteProduct, disableProduct } from '@/api/products'
 import type { Product } from '@/api/products'
 import { formatAmount, formatPercent, downloadCsv } from '@/utils'
 import apiClient from '@/api/client'
+import { usePaginatedList } from '@/hooks/usePaginatedList'
 
 const statusMap: Record<string, { color: string; label: string }> = {
   active: { color: 'green', label: '上架' },
@@ -18,14 +19,14 @@ const statusMap: Record<string, { color: string; label: string }> = {
 
 export default function ProductsPage() {
   const navigate = useNavigate()
-  const [data, setData] = useState<Product[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(false)
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
-  const [keyword, setKeyword] = useState('')
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const { data, total, loading, page, pageSize, keyword, setPage, setKeyword, onPageChange, refresh: loadData } = usePaginatedList<Product>(
+    (params) => fetchProducts(params).then(r => r.data),
+    { status: statusFilter },
+    '加载商品列表失败',
+  )
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -43,23 +44,6 @@ export default function ProductsPage() {
     } catch { /* 统一错误提示 */ }
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
-
-  const loadData = useCallback(async () => {
-    setLoading(true)
-    try {
-      const res = await fetchProducts({ page, page_size: pageSize, keyword: keyword || undefined, status: statusFilter })
-      if (res.success) {
-        setData(res.data.items)
-        setTotal(res.data.total)
-      }
-    } catch {
-      message.error('加载商品列表失败')
-    } finally {
-      setLoading(false)
-    }
-  }, [page, pageSize, keyword, statusFilter])
-
-  useEffect(() => { loadData() }, [loadData])
 
   const handleDelete = async (id: string) => {
     try {
@@ -152,7 +136,7 @@ export default function ProductsPage() {
             placeholder="搜索商品名称"
             prefix={<SearchOutlined />}
             value={keyword}
-            onChange={(e) => { setKeyword(e.target.value); setPage(1) }}
+            onChange={(e) => setKeyword(e.target.value)}
             style={{ width: 240 }}
             allowClear
           />
@@ -195,7 +179,7 @@ export default function ProductsPage() {
           showSizeChanger: true,
           pageSizeOptions: [10, 20, 50, 100],
           showTotal: (t) => `共 ${t} 条`,
-          onChange: (p, ps) => { setPage(p); setPageSize(ps) },
+          onChange: onPageChange,
         }}
       />
     </div>

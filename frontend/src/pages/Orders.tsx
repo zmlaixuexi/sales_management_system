@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Table, Button, Input, Select, Space, Tag, message } from 'antd'
+import { useState } from 'react'
+import { Table, Button, Input, Select, Space, Tag } from 'antd'
 import { PlusOutlined, SearchOutlined, EyeOutlined, DownloadOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
 import { fetchOrders } from '@/api/orders'
 import type { Order } from '@/api/orders'
 import { formatAmount, formatPercent, downloadCsv } from '@/utils'
+import { usePaginatedList } from '@/hooks/usePaginatedList'
 
 const statusMap: Record<string, { color: string; label: string }> = {
   draft: { color: 'default', label: '草稿' },
@@ -17,35 +18,13 @@ const statusMap: Record<string, { color: string; label: string }> = {
 
 export default function OrdersPage() {
   const navigate = useNavigate()
-  const [data, setData] = useState<Order[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(false)
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
-  const [keyword, setKeyword] = useState('')
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined)
 
-  const loadData = useCallback(async () => {
-    setLoading(true)
-    try {
-      const res = await fetchOrders({
-        page,
-        page_size: pageSize,
-        keyword: keyword || undefined,
-        status: statusFilter,
-      })
-      if (res.success) {
-        setData(res.data.items)
-        setTotal(res.data.total)
-      }
-    } catch {
-      message.error('加载订单列表失败')
-    } finally {
-      setLoading(false)
-    }
-  }, [page, pageSize, keyword, statusFilter])
-
-  useEffect(() => { loadData() }, [loadData])
+  const { data, total, loading, page, pageSize, keyword, setPage, setKeyword, onPageChange } = usePaginatedList<Order>(
+    (params) => fetchOrders(params).then(r => r.data),
+    { status: statusFilter },
+    '加载订单列表失败',
+  )
 
   const columns: ColumnsType<Order> = [
     {
@@ -120,7 +99,7 @@ export default function OrdersPage() {
             placeholder="搜索订单号"
             prefix={<SearchOutlined />}
             value={keyword}
-            onChange={(e) => { setKeyword(e.target.value); setPage(1) }}
+            onChange={(e) => setKeyword(e.target.value)}
             style={{ width: 240 }}
             allowClear
           />
@@ -155,7 +134,7 @@ export default function OrdersPage() {
           showSizeChanger: true,
           pageSizeOptions: [10, 20, 50, 100],
           showTotal: (t) => `共 ${t} 条`,
-          onChange: (p, ps) => { setPage(p); setPageSize(ps) },
+          onChange: onPageChange,
         }}
       />
     </div>

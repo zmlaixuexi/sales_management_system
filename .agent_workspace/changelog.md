@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第七十一轮）
+
+### 重构：前端列表页统一分页 hook
+
+- 新建 `usePaginatedList` 自定义 hook：封装分页列表的 data/total/loading/page/pageSize/keyword 状态和加载逻辑
+- 重构 Products/Customers/Orders/AuditLogs 四个列表页，消除约 80 行重复样板代码
+- 新增 8 个 hook 单元测试
+- 前端 86/86 通过，build 通过
+
 ## 2026-04-30（第七十轮）
 
 ### 文档：新增架构文档

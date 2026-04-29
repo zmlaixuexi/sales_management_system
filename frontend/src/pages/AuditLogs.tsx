@@ -3,6 +3,7 @@ import { Table, Select, DatePicker, Input, Tag, Space, Typography, Tooltip } fro
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { fetchAuditLogs, fetchAuditActions, type AuditLogItem } from '@/api/auditLogs';
+import { usePaginatedList } from '@/hooks/usePaginatedList';
 
 const { RangePicker } = DatePicker;
 const { Text } = Typography;
@@ -42,17 +43,24 @@ const RESOURCE_LABELS: Record<string, string> = {
 };
 
 export default function AuditLogs() {
-  const [logs, setLogs] = useState<AuditLogItem[]>([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
-  const [loading, setLoading] = useState(false);
   const [actionFilter, setActionFilter] = useState<string | undefined>();
   const [resourceFilter, setResourceFilter] = useState<string | undefined>();
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null] | null>(null);
-  const [keyword, setKeyword] = useState('');
   const [actions, setActions] = useState<string[]>([]);
   const [resourceTypes, setResourceTypes] = useState<string[]>([]);
+
+  const filters = {
+    action: actionFilter,
+    resource_type: resourceFilter,
+    start_date: dateRange?.[0]?.format('YYYY-MM-DD'),
+    end_date: dateRange?.[1]?.format('YYYY-MM-DD'),
+  };
+
+  const { data: logs, total, loading, page, pageSize, setPage, setKeyword, onPageChange } = usePaginatedList<AuditLogItem>(
+    fetchAuditLogs,
+    filters,
+    '加载操作日志失败',
+  );
 
   const loadActions = useCallback(async () => {
     try {
@@ -62,24 +70,7 @@ export default function AuditLogs() {
     } catch { /* ignore */ }
   }, []);
 
-  const loadLogs = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params: Record<string, unknown> = { page, page_size: pageSize };
-      if (actionFilter) params.action = actionFilter;
-      if (resourceFilter) params.resource_type = resourceFilter;
-      if (keyword) params.keyword = keyword;
-      if (dateRange && dateRange[0]) params.start_date = dateRange[0].format('YYYY-MM-DD');
-      if (dateRange && dateRange[1]) params.end_date = dateRange[1].format('YYYY-MM-DD');
-      const data = await fetchAuditLogs(params as Parameters<typeof fetchAuditLogs>[0]);
-      setLogs(data.items || []);
-      setTotal(data.total || 0);
-    } catch { /* ignore */ }
-    setLoading(false);
-  }, [page, pageSize, actionFilter, resourceFilter, dateRange, keyword]);
-
   useEffect(() => { loadActions(); }, [loadActions]);
-  useEffect(() => { loadLogs(); }, [loadLogs]);
 
   const columns: ColumnsType<AuditLogItem> = [
     {
@@ -158,7 +149,7 @@ export default function AuditLogs() {
           placeholder="操作类型"
           style={{ width: 140 }}
           value={actionFilter}
-          onChange={setActionFilter}
+          onChange={(v) => { setActionFilter(v); setPage(1) }}
           options={actions.map(a => ({ label: ACTION_LABELS[a]?.label || a, value: a }))}
         />
         <Select
@@ -166,12 +157,12 @@ export default function AuditLogs() {
           placeholder="资源类型"
           style={{ width: 120 }}
           value={resourceFilter}
-          onChange={setResourceFilter}
+          onChange={(v) => { setResourceFilter(v); setPage(1) }}
           options={resourceTypes.map(r => ({ label: RESOURCE_LABELS[r] || r, value: r }))}
         />
         <RangePicker
           value={dateRange}
-          onChange={(dates) => setDateRange(dates as [dayjs.Dayjs | null, dayjs.Dayjs | null] | null)}
+          onChange={(dates) => { setDateRange(dates as [dayjs.Dayjs | null, dayjs.Dayjs | null] | null); setPage(1) }}
         />
         <Input.Search
           placeholder="搜索操作人或资源ID"
@@ -193,7 +184,7 @@ export default function AuditLogs() {
           showSizeChanger: true,
           pageSizeOptions: [10, 20, 50, 100],
           showTotal: (t) => `共 ${t} 条`,
-          onChange: (p, ps) => { setPage(p); setPageSize(ps); },
+          onChange: onPageChange,
         }}
         size="small"
         scroll={{ x: 900 }}
