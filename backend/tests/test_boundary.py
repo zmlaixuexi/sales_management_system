@@ -7,11 +7,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.api.deps import get_db
-from app.core.security import create_access_token, create_refresh_token, hash_password
+from app.core.security import create_access_token, hash_password
 from app.db.session import Base
 from app.main import app
 from app.models.customer import Customer
-from app.models.order import Payment, SalesOrder, SalesOrderItem
+from app.models.order import SalesOrder, SalesOrderItem
 from app.models.product import Product, ProductCategory
 from app.models.user import User
 
