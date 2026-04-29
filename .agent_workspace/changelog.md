@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第一百二十二轮）
+
+### 测试：请求 ID 中间件测试（+3，后端 289/289）
+
+- 自动生成：请求不带 X-Request-ID 时生成 UUID 格式 ID
+- 透传：请求带 X-Request-ID 时原样返回
+- 日志关联：request_id 写入 RequestLogMiddleware extra_fields
+- 后端 289/289 通过
+
 ## 2026-04-30（第一百二十一轮）
 
 ### 可观测性：请求 ID 中间件 — 全链路追踪日志和审计关联
