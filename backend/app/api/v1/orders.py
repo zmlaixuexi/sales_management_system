@@ -110,6 +110,25 @@ def _prepare_item(
     }
 
 
+def _validate_and_prepare_items(db: Session, raw_items: list) -> list[dict]:
+    """校验订单明细行并返回准备好的数据"""
+    prepared: list[dict] = []
+    for ri in raw_items:
+        product = get_or_404(db, Product, str(ri.product_id), "商品")
+        if product.status != "active":
+            raise HTTPException(
+                status_code=400,
+                detail={"code": "VALIDATION_FAILED", "message": f"商品 {product.name} 已停用，不可下单"},
+            )
+        if ri.quantity <= 0:
+            raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "数量必须大于 0"})
+        unit_price = Decimal(str(ri.unit_price)) if ri.unit_price is not None else None
+        if unit_price is not None and unit_price < 0:
+            raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "成交单价不能为负"})
+        prepared.append(_prepare_item(product, ri.quantity, unit_price))
+    return prepared
+
+
 def _deduct_inventory(db: Session, order_id: uuid.UUID, items: list[SalesOrderItem], operator_id: uuid.UUID) -> None:
     """确认订单时扣减库存，并记录流水"""
     for item in items:
@@ -238,28 +257,7 @@ def create_order(
         raise HTTPException(status_code=400, detail={"code": "ORDER_EMPTY_ITEMS", "message": "订单明细不能为空"})
 
     # 构建明细行（含快照）
-    prepared_items: list[dict] = []
-    for ri in raw_items:
-        product_id = ri.product_id
-        product = get_or_404(db, Product, str(product_id), "商品")
-        if product.status != "active":
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "code": "VALIDATION_FAILED",
-                    "message": f"商品 {product.name} 已停用，不可下单",
-                },
-            )
-
-        quantity = ri.quantity
-        if quantity <= 0:
-            raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "数量必须大于 0"})
-
-        unit_price = Decimal(str(ri.unit_price)) if ri.unit_price is not None else None
-        if unit_price is not None and unit_price < 0:
-            raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "成交单价不能为负"})
-
-        prepared_items.append(_prepare_item(product, quantity, unit_price))
+    prepared_items = _validate_and_prepare_items(db, raw_items)
 
     totals = _calc_order_totals(prepared_items)
     order_no = _generate_order_no(db)
@@ -391,25 +389,7 @@ def update_order(
         # 删除旧明细
         db.query(SalesOrderItem).filter(SalesOrderItem.order_id == order.id).delete()
 
-        prepared_items: list[dict] = []
-        for ri in raw_items:
-            product_id = ri.product_id
-            product = get_or_404(db, Product, str(product_id), "商品")
-            if product.status != "active":
-                raise HTTPException(
-                    status_code=400,
-                    detail={
-                        "code": "VALIDATION_FAILED",
-                        "message": f"商品 {product.name} 已停用",
-                    },
-                )
-
-            quantity = ri.quantity
-            if quantity <= 0:
-                raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "数量必须大于 0"})
-
-            unit_price = Decimal(str(ri.unit_price)) if ri.unit_price is not None else None
-            prepared_items.append(_prepare_item(product, quantity, unit_price))
+        prepared_items = _validate_and_prepare_items(db, raw_items)
 
         totals = _calc_order_totals(prepared_items)
         order.total_amount = totals["total_amount"]
