@@ -6,6 +6,43 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的“已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-14
+
+功能名称：客户 CSV 批量导入
+所属模块：客户管理
+关联任务编号：EXT-006
+实现日期：2026-04-30
+实现 Agent：Claude
+当前状态：已测试
+
+### 实现范围
+
+- 后端 `POST /customers/import`：接受 CSV 文件，支持中英文表头
+  - 手机号唯一性检查（数据库 + 批量内去重）
+  - 验证：名称必填
+  - 错误逐行收集，返回 `{created, errors: [{row, message}]}`
+  - 记录 `customer_import` 审计日志
+- 前端客户列表页新增"导入"按钮（UploadOutlined + hidden file input）
+- 审计日志页面新增 customer_import 标签
+
+### 涉及文件
+
+| 文件 | 变更说明 |
+|---|---|
+| backend/app/api/v1/customers.py | 新增 import 端点 |
+| frontend/src/pages/Customers.tsx | 新增导入按钮 |
+| frontend/src/pages/AuditLogs.tsx | 新增 customer_import 标签 |
+| backend/tests/test_customer_import.py | 新增：8 个导入测试 |
+
+### 测试状态
+
+- 后端 116/116 测试通过（含 8 个客户导入测试）
+- 前端 TypeScript 编译通过
+
+### 已知限制
+
+- 导入时所有客户归属当前操作用户，不支持指定归属
+
 ## 功能编号：FEAT-20260430-13
 
 功能名称：商品 CSV 批量导入

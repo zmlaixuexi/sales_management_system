@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Table, Button, Input, Space, Tag, Popconfirm, message, Select } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, DownloadOutlined } from '@ant-design/icons'
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
 import { fetchCustomers, deleteCustomer } from '@/api/customers'
 import type { Customer } from '@/api/customers'
 import { downloadCsv } from '@/utils'
+import apiClient from '@/api/client'
 
 const sourceMap: Record<string, string> = {
   referral: '转介绍',
@@ -31,6 +32,24 @@ export default function CustomersPage() {
   const [pageSize, setPageSize] = useState(20)
   const [keyword, setKeyword] = useState('')
   const [sourceFilter, setSourceFilter] = useState<string | undefined>(undefined)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const formData = new FormData()
+    formData.append('file', file)
+    try {
+      const { data: res } = await apiClient.post('/customers/import', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      if (res.success) {
+        message.success(res.message)
+        loadData()
+      }
+    } catch { /* 统一错误提示 */ }
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -128,6 +147,10 @@ export default function CustomersPage() {
           />
         </Space>
         <Space>
+          <Button icon={<UploadOutlined />} onClick={() => fileInputRef.current?.click()}>
+            导入
+          </Button>
+          <input ref={fileInputRef} type="file" accept=".csv" style={{ display: 'none' }} onChange={handleImport} />
           <Button icon={<DownloadOutlined />} onClick={() => downloadCsv('/exports/customers', { keyword: keyword || undefined, source: sourceFilter })}>
             导出
           </Button>

@@ -1,9 +1,11 @@
 """客户 CRUD API"""
 
+import csv
+import io
 import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db, require_permission, has_permission
@@ -312,3 +314,94 @@ def transfer_customer(
     db.commit()
 
     return {"success": True, "data": {"id": str(customer.id), "owner_user_id": str(customer.owner_user_id)}, "message": "转移成功"}
+
+
+@router.post("/import")
+async def import_customers_csv(
+    request: Request,
+    file: UploadFile,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("customer:create")),
+):
+    """批量导入客户（CSV 格式）"""
+    if not file.filename or not file.filename.endswith(".csv"):
+        raise HTTPException(status_code=400, detail={
+            "code": "VALIDATION_FAILED", "message": "请上传 CSV 文件",
+        })
+
+    content = await file.read()
+    try:
+        text = content.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        raise HTTPException(status_code=400, detail={
+            "code": "VALIDATION_FAILED", "message": "文件编码错误，请使用 UTF-8",
+        })
+
+    reader = csv.DictReader(io.StringIO(text))
+    if not reader.fieldnames:
+        raise HTTPException(status_code=400, detail={
+            "code": "VALIDATION_FAILED", "message": "CSV 文件为空或缺少表头",
+        })
+
+    # 批量内手机号去重
+    used_phones: set[str] = set()
+    created = 0
+    errors: list[dict] = []
+
+    for row_num, row in enumerate(reader, start=2):
+        name = (row.get("客户名称") or row.get("name") or "").strip()
+        if not name:
+            errors.append({"row": row_num, "message": "客户名称不能为空"})
+            continue
+
+        phone = (row.get("电话") or row.get("phone") or "").strip() or None
+        if phone:
+            # 批量内去重
+            if phone in used_phones:
+                errors.append({"row": row_num, "message": f"手机号 {phone} 在文件中重复"})
+                continue
+            # 数据库去重
+            existing = db.query(Customer).filter(
+                Customer.phone == phone, Customer.deleted_at.is_(None),
+            ).first()
+            if existing:
+                errors.append({"row": row_num, "message": f"手机号 {phone} 已被客户「{existing.name}」使用"})
+                continue
+            used_phones.add(phone)
+
+        contact_name = (row.get("联系人") or row.get("contact_name") or "").strip() or None
+        email = (row.get("邮箱") or row.get("email") or "").strip() or None
+        source = (row.get("来源") or row.get("source") or "").strip() or None
+        level = (row.get("等级") or row.get("level") or "").strip() or "normal"
+        remark = (row.get("备注") or row.get("remark") or "").strip() or None
+
+        customer = Customer(
+            id=uuid.uuid4(),
+            name=name,
+            contact_name=contact_name,
+            phone=phone,
+            email=email,
+            source=source,
+            level=level,
+            owner_user_id=current_user.id,
+            follow_status="new",
+            remark=remark,
+            created_by=current_user.id,
+            updated_by=current_user.id,
+        )
+        db.add(customer)
+        created += 1
+
+    db.commit()
+
+    log_action(db, actor_id=current_user.id, actor_name=current_user.display_name,
+               action="customer_import", resource_type="customer",
+               after_data={"created": created, "errors": len(errors)},
+               **get_request_meta(request))
+    db.commit()
+
+    return {
+        "success": True,
+        "data": {"created": created, "errors": errors},
+        "message": f"成功导入 {created} 个客户" + (f"，{len(errors)} 行跳过" if errors else ""),
+    }
