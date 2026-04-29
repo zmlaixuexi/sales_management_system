@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第三十七轮）
+
+### 测试：前端测试补强（10 → 23）
+
+- 新增 client.test.ts（3 个）：API 客户端 baseURL、token 附加、无 token 场景
+- 新增 request.test.ts（4 个）：get/post/put/del 封装函数调用验证
+- 新增 statusMaps.test.ts（6 个）：商品状态/客户来源/客户等级/订单状态映射完整性
+- 前端 23/23 测试通过，TypeScript 编译通过
+
 ## 2026-04-30（第三十六轮）
 
 ### 体验：列表页空状态提示和分页大小选项
