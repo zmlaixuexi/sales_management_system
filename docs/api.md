@@ -88,11 +88,14 @@ Authorization: Bearer <access_token>
 - `status`：响应状态码
 - `duration_ms`：请求耗时（毫秒）
 - `client_ip`：客户端 IP 地址
+- `slow`：是否为慢请求（超过阈值时为 true）
+
+超过 `SLOW_REQUEST_THRESHOLD_MS`（默认 1000ms）的请求自动升级为 WARNING 级别，日志前缀加 `SLOW` 标记。
 
 JSON 日志格式示例：
 
 ```json
-{"timestamp":"2026-04-30T12:00:00Z","level":"INFO","logger":"app.request","message":"GET /api/v1/health 200 3.5ms","method":"GET","path":"/api/v1/health","status":200,"duration_ms":3.5,"client_ip":"127.0.0.1"}
+{"timestamp":"2026-04-30T12:00:00Z","level":"INFO","logger":"app.request","message":"GET /api/v1/health 200 3.5ms","method":"GET","path":"/api/v1/health","status":200,"duration_ms":3.5,"client_ip":"127.0.0.1","slow":false}
 ```
 
 ---

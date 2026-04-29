@@ -105,6 +105,7 @@ make docker-down
 | LOG_FORMAT | text | 日志格式（生产建议 json） |
 | RATE_LIMIT_MAX | 1000 | API 速率限制（每窗口请求数） |
 | RATE_LIMIT_WINDOW | 60 | 速率限制窗口（秒） |
+| SLOW_REQUEST_THRESHOLD_MS | 1000 | 慢请求阈值（毫秒，超过后日志升级为 WARNING） |
 | INVENTORY_WARNING_THRESHOLD | 10 | 库存预警阈值 |
 
 ## Nginx 配置
