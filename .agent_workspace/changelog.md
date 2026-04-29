@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百一十五轮）
+
+### 测试：getApiErrorMessage 工具函数测试（+3，前端 100/100）
+
+- 新增 3 个测试：提取 detail.message、无 response 使用 fallback、无 detail 使用 fallback
+- 前端测试总数突破 100 大关
+- 全量验证：286 后端 + 100 前端 + ruff 0 + ESLint 0 + tsc 0 + build 通过
+
 ## 2026-04-30（第一百一十四轮）
 
 ### 修复：docker-compose.prod.yml nginx depends_on 语法错误
