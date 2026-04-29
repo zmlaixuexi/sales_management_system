@@ -1,25 +1,25 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：P1 性能优化
-当前任务编号：PERF-001
-当前任务名称：前端路由级代码拆分
+当前阶段：P1 前端体验
+当前任务编号：UX-001
+当前任务名称：前端请求层 429 重试和统一错误提示
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- 路由配置改为 React.lazy + Suspense 动态导入
-- bundle 从单个 1,452KB 拆分为 40+ 个按需加载 chunk
-- 页面级模块独立：Dashboard 11KB、Products 4.5KB、Orders 3KB 等
-- 加载中显示 Spin 全屏占位
-- TypeScript 编译通过，构建成功
+- 合并两个 axios 实例为统一 client（token 刷新 + 429 重试 + 错误提示）
+- client.ts：429 自动重试一次（读取 Retry-After 头，最多等 5s）
+- 统一错误提示：403/404/429/500/网络错误 自动 message.error
+- request.ts 改为基于 apiClient 的轻量封装
+- TypeScript 编译通过，前端构建通过，后端 90/90 通过
 
 ## 下一步第一动作
 
 1. 批量导入功能
-2. 前端错误边界和 loading 状态统一
-3. 前端请求层 429 重试和错误提示
+2. 前端错误边界（ErrorBoundary）统一兜底
+3. 部署文档完善
 
 ## 阻塞问题
 
