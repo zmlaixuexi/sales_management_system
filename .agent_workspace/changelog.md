@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-04-30（第五十六轮）
+
+### 安全：CSP 和安全响应头加固
+
+- 新增 `app/core/security_headers.py`：SecurityHeadersMiddleware 中间件
+  - X-Content-Type-Options: nosniff
+  - X-Frame-Options: DENY
+  - X-XSS-Protection: 1; mode=block
+  - Referrer-Policy: strict-origin-when-cross-origin
+  - Permissions-Policy: camera=(), microphone=(), geolocation=()
+  - Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
+- main.py 注册 SecurityHeadersMiddleware
+- Nginx 配置新增 CSP 和 Permissions-Policy 头（前端安全策略）
+- test_health.py 新增安全响应头验证测试
+- 后端 179/179 通过
+
 ## 2026-04-30（第五十五轮）
 
 ### 测试：后端边界测试补强（142→178）
