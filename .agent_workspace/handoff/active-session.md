@@ -15,9 +15,20 @@
 
 ## 下一步第一动作
 
-1. 批量导入功能
-2. 前端自动化测试框架搭建
-3. 前端商品/客户列表页空状态优化
+1. 批量导入功能（商品/客户 CSV 上传）
+2. 前端自动化测试框架搭建（Vitest + Testing Library）
+3. 前端列表页空状态和分页大小选择器
+
+## 当前里程碑总结（Round 15-31）
+
+- 测试：51 → 100（+49，覆盖权限、异常路径、速率限制、文件上传、导出审计）
+- 安全：RBAC 权限、数据范围过滤、速率限制、敏感字段控制、logout token 清理
+- 可观测性：结构化 JSON 日志（LOG_FORMAT）、审计日志请求元数据
+- 性能：前端代码拆分（1.4MB → 40+ chunk）、TypeScript strict 模式
+- 前端体验：统一错误提示、429 重试、ErrorBoundary、菜单修复、用户名/角色展示
+- 文档：API 文档、README、.env.example、测试报告全部更新
+- 配置：INVENTORY_WARNING_THRESHOLD、LOG_FORMAT、RATE_LIMIT_MAX/WINDOW
+- 后端 100/100 通过，前端 TypeScript + 构建通过
 
 ## 阻塞问题
 
