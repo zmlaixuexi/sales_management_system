@@ -163,3 +163,18 @@ def test_08_import_requires_auth():
         files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
     )
     assert resp.status_code == 401
+
+
+def test_09_import_file_too_large(monkeypatch):
+    """超过大小限制的 CSV 文件被拒绝"""
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "MAX_CSV_IMPORT_SIZE_MB", 0)
+    csv_content = "客户名称,电话\n测试,13800008888"
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 400
+    assert "CSV 文件不能超过" in resp.json()["detail"]["message"]
