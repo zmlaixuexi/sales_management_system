@@ -1,4 +1,4 @@
-.PHONY: help dev dev-backend dev-frontend install test test-backend test-frontend lint lint-backend lint-frontend build build-frontend db-migrate db-seed docker-up docker-down clean
+.PHONY: help dev dev-backend dev-frontend install test test-backend test-frontend lint lint-backend lint-frontend build build-frontend db-migrate db-seed db-backup db-restore docker-up docker-down clean
 
 help: ## 显示帮助信息
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -54,6 +54,12 @@ db-migrate: ## 运行数据库迁移
 
 db-seed: ## 初始化种子数据
 	cd backend && python -m app.db.seed
+
+db-backup: ## 备份数据库（PostgreSQL）
+	bash deploy/backup.sh
+
+db-restore: ## 恢复数据库（参数：BACKUP_FILE=backups/xxx.sql.gz）
+	bash deploy/restore.sh $${BACKUP_FILE:-}
 
 # ─── Docker ────────────────────────────────────────────────
 
