@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第八十四轮）
+
+### 性能：修复订单导出 N+1 查询
+
+- export_orders 查询添加 selectinload(SalesOrder.items)，避免逐行触发 items 加载
+- Product.category 和 Customer.owner 已在模型层配置 selectin，无需额外处理
+- 后端 213/213 通过，ruff 0
+
 ## 2026-04-30（第八十三轮）
 
 ### 测试：CSV 导出内容格式验证（9 个新测试）

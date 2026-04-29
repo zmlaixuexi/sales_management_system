@@ -6,7 +6,7 @@ import uuid
 from decimal import Decimal
 from typing import Generator
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.sanitize import escape_like
 from app.models.customer import Customer
@@ -181,7 +181,9 @@ def export_orders(
     end_date: str | None = None,
     sales_user_id: uuid.UUID | None = None,
 ) -> Generator[str, None, None]:
-    query = db.query(SalesOrder).filter(SalesOrder.deleted_at.is_(None))
+    query = db.query(SalesOrder).filter(SalesOrder.deleted_at.is_(None)).options(
+        selectinload(SalesOrder.items),
+    )
     if keyword:
         query = query.filter(SalesOrder.order_no.ilike(f"%{escape_like(keyword)}%", escape="\\"))
     if status:
