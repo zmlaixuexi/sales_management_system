@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百一十四轮）
+
+### 修复：docker-compose.prod.yml nginx depends_on 语法错误
+
+- nginx depends_on 混用 mapping 和 list 语法导致 `docker compose config` 失败
+- 统一为 mapping 格式：backend service_healthy + frontend-build service_started
+- dev 和 prod 配置均已验证通过
+
 ## 2026-04-30（第一百一十三轮）
 
 ### 部署：后端 Dockerfile 改为多阶段构建，减小运行时镜像体积
