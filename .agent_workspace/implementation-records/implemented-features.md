@@ -6,6 +6,100 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的“已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-22
+
+功能名称：Makefile 开发命令
+所属模块：部署
+实现日期：2026-04-30
+实现 Agent：Claude
+
+### 实现范围
+
+- 新建 Makefile（17 个命令）：dev、dev-backend、dev-frontend、install、test、lint、build、db-migrate、db-seed、docker-up/down、clean
+- README 新增 Makefile 使用说明
+
+## 功能编号：FEAT-20260430-21
+
+功能名称：请求日志中间件
+所属模块：可观测性
+实现日期：2026-04-30
+实现 Agent：Claude
+
+### 实现范围
+
+- 新增 `app/core/request_log.py`：RequestLogMiddleware
+- 记录 /api/ 请求的方法、路径、状态码、耗时(ms)、客户端 IP
+- 兼容 JSON 结构化日志
+
+## 功能编号：FEAT-20260430-20
+
+功能名称：CSP 和安全响应头加固
+所属模块：安全
+实现日期：2026-04-30
+实现 Agent：Claude
+
+### 实现范围
+
+- 新增 `app/core/security_headers.py`：SecurityHeadersMiddleware（6 个安全头）
+- Nginx 新增 CSP 和 Permissions-Policy 前端安全策略
+- 后端 201/201 通过，前端 78/78 通过
+
+## 功能编号：FEAT-20260430-19
+
+功能名称：后端边界测试补强
+所属模块：测试
+实现日期：2026-04-30
+实现 Agent：Claude
+
+### 实现范围
+
+- test_boundary.py（36 个测试）：认证边界、订单状态机、收款边界、用户管理、库存调整
+- test_reports_audit.py（22 个测试）：销售汇总、趋势、排行、库存预警、审计日志查询/筛选/权限
+- 前端 payments-api.test.ts（5 个）、auditLogs-api.test.ts（5 个）、upload 测试（1 个）
+- 修复 users.py UUID 转换 bug
+- 后端 142→201（+59），前端 67→78（+11）
+
+## 功能编号：FEAT-20260430-18
+
+功能名称：前端代码分割优化
+所属模块：前端工程化
+实现日期：2026-04-30
+实现 Agent：Claude
+
+### 实现范围
+
+- vite.config.ts 新增 manualChunks 函数拆分 vendor 库
+- vendor-react（93KB）+ vendor-antd（1281KB）
+- index.js 从 730KB 降至 45KB（减少 94%）
+- 前端 67/67 通过，build 成功
+
+## 功能编号：FEAT-20260430-17
+
+功能名称：前端 build 修复
+所属模块：前端工程化
+实现日期：2026-04-30
+实现 Agent：Claude
+
+### 实现范围
+
+- tsconfig.app.json 新增 exclude 排除测试文件
+- 修复 `npm run build` 和 `tsc -b` 失败问题
+
+## 功能编号：FEAT-20260430-16
+
+功能名称：API 文档增强和请求模型
+所属模块：API 文档
+实现日期：2026-04-30
+实现 Agent：Claude
+
+### 实现范围
+
+- main.py 新增 description、openapi_tags（11 模块描述）
+- 5 模块 Pydantic 请求/响应模型（products、customers、orders、payments、inventory）
+- 11 模块路由 responses 参数（401/403/400/404/409）
+- 修正 7 个测试用例（Pydantic 422 vs 手动 400）
+- 后端 142/142 通过
+
 ## 功能编号：FEAT-20260430-15
 
 功能名称：前端自动化测试框架
