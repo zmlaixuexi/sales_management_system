@@ -9,6 +9,7 @@ import app.core.logging  # noqa: F401 — 确保日志初始化
 from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.ratelimit import add_rate_limit
+from app.core.request_log import RequestLogMiddleware
 from app.core.security_headers import SecurityHeadersMiddleware
 
 
@@ -54,6 +55,7 @@ app.add_middleware(
 )
 
 app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(RequestLogMiddleware)
 
 app.include_router(api_router, prefix="/api/v1")
 

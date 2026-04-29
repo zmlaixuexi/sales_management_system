@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-04-30（第六十二轮）
+
+### 可观测性：请求日志中间件
+
+- 新增 `app/core/request_log.py`：RequestLogMiddleware
+  - 记录每个 /api/ 请求的方法、路径、状态码、耗时（ms）、客户端 IP
+  - 只记录 API 路径，跳过静态文件和文档页面
+  - 兼容结构化 JSON 日志（通过 extra_fields）
+- main.py 注册 RequestLogMiddleware
+- 后端 201/201 通过，ruff 0 错误
+
 ## 2026-04-30（第六十一轮）
 
 ### 测试：前端 upload 函数测试 + 问题台账更新
