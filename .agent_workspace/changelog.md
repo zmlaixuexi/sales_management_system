@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-04-30（第五十五轮）
+
+### 工程：前端代码分割优化
+
+- vite.config.ts 新增 build.rollupOptions.output.manualChunks 函数
+- 将 react/react-dom/react-router 拆为 vendor-react chunk（93KB）
+- 将 antd/@ant-design 拆为 vendor-antd chunk（1281KB）
+- index.js 从 730KB 降至 45KB（减少 94%）
+- 前端 67/67 测试通过，build 成功
+
 ## 2026-04-30（第四十四轮）
 
 ### 文档：FastAPI API 文档增强
