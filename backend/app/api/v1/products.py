@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFil
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, has_permission, require_permission
+from app.core.config import settings
 from app.core.sanitize import escape_like
 from app.models.product import Product, ProductCategory, ProductPriceHistory
 from app.models.user import User
@@ -494,6 +495,13 @@ async def import_products_csv(
         })
 
     content = await file.read()
+    max_size = settings.MAX_CSV_IMPORT_SIZE_MB * 1024 * 1024
+    if len(content) > max_size:
+        raise HTTPException(status_code=400, detail={
+            "code": "VALIDATION_FAILED",
+            "message": f"CSV 文件不能超过 {settings.MAX_CSV_IMPORT_SIZE_MB}MB",
+        })
+
     try:
         text = content.decode("utf-8-sig")
     except UnicodeDecodeError:

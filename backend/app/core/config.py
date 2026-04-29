@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = str(Path(__file__).resolve().parent.parent.parent / "uploads")
     UPLOAD_PUBLIC_BASE_URL: str = "/uploads"
     MAX_IMAGE_SIZE_MB: int = 5
+    MAX_CSV_IMPORT_SIZE_MB: int = 10
     INVENTORY_WARNING_THRESHOLD: int = 10
     RATE_LIMIT_MAX: int = 1000
     RATE_LIMIT_WINDOW: int = 60
