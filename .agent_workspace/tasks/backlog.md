@@ -61,7 +61,7 @@
 | DOC-001 | README 基础说明 | 已完成 |
 | DOC-002 | docs/api.md | 已完成 |
 | DOC-003 | docs/database.md | 已完成 |
-| DOC-004 | docs/testing.md | 未完成 |
+| DOC-004 | docs/testing.md | 已完成 |
 | QA-REPORT-001 | 阶段测试报告 `.agent_workspace/test-reports/phase-xx-test-report.md` | 未完成 |
 | DEVOPS-PROD-001 | 生产 Docker Compose | 未完成 |
 | DEVOPS-NGINX-001 | Nginx 反向代理配置 | 未完成 |

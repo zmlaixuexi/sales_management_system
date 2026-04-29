@@ -2,36 +2,34 @@
 
 最后更新时间：2026-04-30
 当前阶段：阶段 6 交付加固
-当前任务编号：DOC-002 / DOC-003
-当前任务名称：API 和数据库文档
+当前任务编号：DOC-004
+当前任务名称：测试文档
 当前 Agent：Claude
 任务状态：已完成
 
 ## 本次目标
 
-创建完整的 API 接口文档和数据库文档。
+创建完整测试文档。
 
 ## 最近完成
 
-- docs/api.md：46 个 API 端点、23 个权限码、错误码、请求/响应格式
-- docs/database.md：16 张表、ER 关系、字段说明、种子数据、迁移命令
+- docs/testing.md：51 个测试、5 个文件详解、编写指南、注意事项
 
 ## 当前正在做
 
-文档已完成。下一步继续阶段 6 交付物。
+测试文档已完成。下一步继续阶段 6 交付物。
 
 ## 下一步第一动作
 
-1. docs/testing.md（DOC-004）
-2. 测试报告（QA-REPORT-001）
-3. 生产 Docker Compose 和 Nginx 配置
+1. QA-REPORT-001：阶段测试报告
+2. DEVOPS-PROD-001：生产 Docker Compose
+3. DEVOPS-NGINX-001：Nginx 反向代理配置
 
 ## 涉及文件
 
 | 文件 | 状态 | 说明 |
 |---|---|---|
-| docs/api.md | 新建 | API 接口文档 |
-| docs/database.md | 新建 | 数据库文档 |
+| docs/testing.md | 新建 | 测试文档 |
 
 ## 已执行命令
 
@@ -39,7 +37,6 @@
 
 ## 未完成事项
 
-- docs/testing.md
 - 阶段测试报告
 - 生产部署配置
 
