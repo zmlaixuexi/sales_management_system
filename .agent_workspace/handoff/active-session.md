@@ -1,71 +1,50 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：安全加固 — 权限校验
-当前任务编号：SEC-001
-当前任务名称：统一权限依赖和敏感字段控制
+当前阶段：安全加固 — 数据范围权限
+当前任务编号：SEC-002
+当前任务名称：数据范围权限和导出过滤
 当前 Agent：Claude
 任务状态：已完成
 
 ## 本次目标
 
-实现统一权限依赖，保护所有业务 API 接口按权限码校验，实现敏感字段（成本价/毛利）过滤。
+实现客户/订单数据范围权限（销售只能看本人数据），并在导出 CSV 时同样过滤。
 
 ## 最近完成
 
-- 在 deps.py 添加 `require_permission(permission_code)` 依赖和 `has_permission(user, code)` 辅助函数
-- 为全部 8 个业务 API 模块共 25 个端点添加权限校验：
-  - products：product:list/create/update/delete + product:view_cost 敏感字段过滤
-  - customers：customer:list/create/update/delete
-  - orders：order:list/create/update/confirm/cancel
-  - payments：payment:list/create/reverse
-  - inventory：inventory:list/adjust
-  - reports：report:sales
-  - audit-logs：audit:view
-  - exports：使用对应模块的 list 权限
-- 商品列表 API 实现敏感字段过滤：无 product:view_cost 权限时不返回 cost_price/unit_profit/gross_margin
-- superuser 自动通过所有权限校验
-- 更新测试用户为 is_superuser=True 以保持测试通过
-- 后端 51/51 测试通过，前端构建通过
+- 客户列表 API：无 `customer:view_all` 权限时只返回 `owner_user_id == current_user.id` 的客户
+- 订单列表 API：无 `order:view_all` 权限时只返回 `sales_user_id == current_user.id` 的订单
+- 客户导出 CSV：同样应用 `owner_user_id` 过滤
+- 订单导出 CSV：同样应用 `sales_user_id` 过滤
+- 后端 51/51 测试通过
 
 ## 当前正在做
 
-权限校验已完成。下一步继续 P0 缺口。
+数据范围权限已完成。下一步继续 P0 缺口。
 
 ## 下一步第一动作
 
-继续 P0 缺口：
-1. 数据范围权限：销售只能看本人客户/订单（需 customer:view_all、order:view_all）
-2. 审计日志补充 IP、user_agent、request_id
-3. 补齐文档和交付物
+1. 审计日志补充 IP、user_agent、request_id（AUDIT-REQ-001）
+2. 补齐阶段 6 交付物和文档
 
 ## 涉及文件
 
 | 文件 | 状态 | 说明 |
 |---|---|---|
-| backend/app/api/deps.py | 更新 | 添加 require_permission 和 has_permission |
-| backend/app/api/v1/products.py | 更新 | 权限校验 + 敏感字段过滤 |
-| backend/app/api/v1/customers.py | 更新 | 权限校验 |
-| backend/app/api/v1/orders.py | 更新 | 权限校验 |
-| backend/app/api/v1/payments.py | 更新 | 权限校验 |
-| backend/app/api/v1/inventory.py | 更新 | 权限校验 |
-| backend/app/api/v1/reports.py | 更新 | 权限校验 |
-| backend/app/api/v1/audit_logs.py | 更新 | 权限校验 |
-| backend/app/api/v1/exports.py | 更新 | 权限校验 |
-| backend/tests/test_integration.py | 更新 | 测试用户改为 superuser |
-| backend/tests/test_audit_log.py | 更新 | 测试用户改为 superuser |
-| backend/tests/test_export.py | 更新 | 测试用户改为 superuser |
+| backend/app/api/v1/customers.py | 更新 | 数据范围过滤 |
+| backend/app/api/v1/orders.py | 更新 | 数据范围过滤 |
+| backend/app/api/v1/exports.py | 更新 | 导出数据范围过滤 |
+| backend/app/services/export_service.py | 更新 | 导出函数增加 owner_user_id/sales_user_id 参数 |
 
 ## 已执行命令
 
 | 命令 | 结果 | 备注 |
 |---|---|---|
 | pytest tests/ -v | 51/51 通过 | 无回归 |
-| npm run build | 成功 | 前端构建通过 |
 
 ## 未完成事项
 
-- 数据范围权限（销售看本人客户/订单）。
 - 审计日志补充 IP、user_agent、request_id。
 - 补齐文档和交付物。
 

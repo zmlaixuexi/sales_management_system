@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db, require_permission
+from app.api.deps import get_current_user, get_db, has_permission, require_permission
 from app.models.user import User
 from app.services.export_service import (
     export_customers,
@@ -49,7 +49,8 @@ def export_customers_csv(
     current_user: User = Depends(require_permission("customer:list")),
 ):
     """导出客户列表为 CSV"""
-    generator = export_customers(db, keyword=keyword, source=source)
+    owner_user_id = None if has_permission(current_user, "customer:view_all") else current_user.id
+    generator = export_customers(db, keyword=keyword, source=source, owner_user_id=owner_user_id)
     return StreamingResponse(
         generator,
         media_type="text/csv; charset=utf-8",
@@ -68,9 +69,10 @@ def export_orders_csv(
     current_user: User = Depends(require_permission("order:list")),
 ):
     """导出订单列表为 CSV"""
+    sales_user_id = None if has_permission(current_user, "order:view_all") else current_user.id
     generator = export_orders(
         db, keyword=keyword, status=status, customer_id=customer_id,
-        start_date=start_date, end_date=end_date,
+        start_date=start_date, end_date=end_date, sales_user_id=sales_user_id,
     )
     return StreamingResponse(
         generator,

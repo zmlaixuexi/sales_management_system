@@ -110,6 +110,7 @@ def export_customers(
     *,
     keyword: str | None = None,
     source: str | None = None,
+    owner_user_id: uuid.UUID | None = None,
 ) -> Generator[str, None, None]:
     query = db.query(Customer).filter(Customer.deleted_at.is_(None))
     if keyword:
@@ -120,6 +121,8 @@ def export_customers(
         )
     if source:
         query = query.filter(Customer.source == source)
+    if owner_user_id:
+        query = query.filter(Customer.owner_user_id == owner_user_id)
     query = query.order_by(Customer.created_at.desc())
 
     buf = io.StringIO()
@@ -174,6 +177,7 @@ def export_orders(
     customer_id: uuid.UUID | None = None,
     start_date: str | None = None,
     end_date: str | None = None,
+    sales_user_id: uuid.UUID | None = None,
 ) -> Generator[str, None, None]:
     query = db.query(SalesOrder).filter(SalesOrder.deleted_at.is_(None))
     if keyword:
@@ -186,6 +190,8 @@ def export_orders(
         query = query.filter(SalesOrder.created_at >= start_date)
     if end_date:
         query = query.filter(SalesOrder.created_at <= end_date)
+    if sales_user_id:
+        query = query.filter(SalesOrder.sales_user_id == sales_user_id)
     query = query.order_by(SalesOrder.created_at.desc())
 
     buf = io.StringIO()

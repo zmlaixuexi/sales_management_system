@@ -6,7 +6,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db, require_permission
+from app.api.deps import get_current_user, get_db, require_permission, has_permission
 from app.models.customer import Customer
 from app.models.user import User
 from app.services.audit_service import log_action
@@ -26,6 +26,10 @@ def list_customers(
 ):
     """客户列表"""
     query = db.query(Customer).filter(Customer.deleted_at.is_(None))
+
+    # 数据范围：无 customer:view_all 权限只能看本人客户
+    if not has_permission(current_user, "customer:view_all"):
+        query = query.filter(Customer.owner_user_id == current_user.id)
 
     if keyword:
         query = query.filter(

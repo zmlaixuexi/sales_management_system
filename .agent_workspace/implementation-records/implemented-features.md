@@ -6,6 +6,57 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的“已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-09
+
+功能名称：数据范围权限
+所属模块：安全
+关联任务编号：SEC-002 / RBAC-003
+实现日期：2026-04-30
+实现 Agent：Claude
+当前状态：已测试
+
+### 实现范围
+
+- 客户列表 API：无 `customer:view_all` 权限时，自动过滤为 `owner_user_id == current_user.id`
+- 订单列表 API：无 `order:view_all` 权限时，自动过滤为 `sales_user_id == current_user.id`
+- 客户导出 CSV：同样应用 `owner_user_id` 过滤
+- 订单导出 CSV：同样应用 `sales_user_id` 过滤
+- 使用 `has_permission()` 辅助函数做非抛异常检查，superuser 自动通过
+
+### 测试状态
+
+- 后端 51/51 测试通过
+
+### 已知限制
+
+- 数据范围仅支持"本人"和"全部"两级，暂无"团队"级别
+- 报表 API 尚未应用数据范围过滤
+
+## 功能编号：FEAT-20260430-08
+
+功能名称：统一权限校验系统
+所属模块：安全
+关联任务编号：SEC-001 / RBAC-002 / RBAC-004
+实现日期：2026-04-30
+实现 Agent：Claude
+当前状态：已测试
+
+### 实现范围
+
+- deps.py 新增 `require_permission(code)` FastAPI 依赖和 `has_permission(user, code)` 辅助函数
+- superuser 自动通过所有权限校验
+- 8 个 API 模块共 25 个端点添加权限码校验
+- 商品列表 API 实现敏感字段过滤：无 `product:view_cost` 权限时不返回成本价/毛利/毛利率
+- 审计日志查询限制为 `audit:view` 权限
+
+### 测试状态
+
+- 后端 51/51 测试通过
+
+### 已知限制
+
+- 审计日志尚未记录 IP、user_agent、request_id
+
 ## 功能编号：FEAT-20260430-07
 
 功能名称：数据导出功能

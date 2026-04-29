@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db, require_permission
+from app.api.deps import get_current_user, get_db, require_permission, has_permission
 from app.models.customer import Customer
 from app.models.order import SalesOrder, SalesOrderItem, InventoryMovement, Payment
 from app.models.product import Product
@@ -157,6 +157,10 @@ def list_orders(
 ):
     """订单列表"""
     query = db.query(SalesOrder).filter(SalesOrder.deleted_at.is_(None))
+
+    # 数据范围：无 order:view_all 权限只能看本人订单
+    if not has_permission(current_user, "order:view_all"):
+        query = query.filter(SalesOrder.sales_user_id == current_user.id)
     if keyword:
         query = query.filter(SalesOrder.order_no.ilike(f"%{keyword}%"))
     if status:
