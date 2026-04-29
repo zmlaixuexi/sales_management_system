@@ -44,8 +44,6 @@ describe('apiClient 响应拦截器', () => {
       data: { data: { access_token: 'new-token', refresh_token: 'new-refresh' } },
     })
 
-    // 拦截重试请求以避免实际发送
-    const origRequest = apiClient.request
     const requestSpy = vi.spyOn(apiClient, 'request').mockResolvedValueOnce({ data: 'ok' } as never)
 
     try {

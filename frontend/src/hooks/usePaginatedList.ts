@@ -19,7 +19,7 @@ export function usePaginatedList<T>(
   const [keyword, setKeyword] = useState('')
 
   const fetchFnRef = useRef(fetchFn)
-  fetchFnRef.current = fetchFn
+  useEffect(() => { fetchFnRef.current = fetchFn })
 
   const filtersKey = JSON.stringify(filters)
 
@@ -39,6 +39,7 @@ export function usePaginatedList<T>(
     } finally {
       setLoading(false)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, pageSize, keyword, filtersKey, errorMessage])
 
   useEffect(() => { loadData() }, [loadData])
