@@ -1,4 +1,5 @@
-import { Layout, Menu } from 'antd'
+import { useState, useEffect } from 'react'
+import { Layout, Menu, Space, Typography } from 'antd'
 import {
   DashboardOutlined,
   ShoppingCartOutlined,
@@ -6,8 +7,12 @@ import {
   ShopOutlined,
   FileTextOutlined,
   LogoutOutlined,
+  UserOutlined,
 } from '@ant-design/icons'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { authApi, type CurrentUser } from '@/api/auth'
+
+const { Text } = Typography
 
 const { Header, Sider, Content } = Layout
 
@@ -22,6 +27,13 @@ const menuItems = [
 export default function AppLayout() {
   const navigate = useNavigate()
   const location = useLocation()
+  const [user, setUser] = useState<CurrentUser | null>(null)
+
+  useEffect(() => {
+    authApi.getMe().then((res) => {
+      if (res.data.success) setUser(res.data.data)
+    }).catch(() => {})
+  }, [])
 
   const handleMenuClick = ({ key }: { key: string }) => {
     navigate(key)
@@ -35,6 +47,9 @@ export default function AppLayout() {
 
   // 匹配子路径高亮：/orders/123 → /orders
   const selectedKey = '/' + location.pathname.split('/').filter(Boolean)[0]
+
+  const displayName = user?.display_name || user?.username || ''
+  const roleLabel = user?.roles?.[0]?.display_name || ''
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -50,8 +65,15 @@ export default function AppLayout() {
         />
       </Sider>
       <Layout>
-        <Header style={{ background: '#fff', padding: '0 24px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-          <LogoutOutlined style={{ fontSize: 18, cursor: 'pointer' }} onClick={handleLogout} />
+        <Header style={{ background: '#fff', padding: '0 24px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 16 }}>
+          {user && (
+            <Space>
+              <UserOutlined />
+              <Text strong>{displayName}</Text>
+              {roleLabel && <Text type="secondary" style={{ fontSize: 12 }}>{roleLabel}</Text>}
+            </Space>
+          )}
+          <LogoutOutlined style={{ fontSize: 18, cursor: 'pointer' }} onClick={handleLogout} title="退出登录" />
         </Header>
         <Content style={{ margin: 24, padding: 24, background: '#fff', borderRadius: 8 }}>
           <Outlet />
