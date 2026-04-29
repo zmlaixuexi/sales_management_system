@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatAmount, formatPercent } from '@/utils'
+import { formatAmount, formatPercent, getApiErrorMessage } from '@/utils'
 
 describe('formatAmount', () => {
   it('格式化数字金额为两位小数', () => {
@@ -41,5 +41,22 @@ describe('formatPercent', () => {
 
   it('处理无效字符串', () => {
     expect(formatPercent('abc')).toBe('--')
+  })
+})
+
+describe('getApiErrorMessage', () => {
+  it('提取 detail.message', () => {
+    const err = { response: { data: { detail: { message: '库存不足' } } } }
+    expect(getApiErrorMessage(err)).toBe('库存不足')
+  })
+
+  it('无 response 时使用 fallback', () => {
+    expect(getApiErrorMessage({})).toBe('操作失败')
+    expect(getApiErrorMessage({}, '删除失败')).toBe('删除失败')
+  })
+
+  it('无 detail.message 时使用 fallback', () => {
+    const err = { response: { data: {} } }
+    expect(getApiErrorMessage(err)).toBe('操作失败')
   })
 })
