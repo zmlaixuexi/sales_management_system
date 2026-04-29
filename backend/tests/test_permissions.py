@@ -6,13 +6,13 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.db.session import Base
-from app.main import app
 from app.api.deps import get_db
 from app.core.security import hash_password
-from app.models.user import User, Role, Permission, UserRole, RolePermission
+from app.db.session import Base
+from app.main import app
 from app.models.customer import Customer
 from app.models.product import Product, ProductCategory
+from app.models.user import Permission, Role, RolePermission, User, UserRole
 
 TEST_DB_URL = "sqlite:///./test_permissions.db"
 engine = create_engine(TEST_DB_URL, connect_args={"check_same_thread": False})
@@ -247,7 +247,7 @@ def test_08_export_customer_data_scope():
     content = resp.text
     assert "销售员客户" in content, "应包含本人客户"
     # 管理员客户可能出现在表头行之外
-    lines = [l for l in content.strip().split("\n") if l.strip() and "客户名称" not in l]
+    lines = [line for line in content.strip().split("\n") if line.strip() and "客户名称" not in line]
     assert len(lines) == 1, "销售员导出只应有 1 个客户数据行"
 
 
@@ -256,5 +256,5 @@ def test_09_export_order_data_scope():
     resp = client.get("/api/v1/exports/orders", headers=_auth("sale01"))
     assert resp.status_code == 200
     content = resp.text
-    lines = [l for l in content.strip().split("\n") if l.strip() and "订单号" not in l]
+    lines = [line for line in content.strip().split("\n") if line.strip() and "订单号" not in line]
     assert len(lines) == 1, "销售员导出只应有 1 个订单数据行"

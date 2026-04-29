@@ -1,18 +1,17 @@
 """文件上传集成测试 — 覆盖上传、校验、查询、删除"""
 
 import os
-import uuid
 import tempfile
-from pathlib import Path
+import uuid
 
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.db.session import Base
-from app.main import app
 from app.api.deps import get_db
 from app.core.security import hash_password
+from app.db.session import Base
+from app.main import app
 from app.models.user import User
 
 TEST_DB_URL = "sqlite:///./test_file_upload.db"

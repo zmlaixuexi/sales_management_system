@@ -4,11 +4,11 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.db.session import Base
-from app.main import app
 from app.api.deps import get_db
 from app.core.security import hash_password
-from app.models.user import User, Role, Permission, UserRole, RolePermission
+from app.db.session import Base
+from app.main import app
+from app.models.user import User
 
 # 测试用内存 SQLite 数据库
 TEST_DB_URL = "sqlite:///./test.db"

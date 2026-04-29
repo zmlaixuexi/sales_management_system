@@ -5,13 +5,13 @@ import io
 import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db, require_permission, has_permission
+from app.api.deps import get_db, has_permission, require_permission
 from app.models.customer import Customer
 from app.models.user import User
-from app.services.audit_service import log_action, get_request_meta
+from app.services.audit_service import get_request_meta, log_action
 
 router = APIRouter(prefix="/customers", tags=["客户管理"])
 
@@ -100,7 +100,10 @@ def create_customer(
         if existing:
             raise HTTPException(
                 status_code=409,
-                detail={"code": "CUSTOMER_DUPLICATED_WARNING", "message": f"手机号 {phone} 已被客户「{existing.name}」使用"},
+                detail={
+                    "code": "CUSTOMER_DUPLICATED_WARNING",
+                    "message": f"手机号 {phone} 已被客户「{existing.name}」使用",
+                },
             )
 
     customer = Customer(
@@ -313,7 +316,11 @@ def transfer_customer(
     )
     db.commit()
 
-    return {"success": True, "data": {"id": str(customer.id), "owner_user_id": str(customer.owner_user_id)}, "message": "转移成功"}
+    return {
+        "success": True,
+        "data": {"id": str(customer.id), "owner_user_id": str(customer.owner_user_id)},
+        "message": "转移成功",
+    }
 
 
 @router.post("/import")

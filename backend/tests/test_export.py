@@ -6,12 +6,12 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.db.session import Base
-from app.main import app
 from app.api.deps import get_db
 from app.core.security import hash_password
-from app.models.user import User
+from app.db.session import Base
+from app.main import app
 from app.models.product import ProductCategory
+from app.models.user import User
 
 TEST_DB_URL = "sqlite:///./test_export.db"
 engine = create_engine(TEST_DB_URL, connect_args={"check_same_thread": False})
@@ -189,13 +189,12 @@ def test_08_export_empty_filter():
     content = resp.text
     assert "SKU" in content
     # 只有一行表头
-    lines = [l for l in content.strip().split("\n") if l.strip()]
+    lines = [line for line in content.strip().split("\n") if line.strip()]
     assert len(lines) == 1
 
 
 def test_09_export_creates_audit_log():
     """导出操作生成审计日志"""
-    from app.models.audit import AuditLog
 
     # 执行导出
     resp = client.get("/api/v1/exports/products?status=active", headers=_auth())

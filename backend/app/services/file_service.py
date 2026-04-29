@@ -1,6 +1,5 @@
 """文件上传、校验、存储服务"""
 
-import os
 import uuid
 from datetime import datetime
 from pathlib import Path

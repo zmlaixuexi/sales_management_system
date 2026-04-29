@@ -5,11 +5,11 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db, require_permission
+from app.api.deps import get_db, require_permission
 from app.models.order import InventoryMovement
 from app.models.product import Product
 from app.models.user import User
-from app.services.audit_service import log_action, get_request_meta
+from app.services.audit_service import get_request_meta, log_action
 
 router = APIRouter(prefix="/inventory", tags=["库存管理"])
 
@@ -85,7 +85,13 @@ def adjust_inventory(
     before = product.stock_quantity
     after = before + quantity_change
     if after < 0:
-        raise HTTPException(status_code=400, detail={"code": "INVENTORY_NOT_ENOUGH", "message": f"库存不能为负（当前 {before}，调整 {quantity_change}）"})
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "INVENTORY_NOT_ENOUGH",
+                "message": f"库存不能为负（当前 {before}，调整 {quantity_change}）",
+            },
+        )
 
     product.stock_quantity = after
 

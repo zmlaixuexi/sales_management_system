@@ -1,16 +1,15 @@
 """收款登记和冲正 API"""
 
 import uuid
-from datetime import datetime
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db, require_permission
+from app.api.deps import get_db, require_permission
 from app.models.order import Payment, SalesOrder
 from app.models.user import User
-from app.services.audit_service import log_action, get_request_meta
+from app.services.audit_service import get_request_meta, log_action
 
 router = APIRouter(prefix="/payments", tags=["收款管理"])
 
@@ -72,7 +71,13 @@ def create_payment(
         raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "订单不存在"})
 
     if order.status not in ("confirmed", "partially_paid"):
-        raise HTTPException(status_code=400, detail={"code": "ORDER_INVALID_STATUS", "message": "只有已确认/部分收款的订单可以登记收款"})
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "ORDER_INVALID_STATUS",
+                "message": "只有已确认/部分收款的订单可以登记收款",
+            },
+        )
 
     amount = Decimal(str(data.get("amount", "0")))
     if amount <= 0:

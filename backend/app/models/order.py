@@ -31,10 +31,14 @@ class SalesOrder(Base):
     created_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"))
     updated_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
-    items: Mapped[list["SalesOrderItem"]] = relationship(back_populates="order", lazy="selectin", cascade="all, delete-orphan")
+    items: Mapped[list["SalesOrderItem"]] = relationship(
+        back_populates="order", lazy="selectin", cascade="all, delete-orphan"
+    )
     payments: Mapped[list["Payment"]] = relationship(back_populates="order", lazy="selectin")
 
 

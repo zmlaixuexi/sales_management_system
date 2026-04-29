@@ -3,11 +3,11 @@
 import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db, has_permission, require_permission
+from app.api.deps import get_db, has_permission, require_permission
 from app.models.user import User
 from app.services.audit_service import get_request_meta, log_action
 from app.services.export_service import (

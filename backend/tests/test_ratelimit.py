@@ -6,10 +6,10 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.db.session import Base
-from app.main import app
 from app.api.deps import get_db
 from app.core.security import hash_password
+from app.db.session import Base
+from app.main import app
 from app.models.user import User
 
 TEST_DB_URL = "sqlite:///./test_ratelimit.db"

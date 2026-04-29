@@ -1,6 +1,5 @@
 """pytest 配置：确保速率限制测试最后运行"""
 
-import pytest
 
 
 def pytest_collection_modifyitems(items):

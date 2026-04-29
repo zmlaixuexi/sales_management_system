@@ -4,10 +4,9 @@ import json
 import uuid
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db, require_permission
+from app.api.deps import get_db, require_permission
 from app.models.audit import AuditLog
 from app.models.user import User
 

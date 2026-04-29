@@ -1,12 +1,11 @@
-import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db
 from app.core.security import hash_password
-from app.models.user import User, UserRole, Role
-from app.schemas.auth import UserCreate, UserUpdate, UserBrief, RoleBrief
+from app.models.user import User, UserRole
+from app.schemas.auth import RoleBrief, UserCreate, UserUpdate
 
 router = APIRouter(prefix="/users", tags=["用户管理"])
 
@@ -96,7 +95,12 @@ def create_user(req: UserCreate, db: Session = Depends(get_db), current_user: Us
 
 
 @router.put("/{user_id}")
-def update_user(user_id: str, req: UserUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def update_user(
+    user_id: str,
+    req: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """编辑用户"""
     if not current_user.is_superuser:
         raise HTTPException(

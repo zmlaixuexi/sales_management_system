@@ -6,10 +6,10 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.db.session import Base
-from app.main import app
 from app.api.deps import get_db
 from app.core.security import hash_password
+from app.db.session import Base
+from app.main import app
 from app.models.user import User
 
 TEST_DB_URL = "sqlite:///./test_customer_import.db"
@@ -78,7 +78,11 @@ def test_01_login():
 
 def test_02_import_csv_success():
     """CSV 批量导入成功"""
-    csv_content = "客户名称,电话,联系人,邮箱\n测试客户A,13800001111,张三,a@test.com\n测试客户B,13800002222,李四,b@test.com"
+    csv_content = (
+        "客户名称,电话,联系人,邮箱\n"
+        "测试客户A,13800001111,张三,a@test.com\n"
+        "测试客户B,13800002222,李四,b@test.com"
+    )
     resp = client.post(
         "/api/v1/customers/import",
         files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},

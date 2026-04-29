@@ -59,8 +59,14 @@ def log_action(
             action=action,
             resource_type=resource_type,
             resource_id=resource_id,
-            before_data=json.dumps(_mask_sensitive(before_data), ensure_ascii=False, default=str) if before_data else None,
-            after_data=json.dumps(_mask_sensitive(after_data), ensure_ascii=False, default=str) if after_data else None,
+            before_data=(
+                json.dumps(_mask_sensitive(before_data), ensure_ascii=False, default=str)
+                if before_data else None
+            ),
+            after_data=(
+                json.dumps(_mask_sensitive(after_data), ensure_ascii=False, default=str)
+                if after_data else None
+            ),
             ip_address=ip_address,
             user_agent=user_agent[:500] if user_agent else None,
             request_id=request_id,

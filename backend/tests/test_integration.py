@@ -9,14 +9,12 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.db.session import Base
-from app.main import app
 from app.api.deps import get_db
 from app.core.security import hash_password
+from app.db.session import Base
+from app.main import app
+from app.models.product import ProductCategory
 from app.models.user import User
-from app.models.product import Product, ProductCategory
-from app.models.customer import Customer
-from app.models.order import SalesOrder
 
 # SQLite 测试数据库
 TEST_DB_URL = "sqlite:///./test_integration.db"

@@ -4,16 +4,15 @@ import csv
 import io
 import uuid
 from datetime import datetime
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile, status
-from sqlalchemy import func
-from sqlalchemy.orm import Session, joinedload
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile
+from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db, require_permission, has_permission
+from app.api.deps import get_db, has_permission, require_permission
 from app.models.product import Product, ProductCategory, ProductPriceHistory
 from app.models.user import User
-from app.services.audit_service import log_action, get_request_meta, model_to_dict
+from app.services.audit_service import get_request_meta, log_action
 
 router = APIRouter(prefix="/products", tags=["商品管理"])
 

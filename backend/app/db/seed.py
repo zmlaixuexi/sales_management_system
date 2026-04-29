@@ -1,13 +1,12 @@
 """初始化管理员账号和基础角色、权限的种子数据脚本"""
 
 import logging
-import uuid
 
 from sqlalchemy.orm import Session
 
 from app.core.security import hash_password
 from app.db.session import SessionLocal
-from app.models.user import User, Role, Permission, UserRole, RolePermission
+from app.models.user import Permission, Role, RolePermission, User, UserRole
 
 logger = logging.getLogger(__name__)
 

@@ -2,18 +2,17 @@
 
 import uuid
 from datetime import datetime
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
-from sqlalchemy import func
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db, require_permission, has_permission
+from app.api.deps import get_db, has_permission, require_permission
 from app.models.customer import Customer
-from app.models.order import SalesOrder, SalesOrderItem, InventoryMovement, Payment
+from app.models.order import InventoryMovement, SalesOrder, SalesOrderItem
 from app.models.product import Product
 from app.models.user import User
-from app.services.audit_service import log_action, get_request_meta
+from app.services.audit_service import get_request_meta, log_action
 
 router = APIRouter(prefix="/sales-orders", tags=["订单管理"])
 
@@ -105,11 +104,23 @@ def _deduct_inventory(db: Session, order_id: uuid.UUID, items: list[SalesOrderIt
     for item in items:
         product = db.query(Product).filter(Product.id == item.product_id).with_for_update().first()
         if not product:
-            raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": f"商品 {item.product_name_snapshot} 不存在"})
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "code": "RESOURCE_NOT_FOUND",
+                    "message": f"商品 {item.product_name_snapshot} 不存在",
+                },
+            )
         if product.stock_quantity < item.quantity:
             raise HTTPException(
                 status_code=400,
-                detail={"code": "INVENTORY_NOT_ENOUGH", "message": f"商品 {product.name} 库存不足（当前 {product.stock_quantity}，需要 {item.quantity}）"},
+                detail={
+                    "code": "INVENTORY_NOT_ENOUGH",
+                    "message": (
+                        f"商品 {product.name} 库存不足"
+                        f"（当前 {product.stock_quantity}，需要 {item.quantity}）"
+                    ),
+                },
             )
         before = product.stock_quantity
         product.stock_quantity -= item.quantity
@@ -211,7 +222,11 @@ def create_order(
     if not customer_id:
         raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "请选择客户"})
 
-    customer = db.query(Customer).filter(Customer.id == uuid.UUID(str(customer_id)), Customer.deleted_at.is_(None)).first()
+    customer = (
+        db.query(Customer)
+        .filter(Customer.id == uuid.UUID(str(customer_id)), Customer.deleted_at.is_(None))
+        .first()
+    )
     if not customer:
         raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "客户不存在"})
 
@@ -231,7 +246,13 @@ def create_order(
         if not product:
             raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "商品不存在"})
         if product.status != "active":
-            raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": f"商品 {product.name} 已停用，不可下单"})
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "code": "VALIDATION_FAILED",
+                    "message": f"商品 {product.name} 已停用，不可下单",
+                },
+            )
 
         quantity = int(ri.get("quantity", 0))
         if quantity <= 0:
@@ -390,7 +411,13 @@ def update_order(
             if not product:
                 raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "商品不存在"})
             if product.status != "active":
-                raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": f"商品 {product.name} 已停用"})
+                raise HTTPException(
+                    status_code=400,
+                    detail={
+                        "code": "VALIDATION_FAILED",
+                        "message": f"商品 {product.name} 已停用",
+                    },
+                )
 
             quantity = int(ri.get("quantity", 0))
             if quantity <= 0:
@@ -475,7 +502,15 @@ def cancel_order(
 
     allowed = VALID_TRANSITIONS.get(order.status, set())
     if "cancelled" not in allowed:
-        raise HTTPException(status_code=400, detail={"code": "ORDER_INVALID_STATUS", "message": f"订单状态 {STATUS_LABELS.get(order.status, order.status)} 不允许取消"})
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "ORDER_INVALID_STATUS",
+                "message": (
+                    f"订单状态 {STATUS_LABELS.get(order.status, order.status)} 不允许取消"
+                ),
+            },
+        )
 
     # 已确认订单回滚库存
     if order.status == "confirmed":

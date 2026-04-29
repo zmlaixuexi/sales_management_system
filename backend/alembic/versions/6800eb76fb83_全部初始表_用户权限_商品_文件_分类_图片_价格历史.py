@@ -1,14 +1,14 @@
 """全部初始表：用户权限、商品、文件、分类、图片、价格历史
 
 Revision ID: 6800eb76fb83
-Revises: 
+Revises:
 Create Date: 2026-04-30 00:23:27.853851
 """
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 revision: str = '6800eb76fb83'
 down_revision: Union[str, None] = None
