@@ -48,6 +48,33 @@ def test_request_log_ignores_non_api(caplog):
     assert not any("GET /" == r.message.split()[0:2] for r in caplog.records)
 
 
+def test_request_id_generated_when_missing():
+    """请求不带 X-Request-ID 时自动生成"""
+    response = client.get("/api/v1/health")
+    assert response.status_code == 200
+    assert "x-request-id" in response.headers
+    rid = response.headers["x-request-id"]
+    assert len(rid) == 36  # UUID format
+
+
+def test_request_id_passthrough():
+    """请求带 X-Request-ID 时透传回响应"""
+    custom_id = "my-custom-request-id-1234"
+    response = client.get("/api/v1/health", headers={"X-Request-ID": custom_id})
+    assert response.status_code == 200
+    assert response.headers["x-request-id"] == custom_id
+
+
+def test_request_id_in_log(caplog):
+    """验证 request_id 写入请求日志"""
+    with caplog.at_level(logging.INFO, logger="app.request"):
+        client.get("/api/v1/health", headers={"X-Request-ID": "log-test-id"})
+    records = [r for r in caplog.records if "GET /api/v1/health" in r.message]
+    assert len(records) >= 1
+    record = records[-1]
+    assert record.extra_fields["request_id"] == "log-test-id"
+
+
 def test_production_env_rejects_default_secret(monkeypatch):
     """生产环境使用默认 JWT_SECRET_KEY 应拒绝启动"""
     from app.core.config import settings
