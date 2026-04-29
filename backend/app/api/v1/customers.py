@@ -11,8 +11,8 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_db, has_permission, require_permission
 from app.core.sanitize import escape_like
 from app.models.customer import Customer
-from app.schemas.customer import CustomerCreate, CustomerTransfer, CustomerUpdate
 from app.models.user import User
+from app.schemas.customer import CustomerCreate, CustomerTransfer, CustomerUpdate
 from app.services.audit_service import get_request_meta, log_action
 
 router = APIRouter(prefix="/customers", tags=["客户管理"])

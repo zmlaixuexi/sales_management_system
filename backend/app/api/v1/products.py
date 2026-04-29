@@ -12,8 +12,14 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_db, has_permission, require_permission
 from app.core.sanitize import escape_like
 from app.models.product import Product, ProductCategory, ProductPriceHistory
-from app.schemas.product import ProductCreate, ProductUpdate
 from app.models.user import User
+from app.schemas.product import (
+    ProductBrief,
+    ProductCreate,
+    ProductDetail,
+    ProductUpdate,
+)
+from app.schemas.response import ApiResponse
 from app.services.audit_service import get_request_meta, log_action
 
 router = APIRouter(prefix="/products", tags=["商品管理"])
@@ -135,7 +141,7 @@ def list_products(
     }
 
 
-@router.post("")
+@router.post("", response_model=ApiResponse[ProductBrief])
 def create_product(
     data: ProductCreate,
     request: Request,
@@ -218,7 +224,7 @@ def create_product(
     }
 
 
-@router.get("/{product_id}")
+@router.get("/{product_id}", response_model=ApiResponse[ProductDetail])
 def get_product(
     product_id: uuid.UUID,
     db: Session = Depends(get_db),
@@ -268,7 +274,7 @@ def get_product(
     }
 
 
-@router.put("/{product_id}")
+@router.put("/{product_id}", response_model=ApiResponse[ProductBrief])
 def update_product(
     product_id: uuid.UUID,
     data: ProductUpdate,
@@ -441,7 +447,7 @@ def disable_product(
     return {"success": True, "data": {"id": str(product.id), "status": product.status}, "message": "停用成功"}
 
 
-@router.get("/{product_id}/price-history")
+@router.get("/{product_id}/price-history", response_model=ApiResponse[dict])
 def price_history(
     product_id: uuid.UUID,
     db: Session = Depends(get_db),

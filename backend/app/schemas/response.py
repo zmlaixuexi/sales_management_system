@@ -1,4 +1,14 @@
+from typing import Generic, TypeVar
+
 from pydantic import BaseModel
+
+T = TypeVar("T")
+
+
+class ApiResponse(BaseModel, Generic[T]):
+    success: bool = True
+    data: T | None = None
+    message: str = "操作成功"
 
 
 class SuccessResponse(BaseModel):
@@ -14,8 +24,8 @@ class ErrorResponse(BaseModel):
     request_id: str | None = None
 
 
-class PaginatedData(BaseModel):
-    items: list
+class PaginatedData(BaseModel, Generic[T]):
+    items: list[T]
     page: int
     page_size: int
     total: int

@@ -25,3 +25,81 @@ class ProductUpdate(BaseModel):
     status: str | None = None
     sort_weight: int | None = None
     remark: str | None = None
+
+
+# ── 响应模型 ──
+
+class ProductItem(BaseModel):
+    id: str
+    sku: str
+    name: str
+    main_image_url: str | None = None
+    category_id: str | None = None
+    category_name: str | None = None
+    sale_price: str
+    cost_price: str | None = None
+    unit_profit: str | None = None
+    gross_margin: str | None = None
+    stock_quantity: int
+    status: str
+    sort_weight: int
+    remark: str | None = None
+    created_at: str | None = None
+    updated_at: str | None = None
+
+
+class ProductBrief(BaseModel):
+    id: str
+    sku: str
+    name: str
+    main_image_url: str | None = None
+    category_id: str | None = None
+    sale_price: str
+    cost_price: str | None = None
+    unit_profit: str | None = None
+    gross_margin: str | None = None
+    stock_quantity: int
+    status: str
+    sort_weight: int = 0
+
+
+class ProductImageItem(BaseModel):
+    id: str
+    file_id: str
+    url: str | None = None
+    is_primary: bool
+    sort_order: int
+
+
+class ProductDetail(BaseModel):
+    id: str
+    sku: str
+    name: str
+    main_image_url: str | None = None
+    category_id: str | None = None
+    category_name: str | None = None
+    sale_price: str
+    cost_price: str
+    unit_profit: str
+    gross_margin: str
+    stock_quantity: int
+    status: str
+    sort_weight: int
+    remark: str | None = None
+    images: list[ProductImageItem] = []
+    created_at: str | None = None
+    updated_at: str | None = None
+
+
+class PriceHistoryItem(BaseModel):
+    id: str
+    old_sale_price: str | None = None
+    new_sale_price: str | None = None
+    old_cost_price: str | None = None
+    new_cost_price: str | None = None
+    created_at: str | None = None
+
+
+class ImportResult(BaseModel):
+    created: int
+    errors: list[dict]

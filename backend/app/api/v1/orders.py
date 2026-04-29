@@ -12,8 +12,8 @@ from app.core.sanitize import escape_like
 from app.models.customer import Customer
 from app.models.order import InventoryMovement, SalesOrder, SalesOrderItem
 from app.models.product import Product
-from app.schemas.order import OrderCreate, OrderUpdate
 from app.models.user import User
+from app.schemas.order import OrderCreate, OrderUpdate
 from app.services.audit_service import get_request_meta, log_action
 
 router = APIRouter(prefix="/sales-orders", tags=["订单管理"])

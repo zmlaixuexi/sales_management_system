@@ -2,8 +2,6 @@ from fastapi import APIRouter
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db
-from app.core.config import settings
 from app.db.session import SessionLocal
 
 router = APIRouter(tags=["健康检查"])
