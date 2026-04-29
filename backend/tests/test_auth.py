@@ -24,11 +24,15 @@ def override_get_db():
         db.close()
 
 
-app.dependency_overrides[get_db] = override_get_db
 client = TestClient(app)
+
+_original_override = None
 
 
 def setup_module(module):
+    global _original_override
+    _original_override = app.dependency_overrides.get(get_db)
+    app.dependency_overrides[get_db] = override_get_db
     Base.metadata.create_all(bind=engine)
     db = TestSession()
     try:
@@ -52,6 +56,10 @@ def teardown_module(module):
     import os
     if os.path.exists("./test.db"):
         os.remove("./test.db")
+    if _original_override is not None:
+        app.dependency_overrides[get_db] = _original_override
+    elif get_db in app.dependency_overrides:
+        del app.dependency_overrides[get_db]
 
 
 def test_login_success():
