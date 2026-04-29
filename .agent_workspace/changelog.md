@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-04-30（第一百一十一轮）
+
+### 测试：订单负价校验测试（+2，后端 286/286）
+
+- 新增 test_05b：create_order 负单价拒绝（400 + "不能为负"）
+- 新增 test_11b：update_order 负单价拒绝（验证 Round 110 修复的 bug 回归保护）
+
 ## 2026-04-30（第一百一十轮）
 
 ### 重构：提取 _validate_and_prepare_items，修复 update_order 缺少负价校验 bug
