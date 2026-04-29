@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -18,6 +19,12 @@ async def lifespan(app: FastAPI):
     # 确保上传目录存在
     upload_dir = Path(settings.UPLOAD_DIR)
     upload_dir.mkdir(parents=True, exist_ok=True)
+
+    # 生产环境安全检查
+    if settings.APP_ENV == "production" and settings.JWT_SECRET_KEY == "change-me":
+        logging.critical("JWT_SECRET_KEY 未设置，请在环境变量中配置安全密钥")
+        raise RuntimeError("JWT_SECRET_KEY 不能使用默认值")
+
     yield
 
 

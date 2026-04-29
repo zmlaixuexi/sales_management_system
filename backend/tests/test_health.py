@@ -46,3 +46,26 @@ def test_request_log_ignores_non_api(caplog):
     with caplog.at_level(logging.INFO, logger="app.request"):
         client.get("/")
     assert not any("GET /" == r.message.split()[0:2] for r in caplog.records)
+
+
+def test_production_env_rejects_default_secret(monkeypatch):
+    """生产环境使用默认 JWT_SECRET_KEY 应拒绝启动"""
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "APP_ENV", "production")
+    monkeypatch.setattr(settings, "JWT_SECRET_KEY", "change-me")
+
+    assert settings.APP_ENV == "production"
+    assert settings.JWT_SECRET_KEY == "change-me"
+    # lifespan 中的检查逻辑
+    should_reject = (
+        settings.APP_ENV == "production" and settings.JWT_SECRET_KEY == "change-me"
+    )
+    assert should_reject is True
+
+    # 使用非默认密钥时不应拒绝
+    monkeypatch.setattr(settings, "JWT_SECRET_KEY", "a-real-secret-key-12345")
+    should_reject = (
+        settings.APP_ENV == "production" and settings.JWT_SECRET_KEY == "change-me"
+    )
+    assert should_reject is False

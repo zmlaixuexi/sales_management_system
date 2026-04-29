@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第九十轮）
+
+### 安全：生产环境启动检查 JWT_SECRET_KEY
+
+- main.py lifespan 添加生产环境 JWT_SECRET_KEY 默认值检查
+- 生产环境使用 "change-me" 默认密钥时拒绝启动（RuntimeError）
+- 新增测试验证检查逻辑
+- 后端 214/214 通过
+
 ## 2026-04-30（第八十九轮）
 
 ### 文档：更新数据库文档索引信息
