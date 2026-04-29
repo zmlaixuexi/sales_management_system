@@ -1,65 +1,58 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：阶段 5 报表与审计（后端+前端已完成），QA-001 待开始
-当前任务编号：BE-REPORT-001 / FE-REPORT-001
-当前任务名称：报表 API 和首页看板
+当前阶段：阶段 5 全部完成，阶段 6 交付加固待开始
+当前任务编号：QA-001
+当前任务名称：MVP 端到端测试
 当前 Agent：Claude
 任务状态：已完成
 
 ## 本次目标
 
-实现阶段 5 报表 API 和首页看板页面。
+实现 QA-001 MVP 端到端集成测试。
 
 ## 最近完成
 
-- BE-REPORT-001：创建 reports.py 后端报表 API。
-  - GET /reports/sales-summary：销售汇总（总额、总成本、毛利、毛利率、订单数）。
-  - GET /reports/sales-trend：按日销售趋势（填充空缺日期）。
-  - GET /reports/product-ranking：商品销售排行（按销售额排序）。
-  - GET /reports/inventory-warning：库存预警（低于阈值的活跃商品）。
-  - 支持时间段筛选：today/7d/30d/this_month/last_month。
-- FE-REPORT-001：重写 Dashboard.tsx 首页看板。
-  - 四个汇总卡片（销售总额、订单数、毛利、毛利率）。
-  - 销售趋势简易条形图（纯 CSS 实现，不引入图表库）。
-  - 库存预警表格（≤10 的活跃商品）。
-  - 商品销售排行表格（Top 10）。
-  - 时间段切换下拉。
-- 创建 frontend/src/api/reports.ts API 调用层。
-- 前端构建通过，后端测试 10/10 通过。
+- 创建 test_integration.py：24 个集成测试覆盖完整业务流程。
+  - 认证（登录、获取当前用户）
+  - 商品（创建、列表、第二商品）
+  - 客户（创建、列表、重复手机号检测）
+  - 订单（创建草稿、详情、列表、空明细失败、确认扣库存、重复确认失败）
+  - 库存（流水查询、手工调整）
+  - 收款（登记部分收款、登记剩余收款→完成、超额收款失败、冲正）
+  - 报表（销售汇总、趋势、商品排行、库存预警）
+- 修复 test_auth.py 与 test_integration.py 的依赖覆盖冲突（改为 setup_module 中覆盖，teardown_module 中恢复）。
+- 全部 34 个测试通过（8 认证 + 2 健康检查 + 24 集成）。
 
 ## 当前正在做
 
-阶段 5 报表部分已完成。QA-001 MVP 端到端测试待开始。
+阶段 5 全部完成。阶段 6 交付加固（DOC-001）待开始。
 
 ## 下一步第一动作
 
-实现 QA-001 MVP 端到端测试：
-1. 编写后端 API 集成测试，覆盖完整业务流程。
-2. 或者进入阶段 6 交付加固（DOC-001）。
+实现阶段 6 交付加固 DOC-001：
+1. README.md：项目简介、技术栈、快速启动、开发指南。
+2. 部署文档：Docker Compose 生产配置、Nginx 反向代理。
+3. 测试文档：测试策略、运行方法、覆盖率。
 
 ## 涉及文件
 
 | 文件 | 状态 | 说明 |
 |---|---|---|
-| backend/app/api/v1/reports.py | 新建 | 报表 API |
-| backend/app/api/v1/router.py | 更新 | 注册报表路由 |
-| frontend/src/api/reports.ts | 新建 | 报表 API 调用 |
-| frontend/src/pages/Dashboard.tsx | 重写 | 首页看板 |
+| backend/tests/test_integration.py | 新建 | 24 个端到端集成测试 |
+| backend/tests/test_auth.py | 修改 | 修复依赖覆盖冲突 |
 
 ## 已执行命令
 
 | 命令 | 结果 | 备注 |
 |---|---|---|
-| pytest tests/ -v | 10/10 通过 | |
-| npx tsc --noEmit | 通过 | |
-| npm run build | 通过 | |
+| pytest tests/ -v | 34/34 通过 | 8 认证 + 2 健康 + 24 集成 |
 
 ## 未完成事项
 
-- QA-001：MVP 端到端测试。
+- DOC-001：README、部署、测试文档补齐。
 - 操作日志记录。
-- 权限校验细化（敏感字段权限：无权限用户看不到利润指标）。
+- 权限校验细化。
 
 ## 阻塞问题
 
@@ -72,6 +65,7 @@
 3. Alembic env.py 必须导入所有模型 → 否则自动生成空迁移。
 4. 库存扣减必须使用 with_for_update() 行锁 → 否则并发超卖。
 5. Ant Design 组件 import 必须使用实际用到的组件 → 否则构建失败。
+6. 测试文件中 app.dependency_overrides[get_db] 必须在 setup_module 中设置、teardown_module 中恢复 → 否则多个测试文件冲突。
 
 ## 恢复检查清单
 
