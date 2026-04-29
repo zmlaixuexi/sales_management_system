@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第九十八轮）
+
+### 测试：新增用户管理 CRUD 测试（+10）并修复 role_ids UUID 转换 bug
+
+- 新增 test_user_management.py：10 个测试覆盖用户列表搜索、创建（含重复用户名）、编辑（含禁用/角色变更）、403 权限
+- 修复 users.py role_ids 字符串未转 UUID 的 bug（create 和 update 端点）
+- API 文档补齐 product_import 和 customer_import 审计操作类型
+- 后端 216→226（+10）
+
 ## 2026-04-30（第九十七轮）
 
 ### 测试：新增 CSV 导入文件大小限制测试（+2 测试）
