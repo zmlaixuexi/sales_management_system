@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第一百三十轮）
+
+### 工程：数据库连接池可配置
+
+- config.py 新增 DB_POOL_SIZE(5)、DB_MAX_OVERFLOW(10)、DB_POOL_RECYCLE_SECONDS(1800) 三个配置项
+- session.py create_engine 使用配置值，保留 pool_pre_ping=True
+- docker-compose.prod.yml 生产环境默认 pool_size=10, max_overflow=20
+- 后端 290/290 通过
+
 ## 2026-04-30（第一百二十九轮）
 
 ### 工程：全局未处理异常处理器

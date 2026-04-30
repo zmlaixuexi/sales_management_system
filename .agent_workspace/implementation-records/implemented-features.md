@@ -6,6 +6,15 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-35
+
+### 数据库连接池可配置
+
+- **文件**: `backend/app/core/config.py`, `backend/app/db/session.py`, `deploy/docker-compose.prod.yml`
+- **内容**: 新增 DB_POOL_SIZE、DB_MAX_OVERFLOW、DB_POOL_RECYCLE_SECONDS 配置项，create_engine 使用配置值
+- **验证**: 290 后端 + ruff 0 通过
+- **效果**: 生产环境默认 pool_size=10, max_overflow=20, recycle=1800s，开发环境保持默认 5/10
+
 ## 功能编号：FEAT-20260430-34
 
 ### 全局未处理异常处理器
