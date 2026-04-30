@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-137
-当前任务名称：启动配置摘要日志
+当前任务编号：ROUND-138
+当前任务名称：订单明细 N+1 查询优化
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 138：订单明细校验 N+1 优化 — _validate_and_prepare_items 批量 IN 查询替代逐行 get_or_404，292/292
 - Round 137：启动配置摘要日志 — env/pool/rate_limit/log 启动时记录，后端 292/292
 - Round 136：前端构建消除 chunk 大小警告 — Ant Design 已最优拆分，build 零警告
 - Round 135：Makefile 新增 make quality 命令 — lint + typecheck + test 一键质量检查
