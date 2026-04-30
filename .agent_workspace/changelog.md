@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第二百二十九轮）
+
+### 工程：make ci 全量质量验证通过
+
+- ruff 0（含 RUF 规则）+ ESLint 0 + tsc 0
+- 后端 431/431（覆盖率 99.81%，阈值 95%）
+- 前端 123/123 + build 零警告
+- 无 TODO/FIXME、无 console.log、无 flaky test
+
 ## 2026-04-30（第二百二十八轮）
 
 ### 质量：移除 file_service 不可达分支
