@@ -53,7 +53,7 @@ def sales_summary(
     start_dt = datetime.combine(start, datetime.min.time())
     end_dt = datetime.combine(end, datetime.max.time())
 
-    result = (
+    query = (
         db.query(
             func.coalesce(func.sum(SalesOrder.total_amount), 0),
             func.coalesce(func.sum(SalesOrder.total_cost), 0),
@@ -66,8 +66,13 @@ def sales_summary(
             SalesOrder.created_at >= start_dt,
             SalesOrder.created_at <= end_dt,
         )
-        .first()
     )
+
+    # 数据范围：非 view_all 用户只看本人订单
+    if not has_permission(current_user, "order:view_all"):
+        query = query.filter(SalesOrder.sales_user_id == current_user.id)
+
+    result = query.first()
 
     total_amount, total_cost, gross_profit, order_count = result
     gross_margin = (gross_profit / total_amount * 100).quantize(
@@ -101,7 +106,7 @@ def sales_trend(
     start_dt = datetime.combine(start, datetime.min.time())
     end_dt = datetime.combine(end, datetime.max.time())
 
-    rows = (
+    query = (
         db.query(
             func.date(SalesOrder.created_at).label("d"),
             func.coalesce(func.sum(SalesOrder.total_amount), 0).label("amount"),
@@ -113,6 +118,13 @@ def sales_trend(
             SalesOrder.created_at >= start_dt,
             SalesOrder.created_at <= end_dt,
         )
+    )
+
+    if not has_permission(current_user, "order:view_all"):
+        query = query.filter(SalesOrder.sales_user_id == current_user.id)
+
+    rows = (
+        query
         .group_by(func.date(SalesOrder.created_at))
         .order_by(func.date(SalesOrder.created_at))
         .all()
@@ -144,7 +156,7 @@ def product_ranking(
     start_dt = datetime.combine(start, datetime.min.time())
     end_dt = datetime.combine(end, datetime.max.time())
 
-    rows = (
+    query = (
         db.query(
             SalesOrderItem.product_id,
             SalesOrderItem.product_name_snapshot,
@@ -160,6 +172,13 @@ def product_ranking(
             SalesOrder.created_at >= start_dt,
             SalesOrder.created_at <= end_dt,
         )
+    )
+
+    if not has_permission(current_user, "order:view_all"):
+        query = query.filter(SalesOrder.sales_user_id == current_user.id)
+
+    rows = (
+        query
         .group_by(
             SalesOrderItem.product_id,
             SalesOrderItem.product_name_snapshot,
