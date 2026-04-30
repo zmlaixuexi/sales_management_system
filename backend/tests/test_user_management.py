@@ -135,6 +135,7 @@ def test_06_update_user():
     resp = client.put(f"/api/v1/users/{user_id}", json={
         "display_name": "修改后名称",
         "phone": "13899999999",
+        "email": "newuser@test.com",
     }, headers=_auth())
     assert resp.status_code == 200
     assert "更新成功" in resp.json()["message"]
@@ -197,6 +198,27 @@ def test_10_create_user_requires_admin():
 
     resp = client.post("/api/v1/users", json={
         "username": "unauthorized", "password": "pass123456",
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
+
+
+def test_11_non_admin_update_user_forbidden():
+    """非管理员编辑用户返回 403"""
+    db = TestSession()
+    user = db.query(User).filter(User.username == "newuser").first()
+    user.is_active = True
+    user.is_superuser = False
+    db.commit()
+    db.close()
+
+    login = client.post("/api/v1/auth/login", json={
+        "username": "newuser", "password": "password123",
+    })
+    token = login.json()["data"]["access_token"]
+    admin_id = resp_id_from_list("mgmt_admin")
+
+    resp = client.put(f"/api/v1/users/{admin_id}", json={
+        "display_name": "篡改",
     }, headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 403
 
