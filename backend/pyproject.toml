@@ -46,3 +46,13 @@ select = ["E", "F", "I", "N", "W"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+markers = [
+    "crud: CRUD 操作测试",
+    "boundary: 边界值和异常路径测试",
+    "security: 安全相关测试（认证/权限/速率限制）",
+    "export: 导出功能测试",
+    "import: 导入功能测试",
+    "report: 报表和审计日志测试",
+    "integration: 集成测试",
+    "infra: 基础设施测试（健康检查/中间件）",
+]
