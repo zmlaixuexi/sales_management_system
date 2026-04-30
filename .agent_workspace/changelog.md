@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-04-30（第一百三十五轮）
+
+### 工程：Makefile 新增 make quality 命令
+
+- 新增 `make quality` 目标：lint + typecheck + test 一键质量检查
+- 更新 .PHONY 声明
+
 ## 2026-04-30（第一百三十四轮）
 
 ### 文档：同步测试数至 398（292 后端 + 106 前端）
