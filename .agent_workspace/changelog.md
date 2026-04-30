@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-04-30（第一百九十七轮）
+
+### 功能：新增密码修改接口 POST /auth/change-password
+
+- 用户可修改自己密码，需提供旧密码验证身份
+- 新密码受密码强度校验（至少一个字母+一个数字）
+- 修改成功记录 password_change 审计日志
+- 新增 ChangePasswordRequest schema（old_password + new_password）
+- 新增 3 个测试：修改成功+新密码登录验证、旧密码错误 400、新密码弱 422
+- 后端 421/421，ruff 0
+
 ## 2026-04-30（第一百九十六轮）
 
 ### 文档：同步测试数至 540（418 后端 + 122 前端）
