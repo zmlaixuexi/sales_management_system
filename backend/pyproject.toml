@@ -22,6 +22,7 @@ dependencies = [
 dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.25.0",
+    "pytest-cov>=6.0.0",
     "httpx>=0.28.0",
     "ruff>=0.9.0",
 ]
@@ -56,3 +57,12 @@ markers = [
     "integration: 集成测试",
     "infra: 基础设施测试（健康检查/中间件）",
 ]
+
+[tool.coverage.run]
+source = ["app"]
+omit = ["app/db/seed.py", "app/main.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+fail_under = 70
