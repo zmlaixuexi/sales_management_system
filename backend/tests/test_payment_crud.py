@@ -12,7 +12,7 @@ from app.core.security import create_access_token, hash_password
 from app.db.session import Base
 from app.main import app
 from app.models.customer import Customer
-from app.models.order import SalesOrder, SalesOrderItem
+from app.models.order import Payment, SalesOrder, SalesOrderItem
 from app.models.product import Product, ProductCategory
 from app.models.user import Permission, Role, RolePermission, User, UserRole
 
@@ -27,6 +27,7 @@ _customer_id: str = ""
 _confirmed_order_id: str = ""
 _draft_order_id: str = ""
 _payment_id: str = ""
+_admin_id: str = ""
 
 
 def override_get_db():
@@ -135,11 +136,12 @@ def setup_module(module):
 
         db.commit()
 
-        global _product_id, _customer_id, _confirmed_order_id, _draft_order_id
+        global _product_id, _customer_id, _confirmed_order_id, _draft_order_id, _admin_id
         _product_id = str(prod.id)
         _customer_id = str(cust.id)
         _confirmed_order_id = str(order1.id)
         _draft_order_id = str(order2.id)
+        _admin_id = str(user.id)
 
         _tokens["access"] = create_access_token(str(user.id))
     finally:
@@ -321,6 +323,52 @@ def test_12_non_admin_payment_list_filtered():
         # 管理员的收款不应出现在此列表中
         for item in items:
             assert item["order_id"] != _confirmed_order_id
+    finally:
+        db.close()
+
+
+def test_13_reverse_payment_order_deleted():
+    """冲正收款时关联订单已被删除"""
+    db = TestSession()
+    try:
+        # 创建已确认订单 + 收款
+        order = SalesOrder(
+            id=uuid.uuid4(),
+            order_no="ORD-PAY-DEL",
+            customer_id=uuid.UUID(_customer_id),
+            sales_user_id=uuid.UUID(_admin_id),
+            status="confirmed",
+            total_amount=100,
+            total_cost=60,
+            gross_profit=40,
+            gross_margin=0.4,
+            paid_amount=100,
+            created_by=uuid.UUID(_admin_id),
+            updated_by=uuid.UUID(_admin_id),
+        )
+        db.add(order)
+        db.flush()
+
+        payment = Payment(
+            id=uuid.uuid4(),
+            order_id=order.id,
+            amount=100,
+            payment_method="cash",
+            operator_id=uuid.UUID(_admin_id),
+            status="normal",
+        )
+        db.add(payment)
+        db.flush()
+        pid = str(payment.id)
+
+        # 硬删除订单（SQLite 不强制外键）
+        db.query(SalesOrder).filter(SalesOrder.id == order.id).delete()
+        db.commit()
+
+        # 冲正 → 关联订单不存在
+        resp = client.post(f"/api/v1/payments/{pid}/reverse", headers=_auth())
+        assert resp.status_code == 404
+        assert "关联订单" in resp.json()["detail"]["message"]
     finally:
         db.close()
 
