@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-127
-当前任务名称：422 校验错误响应标准化
+当前任务编号：ROUND-128
+当前任务名称：Makefile typecheck 命令
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 128：Makefile 新增 make typecheck 命令（前端 TypeScript 类型检查），验证通过
 - Round 127：标准化 422 校验错误响应格式 — 新增 RequestValidationError 全局处理器，前端可正确提取校验消息
 - Round 126：文档同步测试数至 395（289 后端 + 106 前端）+ README/testing.md 更新
 - Round 125：提取 resp() 响应构造函数，11 个 API 文件 44 处迁移，净减 60 行，后端 289/289
