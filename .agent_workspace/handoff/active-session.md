@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：安全加固
-当前任务编号：ROUND-233
-当前任务名称：收款导出 deleted_at 过滤遗漏修复
+当前任务编号：ROUND-234
+当前任务名称：订单创建 deleted_at 过滤遗漏修复
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 234：修复订单创建 _validate_and_prepare_items 未过滤 deleted_at（允许引用软删除商品下单），+1 测试，后端 434/434
 - Round 233：修复收款 CSV 导出遗漏 deleted_at 过滤（export_payments join SalesOrder 添加过滤），后端 433/433
 - Round 232：修复收款列表和冲正遗漏 deleted_at 过滤（已删除订单的收款不再泄露），后端 433/433
 - Round 231：修复收款冲正 3 个 bug（状态回退逻辑 + 已取消订单冲正防护 + paid_amount=0 回退），+1 测试，后端 433/433
@@ -147,7 +148,7 @@
 
 ## 当前测试状态
 
-- 后端：433/433 通过
+- 后端：434/434 通过
 - 前端：123/123 通过
 - ruff：0 issues（含 RUF 规则）
 - ESLint：0 warnings

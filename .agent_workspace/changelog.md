@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第二百三十四轮）
+
+### 修复：订单创建未过滤已删除商品
+
+- _validate_and_prepare_items 批量查询添加 Product.deleted_at.is_(None)
+- 修复前：用户可通过 API 引用已软删除的商品创建订单
+- 新增 test_39：创建商品→软删除→创建订单返回 404 RESOURCE_NOT_FOUND
+- 后端 434/434，ruff 0
+
 ## 2026-04-30（第二百三十三轮）
 
 ### 修复：收款导出遗漏 deleted_at 过滤
