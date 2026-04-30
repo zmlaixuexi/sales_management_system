@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百五十七轮）
+
+### 工程：Makefile .PHONY 补全 + get_request_meta 测试（+3，后端 341/341）
+
+- Makefile .PHONY 新增 coverage-frontend 目标
+- `get_request_meta`: IP 提取/无客户端时为 None/请求 ID 透传
+- 后端 341/341 通过
+
 ## 2026-04-30（第一百五十六轮）
 
 ### 工程：优雅关闭处理
