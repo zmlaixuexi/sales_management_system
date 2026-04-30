@@ -188,7 +188,7 @@ def test_change_password_wrong_old():
 
 
 def test_change_password_weak_new():
-    """新密码不符合强度要求"""
+    """新密码不符合强度要求（纯数字）"""
     login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
     token = login_resp.json()["data"]["access_token"]
 
@@ -197,3 +197,16 @@ def test_change_password_weak_new():
         "new_password": "123456",
     }, headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 422
+
+
+def test_change_password_no_digits():
+    """新密码纯字母无数字被拒绝"""
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    token = login_resp.json()["data"]["access_token"]
+
+    resp = client.post("/api/v1/auth/change-password", json={
+        "old_password": "testpass123",
+        "new_password": "abcdef",
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 422
+    assert "数字" in str(resp.json())
