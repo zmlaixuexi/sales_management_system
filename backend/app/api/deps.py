@@ -89,8 +89,14 @@ def check_owner_or_forbid(user: User, owner_id, view_all_code: str, label: str =
 
 
 def get_or_404(db: Session, model: type, entity_id: uuid.UUID | str, label: str = "资源"):
-    """按 ID 查询实体，不存在则抛 404。自动过滤软删除。"""
-    uid = uuid.UUID(str(entity_id))
+    """按 ID 查询实体，不存在或 ID 格式无效则抛 404。自动过滤软删除。"""
+    try:
+        uid = uuid.UUID(str(entity_id))
+    except (ValueError, AttributeError):
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "RESOURCE_NOT_FOUND", "message": f"{label}不存在"},
+        ) from None
     query = db.query(model).filter(model.id == uid)
     if hasattr(model, "deleted_at"):
         query = query.filter(model.deleted_at.is_(None))

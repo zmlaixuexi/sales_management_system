@@ -23,6 +23,16 @@ from app.schemas.customer import (
 from app.schemas.response import ApiResponse
 from app.services.audit_service import get_request_meta, log_action
 
+
+def _parse_uuid_or_400(value: str, label: str) -> uuid.UUID:
+    try:
+        return uuid.UUID(str(value))
+    except (ValueError, AttributeError):
+        raise HTTPException(
+            status_code=400, detail={"code": "VALIDATION_FAILED", "message": f"{label}格式无效"},
+        ) from None
+
+
 router = APIRouter(
     prefix="/customers", tags=["客户管理"],
     responses={
@@ -130,7 +140,7 @@ def create_customer(
         email=data.email,
         source=data.source,
         level=data.level,
-        owner_user_id=uuid.UUID(str(data.owner_user_id)) if data.owner_user_id else current_user.id,
+        owner_user_id=_parse_uuid_or_400(data.owner_user_id, "归属用户 ID") if data.owner_user_id else current_user.id,
         follow_status=data.follow_status,
         remark=data.remark,
         created_by=current_user.id,
@@ -239,7 +249,7 @@ def update_customer(
     if data.follow_status is not None:
         customer.follow_status = data.follow_status
     if data.owner_user_id is not None:
-        customer.owner_user_id = uuid.UUID(str(data.owner_user_id))
+        customer.owner_user_id = _parse_uuid_or_400(data.owner_user_id, "归属用户 ID")
     if data.remark is not None:
         customer.remark = data.remark
 
@@ -304,8 +314,9 @@ def transfer_customer(
     check_owner_or_forbid(current_user, customer.owner_user_id, "customer:view_all", "客户")
 
     new_owner_id = data.owner_user_id
+    owner_uid = _parse_uuid_or_400(new_owner_id, "归属用户 ID")
 
-    customer.owner_user_id = uuid.UUID(str(new_owner_id))
+    customer.owner_user_id = owner_uid
     customer.updated_by = current_user.id
     log_action(
         db, action="customer_transfer", resource_type="customer",

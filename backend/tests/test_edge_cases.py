@@ -354,3 +354,15 @@ def test_27_expired_token():
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0In0.fake",
     })
     assert resp.status_code == 401
+
+
+def test_28_malformed_uuid_returns_404():
+    """格式错误的 ID 通过请求体传递应返回 404 而非 500"""
+    if not _tokens.get("access"):
+        login_resp = client.post("/api/v1/auth/login", json={"username": "edge_tester", "password": "testpass123"})
+        _tokens["access"] = login_resp.json()["data"]["access_token"]
+    # 客户转移接口的 owner_user_id 是字符串参数，可能触发 uuid.UUID 异常
+    resp = client.post(f"/api/v1/customers/{_customer_id}/transfer", json={
+        "owner_user_id": "not-a-uuid",
+    }, headers=_auth())
+    assert resp.status_code == 400
