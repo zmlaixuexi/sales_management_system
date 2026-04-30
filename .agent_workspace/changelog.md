@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第一百四十七轮）
+
+### 测试：审计日志服务单元测试（+7，后端 314/314）
+
+- `_mask_sensitive`: None/空字典/密码脱敏/token 脱敏/无敏感字段
+- `model_to_dict`: UUID 转字符串/None 字段跳过
+- conftest.py 注册 test_audit_service 为 report 标记
+- 后端 314/314 通过
+
 ## 2026-04-30（第一百四十六轮）
 
 ### 工程：pytest-cov 覆盖率报告 + make coverage 命令
