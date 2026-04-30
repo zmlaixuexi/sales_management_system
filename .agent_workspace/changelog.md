@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第一百九十五轮）
+
+### 安全：CORS allow_methods/allow_headers 白名单限制
+
+- allow_methods 从 [*] 缩减为 ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+- allow_headers 从 [*] 缩减为 ["Authorization", "Content-Type", "X-Request-ID"]
+- 仅允许 API 实际使用的 HTTP 方法和请求头
+- 后端 418/418，CORS 测试通过，ruff 0
+
 ## 2026-04-30（第一百九十四轮）
 
 ### 安全：密码强度校验
