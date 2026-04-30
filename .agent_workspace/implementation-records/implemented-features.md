@@ -6,6 +6,49 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-41
+
+### CSV 导入去重 N+1 查询优化
+
+- **文件**: `backend/app/api/v1/products.py`, `backend/app/api/v1/customers.py`
+- **内容**: 预加载已有 SKU/手机号到 set，循环内集合查找替代逐行 db.query
+- **验证**: 292 后端通过，18 个导入测试全通过
+- **效果**: N 行 CSV 从 N 次 SELECT 减少为 1 次预加载
+
+## 功能编号：FEAT-20260430-40
+
+### 库存扣减/回滚 N+1 查询优化
+
+- **文件**: `backend/app/api/v1/orders.py`
+- **内容**: `_deduct_inventory` 和 `_restore_inventory` 合并为单次 SELECT FOR UPDATE WHERE id IN (...)
+- **验证**: 292 后端通过
+- **效果**: N 个订单明细从 N 次查询减少为 1 次，保持行锁语义不变
+
+## 功能编号：FEAT-20260430-39
+
+### 订单明细校验 N+1 查询优化
+
+- **文件**: `backend/app/api/v1/orders.py`
+- **内容**: `_validate_and_prepare_items` 改为先查全部商品再按 map 查找
+- **验证**: 292 后端通过
+- **效果**: N 个订单明细从 N 次 SELECT 减少为 1 次 SELECT IN
+
+## 功能编号：FEAT-20260430-38
+
+### 启动配置摘要日志
+
+- **文件**: `backend/app/main.py`
+- **内容**: lifespan 启动时 logger.info 输出 env/pool/rate_limit/log 配置
+- **验证**: 292 后端通过
+
+## 功能编号：FEAT-20260430-37
+
+### pytest 测试标记分类 + CORS 验证测试
+
+- **文件**: `backend/pyproject.toml`, `backend/tests/conftest.py`, `backend/tests/test_health.py`
+- **内容**: 8 个 pytest 标记按文件名自动应用 + CORS 允许/拒绝 Origin 测试
+- **验证**: 292 后端通过（+2 CORS 测试）
+
 ## 功能编号：FEAT-20260430-36
 
 ### 后端 .env.example 环境变量模板

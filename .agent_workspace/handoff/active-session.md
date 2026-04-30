@@ -69,16 +69,17 @@
 
 所有 API 端点已有独立测试文件，文档已同步。建议转向：前端组件测试（需 MSW）、代码质量优化、或部署体验改进。
 
-## 当前里程碑总结（Round 15-100）
+## 当前里程碑总结（Round 95-141）
 
-- 后端测试：51 → 284（+233）
-- 前端测试：0 → 97（+97）
-- 总计 381 测试，全部通过
-- 代码质量：ruff 0 + ESLint 0 + build 通过 + tsc 通过 + 代码分割 + 列表页统一 hook + get_or_404 辅助函数
-- 性能：10 个复合索引 + N+1 查询修复
-- 安全：权限码全量审计 + RBAC + 数据范围 + 速率限制 + 敏感字段 + LIKE 转义 + 安全响应头 + Token 刷新校验 + JWT 密钥启动检查 + CSV 导入大小限制
-- 可观测性：健康检查 + degraded + 请求日志 + 慢请求警告
-- 部署：Docker Compose + Nginx + 备份恢复 + Makefile + 环境变量完整同步
+- 后端测试：214 → 292（+78）
+- 前端测试：97 → 106（+9）
+- 总计 398 测试，全部通过
+- 代码质量：ruff 0 + ESLint 0 + build 零警告 + tsc 通过 + 代码分割 + 列表页统一 hook + get_or_404 + resp() 响应函数 + useSubmit hook + ErrorBoundary 路由感知 + Pydantic schema 校验 + 死代码清除
+- 性能：10 个复合索引 + 3 个 N+1 查询修复（订单明细校验/库存扣减回滚/CSV 导入去重）
+- 安全：权限码全量审计 + RBAC + 数据范围 + 速率限制 + 敏感字段 + LIKE 转义 + 安全响应头 + Token 刷新校验 + JWT 密钥启动检查 + CSV 导入大小限制 + CORS 验证测试
+- 可观测性：健康检查 + degraded + 请求日志 + 慢请求警告 + 请求 ID 全链路追踪 + 启动配置摘要日志 + 全局未处理异常处理器
+- 部署：Docker Compose + Nginx + 备份恢复 + Makefile（quality/typecheck/db-backup/restore）+ 环境变量完整同步 + 多阶段 Docker 构建 + 非 root 用户 + DB 连接池可配置
+- 测试工程：pytest 8 类标记自动分类 + .env.example 前后端对称 + CONTRIBUTING.md
 - 文档：README + testing.md + database.md + architecture.md + api.md + deployment.md 全部完成
 
 ## 阻塞问题
