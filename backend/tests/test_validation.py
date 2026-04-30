@@ -284,3 +284,31 @@ def test_20_users_list():
     data = resp.json()
     assert data["success"] is True
     assert len(data["data"]["items"]) >= 1
+
+
+# ─── 密码强度校验 ──────────────────────────────────────────
+
+def test_21_password_no_letters():
+    """密码纯数字被拒绝"""
+    resp = client.post("/api/v1/users", json={
+        "username": "weak_user1", "password": "123456",
+    }, headers=_auth())
+    assert resp.status_code == 422
+    assert "字母" in str(resp.json())
+
+
+def test_22_password_no_digits():
+    """密码纯字母被拒绝"""
+    resp = client.post("/api/v1/users", json={
+        "username": "weak_user2", "password": "abcdef",
+    }, headers=_auth())
+    assert resp.status_code == 422
+    assert "数字" in str(resp.json())
+
+
+def test_23_password_valid_strength():
+    """包含字母和数字的密码通过"""
+    resp = client.post("/api/v1/users", json={
+        "username": "strong_user", "password": "pass123",
+    }, headers=_auth())
+    assert resp.status_code == 200

@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 
 from pydantic import BaseModel, Field, field_validator
@@ -43,6 +44,15 @@ class UserCreate(BaseModel):
     phone: str | None = None
     email: str | None = None
     role_ids: list[str] = []
+
+    @field_validator("password")
+    @classmethod
+    def validate_password_strength(cls, v: str) -> str:
+        if not re.search(r"[a-zA-Z]", v):
+            raise ValueError("密码必须包含至少一个字母")
+        if not re.search(r"\d", v):
+            raise ValueError("密码必须包含至少一个数字")
+        return v
 
     @field_validator("display_name")
     @classmethod
