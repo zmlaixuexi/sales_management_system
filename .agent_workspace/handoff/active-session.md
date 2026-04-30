@@ -1,14 +1,15 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：P2 前端完善
-当前任务编号：ROUND-163
-当前任务名称：OrderDetail 操作防重复 + loading 状态
+当前阶段：测试补强
+当前任务编号：ROUND-164
+当前任务名称：check_owner_or_forbid 单元测试
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 164：check_owner_or_forbid 单元测试（+4）— 超管/view_all/所有者/403 分支覆盖，后端 346/346
 - Round 163：OrderDetail 操作防重复 — actionLoading 统一管理确认/取消/收款/冲正的 loading 和防重复点击，前端 115/115
 - Round 162：前端静默错误修复 + 429 重试测试 — Dashboard/AuditLogs 错误提示 + 拦截器 429 测试（+2），前端 115/115
 - Round 161：收款接口对象级权限 — list_payments 数据范围过滤 + create/reverse 归属检查，后端 342/342
@@ -80,7 +81,7 @@
 
 ## 当前测试状态
 
-- 后端：342/342 通过
+- 后端：346/346 通过
 - 前端：115/115 通过
 - ruff：0 issues
 - ESLint：0 warnings
@@ -89,13 +90,13 @@
 
 ## 下一步第一动作
 
-OrderDetail 操作防重复已完成。建议继续从测试补强（OrderDetail 页面测试）、代码质量或安全加固中选择下一步。
+check_owner_or_forbid 测试已补齐。建议继续测试补强（products.py 覆盖率 83% 为最大缺口）或代码质量改进。
 
 ## 当前里程碑总结（Round 95-147）
 
 - 后端测试：214 → 314（+100）
 - 前端测试：97 → 115（+18）
-- 总计 457 测试，全部通过
+- 总计 461 测试，全部通过
 - 后端覆盖率：93.87%（314 测试）
 - 代码质量：ruff 0 + ESLint 0 + build 零警告 + tsc 通过 + 代码分割 + 列表页统一 hook + get_or_404 + resp() 响应函数 + useSubmit hook + ErrorBoundary 路由感知 + Pydantic schema 校验 + 死代码清除
 - 性能：10 个复合索引 + 3 个 N+1 查询修复（订单明细校验/库存扣减回滚/CSV 导入去重）
