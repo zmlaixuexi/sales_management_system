@@ -44,6 +44,11 @@ async def lifespan(app: FastAPI):
 
     yield
 
+    # 优雅关闭：释放数据库连接池
+    from app.db.session import engine
+    logger.info("服务关闭 — 释放数据库连接池")
+    engine.dispose()
+
 
 OPENAPI_TAGS = [
     {"name": "认证", "description": "用户登录、令牌刷新、获取当前用户信息"},
