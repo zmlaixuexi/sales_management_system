@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第二百二十二轮）
+
+### 质量：修复 products.py 和 orders.py 中变量 data 的同名覆盖（shadowing）
+
+- create_product/update_product（products.py）：data: dict → result: dict，避免覆盖函数参数 data: ProductCreate/ProductUpdate
+- create_order（orders.py）：data: dict → result: dict，避免覆盖函数参数 data: OrderCreate
+- 后端 426/426，ruff 0
+
 ## 2026-04-30（第二百二十一轮）
 
 ### 安全：nginx 添加 Strict-Transport-Security 响应头（HSTS）
