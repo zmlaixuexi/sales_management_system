@@ -32,4 +32,10 @@ export const authApi = {
 
   getMe: () =>
     apiClient.get<{ success: boolean; data: CurrentUser }>('/auth/me'),
+
+  changePassword: (oldPassword: string, newPassword: string) =>
+    apiClient.post<{ success: boolean; message: string }>('/auth/change-password', {
+      old_password: oldPassword,
+      new_password: newPassword,
+    }),
 };

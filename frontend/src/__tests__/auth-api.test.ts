@@ -42,4 +42,12 @@ describe('authApi', () => {
     await authApi.getMe()
     expect(mockGet).toHaveBeenCalledWith('/auth/me')
   })
+
+  it('changePassword 调用 POST /auth/change-password', async () => {
+    await authApi.changePassword('old123', 'new456')
+    expect(mockPost).toHaveBeenCalledWith('/auth/change-password', {
+      old_password: 'old123',
+      new_password: 'new456',
+    })
+  })
 })
