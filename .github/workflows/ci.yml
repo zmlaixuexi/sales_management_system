@@ -60,7 +60,7 @@ jobs:
         run: npx eslint src/ --max-warnings=0
       - name: TypeScript 类型检查
         run: npx tsc --noEmit
-      - name: 运行测试
-        run: npx vitest run
+      - name: 运行测试（含覆盖率）
+        run: npx vitest run --coverage
       - name: 构建验证
         run: npm run build
