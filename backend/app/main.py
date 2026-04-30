@@ -16,6 +16,8 @@ from app.core.request_id import RequestIDMiddleware
 from app.core.request_log import RequestLogMiddleware
 from app.core.security_headers import SecurityHeadersMiddleware
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -62,12 +64,23 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     """将 FastAPI 默认 422 校验错误统一为 {detail: {code, message}} 格式"""
     errors = exc.errors()
     first = errors[0] if errors else {}
-    loc = " → ".join(str(l) for l in first.get("loc", []))
+    loc = " → ".join(str(part) for part in first.get("loc", []))
     msg = first.get("msg", "请求参数错误")
     detail_msg = f"{loc}: {msg}" if loc else msg
     return JSONResponse(
         status_code=422,
         content={"detail": {"code": "VALIDATION_FAILED", "message": detail_msg}},
+    )
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    """全局未处理异常：返回一致的 JSON 格式，防止泄露内部详情"""
+    rid = request.headers.get("x-request-id", "")
+    logger.exception("未处理异常 [%s] %s rid=%s", request.method, request.url.path, rid)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": {"code": "INTERNAL_ERROR", "message": "服务器内部错误，请稍后重试"}},
     )
 
 app.add_middleware(

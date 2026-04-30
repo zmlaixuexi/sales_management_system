@@ -96,3 +96,27 @@ def test_production_env_rejects_default_secret(monkeypatch):
         settings.APP_ENV == "production" and settings.JWT_SECRET_KEY == "change-me"
     )
     assert should_reject is False
+
+
+def test_unhandled_exception_returns_json():
+    """全局未处理异常应返回一致的 JSON 格式，不泄露内部详情"""
+    from fastapi import APIRouter
+
+    test_router = APIRouter()
+
+    @test_router.get("/api/v1/_test_crash")
+    def crash():
+        raise RuntimeError("something broke")
+
+    app.include_router(test_router)
+    # raise_server_exceptions=False 让异常处理器接管
+    no_raise_client = TestClient(app, raise_server_exceptions=False)
+    try:
+        response = no_raise_client.get("/api/v1/_test_crash")
+        assert response.status_code == 500
+        data = response.json()
+        assert data["detail"]["code"] == "INTERNAL_ERROR"
+        assert data["detail"]["message"] == "服务器内部错误，请稍后重试"
+        assert "something broke" not in str(data)
+    finally:
+        app.routes[:] = [r for r in app.routes if getattr(r, "path", None) != "/api/v1/_test_crash"]
