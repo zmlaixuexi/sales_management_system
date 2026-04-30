@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-130
-当前任务名称：数据库连接池可配置
+当前任务编号：ROUND-131
+当前任务名称：后端 .env.example 环境变量模板
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 131：后端 .env.example — 20 个可配置项分组注释，与前端对称
 - Round 130：数据库连接池可配置 — pool_size / max_overflow / pool_recycle，生产环境默认 10/20/1800s，后端 290/290
 - Round 129：全局未处理异常处理器 — Exception handler 捕获未处理异常返回一致 JSON，防泄露内部详情，后端 290/290
 - Round 128：Makefile 新增 make typecheck 命令（前端 TypeScript 类型检查），验证通过
