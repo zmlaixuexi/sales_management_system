@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-04-30（第二百三十一轮）
+
+### 修复：收款冲正状态回退错误 + 已取消订单冲正防护
+
+- 冲正时增加订单状态校验：仅 confirmed/partially_paid/completed 允许冲正
+- 修复 completed 订单冲正后应回退到 partially_paid（而非 confirmed）
+- 修复 paid_amount 降为 0 时应回退到 confirmed（不再有收款）
+- 新增 test_38：已取消订单冲正收款返回 400 ORDER_INVALID_STATUS
+- 后端 433/433，ruff 0
+
 ## 2026-04-30（第二百三十轮）
 
 ### 修复：部分付款订单取消时未回滚库存
