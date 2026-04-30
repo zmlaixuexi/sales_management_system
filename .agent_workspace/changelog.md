@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第二百零一轮）
+
+### 测试：密码修改纯字母拒绝测试（+1），覆盖率恢复 99.81%
+
+- test_change_password_no_digits 覆盖 ChangePasswordRequest.validate_password_strength 纯字母分支（line 34）
+- 后端 422/422，ruff 0，覆盖率 99.81%（仅 deps.py get_db 4 行不可测）
+- 里程碑总结更新至 Round 95-200（测试 543，新增 CORS/密码/CI 项）
+
 ## 2026-04-30（第二百轮）
 
 ### 工程：实现记录同步至 Round 192-199
