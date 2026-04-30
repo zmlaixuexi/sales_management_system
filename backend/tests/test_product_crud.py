@@ -146,7 +146,6 @@ def test_03c_update_product_sku_duplicate():
         "sku": "SPU-DUP-001",
     }, headers=_auth())
     assert resp.status_code == 200
-    dup_id = resp.json()["data"]["id"]
 
     # 尝试把第一个商品的 SKU 改成第二个的
     resp = client.put(f"/api/v1/products/{_product_id}", json={
@@ -292,6 +291,7 @@ def test_10_create_with_category():
 def test_10a_sku_generation_with_nonnumeric_suffix():
     """SKU 生成：已有非数字后缀时回退到 1"""
     from datetime import datetime
+
     from app.models.product import Product as ProdModel
     today = datetime.now().strftime("%Y%m%d")
     prefix = f"SPU-{today}-"

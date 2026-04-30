@@ -259,7 +259,6 @@ class TestPaymentReverse:
 
 def _create_user_with_perms(db, username, perm_codes):
     """创建带指定权限的非超级用户"""
-    from app.models.order import SalesOrder as SO
     user = User(
         id=uuid.uuid4(),
         username=username,
