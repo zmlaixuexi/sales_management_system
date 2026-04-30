@@ -17,7 +17,7 @@ dev: ## 启动 Docker 开发环境
 # ─── 安装 ─────────────────────────────────────────────────
 
 install: ## 安装前后端依赖
-	cd backend && pip install -r requirements.txt
+	cd backend && pip install ".[dev]"
 	cd frontend && npm install
 
 # ─── 测试 ─────────────────────────────────────────────────
