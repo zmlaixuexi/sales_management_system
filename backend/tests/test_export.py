@@ -349,3 +349,87 @@ def test_18_export_products_csv_values():
     assert row[4] == "25"      # 库存（原始30 - 订单5）
     assert row[5] == "上架"     # 状态映射
     assert row[6] == "未分类"   # 分类
+
+
+def test_19_export_products_keyword_filter():
+    """商品导出关键字筛选"""
+    resp = client.get("/api/v1/exports/products?keyword=导出测试", headers=_auth())
+    assert resp.status_code == 200
+    assert "导出测试商品" in resp.text
+
+
+def test_20_export_products_category_filter():
+    """商品导出分类筛选"""
+    # 先获取分类 ID
+    resp = client.get("/api/v1/products", headers=_auth())
+    items = resp.json()["data"]["items"]
+    cat_id = items[0]["category_id"] if items else None
+    if cat_id:
+        resp = client.get(f"/api/v1/exports/products?category_id={cat_id}", headers=_auth())
+        assert resp.status_code == 200
+        assert "导出测试商品" in resp.text
+
+
+def test_21_export_customers_keyword_filter():
+    """客户导出关键字筛选（按电话）"""
+    resp = client.get("/api/v1/exports/customers?keyword=13700137000", headers=_auth())
+    assert resp.status_code == 200
+    assert "导出测试客户" in resp.text
+
+
+def test_22_export_customers_source_filter():
+    """客户导出来源筛选"""
+    resp = client.get("/api/v1/exports/customers?source=nonexistent", headers=_auth())
+    assert resp.status_code == 200
+    lines = [line for line in resp.text.strip().split("\n") if line.strip() and "客户名称" not in line]
+    assert len(lines) == 0
+
+
+def test_23_export_orders_status_filter():
+    """订单导出状态筛选"""
+    resp = client.get("/api/v1/exports/orders?status=completed", headers=_auth())
+    assert resp.status_code == 200
+    assert "ORD-" in resp.text
+
+
+def test_24_export_orders_date_filter():
+    """订单导出日期范围筛选"""
+    today = "2026-01-01"
+    far_future = "2099-12-31"
+    resp = client.get(f"/api/v1/exports/orders?start_date={today}&end_date={far_future}", headers=_auth())
+    assert resp.status_code == 200
+    assert "ORD-" in resp.text
+
+
+def test_25_export_payments_order_filter():
+    """收款导出按订单筛选"""
+    resp = client.get(f"/api/v1/exports/payments?order_id={_order_id}", headers=_auth())
+    assert resp.status_code == 200
+    assert "500.00" in resp.text
+
+
+def test_26_export_payments_date_filter():
+    """收款导出日期范围筛选"""
+    today = "2026-01-01"
+    far_future = "2099-12-31"
+    resp = client.get(f"/api/v1/exports/payments?start_date={today}&end_date={far_future}", headers=_auth())
+    assert resp.status_code == 200
+    assert "500.00" in resp.text
+
+
+def test_27_export_orders_keyword_filter():
+    """订单导出关键字筛选（按订单号）"""
+    resp = client.get("/api/v1/sales-orders", headers=_auth())
+    items = resp.json()["data"]["items"]
+    if items:
+        order_no = items[0]["order_no"]
+        resp = client.get(f"/api/v1/exports/orders?keyword={order_no[:6]}", headers=_auth())
+        assert resp.status_code == 200
+        assert order_no in resp.text
+
+
+def test_28_export_orders_customer_filter():
+    """订单导出按客户筛选"""
+    resp = client.get(f"/api/v1/exports/orders?customer_id={_customer_id}", headers=_auth())
+    assert resp.status_code == 200
+    assert "ORD-" in resp.text
