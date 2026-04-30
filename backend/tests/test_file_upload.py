@@ -205,3 +205,27 @@ def test_09_upload_requires_auth():
         files={"file": ("test.png", png_bytes, "image/png")},
     )
     assert resp.status_code == 401
+
+
+def test_10_upload_fake_image_rejected():
+    """伪装扩展名上传（非图片内容声明为 image/jpeg）应被拒绝"""
+    fake_content = b"<html><body>malicious</body></html>"
+    resp = client.post(
+        "/api/v1/files/images",
+        files={"file": ("fake.jpg", fake_content, "image/jpeg")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 400
+    assert resp.json()["detail"]["code"] == "FILE_INVALID_TYPE"
+
+
+def test_11_upload_valid_jpeg_accepted():
+    """上传有效 JPEG 文件头应成功"""
+    # JPEG 最小文件头: FF D8 FF + 任意字节
+    jpeg_bytes = b"\xff\xd8\xff\xe0" + b"\x00" * 100
+    resp = client.post(
+        "/api/v1/files/images",
+        files={"file": ("photo.jpg", jpeg_bytes, "image/jpeg")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
