@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百八十八轮）
+
+### 清理：移除死代码 MainLayout（已被 AppLayout 取代，-226 行），前端 122/122
+
+- 发现 MainLayout（components/MainLayout.tsx）从未在路由或任何生产代码中使用
+- AppLayout（routes/AppLayout.tsx）是实际使用的布局组件
+- 删除 MainLayout.tsx 及其测试文件，净减 226 行
+
 ## 2026-04-30（第一百八十七轮）
 
 ### 测试：AppLayout 用户加载/导航/退出 + ProtectedRoute 重定向（+6），前端 128/128

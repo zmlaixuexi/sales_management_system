@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：测试补强
-当前任务编号：ROUND-187
-当前任务名称：前端 AppLayout + ProtectedRoute 覆盖
+当前任务编号：ROUND-188
+当前任务名称：清理死代码 MainLayout
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 188：移除死代码 MainLayout（已被 AppLayout 取代），-226 行，前端 122/122
 - Round 187：AppLayout 用户加载/导航/退出 + ProtectedRoute 重定向（+6），前端 128/128
 - Round 186：MainLayout 菜单导航/退出登录/折叠/用户名（+6），前端 123/123
 - Round 185：ErrorBoundary 路由重置 + 返回首页按钮（+2），前端 117/117
@@ -105,7 +106,7 @@
 ## 当前测试状态
 
 - 后端：415/415 通过
-- 前端：128/128 通过
+- 前端：122/122 通过
 - ruff：0 issues
 - ESLint：0 warnings
 - build：通过
