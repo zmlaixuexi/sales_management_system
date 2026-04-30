@@ -1,6 +1,7 @@
 """报表 API — 销售汇总、趋势、排行、库存预警"""
 
 from datetime import date, datetime, timedelta
+from decimal import Decimal
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func
@@ -70,7 +71,7 @@ def sales_summary(
 
     total_amount, total_cost, gross_profit, order_count = result
     gross_margin = (gross_profit / total_amount * 100).quantize(
-        __import__("decimal").Decimal("0.01")
+        Decimal("0.01")
     ) if total_amount and total_amount > 0 else 0
 
     can_view_profit = has_permission(current_user, "report:profit")
