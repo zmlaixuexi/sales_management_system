@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：安全加固
-当前任务编号：ROUND-246
-当前任务名称：file_service 覆盖率补全
+当前任务编号：ROUND-247
+当前任务名称：里程碑总结同步
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 247：里程碑总结同步至 Round 95-246（566 测试，99.82% 覆盖率，安全加固全量记录）
 - Round 246：file_service.delete_file 不存在文件返回 False 测试（+1），覆盖率 99.77%→99.82%，仅 deps.py get_db 4 行不可测，后端 443/443
 - Round 245：make ci 全量验证通过 + 迁移文件与模型完全同步（17 表均有对应迁移），后端 442/442
 - Round 244：实现记录同步 Round 236-243（FEAT-70 至 FEAT-72：外键校验、对象级权限、自停用防护）
@@ -172,18 +173,18 @@
 
 安全加固阶段已完成，建议切换到其他改进方向（代码质量、异常路径、部署体验等）。
 
-## 当前里程碑总结（Round 95-216）
+## 当前里程碑总结（Round 95-246）
 
-- 后端测试：214 → 426（+212）
+- 后端测试：214 → 443（+229）
 - 前端测试：97 → 123（+26）
-- 总计 549 测试，全部通过
-- 后端覆盖率：99.81%（431 测试，仅 deps.py get_db 4 行不可测，其余模块全部 100%）
+- 总计 566 测试，全部通过
+- 后端覆盖率：99.82%（443 测试，仅 deps.py get_db 4 行不可测，其余模块全部 100%）
 - 代码质量：ruff 0（含 B904/SIM/C4/PERF/RUF 扩展规则）+ ESLint 0 + build 零警告 + tsc 通过 + parse_uuid_or_400 统一到 deps.py + get_or_404 + resp() 响应函数 + useSubmit hook + ErrorBoundary 路由感知 + Pydantic schema 校验 + 死代码清除 + 延迟 import 清理 + __import__ 反模式消除 + __all__ 排序
 - 性能：10 个复合索引 + 3 个 N+1 查询修复（订单明细校验/库存扣减回滚/CSV 导入去重）+ 列表推导式优化
-- 安全：权限码全量审计 + RBAC + 数据范围 + 速率限制 + 敏感字段 + LIKE 转义 + 安全响应头（含静态资源补全）+ Token 刷新校验 + JWT 密钥启动检查 + CSV 导入大小限制 + CORS 白名单（方法+头精确指定）+ XSS 输入消毒（strip_html）+ 密码强度校验（字母+数字）+ 密码修改接口 + UUID 安全转换全量覆盖 + sort_by 白名单 + 收款导出数据范围过滤
+- 安全：权限码全量审计 + RBAC + 数据范围 + 速率限制 + 敏感字段 + LIKE 转义 + 安全响应头（含静态资源补全）+ Token 刷新校验 + JWT 密钥启动检查 + CSV 导入大小限制 + CORS 白名单 + XSS 输入消毒 + 密码强度校验 + 密码修改接口 + UUID 安全转换全量覆盖 + sort_by 白名单 + 收款导出数据范围过滤 + deleted_at 过滤全量覆盖 + 外键存在性校验全量覆盖（role_ids/owner_user_id/customer_id/category_id）+ 对象级权限补全（文件删除/客户归属）+ 超级管理员自停用防护 + 订单状态机修复（partially_paid 取消/冲正状态回退）+ 文件上传魔数字节校验
 - 可观测性：健康检查 + degraded + 请求日志 + 慢请求警告 + 请求 ID 全链路追踪 + 启动配置摘要日志 + 全局未处理异常处理器 + X-Response-Time
 - 部署：Docker Compose + Nginx + 备份恢复 + Makefile（ci/quality/typecheck/coverage/db-backup/restore）+ 环境变量完整同步 + 多阶段 Docker 构建 + 非 root 用户 + DB 连接池可配置 + GitHub Actions CI（含覆盖率）+ Dockerfile/nginx 版本固定
-- 测试工程：pytest 8 类标记自动分类 + .env.example 前后端对称 + CONTRIBUTING.md + pytest-cov 覆盖率报告 99.81% + 前端 vitest 覆盖率 + CI 前后端覆盖率对称
+- 测试工程：pytest 8 类标记自动分类 + .env.example 前后端对称 + CONTRIBUTING.md + pytest-cov 覆盖率报告 99.82% + 前端 vitest 覆盖率 + CI 前后端覆盖率对称 + 重复问题台账（3 类模式）
 - 文档：README + testing.md + database.md + architecture.md + api.md + deployment.md 全部完成
 
 ## 阻塞问题
