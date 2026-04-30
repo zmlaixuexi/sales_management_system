@@ -6,6 +6,33 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-72
+
+### 安全加固：外键引用存在性校验全量覆盖
+
+- **文件**: `backend/app/api/v1/users.py`, `backend/app/api/v1/customers.py`, `backend/app/api/v1/orders.py`, `backend/app/api/v1/products.py`
+- **内容**: 所有外键 ID 参数添加存在性校验 — role_ids（_validate_roles_exist）、owner_user_id（_validate_owner_user）、customer_id（get_or_404）、category_id（_validate_category_id）
+- **验证**: 442 后端通过，ruff 0
+- **效果**: 不存在的外键 ID 返回友好 400 而非数据库 500；用户不能将资源分配给不存在的关联对象
+
+## 功能编号：FEAT-20260430-71
+
+### 安全加固：对象级权限补全
+
+- **文件**: `backend/app/api/v1/files.py`, `backend/app/api/v1/customers.py`
+- **内容**: 文件删除添加 created_by 所有权校验；客户转移/创建/编辑的 owner_user_id 添加用户存在性+活跃状态校验
+- **验证**: 440 后端通过，ruff 0
+- **效果**: 用户不能删除他人文件；客户不能分配给不存在或已禁用的用户
+
+## 功能编号：FEAT-20260430-70
+
+### 安全加固：超级管理员自停用防护
+
+- **文件**: `backend/app/api/v1/users.py`
+- **内容**: update_user 添加 is_active=False 且目标 == 当前用户的自停用拒绝
+- **验证**: 437 后端通过，ruff 0
+- **效果**: 超级管理员不能停用自己的账号，防止锁死
+
 ## 功能编号：FEAT-20260430-65
 
 ### ruff RUF 规则扩展
