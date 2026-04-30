@@ -196,6 +196,17 @@ def test_03h_update_product_category():
     assert resp.status_code == 200
 
 
+def test_03i_update_product_name():
+    """编辑商品名称"""
+    resp = client.put(f"/api/v1/products/{_product_id}", json={
+        "name": "新名称商品",
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    resp = client.get(f"/api/v1/products/{_product_id}", headers=_auth())
+    assert resp.json()["data"]["name"] == "新名称商品"
+
+
 def test_03e_price_history_with_cost():
     """价格变更记录（超管可见成本价）"""
     # test_03b 已将 cost_price 从 99→80，存在一条记录
@@ -257,7 +268,17 @@ def test_09_list_with_sort_asc():
     assert names == sorted(names)
 
 
-def test_10_create_empty_name_rejected():
+def test_10_create_with_category():
+    """创建商品指定分类"""
+    resp = client.post("/api/v1/products", json={
+        "name": "分类商品", "sale_price": "50", "cost_price": "25",
+        "stock_quantity": 10, "category_id": _category_id,
+    }, headers=_auth())
+    assert resp.status_code == 200
+    assert resp.json()["data"]["category_id"] == _category_id
+
+
+def test_10b_create_empty_name_rejected():
     """创建商品名称为空"""
     resp = client.post("/api/v1/products", json={
         "name": "  ", "sale_price": "10", "cost_price": "5", "stock_quantity": 1,
