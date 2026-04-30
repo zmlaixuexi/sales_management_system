@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第二百二十六轮）
+
+### 测试：报表数据范围过滤测试
+
+- test_23_report_data_scope_filtered：创建仅有 report:sales 权限的非超管用户，验证 sales_summary/sales_trend/product_ranking 只返回本人订单数据
+- reports.py 覆盖率从 97% 提升至 100%
+- 后端 429/429，ruff 0
+
 ## 2026-04-30（第二百二十五轮）
 
 ### 安全：全量安全审计扫描 — 未发现新问题
