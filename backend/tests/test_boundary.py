@@ -1,6 +1,7 @@
 """后端边界测试补强 — 覆盖 auth/order/payment/user/audit 未测路径"""
 
 import uuid
+from datetime import UTC
 
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -217,8 +218,8 @@ def test_07_token_deleted_user():
         assert resp.status_code == 200
 
         # 模拟软删除
-        from datetime import datetime, timezone
-        temp_user.deleted_at = datetime.now(timezone.utc)
+        from datetime import datetime
+        temp_user.deleted_at = datetime.now(UTC)
         db.commit()
 
         # 再请求应返回 401

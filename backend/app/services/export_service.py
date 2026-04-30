@@ -3,8 +3,8 @@
 import csv
 import io
 import uuid
+from collections.abc import Generator
 from decimal import Decimal
-from typing import Generator
 
 from sqlalchemy.orm import Session, selectinload
 
