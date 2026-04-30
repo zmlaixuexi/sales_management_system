@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-126
-当前任务名称：文档同步测试数
+当前任务编号：ROUND-127
+当前任务名称：422 校验错误响应标准化
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 127：标准化 422 校验错误响应格式 — 新增 RequestValidationError 全局处理器，前端可正确提取校验消息
 - Round 126：文档同步测试数至 395（289 后端 + 106 前端）+ README/testing.md 更新
 - Round 125：提取 resp() 响应构造函数，11 个 API 文件 44 处迁移，净减 60 行，后端 289/289
 - Round 124：移除未使用的 SuccessResponse / ErrorResponse schema，ruff 0 + 后端 289/289

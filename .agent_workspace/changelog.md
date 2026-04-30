@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第一百二十七轮）
+
+### 安全：标准化 422 校验错误响应格式
+
+- 新增 RequestValidationError 全局异常处理器
+- FastAPI 默认 detail[loc/msg/type] 数组格式统一为 {code: "VALIDATION_FAILED", message}
+- 前端 getApiErrorMessage 现在可正确提取 Pydantic 校验错误消息
+- 更新 2 个测试断言适配新格式，后端 289/289 通过
+
 ## 2026-04-30（第一百二十六轮）
 
 ### 文档：同步测试数至 395（289 后端 + 106 前端）
