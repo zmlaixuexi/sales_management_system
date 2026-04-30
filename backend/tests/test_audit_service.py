@@ -1,12 +1,13 @@
-"""audit_service 内部函数单元测试 — _mask_sensitive / model_to_dict"""
+"""audit_service 内部函数单元测试 — _mask_sensitive / model_to_dict / get_request_meta"""
 
 import uuid
+from unittest.mock import MagicMock
 
 from sqlalchemy import String, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 from app.models.audit import AuditLog
-from app.services.audit_service import _mask_sensitive, model_to_dict
+from app.services.audit_service import _mask_sensitive, get_request_meta, model_to_dict
 
 # ─── _mask_sensitive ────────────────────────────────────────
 
@@ -84,3 +85,39 @@ def test_model_to_dict_skips_none():
     assert "name" not in result
     assert result["id"] == "abc"
     assert result["status"] == "active"
+
+
+# ─── get_request_meta ────────────────────────────────────────
+
+
+def _mock_request(*, host="127.0.0.1", user_agent="TestAgent", request_id=""):
+    req = MagicMock()
+    req.client = MagicMock() if host else None
+    if host:
+        req.client.host = host
+    req.headers = {"user-agent": user_agent}
+    if request_id:
+        req.headers["x-request-id"] = request_id
+    return req
+
+
+def test_get_request_meta_basic():
+    """基本请求元信息提取"""
+    req = _mock_request()
+    meta = get_request_meta(req)
+    assert meta["ip_address"] == "127.0.0.1"
+    assert meta["user_agent"] == "TestAgent"
+
+
+def test_get_request_meta_no_client():
+    """无客户端信息时 IP 为 None"""
+    req = _mock_request(host=None)
+    meta = get_request_meta(req)
+    assert meta["ip_address"] is None
+
+
+def test_get_request_meta_with_request_id():
+    """透传 x-request-id"""
+    req = _mock_request(request_id="req-123")
+    meta = get_request_meta(req)
+    assert meta["request_id"] == "req-123"
