@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：测试补强
-当前任务编号：ROUND-201
-当前任务名称：覆盖率恢复
+当前任务编号：ROUND-202
+当前任务名称：ruff UP 规则
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 202：ruff 添加 UP（pyupgrade）规则，修复 4 处现代化（UTC/Generator），后端 422/422
 - Round 201：密码修改纯字母拒绝测试（+1），覆盖率恢复 99.81%，后端 422/422
 - Round 200：实现记录同步至 Round 192-199（FEAT-58 至 FEAT-62）+ 里程碑总结更新至 Round 95-200
 - Round 199：生产 nginx 镜像固定版本 1.27-alpine（避免 latest 不可预测变更）

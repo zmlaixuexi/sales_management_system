@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-04-30（第二百零二轮）
+
+### 工程：ruff 添加 UP（pyupgrade）规则
+
+- pyproject.toml lint select 新增 UP 规则
+- UP017：timezone.utc → datetime.UTC（security.py/logging.py/test_boundary.py）
+- UP035：typing.Generator → collections.abc.Generator（export_service.py）
+- alembic/versions 排除 UP 规则（自动生成迁移文件不应被修改）
+- ruff 0，后端 422/422
+
 ## 2026-04-30（第二百零一轮）
 
 ### 测试：密码修改纯字母拒绝测试（+1），覆盖率恢复 99.81%
