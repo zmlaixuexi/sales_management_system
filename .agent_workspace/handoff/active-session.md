@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：安全加固
-当前任务编号：ROUND-235
-当前任务名称：make ci 全量质量验证
+当前任务编号：ROUND-236
+当前任务名称：客户转移目标用户校验
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 236：修复客户转移未校验目标用户存在性和活跃状态（+1 测试），后端 435/435
 - Round 235：make ci 全量质量验证通过（ruff 0 + eslint 0 + tsc 0 + 434/434 + 123/123 + 覆盖率 99.81% + build 零警告）
 - Round 234：修复订单创建 _validate_and_prepare_items 未过滤 deleted_at（允许引用软删除商品下单），+1 测试，后端 434/434
 - Round 233：修复收款 CSV 导出遗漏 deleted_at 过滤（export_payments join SalesOrder 添加过滤），后端 433/433
@@ -149,7 +150,7 @@
 
 ## 当前测试状态
 
-- 后端：434/434 通过
+- 后端：435/435 通过
 - 前端：123/123 通过
 - ruff：0 issues（含 RUF 规则）
 - ESLint：0 warnings
