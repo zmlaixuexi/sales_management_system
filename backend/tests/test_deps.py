@@ -2,7 +2,10 @@
 
 import uuid
 
-from app.api.deps import _get_user_permissions, has_permission
+import pytest
+from fastapi import HTTPException
+
+from app.api.deps import _get_user_permissions, check_owner_or_forbid, has_permission
 from app.models.user import User
 
 
@@ -70,3 +73,32 @@ def test_has_permission_denied():
     """无权限码时返回 False"""
     user = _make_user(perm_codes=["product:view"])
     assert has_permission(user, "product:delete") is False
+
+
+def test_check_owner_or_forbid_superuser():
+    """超级用户直接通过"""
+    user = _make_user(superuser=True)
+    other_id = uuid.uuid4()
+    check_owner_or_forbid(user, other_id, "order:view_all", "订单")
+
+
+def test_check_owner_or_forbid_view_all():
+    """有 view_all 权限的用户通过"""
+    user = _make_user(perm_codes=["order:view_all"])
+    check_owner_or_forbid(user, uuid.uuid4(), "order:view_all", "订单")
+
+
+def test_check_owner_or_forbid_owner():
+    """资源所有者通过"""
+    user = _make_user(perm_codes=[])
+    check_owner_or_forbid(user, user.id, "order:view_all", "订单")
+
+
+def test_check_owner_or_forbid_forbidden():
+    """非所有者且无 view_all 权限 → 403"""
+    user = _make_user(perm_codes=[])
+    other_id = uuid.uuid4()
+    with pytest.raises(HTTPException) as exc_info:
+        check_owner_or_forbid(user, other_id, "order:view_all", "订单")
+    assert exc_info.value.status_code == 403
+    assert "无权访问此订单" in exc_info.value.detail["message"]
