@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：测试补强
-当前任务编号：ROUND-176
-当前任务名称：速率限制/日志覆盖率补强
+当前任务编号：ROUND-177
+当前任务名称：测试补强（客户手机号 + 商品创建/更新）
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 177：客户手机号更新 + 商品名称更新 + 创建指定分类（+3），后端 399/399，33 行未覆盖
 - Round 176：速率限制窗口清理 + get_logger 单元测试（+2），ratelimit/logging 100%，后端 395/395
 - Round 175：商品分类筛选/排序回退/成本价格式/分类更新（+4），products.py 94%，后端 393/393
 - Round 174：文件上传校验单元测试（+4）— 扩展名/MIME/大小/正常，file_service 100%，后端 389/389
@@ -93,7 +94,7 @@
 
 ## 当前测试状态
 
-- 后端：395/395 通过
+- 后端：399/399 通过
 - 前端：115/115 通过
 - ruff：0 issues
 - ESLint：0 warnings
@@ -103,7 +104,7 @@
 
 ## 下一步第一动作
 
-后端覆盖率 98%（37 行未覆盖），前端 115/115。ratelimit/logging/file_service/users/health/audit_logs/export_service 均 100%。剩余未覆盖主要是 products.py CSV 导入和 orders/payments 防御性代码。
+后端覆盖率 98%（33 行未覆盖），前端 115/115。剩余未覆盖主要是 products.py CSV 导入（~15 行）和 orders/payments 防御性代码。
 
 ## 当前里程碑总结（Round 95-173）
 
