@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第二百四十六轮）
+
+### 测试：file_service.delete_file 覆盖率补全
+
+- 新增 test_15：直接调用 delete_file(uuid.uuid4()) 验证返回 False
+- file_service.py 覆盖率 98%→100%
+- 后端 443/443，覆盖率 99.82%（仅 deps.py get_db 4 行不可测），ruff 0
+
 ## 2026-04-30（第二百四十五轮）
 
 ### 工程：make ci 全量验证 + 迁移同步确认

@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：安全加固
-当前任务编号：ROUND-245
-当前任务名称：make ci 全量验证 + 迁移同步确认
+当前任务编号：ROUND-246
+当前任务名称：file_service 覆盖率补全
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 246：file_service.delete_file 不存在文件返回 False 测试（+1），覆盖率 99.77%→99.82%，仅 deps.py get_db 4 行不可测，后端 443/443
 - Round 245：make ci 全量验证通过 + 迁移文件与模型完全同步（17 表均有对应迁移），后端 442/442
 - Round 244：实现记录同步 Round 236-243（FEAT-70 至 FEAT-72：外键校验、对象级权限、自停用防护）
 - Round 243：files.py/users.py 移除不可达分支，覆盖率 99.68%→99.77%，仅 deps.py get_db 5 行不可测
@@ -159,13 +160,13 @@
 
 ## 当前测试状态
 
-- 后端：442/442 通过
+- 后端：443/443 通过
 - 前端：123/123 通过
 - ruff：0 issues（含 RUF 规则）
 - ESLint：0 warnings
 - build：通过（零警告）
 - tsc：通过
-- 后端覆盖率：99.77%（仅 deps.py get_db 5 行不可测）
+- 后端覆盖率：99.82%（仅 deps.py get_db 4 行不可测）
 
 ## 下一步第一动作
 
