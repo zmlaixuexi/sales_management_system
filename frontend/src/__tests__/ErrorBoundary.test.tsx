@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useNavigate, Routes, Route } from 'react-router-dom'
 import ErrorBoundary from '@/components/ErrorBoundary'
 
 // 模拟 antd 组件以避免 jsdom 中复杂的样式计算
@@ -21,8 +21,12 @@ function ThrowError({ error }: { error: Error }) {
   throw error
 }
 
+function NavButton({ to }: { to: string }) {
+  const nav = useNavigate()
+  return <button data-testid="nav-btn" onClick={() => nav(to)}>跳转</button>
+}
+
 describe('ErrorBoundary', () => {
-  // 抑制 React 错误边界的 console.error 输出
   const originalError = console.error
   beforeEach(() => {
     console.error = vi.fn()
@@ -79,5 +83,51 @@ describe('ErrorBoundary', () => {
 
     expect(screen.getByText('恢复内容')).toBeInTheDocument()
     expect(screen.queryByTestId('error-result')).not.toBeInTheDocument()
+  })
+
+  it('路由变化时自动重置错误状态', () => {
+    let shouldThrow = true
+    function MaybeThrow() {
+      if (shouldThrow) throw new Error('路由重置错误')
+      return <div>路由恢复内容</div>
+    }
+
+    render(
+      <MemoryRouter initialEntries={['/page-a']}>
+        {/* 导航按钮放在 ErrorBoundary 外面 */}
+        <NavButton to="/page-b" />
+        <Routes>
+          <Route path="*" element={
+            <ErrorBoundary>
+              <MaybeThrow />
+            </ErrorBoundary>
+          } />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    // 初始渲染触发错误
+    expect(screen.getByTestId('error-result')).toBeInTheDocument()
+
+    // 修复错误并导航到新路由
+    shouldThrow = false
+    fireEvent.click(screen.getByTestId('nav-btn'))
+
+    // 路由变化 → resetKey 更新 → 错误重置 → 子组件重新渲染
+    expect(screen.getByText('路由恢复内容')).toBeInTheDocument()
+    expect(screen.queryByTestId('error-result')).not.toBeInTheDocument()
+  })
+
+  it('返回首页按钮跳转到根路径', () => {
+    render(
+      <MemoryRouter>
+        <ErrorBoundary>
+          <ThrowError error={new Error('首页跳转测试')} />
+        </ErrorBoundary>
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByText('返回首页'))
+    expect(window.location.href).toContain('/')
   })
 })
