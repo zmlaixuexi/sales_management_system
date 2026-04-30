@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-04-30（第二百一十六轮）
+
+### 工程：ruff 添加 RUF 规则，修复 5 处问题
+
+- pyproject.toml select 新增 RUF，ignore RUF001/002/003（中文全角字符）
+- main.py 2 个 exception handler 移除虚假 async（RUF029）
+- 移除 2 处未使用 noqa（RUF100）：main.py F401、test_order_calc.py I001
+- models/__init__.py __all__ 按字母排序（RUF022）
+- 后端 426/426，ruff 0
+
 ## 2026-04-30（第二百一十五轮）
 
 ### 文档：同步测试数至 544（426 后端 + 123 前端）
