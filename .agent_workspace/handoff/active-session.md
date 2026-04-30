@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-152
-当前任务名称：ProtectedRoute 组件测试
+当前任务编号：ROUND-153
+当前任务名称：文档同步测试数至 438
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 153：文档同步测试数至 438（325 后端 + 113 前端）+ testing.md 新增 7 个测试文件条目
 - Round 152：ProtectedRoute 组件测试（+4）— 无 token 重定向/加载中/已认证渲染/fetchUser 失败，前端 113/113
 - Round 151：JSON 日志格式器 + 审计异常处理测试（+5）— _JsonFormatter/log_action 容错，后端 325/325
 - Round 150：商品利润计算函数单元测试（+6）— _calc_profit 纯函数验证，后端 320/320

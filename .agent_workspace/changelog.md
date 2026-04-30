@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-04-30（第一百五十三轮）
+
+### 文档：同步测试数至 438（325 后端 + 113 前端）
+
+- testing.md 概览表更新：325/113/438，后端覆盖率 ~94%
+- testing.md 标记分类表更新：crud 84/security 33/report 38/infra 17
+- testing.md 新增 5 个后端测试文件详解（deps/order_calc/product_calc/audit_service/logging）
+- testing.md 新增 2 个前端测试文件（NotFound/ProtectedRoute）
+- README.md 同步更新测试数和模块表
+- 新增数据库测试文件行：test_deps/test_order_calc/test_product_calc/test_audit_service/test_logging
+
 ## 2026-04-30（第一百五十二轮）
 
 ### 测试：ProtectedRoute 组件测试（+4，前端 113/113）
