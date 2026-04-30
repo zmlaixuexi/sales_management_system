@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-04-30（第一百六十六轮）
+
+### 测试：导出服务筛选测试
+
+- 商品导出：keyword/category_id 筛选
+- 客户导出：keyword/source 筛选
+- 订单导出：keyword/status/customer_id/start_date/end_date 筛选
+- 收款导出：order_id/start_date/end_date 筛选
+- export_service.py 覆盖率 90% → 100%，后端 361/361（+10）
+
 ## 2026-04-30（第一百六十五轮）
 
 ### 测试：商品列表筛选/排序 + 创建校验测试
