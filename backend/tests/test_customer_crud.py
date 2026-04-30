@@ -196,3 +196,57 @@ def test_09_verify_deleted():
     """验证删除后不可见"""
     resp = client.get(f"/api/v1/customers/{_customer_id}", headers=_auth())
     assert resp.status_code == 404
+
+
+def test_10_update_customer_empty_name():
+    """编辑客户名称为空"""
+    # 创建一个新客户用于测试
+    resp = client.post("/api/v1/customers", json={
+        "name": "空名测试", "phone": "13800001999",
+    }, headers=_auth())
+    cid = resp.json()["data"]["id"]
+
+    resp = client.put(f"/api/v1/customers/{cid}", json={"name": "  "}, headers=_auth())
+    assert resp.status_code == 400
+    assert "不能为空" in resp.json()["detail"]["message"]
+
+
+def test_11_update_customer_duplicate_phone():
+    """编辑客户手机号重复"""
+    # 创建两个客户
+    resp = client.post("/api/v1/customers", json={
+        "name": "客户A", "phone": "13800002001",
+    }, headers=_auth())
+    cid_a = resp.json()["data"]["id"]
+    client.post("/api/v1/customers", json={
+        "name": "客户B", "phone": "13800002002",
+    }, headers=_auth())
+
+    # 尝试把 A 的手机号改成 B 的
+    resp = client.put(f"/api/v1/customers/{cid_a}", json={"phone": "13800002002"}, headers=_auth())
+    assert resp.status_code == 409
+    assert "已被其他客户使用" in resp.json()["detail"]["message"]
+
+
+def test_12_update_customer_all_fields():
+    """编辑客户所有可选字段"""
+    resp = client.post("/api/v1/customers", json={
+        "name": "全字段客户", "phone": "13800003001",
+    }, headers=_auth())
+    cid = resp.json()["data"]["id"]
+
+    resp = client.put(f"/api/v1/customers/{cid}", json={
+        "email": "new@test.com",
+        "source": "referral",
+        "follow_status": "following",
+        "remark": "重要客户",
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    # 验证更新
+    resp = client.get(f"/api/v1/customers/{cid}", headers=_auth())
+    data = resp.json()["data"]
+    assert data["email"] == "new@test.com"
+    assert data["source"] == "referral"
+    assert data["follow_status"] == "following"
+    assert data["remark"] == "重要客户"
