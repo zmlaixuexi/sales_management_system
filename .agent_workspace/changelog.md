@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第二百三十二轮）
+
+### 修复：收款列表和冲正遗漏 deleted_at 过滤
+
+- list_payments：join SalesOrder 时添加 deleted_at.is_(None) 过滤
+- reverse_payment：查询关联订单时添加 deleted_at.is_(None) 过滤
+- 修复前：已删除订单的收款记录仍可通过列表和冲正接口访问
+- 后端 433/433，ruff 0
+
 ## 2026-04-30（第二百三十一轮）
 
 ### 修复：收款冲正状态回退错误 + 已取消订单冲正防护
