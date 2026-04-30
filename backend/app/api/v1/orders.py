@@ -505,8 +505,8 @@ def cancel_order(
             },
         )
 
-    # 已确认订单回滚库存
-    if order.status == "confirmed":
+    # 已确认/部分付款订单回滚库存
+    if order.status in ("confirmed", "partially_paid"):
         items = db.query(SalesOrderItem).filter(SalesOrderItem.order_id == order.id).all()
         _restore_inventory(db, order.id, items, current_user.id)
 

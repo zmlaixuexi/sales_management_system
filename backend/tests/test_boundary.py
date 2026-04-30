@@ -652,3 +652,46 @@ def test_36_refresh_token_success():
     data = resp.json()["data"]
     assert "access_token" in data
     assert "refresh_token" in data
+
+
+# ─── 部分付款订单取消回滚库存 ──────────────────────────────────
+
+def test_37_cancel_partially_paid_restores_inventory():
+    """取消部分付款订单应回滚库存"""
+    # 确保 token 有效
+    if not _tokens.get("access"):
+        resp = client.post("/api/v1/auth/login", json={
+            "username": "boundary_admin", "password": "pass123456",
+        })
+        assert resp.status_code == 200
+        _tokens["access"] = resp.json()["data"]["access_token"]
+
+    # 创建 + 确认
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 3}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    order_id = resp.json()["data"]["id"]
+
+    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
+    assert resp.status_code == 200
+
+    # 部分收款（订单变为 partially_paid）
+    resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
+        "amount": "50", "payment_method": "cash",
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    # 取消部分付款订单
+    resp = client.post(f"/api/v1/sales-orders/{order_id}/cancel", headers=_auth())
+    assert resp.status_code == 200
+    assert resp.json()["data"]["status"] == "cancelled"
+
+    # 验证库存回滚：查询库存流水，应存在回滚记录
+    resp = client.get(f"/api/v1/inventory/movements?product_id={_product_id}", headers=_auth())
+    assert resp.status_code == 200
+    movements = resp.json()["data"]["items"]
+    # 应存在 quantity_change=+3 的回滚记录
+    restore_moves = [m for m in movements if m["quantity_change"] == 3]
+    assert len(restore_moves) >= 1
