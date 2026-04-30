@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     RATE_LIMIT_MAX: int = 1000
     RATE_LIMIT_WINDOW: int = 60
     SLOW_REQUEST_THRESHOLD_MS: int = 1000
+    DB_POOL_SIZE: int = 5
+    DB_MAX_OVERFLOW: int = 10
+    DB_POOL_RECYCLE_SECONDS: int = 1800
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
