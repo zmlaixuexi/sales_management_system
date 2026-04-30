@@ -2,8 +2,10 @@ import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 import app.core.logging  # noqa: F401 — 确保日志初始化
@@ -53,6 +55,20 @@ app = FastAPI(
     openapi_tags=OPENAPI_TAGS,
     lifespan=lifespan,
 )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """将 FastAPI 默认 422 校验错误统一为 {detail: {code, message}} 格式"""
+    errors = exc.errors()
+    first = errors[0] if errors else {}
+    loc = " → ".join(str(l) for l in first.get("loc", []))
+    msg = first.get("msg", "请求参数错误")
+    detail_msg = f"{loc}: {msg}" if loc else msg
+    return JSONResponse(
+        status_code=422,
+        content={"detail": {"code": "VALIDATION_FAILED", "message": detail_msg}},
+    )
 
 app.add_middleware(
     CORSMiddleware,

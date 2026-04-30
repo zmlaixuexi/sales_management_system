@@ -169,7 +169,7 @@ class TestOrderCreate:
             "items": [{"product_id": _product_id, "quantity": 1, "unit_price": "-10.00"}],
         }, headers=_auth())
         assert resp.status_code == 422
-        assert "不能为负" in resp.json()["detail"][0]["msg"]
+        assert "不能为负" in resp.json()["detail"]["message"]
 
 
 class TestOrderRead:
@@ -238,7 +238,7 @@ class TestOrderUpdate:
             "items": [{"product_id": _product_id, "quantity": 1, "unit_price": "-5.00"}],
         }, headers=_auth())
         assert resp.status_code == 422
-        assert "不能为负" in resp.json()["detail"][0]["msg"]
+        assert "不能为负" in resp.json()["detail"]["message"]
 
 
 class TestOrderConfirm:
