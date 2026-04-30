@@ -14,7 +14,7 @@ from app.main import app
 from app.models.customer import Customer
 from app.models.order import SalesOrder, SalesOrderItem
 from app.models.product import Product, ProductCategory
-from app.models.user import User
+from app.models.user import Permission, Role, RolePermission, User, UserRole
 
 TEST_DB_URL = "sqlite:///./test_payment_crud.db"
 engine = create_engine(TEST_DB_URL, connect_args={"check_same_thread": False})
@@ -255,6 +255,75 @@ class TestPaymentReverse:
     def test_11_reverse_bad_id_404(self):
         resp = client.post(f"/api/v1/payments/{uuid.uuid4()}/reverse", headers=_auth())
         assert resp.status_code == 404
+
+
+def _create_user_with_perms(db, username, perm_codes):
+    """创建带指定权限的非超级用户"""
+    from app.models.order import SalesOrder as SO
+    user = User(
+        id=uuid.uuid4(),
+        username=username,
+        hashed_password=hash_password("testpass123"),
+        display_name=username,
+        is_active=True,
+        is_superuser=False,
+    )
+    db.add(user)
+    db.flush()
+
+    role = Role(id=uuid.uuid4(), name=f"role_{username}", display_name=f"角色-{username}")
+    db.add(role)
+    db.flush()
+
+    db.add(UserRole(user_id=user.id, role_id=role.id))
+
+    for code in perm_codes:
+        perm = Permission(id=uuid.uuid4(), code=code, name=code, module=code.split(":")[0])
+        db.add(perm)
+        db.flush()
+        db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+
+    return user
+
+
+def test_12_non_admin_payment_list_filtered():
+    """非超管用户只能看到本人订单的收款（数据范围过滤）"""
+    db = TestSession()
+    try:
+        # 创建一个只有 payment:list 权限的销售员
+        sales_user = _create_user_with_perms(db, "pay_sales", ["payment:list"])
+        db.flush()
+
+        # 创建属于该销售员的已确认订单
+        order3 = SalesOrder(
+            id=uuid.uuid4(),
+            order_no="ORD-PAY-0003",
+            customer_id=uuid.UUID(_customer_id),
+            sales_user_id=sales_user.id,
+            status="confirmed",
+            total_amount=100,
+            total_cost=60,
+            gross_profit=40,
+            gross_margin=0.4,
+            paid_amount=0,
+            created_by=sales_user.id,
+            updated_by=sales_user.id,
+        )
+        db.add(order3)
+        db.commit()
+
+        # 以销售员身份登录
+        token = create_access_token(str(sales_user.id))
+
+        # 列表应该只返回该销售员的收款（不含管理员的）
+        resp = client.get("/api/v1/payments", headers={"Authorization": f"Bearer {token}"})
+        assert resp.status_code == 200
+        items = resp.json()["data"]["items"]
+        # 管理员的收款不应出现在此列表中
+        for item in items:
+            assert item["order_id"] != _confirmed_order_id
+    finally:
+        db.close()
 
 
 app.dependency_overrides[get_db] = override_get_db
