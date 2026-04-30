@@ -252,3 +252,45 @@ def test_13_upload_valid_webp_accepted():
         headers=_auth(),
     )
     assert resp.status_code == 200
+
+
+def test_14_delete_other_user_file_forbidden():
+    """非所有者不能删除他人的文件"""
+    # 上传文件（超级用户）
+    png_bytes = _make_png_bytes()
+    resp = client.post(
+        "/api/v1/files/images",
+        files={"file": ("owner.png", png_bytes, "image/png")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    file_id = resp.json()["data"]["id"]
+
+    # 创建第二个普通用户
+    other_user = User(
+        id=uuid.uuid4(),
+        username="file_other",
+        hashed_password=hash_password("testpass123"),
+        display_name="其他用户",
+        is_active=True,
+        is_superuser=False,
+    )
+    db = TestSession()
+    db.add(other_user)
+    db.commit()
+    db.close()
+
+    # 以第二个用户登录
+    resp = client.post("/api/v1/auth/login", json={
+        "username": "file_other", "password": "testpass123",
+    })
+    assert resp.status_code == 200
+    other_token = resp.json()["data"]["access_token"]
+
+    # 尝试删除第一个用户的文件
+    resp = client.delete(
+        f"/api/v1/files/images/{file_id}",
+        headers={"Authorization": f"Bearer {other_token}"},
+    )
+    assert resp.status_code == 403
+    assert resp.json()["detail"]["code"] == "AUTH_FORBIDDEN"

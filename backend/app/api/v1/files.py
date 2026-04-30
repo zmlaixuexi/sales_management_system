@@ -76,6 +76,19 @@ def delete_image(
     current_user: User = Depends(get_current_user),
 ):
     """删除未被引用的图片"""
+    file_record = db.query(File).filter(File.id == file_id).first()
+    if not file_record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": "FILE_NOT_FOUND", "message": "文件不存在"},
+        )
+
+    if not current_user.is_superuser and file_record.created_by != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "AUTH_FORBIDDEN", "message": "无权删除此文件"},
+        )
+
     if not delete_file(db, file_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
