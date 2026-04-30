@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-04-30（第一百四十六轮）
+
+### 工程：pytest-cov 覆盖率报告 + make coverage 命令
+
+- pyproject.toml 新增 pytest-cov 依赖 + coverage 配置（source/omit/report）
+- Makefile 新增 `make coverage` 目标
+- 后端覆盖率：93.87%（307 测试，1990 行代码，122 行未覆盖）
+- 覆盖率热点：products.py 83%、export_service.py 85%、logging.py 78%
+- 307/307 通过
+
 ## 2026-04-30（第一百四十五轮）
 
 ### 测试：订单金额计算函数单元测试（+9，后端 307/307）

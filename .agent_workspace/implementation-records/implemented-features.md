@@ -6,6 +6,15 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-43
+
+### pytest-cov 覆盖率报告
+
+- **文件**: `backend/pyproject.toml`, `Makefile`
+- **内容**: 添加 pytest-cov 依赖 + coverage 配置（source=app, omit seed/main, fail_under=70）+ `make coverage` 目标
+- **验证**: 93.87% 行覆盖率，307 测试全部通过
+- **效果**: 一键查看覆盖率报告，定位未测试代码
+
 ## 功能编号：FEAT-20260430-42
 
 ### 订单金额计算函数单元测试
