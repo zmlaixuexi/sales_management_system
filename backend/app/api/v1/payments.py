@@ -90,8 +90,6 @@ def create_payment(
         )
 
     amount = Decimal(str(data.amount))
-    if amount <= 0:
-        raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "收款金额必须大于 0"})
 
     remaining = order.total_amount - order.paid_amount
     if amount > remaining:
