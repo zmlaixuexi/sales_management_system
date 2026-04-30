@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：安全加固
-当前任务编号：ROUND-216
-当前任务名称：ruff RUF 规则扩展
+当前任务编号：ROUND-218
+当前任务名称：products.py 异常缩窄
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 218：products.py 5 处 except Exception 缩窄为 (ValueError, InvalidOperation)，后端 426/426
 - Round 216：ruff 添加 RUF 规则，修复 5 处（2 虚假 async + 2 未使用 noqa + __all__ 排序），后端 426/426
 - Round 215：文档同步测试数至 544（426 后端 + 123 前端），README + testing.md
 - Round 214：get_or_404 无效 UUID + 收款导出 sales_user_id 过滤测试（+3），后端 426/426，覆盖率 99.81%

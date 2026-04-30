@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第二百一十八轮）
+
+### 工程：products.py Decimal 异常缩窄
+
+- 5 处 `except Exception` 缩窄为 `except (ValueError, InvalidOperation)`（Decimal 转换）
+- 新增 `from decimal import InvalidOperation`
+- 后端 426/426，ruff 0
+
 ## 2026-04-30（第二百一十六轮）
 
 ### 工程：ruff 添加 RUF 规则，修复 5 处问题
