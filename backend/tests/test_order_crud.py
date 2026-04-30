@@ -297,3 +297,87 @@ class TestOrderInventoryInsufficient:
         resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
         assert resp.status_code == 400
         assert "库存不足" in resp.json()["detail"]["message"]
+
+
+class TestOrderFilterAndEdge:
+    """订单列表筛选和边界情况"""
+
+    def test_20_list_orders_filter_customer(self):
+        """按客户筛选订单"""
+        resp = client.get(f"/api/v1/sales-orders?customer_id={_customer_id}", headers=_auth())
+        assert resp.status_code == 200
+        items = resp.json()["data"]["items"]
+        assert len(items) >= 1
+        assert all(o["customer_id"] == _customer_id for o in items)
+
+    def test_21_create_order_disabled_product_400(self):
+        """停用商品不可下单"""
+        # 先停用商品
+        client.post(f"/api/v1/products/{_product2_id}/disable", headers=_auth())
+        resp = client.post("/api/v1/sales-orders", json={
+            "customer_id": _customer_id,
+            "items": [{"product_id": _product2_id, "quantity": 1}],
+        }, headers=_auth())
+        assert resp.status_code == 400
+        assert "已停用" in resp.json()["detail"]["message"]
+
+    def test_22_order_detail_shows_payments(self):
+        """订单详情显示收款记录"""
+        # 创建并确认订单
+        resp = client.post("/api/v1/sales-orders", json={
+            "customer_id": _customer_id,
+            "items": [{"product_id": _product_id, "quantity": 1}],
+        }, headers=_auth())
+        oid = resp.json()["data"]["id"]
+        client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
+
+        # 登记收款
+        client.post(f"/api/v1/payments/orders/{oid}/payments", json={
+            "amount": "100.00", "payment_method": "cash",
+        }, headers=_auth())
+
+        # 查看详情应有收款记录
+        resp = client.get(f"/api/v1/sales-orders/{oid}", headers=_auth())
+        assert resp.status_code == 200
+        payments = resp.json()["data"]["payments"]
+        assert len(payments) >= 1
+        assert payments[0]["amount"] == "100.00"
+
+    def test_23_update_order_customer_id(self):
+        """编辑订单更换客户"""
+        # 创建新客户
+        resp = client.post("/api/v1/customers", json={
+            "name": "换绑客户", "phone": "13800000099",
+        }, headers=_auth())
+        new_cust_id = resp.json()["data"]["id"]
+
+        # 创建草稿订单
+        resp = client.post("/api/v1/sales-orders", json={
+            "customer_id": _customer_id,
+            "items": [{"product_id": _product_id, "quantity": 1}],
+        }, headers=_auth())
+        draft_id = resp.json()["data"]["id"]
+
+        # 更换客户
+        resp = client.put(f"/api/v1/sales-orders/{draft_id}", json={
+            "customer_id": new_cust_id,
+        }, headers=_auth())
+        assert resp.status_code == 200
+
+        # 验证客户已更换
+        resp = client.get(f"/api/v1/sales-orders/{draft_id}", headers=_auth())
+        assert resp.json()["data"]["customer_id"] == new_cust_id
+
+    def test_24_update_order_empty_items(self):
+        """编辑订单明细为空"""
+        resp = client.post("/api/v1/sales-orders", json={
+            "customer_id": _customer_id,
+            "items": [{"product_id": _product_id, "quantity": 1}],
+        }, headers=_auth())
+        draft_id = resp.json()["data"]["id"]
+
+        resp = client.put(f"/api/v1/sales-orders/{draft_id}", json={
+            "items": [],
+        }, headers=_auth())
+        # Pydantic schema 校验先捕获
+        assert resp.status_code == 422
