@@ -116,6 +116,53 @@ def test_03_get_product_not_found():
     assert resp.status_code == 404
 
 
+def test_03b_update_product_all_fields():
+    """编辑商品多个字段"""
+    resp = client.put(f"/api/v1/products/{_product_id}", json={
+        "cost_price": "80.00",
+        "main_image_url": "https://example.com/img.png",
+        "stock_quantity": 200,
+        "sort_weight": 10,
+        "remark": "更新备注",
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    # 验证更新
+    resp = client.get(f"/api/v1/products/{_product_id}", headers=_auth())
+    data = resp.json()["data"]
+    assert data["cost_price"] == "80.00"
+    assert data["main_image_url"] == "https://example.com/img.png"
+    assert data["stock_quantity"] == 200
+    assert data["remark"] == "更新备注"
+
+
+def test_03c_update_product_sku_duplicate():
+    """编辑商品 SKU 重复"""
+    # 创建第二个商品
+    resp = client.post("/api/v1/products", json={
+        "name": "SKU测试商品", "sale_price": "50", "cost_price": "25", "stock_quantity": 1,
+        "sku": "SPU-DUP-001",
+    }, headers=_auth())
+    assert resp.status_code == 200
+    dup_id = resp.json()["data"]["id"]
+
+    # 尝试把第一个商品的 SKU 改成第二个的
+    resp = client.put(f"/api/v1/products/{_product_id}", json={
+        "sku": "SPU-DUP-001",
+    }, headers=_auth())
+    assert resp.status_code == 400
+    assert resp.json()["detail"]["code"] == "PRODUCT_SKU_DUPLICATED"
+
+
+def test_03d_update_product_cost_price_negative():
+    """编辑商品成本价为负"""
+    resp = client.put(f"/api/v1/products/{_product_id}", json={
+        "cost_price": "-10.00",
+    }, headers=_auth())
+    assert resp.status_code == 400
+    assert "成本价不能为负" in resp.json()["detail"]["message"]
+
+
 def test_04_delete_product():
     """软删除商品"""
     resp = client.delete(f"/api/v1/products/{_product_id}", headers=_auth())
