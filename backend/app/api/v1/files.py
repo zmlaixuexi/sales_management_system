@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db, resp
+from app.models.product import File
 from app.models.user import User
 from app.services.file_service import delete_file, upload_image
 
@@ -52,8 +53,6 @@ def get_image(
     current_user: User = Depends(get_current_user),
 ):
     """获取图片信息"""
-    from app.models.product import File
-
     file_record = db.query(File).filter(File.id == file_id).first()
     if not file_record:
         raise HTTPException(
