@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百八十七轮）
+
+### 测试：AppLayout 用户加载/导航/退出 + ProtectedRoute 重定向（+6），前端 128/128
+
+- 新增 AppLayout.test.tsx：5 个测试覆盖用户加载/菜单导航/退出登录/getMe 失败/用户名回退
+- 修复 ProtectedRoute.test.tsx：使用 waitFor 等待 fetchUser 完成后重定向（覆盖 line 29）
+- AppLayout 从 0% 提升到有效覆盖，ProtectedRoute 达到 100%
+
 ## 2026-04-30（第一百八十六轮）
 
 ### 测试：MainLayout 菜单导航/退出登录/折叠/用户名（+6），前端 123/123
