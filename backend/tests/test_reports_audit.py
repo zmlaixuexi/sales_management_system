@@ -1,6 +1,7 @@
 """报表和审计日志端点测试"""
 
 import uuid
+from decimal import Decimal
 
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -14,7 +15,7 @@ from app.models.audit import AuditLog
 from app.models.customer import Customer
 from app.models.order import SalesOrder, SalesOrderItem
 from app.models.product import Product, ProductCategory
-from app.models.user import User
+from app.models.user import Permission, Role, RolePermission, User, UserRole
 
 TEST_DB_URL = "sqlite:///./test_reports_audit.db"
 engine = create_engine(TEST_DB_URL, connect_args={"check_same_thread": False})
@@ -369,3 +370,72 @@ def test_22_audit_requires_permission():
         "Authorization": f"Bearer {token}",
     })
     assert resp.status_code == 403
+
+
+# ─── 报表数据范围过滤 ─────────────────────────────────────────
+
+def test_23_report_data_scope_filtered():
+    """非 view_all 用户的报表只包含本人订单数据"""
+    db = TestSession()
+    try:
+        # 创建只有 report:sales 权限的角色
+        perm = Permission(id=uuid.uuid4(), code="report:sales", name="查看报表", module="report")
+        db.add(perm)
+        db.flush()
+        role = Role(id=uuid.uuid4(), name="report_only", display_name="报表查看")
+        db.add(role)
+        db.flush()
+        db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+
+        # 创建非超管用户
+        sales_user = User(
+            id=uuid.uuid4(), username="scope_tester",
+            hashed_password=hash_password("testpass123"),
+            display_name="范围测试员", is_active=True, is_superuser=False,
+        )
+        db.add(sales_user)
+        db.flush()
+        db.add(UserRole(user_id=sales_user.id, role_id=role.id))
+
+        # 该用户的订单
+        customer2 = Customer(
+            id=uuid.uuid4(), name="范围测试客户", phone="13800001111",
+            owner_user_id=sales_user.id, created_by=sales_user.id, updated_by=sales_user.id,
+        )
+        db.add(customer2)
+        db.flush()
+        order2 = SalesOrder(
+            id=uuid.uuid4(), order_no="ORD-SCOPE-001",
+            customer_id=customer2.id, status="confirmed",
+            total_amount=200, total_cost=100, gross_profit=100,
+            gross_margin=50, paid_amount=0,
+            sales_user_id=sales_user.id, created_by=sales_user.id, updated_by=sales_user.id,
+        )
+        db.add(order2)
+        db.commit()
+
+        token = create_access_token(subject=str(sales_user.id))
+    finally:
+        db.close()
+
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # 销售汇总：只看本人订单（200，不含超管的 500）
+    resp = client.get("/api/v1/reports/sales-summary", headers=headers)
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["total_amount"] == "200.00"
+    assert data["order_count"] == 1
+
+    # 销售趋势：只看本人订单
+    resp = client.get("/api/v1/reports/sales-trend", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    total_amount = sum(Decimal(i["amount"]) for i in items)
+    assert total_amount == Decimal("200")
+
+    # 商品排行：只看本人订单的商品
+    resp = client.get("/api/v1/reports/product-ranking", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) == 0  # scope_tester 的订单没有 SalesOrderItem
