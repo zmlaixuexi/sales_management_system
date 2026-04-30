@@ -327,3 +327,110 @@ def test_11_create_bad_price_rejected():
     }, headers=_auth())
     assert resp.status_code == 400
     assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
+
+
+def test_12_csv_import_success():
+    """CSV 导入商品成功"""
+    import io
+    csv_content = (
+        "商品名称,SKU,销售价,成本价,库存数量\n"
+        "导入商品A,SPU-IMP-001,99.00,50.00,10\n"
+        "导入商品B,SPU-IMP-002,199.00,80.00,5"
+    )
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", io.BytesIO(csv_content.encode("utf-8-sig")), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["created"] == 2
+    assert data["errors"] == []
+
+
+def test_12b_csv_import_encoding_error():
+    """CSV 导入编码错误"""
+    import io
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", io.BytesIO(b"\xff\xfe\x00\x00bad"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 400
+    assert "编码" in resp.json()["detail"]["message"]
+
+
+def test_12c_csv_import_empty_header():
+    """CSV 导入空文件"""
+    import io
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", io.BytesIO(b""), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 400
+    assert "表头" in resp.json()["detail"]["message"]
+
+
+def test_12d_csv_import_row_errors():
+    """CSV 导入行级错误（空名称/价格格式/成本价格式/库存格式）"""
+    import io
+    csv_content = (
+        "商品名称,SKU,销售价,成本价,库存数量\n"
+        ",SPU-ERR-01,99,50,10\n"
+        "测试商品,SPU-ERR-02,abc,50,10\n"
+        "测试商品B,SPU-ERR-03,99,xyz,10\n"
+        "测试商品C,SPU-ERR-04,99,50,abc"
+    )
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", io.BytesIO(csv_content.encode("utf-8-sig")), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["created"] == 1
+    assert len(data["errors"]) == 3
+
+
+def test_12e_csv_import_sku_duplicate_existing():
+    """CSV 导入 SKU 与已有商品重复"""
+    import io
+    csv_content = "商品名称,SKU,销售价,成本价,库存数量\n重复SKU商品,SPU-DUP-001,99,50,10"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", io.BytesIO(csv_content.encode("utf-8-sig")), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["created"] == 0
+    assert len(data["errors"]) == 1
+    assert "SKU" in data["errors"][0]["message"]
+
+
+def test_12f_csv_import_sku_duplicate_within_file():
+    """CSV 导入文件内 SKU 重复"""
+    import io
+    csv_content = "商品名称,SKU,销售价,成本价,库存数量\n商品X,SPU-INFILE-DUP,99,50,10\n商品Y,SPU-INFILE-DUP,199,80,5"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", io.BytesIO(csv_content.encode("utf-8-sig")), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["created"] == 1
+    assert len(data["errors"]) == 1
+    assert "SKU" in data["errors"][0]["message"]
+
+
+def test_13_csv_import_not_csv():
+    """CSV 导入非 CSV 文件"""
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("data.txt", b"hello", "text/plain")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 400
+    assert "CSV" in resp.json()["detail"]["message"]

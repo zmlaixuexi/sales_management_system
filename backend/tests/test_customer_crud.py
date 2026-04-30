@@ -291,3 +291,27 @@ def test_14_update_customer_phone():
 
     resp = client.get(f"/api/v1/customers/{cid}", headers=_auth())
     assert resp.json()["data"]["phone"] == "13800005002"
+
+
+def test_15_csv_import_encoding_error():
+    """客户 CSV 导入编码错误"""
+    import io
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", io.BytesIO(b"\xff\xfe\x00\x00bad"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 400
+    assert "编码" in resp.json()["detail"]["message"]
+
+
+def test_16_csv_import_empty_header():
+    """客户 CSV 导入空文件"""
+    import io
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", io.BytesIO(b""), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 400
+    assert "表头" in resp.json()["detail"]["message"]

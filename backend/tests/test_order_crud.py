@@ -400,3 +400,92 @@ class TestOrderFilterAndEdge:
 
         resp = client.post(f"/api/v1/sales-orders/{draft_id}/confirm", headers=_auth())
         assert resp.status_code == 404
+
+    def test_26_cancel_order_product_deleted(self):
+        """取消已确认订单时商品已删除 → 跳过库存回滚仍成功"""
+        from app.models.product import Product as ProdModel
+        # 创建新商品
+        db = TestSession()
+        new_prod = ProdModel(
+            id=uuid.uuid4(),
+            sku="ORD-CANCEL-DEL",
+            name="取消删除测试商品",
+            sale_price=100,
+            cost_price=50,
+            stock_quantity=10,
+            status="active",
+        )
+        db.add(new_prod)
+        db.commit()
+        pid = str(new_prod.id)
+        db.close()
+
+        # 创建并确认订单
+        resp = client.post("/api/v1/sales-orders", json={
+            "customer_id": _customer_id,
+            "items": [{"product_id": pid, "quantity": 2}],
+        }, headers=_auth())
+        oid = resp.json()["data"]["id"]
+        client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
+
+        # 硬删除商品
+        db = TestSession()
+        db.query(ProdModel).filter(ProdModel.id == uuid.UUID(pid)).delete()
+        db.commit()
+        db.close()
+
+        # 取消订单应成功（跳过已删除商品的库存回滚）
+        resp = client.post(f"/api/v1/sales-orders/{oid}/cancel", headers=_auth())
+        assert resp.status_code == 200
+
+    def test_27_order_no_nonnumeric_suffix_fallback(self):
+        """订单号生成：已有非数字后缀时回退到 1"""
+        from datetime import datetime
+
+        from app.models.order import SalesOrder as OrderModel
+
+        today = datetime.now().strftime("%Y%m%d")
+        prefix = f"ORD-{today}-"
+
+        db = TestSession()
+        # 将所有已有同前缀订单号改为非数字后缀，避免冲突
+        orders = db.query(OrderModel).filter(
+            OrderModel.order_no.like(f"{prefix}%")
+        ).all()
+        for i, o in enumerate(orders):
+            o.order_no = f"{prefix}OLD{i:04d}"
+        db.commit()
+        db.close()
+
+        # 将最后一个改为纯非数字后缀以触发回退
+        db = TestSession()
+        last = db.query(OrderModel).filter(
+            OrderModel.order_no.like(f"{prefix}%")
+        ).order_by(OrderModel.order_no.desc()).first()
+        if last:
+            last.order_no = f"{prefix}ABCD"
+            db.commit()
+        db.close()
+
+        # 创建新订单应得到 {prefix}0001
+        db2 = TestSession()
+        new_prod = Product(
+            id=uuid.uuid4(),
+            sku=f"ORD-SUFFIX-{uuid.uuid4().hex[:6]}",
+            name="订单号后缀测试",
+            sale_price=10,
+            cost_price=5,
+            stock_quantity=100,
+            status="active",
+        )
+        db2.add(new_prod)
+        db2.commit()
+        pid2 = str(new_prod.id)
+        db2.close()
+
+        resp = client.post("/api/v1/sales-orders", json={
+            "customer_id": _customer_id,
+            "items": [{"product_id": pid2, "quantity": 1}],
+        }, headers=_auth())
+        assert resp.status_code == 200
+        assert resp.json()["data"]["order_no"] == f"{prefix}0001"
