@@ -36,7 +36,14 @@ def list_payments(
     query = db.query(Payment).filter(Payment.status == "normal")
     # 数据范围：无 order:view_all 权限只能看本人订单的收款
     if not has_permission(current_user, "order:view_all"):
-        query = query.join(SalesOrder).filter(SalesOrder.sales_user_id == current_user.id)
+        query = query.join(SalesOrder).filter(
+            SalesOrder.sales_user_id == current_user.id,
+            SalesOrder.deleted_at.is_(None),
+        )
+    else:
+        query = query.join(SalesOrder, Payment.order_id == SalesOrder.id).filter(
+            SalesOrder.deleted_at.is_(None),
+        )
     if order_id:
         query = query.filter(Payment.order_id == order_id)
     query = query.order_by(Payment.created_at.desc())
@@ -150,7 +157,9 @@ def reverse_payment(
     if not payment:
         raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "收款记录不存在或已冲正"})
 
-    order = db.query(SalesOrder).filter(SalesOrder.id == payment.order_id).first()
+    order = db.query(SalesOrder).filter(
+        SalesOrder.id == payment.order_id, SalesOrder.deleted_at.is_(None),
+    ).first()
     if not order:
         raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "关联订单不存在"})
 
