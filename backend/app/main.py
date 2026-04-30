@@ -30,6 +30,18 @@ async def lifespan(app: FastAPI):
         logging.critical("JWT_SECRET_KEY 未设置，请在环境变量中配置安全密钥")
         raise RuntimeError("JWT_SECRET_KEY 不能使用默认值")
 
+    # 启动配置摘要
+    logger.info(
+        "服务启动 — env=%s pool=%d/%d rate_limit=%d/%ds log=%s/%s",
+        settings.APP_ENV,
+        settings.DB_POOL_SIZE,
+        settings.DB_MAX_OVERFLOW,
+        settings.RATE_LIMIT_MAX,
+        settings.RATE_LIMIT_WINDOW,
+        settings.LOG_LEVEL,
+        settings.LOG_FORMAT,
+    )
+
     yield
 
 
