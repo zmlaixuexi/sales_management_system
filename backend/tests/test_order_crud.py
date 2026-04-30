@@ -381,3 +381,22 @@ class TestOrderFilterAndEdge:
         }, headers=_auth())
         # Pydantic schema 校验先捕获
         assert resp.status_code == 422
+
+    def test_25_confirm_order_product_deleted(self):
+        """确认订单时商品已被硬删除 → 404"""
+        from app.models.product import Product as ProdModel
+        # 创建草稿订单
+        resp = client.post("/api/v1/sales-orders", json={
+            "customer_id": _customer_id,
+            "items": [{"product_id": _product_id, "quantity": 1}],
+        }, headers=_auth())
+        draft_id = resp.json()["data"]["id"]
+
+        # 硬删除商品（直接从数据库删除，模拟极端情况）
+        db = TestSession()
+        db.query(ProdModel).filter(ProdModel.id == uuid.UUID(_product_id)).delete()
+        db.commit()
+        db.close()
+
+        resp = client.post(f"/api/v1/sales-orders/{draft_id}/confirm", headers=_auth())
+        assert resp.status_code == 404
