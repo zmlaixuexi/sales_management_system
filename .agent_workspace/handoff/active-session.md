@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：测试补强
-当前任务编号：ROUND-204
-当前任务名称：文档同步
+当前任务编号：ROUND-205
+当前任务名称：无效 UUID 防护
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 205：无效 UUID 请求体参数防护（500→400/404），get_or_404 + customers.py，后端 423/423
 - Round 204：文档同步测试数至 545（422 后端 + 123 前端），README + testing.md
 - Round 203：前端 authApi 新增 changePassword 接口调用 + 测试（+1），前端 123/123
 - Round 202：ruff 添加 UP（pyupgrade）规则，修复 4 处现代化（UTC/Generator），后端 422/422
@@ -119,7 +120,7 @@
 
 ## 当前测试状态
 
-- 后端：422/422 通过
+- 后端：423/423 通过
 - 前端：123/123 通过
 - ruff：0 issues
 - ESLint：0 warnings

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-04-30（第二百零五轮）
+
+### 安全：无效 UUID 请求体参数防护（500→400/404）
+
+- get_or_404 新增 try/except 捕获无效 UUID，返回 404 而非 500 内部错误
+- customers.py 新增 _parse_uuid_or_400 辅助函数，3 处 uuid.UUID(str()) 调用改为安全转换
+- 创建/编辑/转移客户时无效 owner_user_id 返回 400 VALIDATION_FAILED
+- 新增 test_28_malformed_uuid_returns_400 测试
+- 后端 423/423，ruff 0
+
 ## 2026-04-30（第二百零四轮）
 
 ### 文档：同步测试数至 545（422 后端 + 123 前端）
