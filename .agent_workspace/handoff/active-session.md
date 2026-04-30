@@ -9,10 +9,10 @@
 
 ## 最近完成
 
+- Round 194：密码强度校验（必须包含字母和数字），后端 418/418，ruff 0
 - Round 193：ruff 扩展规则 B904/SIM/C4/PERF 修复（8 处异常链 + 2 处列表推导式 + 1 处三元表达式 + 1 处 Yoda 条件），pyproject.toml lint select 新增 B/SIM/C4/PERF，ruff 0，后端 415/415
 - Round 192：CI 后端测试添加 --cov 覆盖率检查（阈值 70%），当前实际 99.81%
 - Round 191：里程碑总结更新至 Round 95-190，make ci 全量质量验证通过
-- Round 193：ruff 扩展规则 B904/SIM/C4/PERF 修复并加入 lint 配置（-4 行净减），ruff 0，后端 415/415
 - Round 190：前端 Dockerfile 运行阶段固定 alpine:3.21（避免 latest 不可预测变更）
 - Round 188：移除死代码 MainLayout（已被 AppLayout 取代），-226 行，前端 122/122
 - Round 187：AppLayout 用户加载/导航/退出 + ProtectedRoute 重定向（+6），前端 128/128
@@ -109,7 +109,7 @@
 
 ## 当前测试状态
 
-- 后端：415/415 通过
+- 后端：418/418 通过
 - 前端：122/122 通过
 - ruff：0 issues
 - ESLint：0 warnings
@@ -119,7 +119,7 @@
 
 ## 下一步第一动作
 
-后端 99.81%（4 行不可测），前端 122/122。所有 API 模块 100%，前端 ErrorBoundary/ProtectedRoute/AppLayout 已覆盖。ruff 扩展规则已全部修复。建议继续前端页面测试或安全加固。
+后端 99.81%（4 行不可测），前端 122/122。所有 API 模块 100%，前端 ErrorBoundary/ProtectedRoute/AppLayout 已覆盖。ruff 扩展规则已全部修复，密码强度校验已添加。建议继续安全加固（如 CORS 方法限制、密码修改接口）。
 
 ## 当前里程碑总结（Round 95-190）
 
