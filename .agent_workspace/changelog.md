@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百八十九轮）
+
+### 安全：nginx 静态资源补全 Referrer-Policy/Permissions-Policy/CSP 头
+
+- 静态资源 location 块（JS/CSS/图片）缺少 3 个安全响应头
+- 补全 Referrer-Policy、Permissions-Policy、Content-Security-Policy
+- 与全局安全头保持一致，确保所有资源类型都有完整安全头
+
 ## 2026-04-30（第一百八十八轮）
 
 ### 清理：移除死代码 MainLayout（已被 AppLayout 取代，-226 行），前端 122/122

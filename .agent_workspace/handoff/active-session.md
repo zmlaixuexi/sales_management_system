@@ -2,16 +2,16 @@
 
 最后更新时间：2026-04-30
 当前阶段：测试补强
-当前任务编号：ROUND-188
-当前任务名称：清理死代码 MainLayout
+当前任务编号：ROUND-189
+当前任务名称：nginx 静态资源安全头补全
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 189：nginx 静态资源补全 Referrer-Policy/Permissions-Policy/CSP 头
 - Round 188：移除死代码 MainLayout（已被 AppLayout 取代），-226 行，前端 122/122
 - Round 187：AppLayout 用户加载/导航/退出 + ProtectedRoute 重定向（+6），前端 128/128
-- Round 186：MainLayout 菜单导航/退出登录/折叠/用户名（+6），前端 123/123
 - Round 185：ErrorBoundary 路由重置 + 返回首页按钮（+2），前端 117/117
 - Round 184：冲正收款时关联订单已删除（+1），payments.py 100%，后端 415/415，覆盖率 99.81%
 - Round 183：CSV 导入全路径 + 订单号回退 + 取消已删除商品（+11），99.76%，后端 414/414
