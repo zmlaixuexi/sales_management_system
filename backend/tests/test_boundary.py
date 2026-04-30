@@ -760,3 +760,20 @@ def test_39_order_with_deleted_product_rejected():
     }, headers=_auth())
     assert resp.status_code == 404
     assert resp.json()["detail"]["code"] == "RESOURCE_NOT_FOUND"
+
+
+def test_40_transfer_to_nonexistent_user():
+    """客户转移给不存在的用户应被拒绝"""
+    if not _tokens.get("access"):
+        resp = client.post("/api/v1/auth/login", json={
+            "username": "boundary_admin", "password": "pass123456",
+        })
+        assert resp.status_code == 200
+        _tokens["access"] = resp.json()["data"]["access_token"]
+
+    fake_user_id = str(uuid.uuid4())
+    resp = client.post(f"/api/v1/customers/{_customer_id}/transfer", json={
+        "owner_user_id": fake_user_id,
+    }, headers=_auth())
+    assert resp.status_code == 400
+    assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"

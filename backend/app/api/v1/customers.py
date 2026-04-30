@@ -314,6 +314,16 @@ def transfer_customer(
     new_owner_id = data.owner_user_id
     owner_uid = parse_uuid_or_400(new_owner_id, "归属用户 ID")
 
+    # 校验目标用户存在且活跃
+    target_user = db.query(User).filter(
+        User.id == owner_uid, User.is_active.is_(True), User.deleted_at.is_(None),
+    ).first()
+    if not target_user:
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "VALIDATION_FAILED", "message": "目标用户不存在或已禁用"},
+        )
+
     customer.owner_user_id = owner_uid
     customer.updated_by = current_user.id
     log_action(
