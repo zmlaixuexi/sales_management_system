@@ -1,4 +1,4 @@
-.PHONY: help dev dev-backend dev-frontend install test test-backend test-frontend lint lint-backend lint-frontend typecheck build build-frontend db-migrate db-seed db-backup db-restore docker-up docker-down clean
+.PHONY: help dev dev-backend dev-frontend install test test-backend test-frontend lint lint-backend lint-frontend typecheck quality build build-frontend db-migrate db-seed db-backup db-restore docker-up docker-down clean
 
 help: ## 显示帮助信息
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -42,6 +42,8 @@ lint: lint-backend lint-frontend ## 全部 lint 检查
 
 typecheck: ## 前端 TypeScript 类型检查
 	cd frontend && npx tsc --noEmit
+
+quality: lint typecheck test ## 全部质量检查（lint + typecheck + test）
 
 # ─── 构建 ─────────────────────────────────────────────────
 
