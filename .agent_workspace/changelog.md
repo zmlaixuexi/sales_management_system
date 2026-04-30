@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-04-30（第二百三十七轮）
+
+### 修复：超级管理员可停用自身账号 + 创建用户未校验角色存在性
+
+- update_user 新增自停用防护：is_active=False 且目标用户 == 当前用户时拒绝
+- create_user / update_user 新增 _validate_roles_exist 校验：role_ids 指向不存在的角色返回 400
+- 修复前：超级管理员可停用自身导致锁死；不存在的 role_id 导致数据库 500
+- 新增 test_41：超级管理员停用自身返回 400 VALIDATION_FAILED
+- 新增 test_42：创建用户指定不存在角色返回 400 VALIDATION_FAILED
+- 后端 437/437，ruff 0
+
 ## 2026-04-30（第二百三十六轮）
 
 ### 修复：客户转移未校验目标用户存在性和活跃状态
