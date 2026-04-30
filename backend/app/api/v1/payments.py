@@ -156,13 +156,18 @@ def reverse_payment(
 
     check_owner_or_forbid(current_user, order.sales_user_id, "order:view_all", "订单")
 
+    if order.status not in ("confirmed", "partially_paid", "completed"):
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "ORDER_INVALID_STATUS", "message": "订单状态不允许冲正收款"},
+        )
+
     order.paid_amount -= payment.amount
     if order.paid_amount <= 0:
         order.paid_amount = Decimal("0")
-
-    # 如果订单已完成，回退到已确认
-    if order.status == "completed":
         order.status = "confirmed"
+    elif order.status == "completed":
+        order.status = "partially_paid"
 
     payment.status = "reversed"
     order.updated_by = current_user.id

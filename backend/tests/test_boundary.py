@@ -695,3 +695,40 @@ def test_37_cancel_partially_paid_restores_inventory():
     # 应存在 quantity_change=+3 的回滚记录
     restore_moves = [m for m in movements if m["quantity_change"] == 3]
     assert len(restore_moves) >= 1
+
+
+def test_38_reverse_payment_on_cancelled_order():
+    """已取消订单不允许冲正收款"""
+    if not _tokens.get("access"):
+        resp = client.post("/api/v1/auth/login", json={
+            "username": "boundary_admin", "password": "pass123456",
+        })
+        assert resp.status_code == 200
+        _tokens["access"] = resp.json()["data"]["access_token"]
+
+    # 创建 + 确认 + 部分收款（订单变为 partially_paid）
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 2}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    order_id = resp.json()["data"]["id"]
+
+    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
+    assert resp.status_code == 200
+
+    resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
+        "amount": "50", "payment_method": "cash",
+    }, headers=_auth())
+    assert resp.status_code == 200
+    assert resp.json()["data"]["order_status"] == "partially_paid"
+    payment_id = resp.json()["data"]["id"]
+
+    # 取消订单（从 partially_paid 状态）
+    resp = client.post(f"/api/v1/sales-orders/{order_id}/cancel", headers=_auth())
+    assert resp.status_code == 200
+
+    # 尝试冲正收款应被拒绝
+    resp = client.post(f"/api/v1/payments/{payment_id}/reverse", headers=_auth())
+    assert resp.status_code == 400
+    assert resp.json()["detail"]["code"] == "ORDER_INVALID_STATUS"
