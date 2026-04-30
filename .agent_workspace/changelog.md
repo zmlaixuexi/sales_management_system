@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百九十八轮）
+
+### 工程：CI 前端测试添加覆盖率报告（--coverage）
+
+- GitHub Actions CI frontend job 测试步骤添加 --coverage 参数
+- 与后端 --cov 参数对称，CI 报告覆盖率但不设阈值门禁
+- 前端当前覆盖率约 32%（API 层/store 覆盖较好，页面组件待补）
+
 ## 2026-04-30（第一百九十七轮）
 
 ### 功能：新增密码修改接口 POST /auth/change-password
