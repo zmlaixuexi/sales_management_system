@@ -141,8 +141,12 @@ def _validate_and_prepare_items(db: Session, raw_items: list) -> list[dict]:
 
 def _deduct_inventory(db: Session, order_id: uuid.UUID, items: list[SalesOrderItem], operator_id: uuid.UUID) -> None:
     """确认订单时扣减库存，并记录流水"""
+    product_ids = [item.product_id for item in items]
+    products = db.query(Product).filter(Product.id.in_(product_ids)).with_for_update().all()
+    product_map = {p.id: p for p in products}
+
     for item in items:
-        product = db.query(Product).filter(Product.id == item.product_id).with_for_update().first()
+        product = product_map.get(item.product_id)
         if not product:
             raise HTTPException(
                 status_code=404,
@@ -178,8 +182,12 @@ def _deduct_inventory(db: Session, order_id: uuid.UUID, items: list[SalesOrderIt
 
 def _restore_inventory(db: Session, order_id: uuid.UUID, items: list[SalesOrderItem], operator_id: uuid.UUID) -> None:
     """取消订单时回滚库存"""
+    product_ids = [item.product_id for item in items]
+    products = db.query(Product).filter(Product.id.in_(product_ids)).with_for_update().all()
+    product_map = {p.id: p for p in products}
+
     for item in items:
-        product = db.query(Product).filter(Product.id == item.product_id).with_for_update().first()
+        product = product_map.get(item.product_id)
         if not product:
             continue
         before = product.stock_quantity
