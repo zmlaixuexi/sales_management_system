@@ -33,6 +33,9 @@ test: test-backend test-frontend ## 运行全部测试
 coverage: ## 后端测试覆盖率报告
 	cd backend && python -m pytest tests/ --cov --cov-report=term-missing -q
 
+coverage-frontend: ## 前端测试覆盖率报告
+	cd frontend && npx vitest run --coverage
+
 # ─── 代码质量 ──────────────────────────────────────────────
 
 lint-backend: ## 后端 lint 检查
