@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-139
-当前任务名称：库存扣减/回滚 N+1 查询优化
+当前任务编号：ROUND-140
+当前任务名称：CSV 导入去重 N+1 查询优化
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 140：CSV 导入去重 N+1 优化 — 预加载 SKU/手机号集合替代逐行查询，292/292
 - Round 139：库存扣减/回滚 N+1 优化 — _deduct/_restore 批量 FOR UPDATE IN 查询，292/292
 - Round 138：订单明细校验 N+1 优化 — _validate_and_prepare_items 批量 IN 查询替代逐行 get_or_404，292/292
 - Round 137：启动配置摘要日志 — env/pool/rate_limit/log 启动时记录，后端 292/292
