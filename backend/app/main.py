@@ -15,6 +15,7 @@ from app.core.ratelimit import add_rate_limit
 from app.core.request_id import RequestIDMiddleware
 from app.core.request_log import RequestLogMiddleware
 from app.core.security_headers import SecurityHeadersMiddleware
+from app.db.session import engine
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +46,6 @@ async def lifespan(app: FastAPI):
     yield
 
     # 优雅关闭：释放数据库连接池
-    from app.db.session import engine
     logger.info("服务关闭 — 释放数据库连接池")
     engine.dispose()
 
