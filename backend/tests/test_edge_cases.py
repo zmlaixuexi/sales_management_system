@@ -2,6 +2,7 @@
 
 import uuid
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -366,3 +367,33 @@ def test_28_malformed_uuid_returns_404():
         "owner_user_id": "not-a-uuid",
     }, headers=_auth())
     assert resp.status_code == 400
+
+
+def test_29_get_or_404_invalid_uuid():
+    """get_or_404 对无效 UUID 字符串直接调用返回 404"""
+    from app.api.deps import get_or_404
+    db = TestSession()
+    with pytest.raises(Exception) as exc_info:
+        get_or_404(db, Product, "not-a-uuid", "商品")
+    assert exc_info.value.status_code == 404
+
+
+def test_30_export_payments_data_scope():
+    """导出收款接口返回 CSV"""
+    if not _tokens.get("access"):
+        login_resp = client.post("/api/v1/auth/login", json={"username": "edge_tester", "password": "testpass123"})
+        _tokens["access"] = login_resp.json()["data"]["access_token"]
+    resp = client.get("/api/v1/exports/payments", headers=_auth())
+    assert resp.status_code == 200
+    assert resp.headers["content-type"].startswith("text/csv")
+
+
+def test_31_export_payments_sales_user_filter():
+    """export_payments sales_user_id 过滤覆盖"""
+    from app.services.export_service import export_payments
+    db = TestSession()
+    # 传入 sales_user_id 参数触发 join 过滤分支
+    rows = list(export_payments(db, sales_user_id=uuid.uuid4()))
+    # 返回 BOM + header + 至少 BOM 开头
+    assert rows  # 至少有 header 行
+    db.close()
