@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-04-30（第一百九十轮）
+
+### 工程：前端 Dockerfile 运行阶段固定 alpine:3.21
+
+- 运行阶段从 `alpine:latest` 改为 `alpine:3.21`
+- 避免 latest 标签在构建时拉取不可预测的新版本
+
 ## 2026-04-30（第一百八十九轮）
 
 ### 安全：nginx 静态资源补全 Referrer-Policy/Permissions-Policy/CSP 头

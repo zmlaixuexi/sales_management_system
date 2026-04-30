@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：测试补强
-当前任务编号：ROUND-189
-当前任务名称：nginx 静态资源安全头补全
+当前任务编号：ROUND-190
+当前任务名称：前端 Dockerfile 版本固定
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 190：前端 Dockerfile 运行阶段固定 alpine:3.21（避免 latest 不可预测变更）
 - Round 189：nginx 静态资源补全 Referrer-Policy/Permissions-Policy/CSP 头
 - Round 188：移除死代码 MainLayout（已被 AppLayout 取代），-226 行，前端 122/122
 - Round 187：AppLayout 用户加载/导航/退出 + ProtectedRoute 重定向（+6），前端 128/128
