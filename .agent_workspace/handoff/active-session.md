@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-128
-当前任务名称：Makefile typecheck 命令
+当前任务编号：ROUND-129
+当前任务名称：全局未处理异常处理器
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 129：全局未处理异常处理器 — Exception handler 捕获未处理异常返回一致 JSON，防泄露内部详情，后端 290/290
 - Round 128：Makefile 新增 make typecheck 命令（前端 TypeScript 类型检查），验证通过
 - Round 127：标准化 422 校验错误响应格式 — 新增 RequestValidationError 全局处理器，前端可正确提取校验消息
 - Round 126：文档同步测试数至 395（289 后端 + 106 前端）+ README/testing.md 更新
@@ -46,7 +47,7 @@
 
 ## 当前测试状态
 
-- 后端：289/289 通过
+- 后端：290/290 通过
 - 前端：106/106 通过
 - ruff：0 issues
 - ESLint：0 warnings

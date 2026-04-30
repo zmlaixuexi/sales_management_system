@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第一百二十九轮）
+
+### 工程：全局未处理异常处理器
+
+- 新增 Exception handler 捕获未处理异常，返回一致 JSON `{detail: {code: "INTERNAL_ERROR", message}}`
+- 防止泄露内部错误详情，日志记录含 request_id 便于追踪
+- 顺带修复 validation_exception_handler 中 ruff E741 变量名警告
+- 新增测试验证异常处理器行为（+1），后端 290/290
+
 ## 2026-04-30（第一百二十八轮）
 
 ### 工程：Makefile 新增 typecheck 命令
