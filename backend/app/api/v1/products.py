@@ -36,6 +36,12 @@ router = APIRouter(
 # 默认分类名称
 DEFAULT_CATEGORY_NAME = "未分类"
 
+# 允许排序的字段白名单
+SORTABLE_COLUMNS = {
+    "name", "sku", "sale_price", "cost_price", "stock_quantity",
+    "status", "sort_weight", "created_at", "updated_at",
+}
+
 
 def _generate_sku(db: Session) -> str:
     """生成 SKU: SPU-YYYYMMDD-四位序号"""
@@ -102,8 +108,8 @@ def list_products(
     if category_id:
         query = query.filter(Product.category_id == category_id)
 
-    # 排序
-    sort_col = getattr(Product, sort_by, None)
+    # 排序（白名单校验）
+    sort_col = getattr(Product, sort_by, None) if sort_by in SORTABLE_COLUMNS else None
     if sort_col is None:
         sort_col = Product.sort_weight
     if sort_order == "asc":
