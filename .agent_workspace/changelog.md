@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第一百三十二轮）
+
+### 工程：pytest 测试标记分类
+
+- pyproject.toml 定义 8 个标记：crud/boundary/security/export/import/report/integration/infra
+- conftest.py 根据文件名自动应用标记，无需修改 22 个测试文件
+- 支持 `pytest -m crud` / `-m security` 等选择性运行
+- 验证：crud 69 个、security 27 个、290/290 全量通过
+
 ## 2026-04-30（第一百三十一轮）
 
 ### 文档：后端 .env.example 环境变量模板
