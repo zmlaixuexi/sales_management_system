@@ -351,6 +351,12 @@ async def import_customers_csv(
 
     # 批量内手机号去重
     used_phones: set[str] = set()
+    # 预加载已有手机号，避免逐行查询数据库
+    existing_phones = {
+        p for (p,) in db.query(Customer.phone).filter(
+            Customer.phone.isnot(None), Customer.deleted_at.is_(None),
+        ).all()
+    }
     created = 0
     errors: list[dict] = []
 
@@ -366,12 +372,9 @@ async def import_customers_csv(
             if phone in used_phones:
                 errors.append({"row": row_num, "message": f"手机号 {phone} 在文件中重复"})
                 continue
-            # 数据库去重
-            existing = db.query(Customer).filter(
-                Customer.phone == phone, Customer.deleted_at.is_(None),
-            ).first()
-            if existing:
-                errors.append({"row": row_num, "message": f"手机号 {phone} 已被客户「{existing.name}」使用"})
+            # 数据库去重（使用预加载的集合）
+            if phone in existing_phones:
+                errors.append({"row": row_num, "message": f"手机号 {phone} 已被使用"})
                 continue
             used_phones.add(phone)
 

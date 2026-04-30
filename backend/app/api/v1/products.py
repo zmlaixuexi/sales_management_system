@@ -499,6 +499,10 @@ async def import_products_csv(
     created = 0
     errors: list[dict] = []
     used_skus: set[str] = set()
+    # 预加载已有 SKU，避免逐行查询数据库
+    existing_skus = {
+        s for (s,) in db.query(Product.sku).filter(Product.deleted_at.is_(None)).all()
+    }
 
     # 预计算批量 SKU 前缀和起始序号
     today = datetime.now().strftime("%Y%m%d")
@@ -544,10 +548,7 @@ async def import_products_csv(
             if sku in used_skus:
                 errors.append({"row": row_num, "message": f"SKU {sku} 已存在"})
                 continue
-            existing = db.query(Product).filter(
-                Product.sku == sku, Product.deleted_at.is_(None),
-            ).first()
-            if existing:
+            if sku in existing_skus:
                 errors.append({"row": row_num, "message": f"SKU {sku} 已存在"})
                 continue
         else:
