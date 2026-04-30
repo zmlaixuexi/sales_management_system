@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import ProtectedRoute from '../routes/ProtectedRoute';
 import { useAuthStore } from '../stores/auth';
 
@@ -70,8 +70,6 @@ describe('ProtectedRoute', () => {
   });
 
   it('fetchUser 失败后 user 为 null 时重定向到登录', async () => {
-    // First render: has token, no user, loading
-    // After fetchUser: still no user → redirect
     const storeValues = {
       token: 'test-token',
       user: null,
@@ -80,7 +78,11 @@ describe('ProtectedRoute', () => {
     mockedUseAuthStore.mockReturnValue(storeValues as ReturnType<typeof useAuthStore>);
 
     renderWithRouter();
-    // Initially shows spinner
     expect(screen.getByTestId('spin')).toBeInTheDocument();
+
+    // 等待 fetchUser 完成，loading 变为 false，user 仍为 null → 重定向到登录
+    await waitFor(() => {
+      expect(screen.getByText('login-page')).toBeInTheDocument();
+    });
   });
 });
