@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百八十五轮）
+
+### 测试：ErrorBoundary 路由重置 + 返回首页按钮（+2），前端 117/117
+
+- 新增路由变化自动重置错误状态测试（覆盖 componentDidUpdate resetKey 分支）
+- 新增返回首页按钮跳转测试（覆盖 onClick handler）
+- ErrorBoundary 组件达到 100% 覆盖
+
 ## 2026-04-30（第一百八十四轮）
 
 ### 测试：冲正收款时关联订单已删除（+1），payments.py 100%，99.81%
