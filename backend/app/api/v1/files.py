@@ -89,11 +89,7 @@ def delete_image(
             detail={"code": "AUTH_FORBIDDEN", "message": "无权删除此文件"},
         )
 
-    if not delete_file(db, file_id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"code": "FILE_NOT_FOUND", "message": "文件不存在"},
-        )
+    delete_file(db, file_id)
     db.commit()
 
     return resp(None, "删除成功")

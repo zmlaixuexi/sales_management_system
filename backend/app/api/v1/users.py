@@ -19,8 +19,6 @@ router = APIRouter(
 
 def _validate_roles_exist(db: Session, role_ids: list) -> None:
     """校验所有 role_id 是否存在"""
-    if not role_ids:
-        return
     found = db.query(Role.id).filter(Role.id.in_(role_ids)).all()
     found_ids = {r.id for r in found}
     missing = set(role_ids) - found_ids
