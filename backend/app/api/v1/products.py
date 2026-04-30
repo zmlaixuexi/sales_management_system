@@ -37,6 +37,15 @@ router = APIRouter(
 DEFAULT_CATEGORY_NAME = "未分类"
 
 
+def _parse_uuid_or_400(value: str, label: str) -> uuid.UUID:
+    try:
+        return uuid.UUID(str(value))
+    except (ValueError, AttributeError):
+        raise HTTPException(
+            status_code=400, detail={"code": "VALIDATION_FAILED", "message": f"{label}格式无效"},
+        ) from None
+
+
 def _generate_sku(db: Session) -> str:
     """生成 SKU: SPU-YYYYMMDD-四位序号"""
     today = datetime.now().strftime("%Y%m%d")
@@ -176,7 +185,11 @@ def create_product(
     if existing_sku:
         raise HTTPException(status_code=400, detail={"code": "PRODUCT_SKU_DUPLICATED", "message": "商品编码已存在"})
 
-    category_id = _get_default_category_id(db) if not data.category_id else uuid.UUID(str(data.category_id))
+    category_id = (
+        _get_default_category_id(db)
+        if not data.category_id
+        else _parse_uuid_or_400(data.category_id, "分类 ID")
+    )
 
     main_image_url = data.main_image_url
 
@@ -320,7 +333,7 @@ def update_product(
         product.main_image_url = data.main_image_url
 
     if data.category_id is not None:
-        product.category_id = uuid.UUID(str(data.category_id))
+        product.category_id = _parse_uuid_or_400(data.category_id, "分类 ID")
 
     if data.stock_quantity is not None:
         product.stock_quantity = data.stock_quantity

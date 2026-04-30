@@ -45,6 +45,15 @@ STATUS_LABELS = {
 }
 
 
+def _parse_uuid_or_400(value: str, label: str) -> uuid.UUID:
+    try:
+        return uuid.UUID(str(value))
+    except (ValueError, AttributeError):
+        raise HTTPException(
+            status_code=400, detail={"code": "VALIDATION_FAILED", "message": f"{label}格式无效"},
+        ) from None
+
+
 def _generate_order_no(db: Session) -> str:
     today = datetime.now().strftime("%Y%m%d")
     prefix = f"ORD-{today}-"
@@ -113,13 +122,13 @@ def _prepare_item(
 def _validate_and_prepare_items(db: Session, raw_items: list) -> list[dict]:
     """校验订单明细行并返回准备好的数据"""
     # 批量查询所有商品，将 N 次查询减少为 1 次
-    product_ids = [uuid.UUID(str(ri.product_id)) for ri in raw_items]
+    product_ids = [_parse_uuid_or_400(ri.product_id, "商品 ID") for ri in raw_items]
     products = db.query(Product).filter(Product.id.in_(product_ids)).all()
     product_map = {p.id: p for p in products}
 
     prepared: list[dict] = []
     for ri in raw_items:
-        product = product_map.get(uuid.UUID(str(ri.product_id)))
+        product = product_map.get(_parse_uuid_or_400(ri.product_id, "商品 ID"))
         if product is None:
             raise HTTPException(
                 status_code=404,
@@ -283,7 +292,7 @@ def create_order(
 
     order = SalesOrder(
         order_no=order_no,
-        customer_id=uuid.UUID(str(customer_id)),
+        customer_id=_parse_uuid_or_400(customer_id, "客户 ID"),
         sales_user_id=current_user.id,
         status="draft",
         total_amount=totals["total_amount"],
@@ -426,7 +435,7 @@ def update_order(
     if data.remark is not None:
         order.remark = data.remark
     if data.customer_id is not None:
-        order.customer_id = uuid.UUID(str(data.customer_id))
+        order.customer_id = _parse_uuid_or_400(data.customer_id, "客户 ID")
 
     order.updated_by = current_user.id
     log_action(

@@ -24,6 +24,15 @@ router = APIRouter(
 )
 
 
+def _parse_uuid_or_400(value: str, label: str) -> uuid.UUID:
+    try:
+        return uuid.UUID(str(value))
+    except (ValueError, AttributeError):
+        raise HTTPException(
+            status_code=400, detail={"code": "VALIDATION_FAILED", "message": f"{label}格式无效"},
+        ) from None
+
+
 @router.get("/movements")
 def list_movements(
     page: int = Query(1, ge=1),
@@ -80,7 +89,7 @@ def adjust_inventory(
         raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "调整数量不能为 0"})
 
     product = db.query(Product).filter(
-        Product.id == uuid.UUID(str(product_id)), Product.deleted_at.is_(None)
+        Product.id == _parse_uuid_or_400(product_id, "商品 ID"), Product.deleted_at.is_(None)
     ).with_for_update().first()
     if not product:
         raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "商品不存在"})
