@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-04-30（第一百四十一轮）
+
+### 文档：里程碑总结更新 + 实现记录补齐 Round 129-140
+
+- active-session 里程碑总结更新至 Round 95-141
+- implemented-features 补齐 FEAT-37 到 FEAT-41（pytest 标记/CORS 测试/启动日志/3 个 N+1 优化）
+
 ## 2026-04-30（第一百四十轮）
 
 ### 性能：CSV 导入去重 N+1 查询优化
