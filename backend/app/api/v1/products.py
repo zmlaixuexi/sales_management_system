@@ -66,6 +66,13 @@ def _generate_sku(db: Session) -> str:
     return f"{prefix}{seq:04d}"
 
 
+def _validate_category_id(db: Session, category_id: uuid.UUID) -> uuid.UUID:
+    """校验分类存在"""
+    if not db.query(ProductCategory).filter(ProductCategory.id == category_id).first():
+        raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "商品分类不存在"})
+    return category_id
+
+
 def _get_default_category_id(db: Session) -> uuid.UUID:
     """获取默认分类 ID"""
     cat = db.query(ProductCategory).filter(ProductCategory.name == DEFAULT_CATEGORY_NAME).first()
@@ -185,7 +192,7 @@ def create_product(
     category_id = (
         _get_default_category_id(db)
         if not data.category_id
-        else parse_uuid_or_400(data.category_id, "分类 ID")
+        else _validate_category_id(db, parse_uuid_or_400(data.category_id, "分类 ID"))
     )
 
     main_image_url = data.main_image_url
@@ -330,7 +337,7 @@ def update_product(
         product.main_image_url = data.main_image_url
 
     if data.category_id is not None:
-        product.category_id = parse_uuid_or_400(data.category_id, "分类 ID")
+        product.category_id = _validate_category_id(db, parse_uuid_or_400(data.category_id, "分类 ID"))
 
     if data.stock_quantity is not None:
         product.stock_quantity = data.stock_quantity

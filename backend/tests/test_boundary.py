@@ -870,3 +870,42 @@ def test_44_customer_create_nonexistent_owner_rejected():
     assert resp.status_code == 400
     assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
     assert "归属用户不存在或已禁用" in resp.json()["detail"]["message"]
+
+
+def test_45_product_create_nonexistent_category_rejected():
+    """创建商品时指定不存在的分类应被拒绝"""
+    if not _tokens.get("access"):
+        resp = client.post("/api/v1/auth/login", json={
+            "username": "boundary_admin", "password": "pass123456",
+        })
+        assert resp.status_code == 200
+        _tokens["access"] = resp.json()["data"]["access_token"]
+
+    fake_category_id = str(uuid.uuid4())
+    resp = client.post("/api/v1/products", json={
+        "name": "分类不存在商品",
+        "sale_price": "100",
+        "cost_price": "50",
+        "category_id": fake_category_id,
+    }, headers=_auth())
+    assert resp.status_code == 400
+    assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
+    assert "商品分类不存在" in resp.json()["detail"]["message"]
+
+
+def test_46_product_update_nonexistent_category_rejected():
+    """更新商品分类为不存在的分类应被拒绝"""
+    if not _tokens.get("access"):
+        resp = client.post("/api/v1/auth/login", json={
+            "username": "boundary_admin", "password": "pass123456",
+        })
+        assert resp.status_code == 200
+        _tokens["access"] = resp.json()["data"]["access_token"]
+
+    fake_category_id = str(uuid.uuid4())
+    resp = client.put(f"/api/v1/products/{_product_id}", json={
+        "category_id": fake_category_id,
+    }, headers=_auth())
+    assert resp.status_code == 400
+    assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
+    assert "商品分类不存在" in resp.json()["detail"]["message"]
