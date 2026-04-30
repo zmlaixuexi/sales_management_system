@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：安全加固
-当前任务编号：ROUND-213
-当前任务名称：main.py 延迟 import 修复
+当前任务编号：ROUND-214
+当前任务名称：测试补强 — 覆盖率提升至 99.81%
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 214：get_or_404 无效 UUID + 收款导出 sales_user_id 过滤测试（+3），后端 426/426，覆盖率 99.81%
 - Round 213：main.py lifespan 内延迟 import engine 改为顶层导入，后端 423/423
 - Round 212：files.py get_image 延迟 import File 改为顶层导入，后端 423/423
 - Round 211：reports.py __import__("decimal") 改为标准 import Decimal，后端 423/423

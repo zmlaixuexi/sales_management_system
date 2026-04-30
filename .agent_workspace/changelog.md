@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第二百一十四轮）
+
+### 测试：覆盖率提升至 99.81%
+
+- test_29 get_or_404 直接调用无效 UUID 返回 404（覆盖 deps.py:106-107）
+- test_30 导出收款接口返回 CSV（API 级别验证）
+- test_31 export_payments sales_user_id 过滤单元测试（覆盖 export_service.py:260）
+- 后端 426/426（+3），ruff 0，覆盖率 99.81%（仅 deps.py get_db 4 行不可测）
+
 ## 2026-04-30（第二百一十三轮）
 
 ### 工程：main.py 消除 lifespan 内延迟 import
