@@ -1,6 +1,8 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+from app.core.sanitize import strip_html
 
 
 class LoginRequest(BaseModel):
@@ -42,6 +44,11 @@ class UserCreate(BaseModel):
     email: str | None = None
     role_ids: list[str] = []
 
+    @field_validator("display_name")
+    @classmethod
+    def sanitize_text(cls, v: str | None) -> str | None:
+        return strip_html(v) if v else v
+
 
 class UserUpdate(BaseModel):
     display_name: str | None = None
@@ -49,6 +56,11 @@ class UserUpdate(BaseModel):
     email: str | None = None
     is_active: bool | None = None
     role_ids: list[str] | None = None
+
+    @field_validator("display_name")
+    @classmethod
+    def sanitize_text(cls, v: str | None) -> str | None:
+        return strip_html(v) if v else v
 
 
 class UserBrief(BaseModel):

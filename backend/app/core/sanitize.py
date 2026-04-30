@@ -1,6 +1,9 @@
 """输入清理工具"""
 
+import re
+
 _LIKE_SPECIAL_CHARS = {"%", "_", "\\"}
+_HTML_TAG_RE = re.compile(r"<[^>]*>")
 
 
 def escape_like(value: str) -> str:
@@ -11,3 +14,8 @@ def escape_like(value: str) -> str:
             result.append("\\")
         result.append(ch)
     return "".join(result)
+
+
+def strip_html(value: str) -> str:
+    """移除字符串中的 HTML 标签，防止存储型 XSS"""
+    return _HTML_TAG_RE.sub("", value)

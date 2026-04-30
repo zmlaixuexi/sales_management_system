@@ -1,4 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+from app.core.sanitize import strip_html
 
 
 class CustomerCreate(BaseModel):
@@ -12,6 +14,11 @@ class CustomerCreate(BaseModel):
     follow_status: str = Field("new", description="跟进状态")
     remark: str | None = Field(None, description="备注")
 
+    @field_validator("name", "contact_name", "remark")
+    @classmethod
+    def sanitize_text(cls, v: str | None) -> str | None:
+        return strip_html(v) if v else v
+
 
 class CustomerUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=200)
@@ -23,6 +30,11 @@ class CustomerUpdate(BaseModel):
     follow_status: str | None = None
     owner_user_id: str | None = None
     remark: str | None = None
+
+    @field_validator("name", "contact_name", "remark")
+    @classmethod
+    def sanitize_text(cls, v: str | None) -> str | None:
+        return strip_html(v) if v else v
 
 
 class CustomerTransfer(BaseModel):

@@ -1,4 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+from app.core.sanitize import strip_html
 
 
 class ProductCreate(BaseModel):
@@ -13,6 +15,11 @@ class ProductCreate(BaseModel):
     sort_weight: int = Field(0, description="排序权重")
     remark: str | None = Field(None, description="备注")
 
+    @field_validator("name", "remark")
+    @classmethod
+    def sanitize_text(cls, v: str | None) -> str | None:
+        return strip_html(v) if v else v
+
 
 class ProductUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=200)
@@ -25,6 +32,11 @@ class ProductUpdate(BaseModel):
     status: str | None = None
     sort_weight: int | None = None
     remark: str | None = None
+
+    @field_validator("name", "remark")
+    @classmethod
+    def sanitize_text(cls, v: str | None) -> str | None:
+        return strip_html(v) if v else v
 
 
 # ── 响应模型 ──

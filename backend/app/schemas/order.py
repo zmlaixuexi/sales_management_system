@@ -2,6 +2,8 @@ from decimal import Decimal
 
 from pydantic import BaseModel, Field, field_validator
 
+from app.core.sanitize import strip_html
+
 
 class OrderItemInput(BaseModel):
     product_id: str = Field(..., description="商品 ID")
@@ -21,11 +23,21 @@ class OrderCreate(BaseModel):
     items: list[OrderItemInput] = Field(..., min_length=1, description="订单明细")
     remark: str | None = Field(None, description="备注")
 
+    @field_validator("remark")
+    @classmethod
+    def sanitize_text(cls, v: str | None) -> str | None:
+        return strip_html(v) if v else v
+
 
 class OrderUpdate(BaseModel):
     customer_id: str | None = None
     items: list[OrderItemInput] | None = Field(None, min_length=1)
     remark: str | None = None
+
+    @field_validator("remark")
+    @classmethod
+    def sanitize_text(cls, v: str | None) -> str | None:
+        return strip_html(v) if v else v
 
 
 # ── 响应模型 ──
