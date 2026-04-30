@@ -122,7 +122,11 @@ def export_payments_csv(
     current_user: User = Depends(require_permission("payment:list")),
 ):
     """导出收款记录为 CSV"""
-    generator = export_payments(db, order_id=order_id, start_date=start_date, end_date=end_date)
+    sales_user_id = None if has_permission(current_user, "order:view_all") else current_user.id
+    generator = export_payments(
+        db, order_id=order_id, start_date=start_date,
+        end_date=end_date, sales_user_id=sales_user_id,
+    )
     log_action(db, actor_id=current_user.id, actor_name=current_user.display_name,
                action="export_payments", resource_type="payment",
                after_data={"order_id": str(order_id) if order_id else None},

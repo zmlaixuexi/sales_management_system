@@ -253,8 +253,11 @@ def export_payments(
     order_id: uuid.UUID | None = None,
     start_date: str | None = None,
     end_date: str | None = None,
+    sales_user_id: uuid.UUID | None = None,
 ) -> Generator[str, None, None]:
     query = db.query(Payment)
+    if sales_user_id:
+        query = query.join(SalesOrder).filter(SalesOrder.sales_user_id == sales_user_id)
     if order_id:
         query = query.filter(Payment.order_id == order_id)
     if start_date:
