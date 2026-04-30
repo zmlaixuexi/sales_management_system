@@ -20,6 +20,7 @@ TestSession = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 _original_override = None
 _tokens: dict = {}
 _product_id: str = ""
+_category_id: str = ""
 
 
 def override_get_db():
@@ -31,7 +32,7 @@ def override_get_db():
 
 
 def setup_module(module):
-    global _original_override, _product_id
+    global _original_override, _product_id, _category_id
     _original_override = app.dependency_overrides.get(get_db)
     app.dependency_overrides[get_db] = override_get_db
     Base.metadata.create_all(bind=engine)
@@ -64,6 +65,7 @@ def setup_module(module):
         )
         db.add(product)
         _product_id = str(product.id)
+        _category_id = str(cat.id)
 
         db.commit()
     finally:
@@ -161,6 +163,37 @@ def test_03d_update_product_cost_price_negative():
     }, headers=_auth())
     assert resp.status_code == 400
     assert "成本价不能为负" in resp.json()["detail"]["message"]
+
+
+def test_03e_list_with_category_filter():
+    """按分类筛选商品"""
+    resp = client.get("/api/v1/products", params={"category_id": _category_id}, headers=_auth())
+    assert resp.status_code == 200
+    for item in resp.json()["data"]["items"]:
+        assert item["category_id"] == _category_id
+
+
+def test_03f_list_with_invalid_sort_fallback():
+    """无效排序字段回退"""
+    resp = client.get("/api/v1/products", params={"sort_by": "nonexistent"}, headers=_auth())
+    assert resp.status_code == 200
+
+
+def test_03g_update_product_cost_price_format_error():
+    """编辑商品成本价格式错误"""
+    resp = client.put(f"/api/v1/products/{_product_id}", json={
+        "cost_price": "abc",
+    }, headers=_auth())
+    assert resp.status_code == 400
+    assert "成本价格式错误" in resp.json()["detail"]["message"]
+
+
+def test_03h_update_product_category():
+    """编辑商品分类"""
+    resp = client.put(f"/api/v1/products/{_product_id}", json={
+        "category_id": _category_id,
+    }, headers=_auth())
+    assert resp.status_code == 200
 
 
 def test_03e_price_history_with_cost():
