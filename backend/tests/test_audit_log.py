@@ -256,3 +256,19 @@ def test_09_audit_actions_list():
     assert "resource_types" in data
     assert "login_success" in data["actions"]
     assert "product" in data["resource_types"]
+
+
+def test_10_audit_log_filter_by_actor_id():
+    """按操作人筛选审计日志"""
+    resp = client.get("/api/v1/audit-logs", headers=_auth())
+    actor_id = resp.json()["data"]["items"][0]["actor_id"]
+    resp = client.get(f"/api/v1/audit-logs?actor_id={actor_id}", headers=_auth())
+    assert resp.status_code == 200
+    assert resp.json()["data"]["total"] > 0
+
+
+def test_11_audit_log_filter_by_date_range():
+    """按日期范围筛选审计日志"""
+    resp = client.get("/api/v1/audit-logs?start_date=2020-01-01&end_date=2099-12-31", headers=_auth())
+    assert resp.status_code == 200
+    assert resp.json()["data"]["total"] > 0
