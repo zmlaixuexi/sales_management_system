@@ -6,7 +6,7 @@ from decimal import Decimal
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, get_or_404, require_permission, resp
+from app.api.deps import check_owner_or_forbid, get_db, get_or_404, has_permission, require_permission, resp
 from app.models.order import Payment, SalesOrder
 from app.models.user import User
 from app.schemas.payment import PaymentCreate, PaymentCreated, PaymentReversed
@@ -34,6 +34,9 @@ def list_payments(
 ):
     """收款列表"""
     query = db.query(Payment).filter(Payment.status == "normal")
+    # 数据范围：无 order:view_all 权限只能看本人订单的收款
+    if not has_permission(current_user, "order:view_all"):
+        query = query.join(SalesOrder).filter(SalesOrder.sales_user_id == current_user.id)
     if order_id:
         query = query.filter(Payment.order_id == order_id)
     query = query.order_by(Payment.created_at.desc())
@@ -74,6 +77,8 @@ def create_payment(
 ):
     """登记订单收款"""
     order = get_or_404(db, SalesOrder, order_id, "订单")
+
+    check_owner_or_forbid(current_user, order.sales_user_id, "order:view_all", "订单")
 
     if order.status not in ("confirmed", "partially_paid"):
         raise HTTPException(
@@ -150,6 +155,8 @@ def reverse_payment(
     order = db.query(SalesOrder).filter(SalesOrder.id == payment.order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "关联订单不存在"})
+
+    check_owner_or_forbid(current_user, order.sales_user_id, "order:view_all", "订单")
 
     order.paid_amount -= payment.amount
     if order.paid_amount <= 0:
