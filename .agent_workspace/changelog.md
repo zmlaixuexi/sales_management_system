@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第二百零七轮）
+
+### 工程：parse_uuid_or_400 统一到 deps.py
+
+- deps.py 新增 parse_uuid_or_400 公共函数
+- 移除 customers.py、products.py、orders.py、inventory.py 中重复的 _parse_uuid_or_400 定义
+- 4 个文件改为从 deps.py 导入，净减 9 行
+- 后端 423/423，ruff 0
+
 ## 2026-04-30（第二百零六轮）
 
 ### 安全：UUID 防护扩展至 products/orders/inventory
