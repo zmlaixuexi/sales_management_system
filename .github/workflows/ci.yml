@@ -39,8 +39,8 @@ jobs:
         env:
           DATABASE_URL: postgresql+psycopg://test:test@localhost:5432/test_ci
         run: alembic upgrade head && alembic check
-      - name: 运行测试
-        run: python -m pytest tests/ -q
+      - name: 运行测试（含覆盖率）
+        run: python -m pytest tests/ --cov -q
 
   frontend:
     runs-on: ubuntu-latest
