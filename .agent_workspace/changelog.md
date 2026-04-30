@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-04-30（第一百九十六轮）
+
+### 文档：同步测试数至 540（418 后端 + 122 前端）
+
+- README 测试表全量同步：后端 325→418，前端 113→122
+- testing.md 概览更新：覆盖率 99.81%，28 个后端测试文件，20 个前端测试文件
+- testing.md 新增条目：test_export_helpers、test_file_service、test_sanitize XSS 扩展、AppLayout
+- testing.md 已有条目同步：health 14、auth 10、validation 23、export 28、product_crud 30、customer_crud 19、order_crud 29、payment_crud 13、deps 10、ratelimit 4、sanitize 12
+- pytest 标记计数表更新
+
 ## 2026-04-30（第一百九十五轮）
 
 ### 安全：CORS allow_methods/allow_headers 白名单限制

@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：测试补强
-当前任务编号：ROUND-195
-当前任务名称：CORS 方法/头白名单限制
+当前任务编号：ROUND-196
+当前任务名称：文档同步测试数
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 196：文档同步测试数至 540（418 后端 + 122 前端），README + testing.md 全量更新
 - Round 195：CORS allow_methods/allow_headers 从通配符缩减为白名单，后端 418/418
 - Round 194：密码强度校验（必须包含字母和数字），后端 418/418，ruff 0
 - Round 193：ruff 扩展规则 B904/SIM/C4/PERF 修复（8 处异常链 + 2 处列表推导式 + 1 处三元表达式 + 1 处 Yoda 条件），pyproject.toml lint select 新增 B/SIM/C4/PERF，ruff 0，后端 415/415
