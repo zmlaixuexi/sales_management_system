@@ -139,3 +139,12 @@ def test_users_list_requires_admin():
 
     response = client.get("/api/v1/users", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 403
+
+
+def test_access_with_refresh_token_rejected():
+    """使用 refresh token 作为 Bearer 应被拒绝（type != access）"""
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    refresh_token = login_resp.json()["data"]["refresh_token"]
+
+    response = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {refresh_token}"})
+    assert response.status_code == 401
