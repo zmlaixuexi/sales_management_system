@@ -132,12 +132,12 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（418 个）
+# 后端测试（422 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
 
-# 前端测试（122 个）
+# 前端测试（123 个）
 cd frontend
 npm test
 
@@ -150,7 +150,7 @@ npm run build
 
 | 模块 | 测试数 | 覆盖内容 |
 |---|---|---|
-| 认证 | 10 | 登录成功/失败、Token 刷新、当前用户、权限校验、禁用用户刷新被拒 |
+| 认证 | 13 | 登录成功/失败、Token 刷新、当前用户、权限校验、禁用用户刷新被拒、密码修改（成功/旧密码错误/弱密码/纯字母） |
 | 健康检查 | 14 | 健康状态、版本信息、安全响应头、请求日志记录、请求 ID 生成/透传/日志关联、生产环境 JWT 密钥检查、未处理异常 JSON 响应、CORS 允许/拒绝验证 |
 | 集成（端到端） | 24 | 完整业务流程：商品→客户→订单→库存→收款→报表 |
 | 审计日志 | 11 | 全操作类型日志、筛选、操作类型列表 |
@@ -179,7 +179,7 @@ npm run build
 | 日志格式器 | 6 | _JsonFormatter JSON 输出/异常/extra_fields，log_action 容错 |
 | 导出辅助函数 | 13 | _dec/_str/_dt CSV 格式化 |
 | 文件服务 | 4 | 扩展名/MIME/大小/正常 |
-| **合计** | **418** | |
+| **合计** | **422** | |
 
 ### 前端测试覆盖
 
@@ -197,7 +197,7 @@ npm run build
 | 收款 API | 5 | fetchPayments/筛选/createPayment/备注/reversePayment |
 | 报表 API | 6 | fetchSalesSummary（含无参数）/Trend/ProductRanking/InventoryWarning（含无阈值） |
 | 审计日志 API | 5 | fetchAuditLogs/筛选/日期范围/数据解析/fetchAuditActions |
-| auth API | 4 | login/refresh/logout/getMe 路径验证 |
+| auth API | 5 | login/refresh/logout/getMe/changePassword 路径验证 |
 | auth store | 11 | login/logout/fetchUser/hasPermission/loading 状态 |
 | downloadCsv | 6 | 成功下载、查询参数、过滤、错误、文件名提取 |
 | usePaginatedList | 9 | 初始加载、错误处理、筛选、分页切换、刷新、空结果 |
@@ -205,7 +205,7 @@ npm run build
 | useSubmit | 5 | 成功调用/提交中状态/错误提示/Ant Design 校验静默/防重 |
 | NotFound | 3 | 404 渲染/返回首页按钮/按钮点击导航 |
 | ProtectedRoute | 5 | 无 token 重定向/加载中/已认证渲染/fetchUser 失败/异步重定向 |
-| **合计** | **122** | |
+| **合计** | **123** | |
 
 ## API 概览
 
