@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：安全加固
-当前任务编号：ROUND-211
-当前任务名称：reports.py __import__ 反模式修复
+当前任务编号：ROUND-212
+当前任务名称：files.py 延迟 import 修复
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 212：files.py get_image 延迟 import File 改为顶层导入，后端 423/423
 - Round 211：reports.py __import__("decimal") 改为标准 import Decimal，后端 423/423
 - Round 210：users.py 3 处 uuid.UUID 改为 parse_uuid_or_400 + 列表推导式优化，后端 423/423
 - Round 209：收款导出添加数据范围过滤（非管理员只导出本人订单的收款），后端 423/423

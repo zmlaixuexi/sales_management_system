@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-04-30（第二百一十二轮）
+
+### 工程：files.py 消除函数内延迟 import
+
+- get_image 中 `from app.models.product import File` 移至顶层
+- 后端 423/423，ruff 0
+
 ## 2026-04-30（第二百一十一轮）
 
 ### 工程：reports.py 消除 __import__ 反模式
