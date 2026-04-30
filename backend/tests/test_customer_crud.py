@@ -228,6 +228,15 @@ def test_11_update_customer_duplicate_phone():
     assert "已被其他客户使用" in resp.json()["detail"]["message"]
 
 
+def test_11b_list_customers_by_owner():
+    """按归属人筛选客户"""
+    resp = client.get("/api/v1/customers", params={"owner_user_id": _admin_id}, headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    # _admin_id 拥有的客户（刚创建的测试客户）
+    assert all(c["owner_user_id"] == _admin_id for c in items)
+
+
 def test_12_update_customer_all_fields():
     """编辑客户所有可选字段"""
     resp = client.post("/api/v1/customers", json={
@@ -250,3 +259,19 @@ def test_12_update_customer_all_fields():
     assert data["source"] == "referral"
     assert data["follow_status"] == "following"
     assert data["remark"] == "重要客户"
+
+
+def test_13_update_customer_owner_user_id():
+    """编辑客户转移归属人"""
+    resp = client.post("/api/v1/customers", json={
+        "name": "归属测试客户", "phone": "13800004001",
+    }, headers=_auth())
+    cid = resp.json()["data"]["id"]
+
+    resp = client.put(f"/api/v1/customers/{cid}", json={
+        "owner_user_id": _second_user_id,
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    resp = client.get(f"/api/v1/customers/{cid}", headers=_auth())
+    assert resp.json()["data"]["owner_user_id"] == _second_user_id

@@ -15,6 +15,19 @@ def test_health_check():
     assert data["data"]["status"] == "ok"
 
 
+def test_health_check_degraded(monkeypatch):
+    """数据库不可用时返回 degraded"""
+    from app.api.v1 import health as health_mod
+    def _broken_session():
+        raise RuntimeError("db down")
+    monkeypatch.setattr(health_mod, "SessionLocal", _broken_session)
+    response = client.get("/api/v1/health")
+    assert response.status_code == 200
+    data = response.json()["data"]
+    assert data["status"] == "degraded"
+    assert data["database"] == "error"
+
+
 def test_version():
     response = client.get("/api/v1/version")
     assert response.status_code == 200
