@@ -135,3 +135,44 @@ def test_06_list_excludes_deleted():
     assert resp.status_code == 200
     ids = [p["id"] for p in resp.json()["data"]["items"]]
     assert _product_id not in ids
+
+
+def test_07_list_with_keyword_filter():
+    """关键字筛选"""
+    resp = client.get("/api/v1/products", params={"keyword": "不存在的商品"}, headers=_auth())
+    assert resp.status_code == 200
+    assert resp.json()["data"]["total"] == 0
+
+
+def test_08_list_with_status_filter():
+    """状态筛选"""
+    resp = client.get("/api/v1/products", params={"status": "active"}, headers=_auth())
+    assert resp.status_code == 200
+    for item in resp.json()["data"]["items"]:
+        assert item["status"] == "active"
+
+
+def test_09_list_with_sort_asc():
+    """升序排序"""
+    resp = client.get("/api/v1/products", params={"sort_by": "name", "sort_order": "asc"}, headers=_auth())
+    assert resp.status_code == 200
+    names = [p["name"] for p in resp.json()["data"]["items"]]
+    assert names == sorted(names)
+
+
+def test_10_create_empty_name_rejected():
+    """创建商品名称为空"""
+    resp = client.post("/api/v1/products", json={
+        "name": "  ", "sale_price": "10", "cost_price": "5", "stock_quantity": 1,
+    }, headers=_auth())
+    assert resp.status_code == 400
+    assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
+
+
+def test_11_create_bad_price_rejected():
+    """创建商品价格格式错误"""
+    resp = client.post("/api/v1/products", json={
+        "name": "测试", "sale_price": "abc", "cost_price": "5", "stock_quantity": 1,
+    }, headers=_auth())
+    assert resp.status_code == 400
+    assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
