@@ -32,13 +32,13 @@ export default function OrderDetail() {
   const { id } = useParams<{ id: string }>()
   const [order, setOrder] = useState<OrderDetail | null>(null)
   const [loading, setLoading] = useState(false)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
 
   // 收款弹窗状态
   const [payModalOpen, setPayModalOpen] = useState(false)
   const [payAmount, setPayAmount] = useState<number>(0)
   const [payMethod, setPayMethod] = useState('cash')
   const [payRemark, setPayRemark] = useState('')
-  const [payLoading, setPayLoading] = useState(false)
 
   const loadOrder = useCallback(async () => {
     if (!id) return
@@ -56,7 +56,8 @@ export default function OrderDetail() {
   useEffect(() => { loadOrder() }, [loadOrder])
 
   const handleConfirm = async () => {
-    if (!id) return
+    if (!id || actionLoading) return
+    setActionLoading('confirm')
     try {
       const res = await confirmOrder(id)
       if (res.success) {
@@ -65,11 +66,14 @@ export default function OrderDetail() {
       }
     } catch (e: unknown) {
       message.error(getApiErrorMessage(e, '确认失败'))
+    } finally {
+      setActionLoading(null)
     }
   }
 
   const handleCancel = async () => {
-    if (!id) return
+    if (!id || actionLoading) return
+    setActionLoading('cancel')
     try {
       const res = await cancelOrder(id)
       if (res.success) {
@@ -78,15 +82,17 @@ export default function OrderDetail() {
       }
     } catch (e: unknown) {
       message.error(getApiErrorMessage(e, '取消失败'))
+    } finally {
+      setActionLoading(null)
     }
   }
 
   const handleRegisterPayment = async () => {
-    if (!id || payAmount <= 0) {
+    if (!id || actionLoading || payAmount <= 0) {
       message.error('请输入正确的收款金额')
       return
     }
-    setPayLoading(true)
+    setActionLoading('payment')
     try {
       const res = await createPayment(id, {
         amount: String(payAmount),
@@ -103,11 +109,13 @@ export default function OrderDetail() {
     } catch (e: unknown) {
       message.error(getApiErrorMessage(e, '收款登记失败'))
     } finally {
-      setPayLoading(false)
+      setActionLoading(null)
     }
   }
 
   const handleReversePayment = async (paymentId: string) => {
+    if (actionLoading) return
+    setActionLoading('reverse')
     try {
       const res = await reversePayment(paymentId)
       if (res.success) {
@@ -116,6 +124,8 @@ export default function OrderDetail() {
       }
     } catch (e: unknown) {
       message.error(getApiErrorMessage(e, '冲正失败'))
+    } finally {
+      setActionLoading(null)
     }
   }
 
@@ -189,7 +199,7 @@ export default function OrderDetail() {
       width: 80,
       render: (_, record) => (
         <Popconfirm title="确定冲正该笔收款？" onConfirm={() => handleReversePayment(record.id)}>
-          <Button type="link" size="small" danger>冲正</Button>
+          <Button type="link" size="small" danger loading={actionLoading === 'reverse'} disabled={!!actionLoading}>冲正</Button>
         </Popconfirm>
       ),
     },
@@ -205,15 +215,15 @@ export default function OrderDetail() {
           )}
           {canConfirm && (
             <Popconfirm title="确认订单将扣减库存，确定？" onConfirm={handleConfirm}>
-              <Button type="primary">确认订单</Button>
+              <Button type="primary" loading={actionLoading === 'confirm'} disabled={!!actionLoading}>确认订单</Button>
             </Popconfirm>
           )}
           {canPay && (
-            <Button icon={<DollarOutlined />} onClick={() => setPayModalOpen(true)}>登记收款</Button>
+            <Button icon={<DollarOutlined />} onClick={() => setPayModalOpen(true)} disabled={!!actionLoading}>登记收款</Button>
           )}
           {canCancel && (
             <Popconfirm title="确定取消该订单？" onConfirm={handleCancel}>
-              <Button danger>取消订单</Button>
+              <Button danger loading={actionLoading === 'cancel'} disabled={!!actionLoading}>取消订单</Button>
             </Popconfirm>
           )}
         </Space>
@@ -273,7 +283,7 @@ export default function OrderDetail() {
         open={payModalOpen}
         onOk={handleRegisterPayment}
         onCancel={() => setPayModalOpen(false)}
-        confirmLoading={payLoading}
+        confirmLoading={actionLoading === 'payment'}
         okText="确认收款"
       >
         <div style={{ marginBottom: 12 }}>
