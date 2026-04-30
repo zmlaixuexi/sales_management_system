@@ -436,7 +436,9 @@ def update_order(
     if data.remark is not None:
         order.remark = data.remark
     if data.customer_id is not None:
-        order.customer_id = parse_uuid_or_400(data.customer_id, "客户 ID")
+        new_cid = parse_uuid_or_400(data.customer_id, "客户 ID")
+        get_or_404(db, Customer, new_cid, "客户")
+        order.customer_id = new_cid
 
     order.updated_by = current_user.id
     log_action(

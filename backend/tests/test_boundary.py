@@ -815,3 +815,58 @@ def test_42_create_user_nonexistent_role_rejected():
     assert resp.status_code == 400
     assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
     assert "角色不存在" in resp.json()["detail"]["message"]
+
+
+def test_43_order_update_deleted_customer_rejected():
+    """订单更新客户 ID 为已删除客户应返回 404"""
+    if not _tokens.get("access"):
+        resp = client.post("/api/v1/auth/login", json={
+            "username": "boundary_admin", "password": "pass123456",
+        })
+        assert resp.status_code == 200
+        _tokens["access"] = resp.json()["data"]["access_token"]
+
+    # 通过 API 创建并软删除一个客户
+    resp = client.post("/api/v1/customers", json={
+        "name": "待删除客户", "phone": "13900000999",
+    }, headers=_auth())
+    assert resp.status_code == 200
+    deleted_cid = resp.json()["data"]["id"]
+
+    resp = client.delete(f"/api/v1/customers/{deleted_cid}", headers=_auth())
+    assert resp.status_code == 200
+
+    # 创建草稿订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 1, "unit_price": "100"}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    order_id = resp.json()["data"]["id"]
+
+    # 更新客户 ID 为已删除客户
+    resp = client.put(f"/api/v1/sales-orders/{order_id}", json={
+        "customer_id": deleted_cid,
+    }, headers=_auth())
+    assert resp.status_code == 404
+    assert resp.json()["detail"]["code"] == "RESOURCE_NOT_FOUND"
+
+
+def test_44_customer_create_nonexistent_owner_rejected():
+    """创建客户时指定不存在的归属用户应被拒绝"""
+    if not _tokens.get("access"):
+        resp = client.post("/api/v1/auth/login", json={
+            "username": "boundary_admin", "password": "pass123456",
+        })
+        assert resp.status_code == 200
+        _tokens["access"] = resp.json()["data"]["access_token"]
+
+    fake_user_id = str(uuid.uuid4())
+    resp = client.post("/api/v1/customers", json={
+        "name": "归属不存在客户",
+        "phone": "13900000888",
+        "owner_user_id": fake_user_id,
+    }, headers=_auth())
+    assert resp.status_code == 400
+    assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
+    assert "归属用户不存在或已禁用" in resp.json()["detail"]["message"]

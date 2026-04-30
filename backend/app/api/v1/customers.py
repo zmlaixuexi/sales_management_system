@@ -43,6 +43,18 @@ router = APIRouter(
 )
 
 
+def _validate_owner_user(db: Session, owner_uid: uuid.UUID) -> None:
+    """校验归属用户存在且活跃"""
+    target = db.query(User).filter(
+        User.id == owner_uid, User.is_active.is_(True), User.deleted_at.is_(None),
+    ).first()
+    if not target:
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "VALIDATION_FAILED", "message": "归属用户不存在或已禁用"},
+        )
+
+
 @router.get("")
 def list_customers(
     page: int = Query(1, ge=1),
@@ -131,6 +143,11 @@ def create_customer(
                 },
             )
 
+    owner_uid = current_user.id
+    if data.owner_user_id:
+        owner_uid = parse_uuid_or_400(data.owner_user_id, "归属用户 ID")
+        _validate_owner_user(db, owner_uid)
+
     customer = Customer(
         name=name,
         contact_name=data.contact_name,
@@ -138,7 +155,7 @@ def create_customer(
         email=data.email,
         source=data.source,
         level=data.level,
-        owner_user_id=parse_uuid_or_400(data.owner_user_id, "归属用户 ID") if data.owner_user_id else current_user.id,
+        owner_user_id=owner_uid,
         follow_status=data.follow_status,
         remark=data.remark,
         created_by=current_user.id,
@@ -247,7 +264,9 @@ def update_customer(
     if data.follow_status is not None:
         customer.follow_status = data.follow_status
     if data.owner_user_id is not None:
-        customer.owner_user_id = parse_uuid_or_400(data.owner_user_id, "归属用户 ID")
+        owner_uid = parse_uuid_or_400(data.owner_user_id, "归属用户 ID")
+        _validate_owner_user(db, owner_uid)
+        customer.owner_user_id = owner_uid
     if data.remark is not None:
         customer.remark = data.remark
 
@@ -315,14 +334,7 @@ def transfer_customer(
     owner_uid = parse_uuid_or_400(new_owner_id, "归属用户 ID")
 
     # 校验目标用户存在且活跃
-    target_user = db.query(User).filter(
-        User.id == owner_uid, User.is_active.is_(True), User.deleted_at.is_(None),
-    ).first()
-    if not target_user:
-        raise HTTPException(
-            status_code=400,
-            detail={"code": "VALIDATION_FAILED", "message": "目标用户不存在或已禁用"},
-        )
+    _validate_owner_user(db, owner_uid)
 
     customer.owner_user_id = owner_uid
     customer.updated_by = current_user.id
