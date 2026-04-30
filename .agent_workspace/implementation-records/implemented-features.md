@@ -6,6 +6,15 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-55
+
+### CI 数据库迁移一致性检查
+
+- **文件**: `.github/workflows/ci.yml`, `Makefile`
+- **内容**: CI backend job 新增 PostgreSQL 服务容器，运行 alembic upgrade head + alembic check 检测模型/迁移漂移
+- **验证**: YAML 语法验证通过，341 后端测试通过
+- **效果**: CI 自动检测遗漏的数据库迁移，防止模型/迁移不一致
+
 ## 功能编号：FEAT-20260430-54
 
 ### get_request_meta 单元测试

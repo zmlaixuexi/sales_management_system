@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-157
-当前任务名称：Makefile 补全 + get_request_meta 测试
+当前任务编号：ROUND-158
+当前任务名称：CI 数据库迁移一致性检查
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 158：CI 数据库迁移一致性检查 + make db-check — PostgreSQL 服务容器 + alembic upgrade head && check
 - Round 157：Makefile .PHONY 补全 + get_request_meta 单元测试（+3），后端 341/341
 - Round 156：优雅关闭 — lifespan yield 后释放数据库连接池 + 关闭日志，后端 338/338
 - Round 155：新增 .dockerignore — 后端和前端排除测试/缓存/IDE/环境文件，Docker 构建验证通过

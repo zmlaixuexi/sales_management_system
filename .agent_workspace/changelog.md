@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-04-30（第一百五十八轮）
+
+### 工程：CI 数据库迁移一致性检查 + make db-check
+
+- CI backend job 新增 PostgreSQL 17 服务容器
+- CI 运行 `alembic upgrade head && alembic check` 检测模型/迁移漂移
+- Makefile 新增 `make db-check` 目标（本地检查模型与迁移同步）
+- .PHONY 补全 db-check
+- 后端 341/341 通过
+
 ## 2026-04-30（第一百五十七轮）
 
 ### 工程：Makefile .PHONY 补全 + get_request_meta 测试（+3，后端 341/341）
