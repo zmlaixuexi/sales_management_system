@@ -8,7 +8,7 @@ from app.models.user import User
 
 def _make_user(*, superuser=False, perm_codes=None):
     """构造测试用户，直接绑定角色和权限"""
-    from app.models.user import Role, Permission
+    from app.models.user import Permission, Role
 
     perms = [Permission(id=uuid.uuid4(), code=c, name=c) for c in (perm_codes or [])]
     role = Role(id=uuid.uuid4(), name="test_role", display_name="测试", permissions=perms)
@@ -38,7 +38,7 @@ def test_get_user_permissions_empty_roles():
 
 def test_get_user_permissions_dedup():
     """不同角色的相同权限码应去重"""
-    from app.models.user import Role, Permission
+    from app.models.user import Permission, Role
 
     perm = Permission(id=uuid.uuid4(), code="product:view", name="查看商品")
     role1 = Role(id=uuid.uuid4(), name="r1", display_name="R1", permissions=[perm])

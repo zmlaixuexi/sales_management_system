@@ -229,7 +229,12 @@ def list_orders(
 
     query = query.order_by(SalesOrder.created_at.desc())
     total = query.count()
-    orders = query.options(joinedload(SalesOrder.items), joinedload(SalesOrder.payments)).offset((page - 1) * page_size).limit(page_size).all()
+    orders = (
+        query.options(joinedload(SalesOrder.items), joinedload(SalesOrder.payments))
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+        .all()
+    )
 
     items_out = []
     for o in orders:
