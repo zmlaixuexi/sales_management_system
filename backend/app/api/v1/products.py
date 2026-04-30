@@ -9,7 +9,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile
 from sqlalchemy.orm import Session, joinedload
 
-from app.api.deps import get_db, get_or_404, has_permission, require_permission, resp
+from app.api.deps import get_db, get_or_404, has_permission, parse_uuid_or_400, require_permission, resp
 from app.core.config import settings
 from app.core.sanitize import escape_like
 from app.models.product import Product, ProductCategory, ProductPriceHistory
@@ -35,15 +35,6 @@ router = APIRouter(
 
 # 默认分类名称
 DEFAULT_CATEGORY_NAME = "未分类"
-
-
-def _parse_uuid_or_400(value: str, label: str) -> uuid.UUID:
-    try:
-        return uuid.UUID(str(value))
-    except (ValueError, AttributeError):
-        raise HTTPException(
-            status_code=400, detail={"code": "VALIDATION_FAILED", "message": f"{label}格式无效"},
-        ) from None
 
 
 def _generate_sku(db: Session) -> str:
@@ -188,7 +179,7 @@ def create_product(
     category_id = (
         _get_default_category_id(db)
         if not data.category_id
-        else _parse_uuid_or_400(data.category_id, "分类 ID")
+        else parse_uuid_or_400(data.category_id, "分类 ID")
     )
 
     main_image_url = data.main_image_url
@@ -333,7 +324,7 @@ def update_product(
         product.main_image_url = data.main_image_url
 
     if data.category_id is not None:
-        product.category_id = _parse_uuid_or_400(data.category_id, "分类 ID")
+        product.category_id = parse_uuid_or_400(data.category_id, "分类 ID")
 
     if data.stock_quantity is not None:
         product.stock_quantity = data.stock_quantity

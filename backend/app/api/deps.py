@@ -88,6 +88,17 @@ def check_owner_or_forbid(user: User, owner_id, view_all_code: str, label: str =
         )
 
 
+def parse_uuid_or_400(value: str, label: str) -> uuid.UUID:
+    """将字符串安全转换为 UUID，无效则抛 400 VALIDATION_FAILED。"""
+    try:
+        return uuid.UUID(str(value))
+    except (ValueError, AttributeError):
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "VALIDATION_FAILED", "message": f"{label}格式无效"},
+        ) from None
+
+
 def get_or_404(db: Session, model: type, entity_id: uuid.UUID | str, label: str = "资源"):
     """按 ID 查询实体，不存在或 ID 格式无效则抛 404。自动过滤软删除。"""
     try:

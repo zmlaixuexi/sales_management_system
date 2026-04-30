@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, require_permission, resp
+from app.api.deps import get_db, parse_uuid_or_400, require_permission, resp
 from app.models.order import InventoryMovement
 from app.models.product import Product
 from app.models.user import User
@@ -23,14 +23,6 @@ router = APIRouter(
     },
 )
 
-
-def _parse_uuid_or_400(value: str, label: str) -> uuid.UUID:
-    try:
-        return uuid.UUID(str(value))
-    except (ValueError, AttributeError):
-        raise HTTPException(
-            status_code=400, detail={"code": "VALIDATION_FAILED", "message": f"{label}格式无效"},
-        ) from None
 
 
 @router.get("/movements")
@@ -89,7 +81,7 @@ def adjust_inventory(
         raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "调整数量不能为 0"})
 
     product = db.query(Product).filter(
-        Product.id == _parse_uuid_or_400(product_id, "商品 ID"), Product.deleted_at.is_(None)
+        Product.id == parse_uuid_or_400(product_id, "商品 ID"), Product.deleted_at.is_(None)
     ).with_for_update().first()
     if not product:
         raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "商品不存在"})
