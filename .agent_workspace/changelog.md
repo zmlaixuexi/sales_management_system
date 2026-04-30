@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第二百二十三轮）
+
+### 安全：文件上传添加文件头魔数字节校验
+
+- file_service.py 新增 _validate_magic_bytes 函数，校验 JPEG/PNG/WebP 文件头
+- 防止攻击者将非图片文件伪装为合法扩展名上传
+- 新增 2 个测试：伪装文件拒绝 + 有效 JPEG 接受
+- 后端 428/428，ruff 0
+
 ## 2026-04-30（第二百二十二轮）
 
 ### 质量：修复 products.py 和 orders.py 中变量 data 的同名覆盖（shadowing）

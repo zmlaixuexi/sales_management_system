@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：安全加固
-当前任务编号：ROUND-222
-当前任务名称：变量 data 同名覆盖（shadowing）修复
+当前任务编号：ROUND-223
+当前任务名称：文件上传文件头魔数字节校验
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 223：文件上传添加文件头魔数字节（magic bytes）校验，防止伪装扩展名上传恶意文件（+2 测试），后端 428/428
 - Round 222：products.py + orders.py 变量 data 同名覆盖修复（create_product/update_product/create_order 中 data 参数被 data: dict 覆盖→改为 result），后端 426/426
 - Round 221：nginx 添加 Strict-Transport-Security 响应头（HSTS，max-age=2年）
 - Round 220：make ci 全量质量验证通过（ruff 0 + eslint 0 + tsc 0 + 426/426 + 123/123 + 覆盖率 99.81% + build 零警告）
@@ -136,7 +137,7 @@
 
 ## 当前测试状态
 
-- 后端：426/426 通过
+- 后端：428/428 通过
 - 前端：123/123 通过
 - ruff：0 issues（含 RUF 规则）
 - ESLint：0 warnings
