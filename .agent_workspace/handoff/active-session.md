@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-143
-当前任务名称：列表页 joinedload 优化
+当前任务编号：ROUND-144
+当前任务名称：deps.py 权限辅助函数单元测试
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 144：deps.py 权限辅助函数单元测试（+6）— _get_user_permissions/has_permission，后端 298/298
 - Round 143：列表页 joinedload 优化 — 商品/客户/订单列表消除 selectin 额外查询，292/292
 - Round 142：NotFound 组件测试（+3）— 404 渲染/按钮/导航，前端 109/109
 - Round 140：CSV 导入去重 N+1 优化 — 预加载 SKU/手机号集合替代逐行查询，292/292
@@ -60,7 +61,7 @@
 
 ## 当前测试状态
 
-- 后端：292/292 通过
+- 后端：298/298 通过
 - 前端：109/109 通过
 - ruff：0 issues
 - ESLint：0 warnings

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第一百四十四轮）
+
+### 安全：deps.py 权限辅助函数单元测试（+6，后端 298/298）
+
+- `_get_user_permissions`: 多角色收集/空角色/跨角色去重
+- `has_permission`: superuser 自动通过/有权限/无权限
+- conftest.py 注册 test_deps 为 security 标记
+- 后端 298/298 通过
+
 ## 2026-04-30（第一百四十三轮）
 
 ### 性能：列表页 joinedload 优化
