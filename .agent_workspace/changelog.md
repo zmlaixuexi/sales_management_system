@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百九十九轮）
+
+### 工程：生产 nginx 镜像固定版本 1.27-alpine
+
+- docker-compose.prod.yml nginx 镜像从 `nginx:alpine`（latest）改为 `nginx:1.27-alpine`
+- 与 Round 190 前端 Dockerfile alpine:3.21 版本固定策略一致
+- 避免生产环境因 latest 标签不可预测变更导致构建失败
+
 ## 2026-04-30（第一百九十八轮）
 
 ### 工程：CI 前端测试添加覆盖率报告（--coverage）

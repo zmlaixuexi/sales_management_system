@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：测试补强
-当前任务编号：ROUND-198
-当前任务名称：CI 前端覆盖率报告
+当前任务编号：ROUND-199
+当前任务名称：nginx 镜像版本固定
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 199：生产 nginx 镜像固定版本 1.27-alpine（避免 latest 不可预测变更）
 - Round 198：CI 前端测试添加 --coverage 报告（与后端 --cov 对称）
 - Round 197：新增密码修改接口 POST /auth/change-password（验证旧密码+强度校验+审计日志），后端 421/421
 - Round 196：文档同步测试数至 540（418 后端 + 122 前端），README + testing.md 全量更新
