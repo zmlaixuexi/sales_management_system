@@ -319,18 +319,18 @@ def create_order(
     db.commit()
 
     can_view_cost = has_permission(current_user, "product:view_cost")
-    data: dict = {
+    result: dict = {
         "id": str(order.id),
         "order_no": order.order_no,
         "status": order.status,
         "total_amount": str(order.total_amount),
     }
     if can_view_cost:
-        data["total_cost"] = str(order.total_cost)
-        data["gross_profit"] = str(order.gross_profit)
-        data["gross_margin"] = str(order.gross_margin)
+        result["total_cost"] = str(order.total_cost)
+        result["gross_profit"] = str(order.gross_profit)
+        result["gross_margin"] = str(order.gross_margin)
 
-    return resp(data=data, message="创建成功")
+    return resp(data=result, message="创建成功")
 
 
 @router.get("/{order_id}", response_model=ApiResponse[OrderDetail])

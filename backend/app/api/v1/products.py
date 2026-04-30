@@ -219,7 +219,7 @@ def create_product(
     db.commit()
 
     can_view_cost = has_permission(current_user, "product:view_cost")
-    data: dict = {
+    result: dict = {
         "id": str(product.id),
         "sku": product.sku,
         "name": product.name,
@@ -231,11 +231,11 @@ def create_product(
         "sort_weight": product.sort_weight,
     }
     if can_view_cost:
-        data["cost_price"] = str(product.cost_price)
-        data["unit_profit"] = str(unit_profit)
-        data["gross_margin"] = str(gross_margin)
+        result["cost_price"] = str(product.cost_price)
+        result["unit_profit"] = str(unit_profit)
+        result["gross_margin"] = str(gross_margin)
 
-    return resp(data=data, message="创建成功")
+    return resp(data=result, message="创建成功")
 
 
 @router.get("/{product_id}", response_model=ApiResponse[ProductDetail])
@@ -379,7 +379,7 @@ def update_product(
     unit_profit, gross_margin = _calc_profit(product.sale_price, product.cost_price)
 
     can_view_cost = has_permission(current_user, "product:view_cost")
-    data: dict = {
+    result: dict = {
         "id": str(product.id),
         "sku": product.sku,
         "name": product.name,
@@ -389,11 +389,11 @@ def update_product(
         "status": product.status,
     }
     if can_view_cost:
-        data["cost_price"] = str(product.cost_price)
-        data["unit_profit"] = str(unit_profit)
-        data["gross_margin"] = str(gross_margin)
+        result["cost_price"] = str(product.cost_price)
+        result["unit_profit"] = str(unit_profit)
+        result["gross_margin"] = str(gross_margin)
 
-    return resp(data=data, message="更新成功")
+    return resp(data=result, message="更新成功")
 
 
 @router.delete("/{product_id}")
