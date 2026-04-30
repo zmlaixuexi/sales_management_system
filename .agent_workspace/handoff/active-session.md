@@ -2,16 +2,16 @@
 
 最后更新时间：2026-04-30
 当前阶段：测试补强
-当前任务编号：ROUND-191
-当前任务名称：里程碑总结更新 + 全量质量验证
+当前任务编号：ROUND-192
+当前任务名称：CI 覆盖率检查
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 192：CI 后端测试添加 --cov 覆盖率检查（阈值 70%），当前实际 99.81%
 - Round 191：里程碑总结更新至 Round 95-190，make ci 全量质量验证通过
 - Round 190：前端 Dockerfile 运行阶段固定 alpine:3.21（避免 latest 不可预测变更）
-- Round 189：nginx 静态资源补全 Referrer-Policy/Permissions-Policy/CSP 头
 - Round 188：移除死代码 MainLayout（已被 AppLayout 取代），-226 行，前端 122/122
 - Round 187：AppLayout 用户加载/导航/退出 + ProtectedRoute 重定向（+6），前端 128/128
 - Round 185：ErrorBoundary 路由重置 + 返回首页按钮（+2），前端 117/117
