@@ -35,6 +35,7 @@ def pytest_collection_modifyitems(items):
         "test_audit_log": "report",
         "test_integration": "integration",
         "test_health": "infra",
+        "test_deps": "security",
         "test_file_upload": "integration",
     }
     for item in items:
