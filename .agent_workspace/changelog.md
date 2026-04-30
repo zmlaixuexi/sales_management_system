@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百八十二轮）
+
+### 工程：新增 make ci 本地完整质量门禁
+
+- Makefile 新增 `ci` 目标：lint + typecheck + coverage + coverage-frontend + build-frontend
+- 修复 ruff lint：移除未使用变量/导入
+- `make ci` 全部通过：403 后端 + 115 前端 + ruff 0 + build 通过
+
 ## 2026-04-30（第一百八十一轮）
 
 ### 工程：移除 Pydantic 已拦截的防御性死代码
