@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第二百零九轮）
+
+### 安全：收款导出添加数据范围过滤
+
+- export_service.py export_payments 新增 sales_user_id 参数
+- exports.py 非管理员只导出本人订单的收款记录（与 list_payments 一致）
+- 后端 423/423，ruff 0
+
 ## 2026-04-30（第二百零八轮）
 
 ### 安全：商品列表 sort_by 参数白名单校验
