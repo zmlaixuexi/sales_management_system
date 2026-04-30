@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第二百零八轮）
+
+### 安全：商品列表 sort_by 参数白名单校验
+
+- products.py 新增 SORTABLE_COLUMNS 白名单（9 个可排序列）
+- list_products 排序逻辑改为白名单校验，防止 getattr 任意属性访问
+- 后端 423/423，ruff 0
+
 ## 2026-04-30（第二百零七轮）
 
 ### 工程：parse_uuid_or_400 统一到 deps.py

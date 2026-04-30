@@ -1,14 +1,15 @@
 # 当前工作现场
 
 最后更新时间：2026-04-30
-当前阶段：代码质量
-当前任务编号：ROUND-207
-当前任务名称：parse_uuid_or_400 统一到 deps.py
+当前阶段：安全加固
+当前任务编号：ROUND-208
+当前任务名称：sort_by 白名单校验
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 208：商品列表 sort_by 参数白名单校验（防止任意模型属性访问），后端 423/423
 - Round 207：parse_uuid_or_400 统一到 deps.py（消除 4 处重复定义，-50 行 +41 行），后端 423/423
 - Round 206：扩展无效 UUID 防护至 products/orders/inventory（7 处 uuid.UUID 调用），后端 423/423
 - Round 205：无效 UUID 请求体参数防护（500→400/404），get_or_404 + customers.py，后端 423/423
