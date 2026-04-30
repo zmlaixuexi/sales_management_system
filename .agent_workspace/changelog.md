@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第二百零六轮）
+
+### 安全：UUID 防护扩展至 products/orders/inventory
+
+- products.py 新增 _parse_uuid_or_400，2 处 uuid.UUID(str()) 改为安全转换（category_id 创建/更新）
+- orders.py 新增 _parse_uuid_or_400，4 处 uuid.UUID(str()) 改为安全转换（product_ids/product_map/customer_id 创建/更新）
+- inventory.py 新增 _parse_uuid_or_400，1 处 uuid.UUID(str()) 改为安全转换（product_id 调整）
+- 后端 423/423，ruff 0
+
 ## 2026-04-30（第二百零五轮）
 
 ### 安全：无效 UUID 请求体参数防护（500→400/404）

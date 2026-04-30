@@ -6,6 +6,15 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-63
+
+### UUID 防护扩展至 products/orders/inventory
+
+- **文件**: `backend/app/api/v1/products.py`, `backend/app/api/v1/orders.py`, `backend/app/api/v1/inventory.py`
+- **内容**: 3 个 API 文件新增 _parse_uuid_or_400，7 处 uuid.UUID(str()) 改为安全转换
+- **验证**: 423 后端通过，ruff 0
+- **效果**: products/orders/inventory 请求体中无效 UUID 返回 400 而非 500
+
 ## 功能编号：FEAT-20260430-62
 
 ### 密码修改接口
