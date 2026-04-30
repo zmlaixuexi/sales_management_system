@@ -4,12 +4,12 @@
 
 | 指标 | 值 |
 |---|---|
-| 后端测试总数 | 289 |
+| 后端测试总数 | 292 |
 | 后端测试文件 | 21 |
 | 前端测试总数 | 106 |
 | 前端测试文件 | 17 |
-| 测试总计 | 395 |
-| 覆盖模块 | 认证、商品、客户、订单、库存、收款、报表、审计日志、数据导出、批量导入、权限校验、速率限制、SQL 注入防护、请求 ID 中间件 |
+| 测试总计 | 398 |
+| 覆盖模块 | 认证、商品、客户、订单、库存、收款、报表、审计日志、数据导出、批量导入、权限校验、速率限制、SQL 注入防护、请求 ID 中间件、CORS 验证 |
 
 ## 运行测试
 
@@ -75,13 +75,35 @@ cd frontend && npx eslint src/
 
 `conftest.py` 确保速率限制测试（test_ratelimit.py）始终最后运行，避免影响其他测试。
 
+### 测试标记
+
+`conftest.py` 根据文件名自动应用 pytest 标记，支持选择性运行：
+
+```bash
+pytest -m crud        # 仅 CRUD 操作测试
+pytest -m security    # 仅安全相关测试
+pytest -m boundary    # 仅边界值测试
+pytest -m "not slow"  # 排除慢速测试
+```
+
+| 标记 | 说明 | 测试数 |
+|---|---|---|
+| crud | CRUD 操作测试 | 69 |
+| boundary | 边界值和异常路径 | 47 |
+| security | 认证/权限/速率限制 | 27 |
+| export | 导出功能 | 18 |
+| import | 导入功能 | 18 |
+| report | 报表和审计日志 | 31 |
+| integration | 集成测试 | 33 |
+| infra | 基础设施（健康检查/中间件） | 12 |
+
 ---
 
 ## 后端测试文件详解
 
-### test_health.py（9 个测试）
+### test_health.py（12 个测试）
 
-健康检查、版本接口、中间件验证和生产环境安全检查，无需认证。
+健康检查、版本接口、中间件验证、异常处理、CORS 和生产环境安全检查，无需认证。
 
 | 测试 | 说明 |
 |---|---|
@@ -94,6 +116,9 @@ cd frontend && npx eslint src/
 | test_request_id_passthrough | 请求带 X-Request-ID 时透传回响应 |
 | test_request_id_in_log | request_id 写入请求日志 extra_fields |
 | test_production_env_rejects_default_secret | 生产环境 JWT 默认密钥拒绝启动 |
+| test_unhandled_exception_returns_json | 未处理异常返回一致 JSON 格式 |
+| test_cors_allowed_origin | 允许的 Origin 返回 CORS 响应头 |
+| test_cors_disallowed_origin | 不允许的 Origin 不返回 CORS 响应头 |
 
 ### test_auth.py（9 个测试）
 
