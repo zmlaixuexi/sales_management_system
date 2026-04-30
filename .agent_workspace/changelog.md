@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-04-30（第一百五十二轮）
+
+### 测试：ProtectedRoute 组件测试（+4，前端 113/113）
+
+- 无 token 时重定向到 /login
+- 有 token 无 user 时显示 Spin 加载并调用 fetchUser
+- 有 token 和 user 时渲染子组件
+- fetchUser 失败后 user 为 null 时的行为
+- 使用 mock antd + useAuthStore + MemoryRouter 模式
+- 前端 113/113 通过
+
 ## 2026-04-30（第一百五十一轮）
 
 ### 测试：JSON 日志格式器 + 审计异常处理测试（+5，后端 325/325）
