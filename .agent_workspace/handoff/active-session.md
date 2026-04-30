@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-158
-当前任务名称：CI 数据库迁移一致性检查
+当前任务编号：ROUND-159
+当前任务名称：X-Response-Time 响应头
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 159：X-Response-Time 响应头 + 测试 — request_log 中间件添加耗时头，后端 342/342
 - Round 158：CI 数据库迁移一致性检查 + make db-check — PostgreSQL 服务容器 + alembic upgrade head && check
 - Round 157：Makefile .PHONY 补全 + get_request_meta 单元测试（+3），后端 341/341
 - Round 156：优雅关闭 — lifespan yield 后释放数据库连接池 + 关闭日志，后端 338/338
@@ -75,7 +76,7 @@
 
 ## 当前测试状态
 
-- 后端：341/341 通过
+- 后端：342/342 通过
 - 前端：113/113 通过
 - ruff：0 issues
 - ESLint：0 warnings
