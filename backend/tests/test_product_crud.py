@@ -163,6 +163,23 @@ def test_03d_update_product_cost_price_negative():
     assert "成本价不能为负" in resp.json()["detail"]["message"]
 
 
+def test_03e_price_history_with_cost():
+    """价格变更记录（超管可见成本价）"""
+    # test_03b 已将 cost_price 从 99→80，存在一条记录
+    resp = client.get(f"/api/v1/products/{_product_id}/price-history", headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    first = items[0]
+    assert "old_sale_price" in first
+    assert "new_sale_price" in first
+    # 超管有 view_cost 权限，应包含成本价字段
+    assert "old_cost_price" in first
+    assert "new_cost_price" in first
+    assert first["old_cost_price"] == "99.00"
+    assert first["new_cost_price"] == "80.00"
+
+
 def test_04_delete_product():
     """软删除商品"""
     resp = client.delete(f"/api/v1/products/{_product_id}", headers=_auth())
