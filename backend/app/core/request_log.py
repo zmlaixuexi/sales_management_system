@@ -43,4 +43,5 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
             record.msg = f"{label}{request.method} {path} {response.status_code} {duration_ms}ms"
             logger.handle(record)
 
+        response.headers["X-Response-Time"] = f"{duration_ms}ms"
         return response

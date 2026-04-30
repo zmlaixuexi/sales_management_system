@@ -144,3 +144,10 @@ def test_cors_disallowed_origin():
         },
     )
     assert "access-control-allow-origin" not in response.headers
+
+
+def test_response_time_header():
+    """所有 API 响应应包含 X-Response-Time 头"""
+    response = client.get("/api/v1/health")
+    assert "x-response-time" in response.headers
+    assert response.headers["x-response-time"].endswith("ms")
