@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：测试补强
-当前任务编号：ROUND-175
-当前任务名称：商品覆盖率和边界补强
+当前任务编号：ROUND-176
+当前任务名称：速率限制/日志覆盖率补强
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 176：速率限制窗口清理 + get_logger 单元测试（+2），ratelimit/logging 100%，后端 395/395
 - Round 175：商品分类筛选/排序回退/成本价格式/分类更新（+4），products.py 94%，后端 393/393
 - Round 174：文件上传校验单元测试（+4）— 扩展名/MIME/大小/正常，file_service 100%，后端 389/389
 - Round 173：存储型 XSS 防护 — strip_html 输入消毒 + 5 个 schema 字段校验（+6 测试），385/385
@@ -92,7 +93,7 @@
 
 ## 当前测试状态
 
-- 后端：393/393 通过
+- 后端：395/395 通过
 - 前端：115/115 通过
 - ruff：0 issues
 - ESLint：0 warnings
@@ -102,7 +103,7 @@
 
 ## 下一步第一动作
 
-后端覆盖率 98%（39 行未覆盖），前端 115/115。products.py 剩余 17 行未覆盖主要是 CSV 导入路径。建议继续从 orders/payments 覆盖率或部署体验中选择下一步。
+后端覆盖率 98%（37 行未覆盖），前端 115/115。ratelimit/logging/file_service/users/health/audit_logs/export_service 均 100%。剩余未覆盖主要是 products.py CSV 导入和 orders/payments 防御性代码。
 
 ## 当前里程碑总结（Round 95-173）
 

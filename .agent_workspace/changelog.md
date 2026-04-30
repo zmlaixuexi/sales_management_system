@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百七十六轮）
+
+### 测试：速率限制/日志覆盖率补强
+
+- _SlidingWindow.count 过期清理单元测试
+- get_logger 返回指定名称 logger
+- ratelimit.py/logging.py 均达 100%，后端 395/395（+2）
+
 ## 2026-04-30（第一百七十五轮）
 
 ### 测试：商品覆盖率补强
