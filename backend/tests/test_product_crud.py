@@ -289,6 +289,28 @@ def test_10_create_with_category():
     assert resp.json()["data"]["category_id"] == _category_id
 
 
+def test_10a_sku_generation_with_nonnumeric_suffix():
+    """SKU 生成：已有非数字后缀时回退到 1"""
+    from datetime import datetime
+    from app.models.product import Product as ProdModel
+    today = datetime.now().strftime("%Y%m%d")
+    prefix = f"SPU-{today}-"
+    # 找到已有的自动生成 SKU 的商品，修改为非数字后缀
+    db = TestSession()
+    prod = db.query(ProdModel).filter(ProdModel.sku.like(f"{prefix}%")).first()
+    if prod:
+        prod.sku = f"{prefix}ABCD"
+        db.commit()
+    db.close()
+
+    # 创建商品不带 SKU，触发自动生成
+    resp = client.post("/api/v1/products", json={
+        "name": "SKU回退测试", "sale_price": "10", "cost_price": "5", "stock_quantity": 1,
+    }, headers=_auth())
+    assert resp.status_code == 200
+    assert resp.json()["data"]["sku"] == f"{prefix}0001"
+
+
 def test_10b_create_empty_name_rejected():
     """创建商品名称为空"""
     resp = client.post("/api/v1/products", json={
