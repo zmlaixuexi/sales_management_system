@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-154
-当前任务名称：导出服务辅助函数单元测试
+当前任务编号：ROUND-155
+当前任务名称：.dockerignore 构建优化
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 155：新增 .dockerignore — 后端和前端排除测试/缓存/IDE/环境文件，Docker 构建验证通过
 - Round 154：导出服务辅助函数单元测试（+13）— _dec/_str/_dt CSV 格式化验证，后端 338/338
 - Round 153：文档同步测试数至 438（325 后端 + 113 前端）+ testing.md 新增 7 个测试文件条目
 - Round 152：ProtectedRoute 组件测试（+4）— 无 token 重定向/加载中/已认证渲染/fetchUser 失败，前端 113/113

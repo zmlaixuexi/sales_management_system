@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第一百五十五轮）
+
+### 部署：新增 .dockerignore
+
+- 后端 `.dockerignore`: 排除 tests/、__pycache__/、.venv/、.env、.git、*.md
+- 前端 `.dockerignore`: 排除 src/__tests__/、node_modules/、.vite/、.env、.git、*.md
+- 后端 Docker 构建验证通过
+- 后端 338/338 通过
+
 ## 2026-04-30（第一百五十四轮）
 
 ### 测试：导出服务辅助函数单元测试（+13，后端 338/338）
