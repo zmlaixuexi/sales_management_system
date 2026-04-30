@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-04-30（第二百一十一轮）
+
+### 工程：reports.py 消除 __import__ 反模式
+
+- `__import__("decimal").Decimal("0.01")` 改为标准 `from decimal import Decimal`
+- 后端 423/423，ruff 0
+
 ## 2026-04-30（第二百一十轮）
 
 ### 安全：用户管理 UUID 安全转换 + 列表推导式优化
