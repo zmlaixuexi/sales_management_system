@@ -19,9 +19,6 @@ export function formatPercent(value: number | string | null | undefined): string
 }
 
 /**
- * 触发 CSV 文件下载
- */
-/**
  * 显示 API 错误消息（提取后端 detail.message）
  */
 export function getApiErrorMessage(e: unknown, fallback = '操作失败'): string {
