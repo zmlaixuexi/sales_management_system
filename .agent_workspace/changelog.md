@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第一百五十一轮）
+
+### 测试：JSON 日志格式器 + 审计异常处理测试（+5，后端 325/325）
+
+- `_JsonFormatter`: 基本 JSON 输出/异常信息/extra_fields 合并/无异常时不输出 exception
+- `log_action` DB 失败：mock flush 异常 → 返回 None 不崩溃
+- conftest.py 注册 test_logging 为 infra 标记
+- 后端 325/325 通过
+
 ## 2026-04-30（第一百五十轮）
 
 ### 测试：商品利润计算函数单元测试（+6，后端 320/320）

@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-150
-当前任务名称：商品利润计算函数单元测试
+当前任务编号：ROUND-151
+当前任务名称：JSON 日志格式器 + 审计异常处理测试
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 151：JSON 日志格式器 + 审计异常处理测试（+5）— _JsonFormatter/log_action 容错，后端 325/325
 - Round 150：商品利润计算函数单元测试（+6）— _calc_profit 纯函数验证，后端 320/320
 - Round 149：GitHub Actions CI 工作流 + Makefile install 修正 — push/PR 自动 ruff+pytest+eslint+tsc+vitest+build
 - Round 148：前端 vitest 覆盖率报告 + make coverage-frontend — API 层 87%/store 100%，前端 109/109
@@ -67,7 +68,7 @@
 
 ## 当前测试状态
 
-- 后端：320/320 通过
+- 后端：325/325 通过
 - 前端：109/109 通过
 - ruff：0 issues
 - ESLint：0 warnings
