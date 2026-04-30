@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：安全加固
-当前任务编号：ROUND-223
-当前任务名称：文件上传文件头魔数字节校验
+当前任务编号：ROUND-224
+当前任务名称：报表 API 数据范围过滤
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 224：报表 API（sales_summary/sales_trend/product_ranking）添加数据范围过滤，非 order:view_all 用户只看本人订单数据，后端 428/428
 - Round 223：文件上传添加文件头魔数字节（magic bytes）校验，防止伪装扩展名上传恶意文件（+2 测试），后端 428/428
 - Round 222：products.py + orders.py 变量 data 同名覆盖修复（create_product/update_product/create_order 中 data 参数被 data: dict 覆盖→改为 result），后端 426/426
 - Round 221：nginx 添加 Strict-Transport-Security 响应头（HSTS，max-age=2年）
