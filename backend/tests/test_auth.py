@@ -148,3 +148,52 @@ def test_access_with_refresh_token_rejected():
 
     response = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {refresh_token}"})
     assert response.status_code == 401
+
+
+def test_change_password_success():
+    """修改密码成功"""
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    token = login_resp.json()["data"]["access_token"]
+
+    resp = client.post("/api/v1/auth/change-password", json={
+        "old_password": "testpass123",
+        "new_password": "newpass456",
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    assert "成功" in resp.json()["message"]
+
+    # 用新密码登录验证
+    login2 = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "newpass456"})
+    assert login2.status_code == 200
+
+    # 改回原密码
+    token2 = login2.json()["data"]["access_token"]
+    client.post("/api/v1/auth/change-password", json={
+        "old_password": "newpass456",
+        "new_password": "testpass123",
+    }, headers={"Authorization": f"Bearer {token2}"})
+
+
+def test_change_password_wrong_old():
+    """原密码错误"""
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    token = login_resp.json()["data"]["access_token"]
+
+    resp = client.post("/api/v1/auth/change-password", json={
+        "old_password": "wrongpass1",
+        "new_password": "newpass456",
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 400
+    assert "原密码" in resp.json()["detail"]["message"]
+
+
+def test_change_password_weak_new():
+    """新密码不符合强度要求"""
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    token = login_resp.json()["data"]["access_token"]
+
+    resp = client.post("/api/v1/auth/change-password", json={
+        "old_password": "testpass123",
+        "new_password": "123456",
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 422

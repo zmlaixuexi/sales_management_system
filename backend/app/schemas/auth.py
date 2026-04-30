@@ -21,6 +21,20 @@ class RefreshRequest(BaseModel):
     refresh_token: str
 
 
+class ChangePasswordRequest(BaseModel):
+    old_password: str = Field(..., min_length=1, max_length=100)
+    new_password: str = Field(..., min_length=6, max_length=100)
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_password_strength(cls, v: str) -> str:
+        if not re.search(r"[a-zA-Z]", v):
+            raise ValueError("新密码必须包含至少一个字母")
+        if not re.search(r"\d", v):
+            raise ValueError("新密码必须包含至少一个数字")
+        return v
+
+
 class CurrentUser(BaseModel):
     id: str
     username: str

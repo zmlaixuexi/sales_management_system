@@ -7,9 +7,9 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db, resp
 from app.core.config import settings
-from app.core.security import create_access_token, create_refresh_token, verify_password
+from app.core.security import create_access_token, create_refresh_token, hash_password, verify_password
 from app.models.user import User
-from app.schemas.auth import LoginRequest, RefreshRequest, RoleBrief
+from app.schemas.auth import ChangePasswordRequest, LoginRequest, RefreshRequest, RoleBrief
 from app.services.audit_service import get_request_meta, log_action
 
 router = APIRouter(
@@ -114,3 +114,30 @@ def get_me(current_user: User = Depends(get_current_user)):
         "roles": [r.model_dump() for r in roles],
         "permissions": permissions,
     }, "查询成功")
+
+
+@router.post("/change-password")
+def change_password(
+    request: Request,
+    req: ChangePasswordRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """修改当前用户密码"""
+    if not verify_password(req.old_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"code": "INVALID_PASSWORD", "message": "原密码错误"},
+        )
+
+    current_user.hashed_password = hash_password(req.new_password)
+    meta = get_request_meta(request)
+    log_action(
+        db, action="password_change", resource_type="user",
+        resource_id=str(current_user.id), actor_id=current_user.id,
+        actor_name=current_user.display_name or current_user.username,
+        **meta,
+    )
+    db.commit()
+
+    return resp(message="密码修改成功")
