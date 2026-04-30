@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百八十一轮）
+
+### 工程：移除 Pydantic 已拦截的防御性死代码
+
+- orders.py：移除 quantity<=0 / unit_price<0 / 空明细检查（Pydantic gt=0 / min_length=1 已拦截）
+- payments.py：移除 amount<=0 检查（Pydantic field_validator 已拦截）
+- 净减 10 行，orders.py 97%→99%，payments.py 97%→98%，后端 403/403
+
 ## 2026-04-30（第一百八十轮）
 
 ### 测试：商品 SKU 测试补强
