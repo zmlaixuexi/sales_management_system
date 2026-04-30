@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-04-30（第二百轮）
+
+### 工程：实现记录同步至 Round 192-199
+
+- 新增 FEAT-58：CI 覆盖率检查（后端 --cov + 前端 --coverage）
+- 新增 FEAT-59：ruff 扩展规则 B904/SIM/C4/PERF 修复并加入 lint 配置
+- 新增 FEAT-60：CORS allow_methods/allow_headers 白名单收紧
+- 新增 FEAT-61：密码强度校验（字母+数字）
+- 新增 FEAT-62：密码修改接口 POST /auth/change-password
+
 ## 2026-04-30（第一百九十九轮）
 
 ### 工程：生产 nginx 镜像固定版本 1.27-alpine

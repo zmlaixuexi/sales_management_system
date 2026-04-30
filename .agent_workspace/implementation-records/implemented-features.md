@@ -6,6 +6,49 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-62
+
+### 密码修改接口
+
+- **文件**: `backend/app/api/v1/auth.py`, `backend/app/schemas/auth.py`, `backend/tests/test_auth.py`
+- **内容**: POST /auth/change-password — 验证旧密码 + 新密码强度校验 + 审计日志
+- **验证**: 421 后端通过（+3）
+- **效果**: 用户可自行修改密码，记录 password_change 审计日志
+
+## 功能编号：FEAT-20260430-61
+
+### 密码强度校验
+
+- **文件**: `backend/app/schemas/auth.py`, `backend/tests/test_validation.py`
+- **内容**: UserCreate.password field_validator 要求至少包含一个字母和一个数字
+- **验证**: 418 后端通过（+3）
+- **效果**: 防止纯数字或纯字母弱密码
+
+## 功能编号：FEAT-20260430-60
+
+### CORS 白名单收紧
+
+- **文件**: `backend/app/main.py`
+- **内容**: allow_methods 从 [*] 缩减为 GET/POST/PUT/DELETE/OPTIONS，allow_headers 从 [*] 缩减为 Authorization/Content-Type/X-Request-ID
+- **验证**: 418 后端通过，CORS 测试通过
+
+## 功能编号：FEAT-20260430-59
+
+### ruff 扩展规则（B904/SIM/C4/PERF）
+
+- **文件**: `backend/app/api/deps.py`, `backend/app/api/v1/auth.py`, `backend/app/api/v1/customers.py`, `backend/app/api/v1/files.py`, `backend/app/api/v1/orders.py`, `backend/app/api/v1/products.py`, `backend/pyproject.toml`
+- **内容**: 12 处代码改进（8 处异常链 + 2 处列表推导式 + 1 处三元表达式 + 1 处 Yoda 条件），lint select 新增 B/SIM/C4/PERF，B008 按文件排除
+- **验证**: ruff 0，415 后端通过
+
+## 功能编号：FEAT-20260430-58
+
+### CI 覆盖率检查
+
+- **文件**: `.github/workflows/ci.yml`
+- **内容**: 后端测试步骤添加 --cov，前端测试步骤添加 --coverage
+- **验证**: CI YAML 语法验证通过
+- **效果**: 本地和 CI 质量门禁完全一致
+
 ## 功能编号：FEAT-20260430-57
 
 ### 对象级权限 + 敏感字段泄露修复
