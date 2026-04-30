@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：安全加固
-当前任务编号：ROUND-227
-当前任务名称：文件上传魔数字节边界测试
+当前任务编号：ROUND-228
+当前任务名称：file_service 不可达分支移除 → 100% 覆盖
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 228：file_service 移除不可达 early return 分支，file_service 100% 覆盖，后端 431/431，仅 deps.py get_db 4 行不可测
 - Round 227：文件上传空内容和 WebP 魔数字节测试（+2），file_service 98%，后端 431/431
 - Round 226：报表数据范围过滤测试（+1），非 view_all 用户只看本人订单数据，reports.py 100% 覆盖，后端 429/429
 - Round 225：全量安全审计扫描（SQL 注入/路径遍历/批量赋值/信息泄露/密码泄露/CORS/Cookie/Token 存储/调试模式），未发现新问题，后端 428/428，ruff 0
@@ -158,7 +159,7 @@
 - 后端测试：214 → 426（+212）
 - 前端测试：97 → 123（+26）
 - 总计 549 测试，全部通过
-- 后端覆盖率：99.81%（426 测试，仅 deps.py get_db 4 行不可测）
+- 后端覆盖率：99.81%（431 测试，仅 deps.py get_db 4 行不可测，其余模块全部 100%）
 - 代码质量：ruff 0（含 B904/SIM/C4/PERF/RUF 扩展规则）+ ESLint 0 + build 零警告 + tsc 通过 + parse_uuid_or_400 统一到 deps.py + get_or_404 + resp() 响应函数 + useSubmit hook + ErrorBoundary 路由感知 + Pydantic schema 校验 + 死代码清除 + 延迟 import 清理 + __import__ 反模式消除 + __all__ 排序
 - 性能：10 个复合索引 + 3 个 N+1 查询修复（订单明细校验/库存扣减回滚/CSV 导入去重）+ 列表推导式优化
 - 安全：权限码全量审计 + RBAC + 数据范围 + 速率限制 + 敏感字段 + LIKE 转义 + 安全响应头（含静态资源补全）+ Token 刷新校验 + JWT 密钥启动检查 + CSV 导入大小限制 + CORS 白名单（方法+头精确指定）+ XSS 输入消毒（strip_html）+ 密码强度校验（字母+数字）+ 密码修改接口 + UUID 安全转换全量覆盖 + sort_by 白名单 + 收款导出数据范围过滤

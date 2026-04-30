@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第二百二十八轮）
+
+### 质量：移除 file_service 不可达分支
+
+- _validate_magic_bytes 中 content_type not in MAGIC_SIGNATURES 分支不可达（_validate_image 已过滤）
+- 移除 2 行死代码，file_service 覆盖率 98%→100%
+- 后端整体覆盖率 99.81%（仅 deps.py get_db 4 行不可测）
+
 ## 2026-04-30（第二百二十七轮）
 
 ### 测试：文件上传空内容和 WebP 魔数字节测试
