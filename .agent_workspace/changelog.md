@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第一百四十九轮）
+
+### 工程：GitHub Actions CI 工作流 + Makefile install 修正
+
+- 新增 `.github/workflows/ci.yml`：push/PR 触发，后端 ruff+pytest，前端 eslint+tsc+vitest+build
+- 两个 job 并行运行（backend + frontend）
+- 修复 Makefile `install` 目标：`pip install -r requirements.txt` → `pip install ".[dev]"`
+- 后端 314/314 通过
+
 ## 2026-04-30（第一百四十八轮）
 
 ### 工程：前端 vitest 覆盖率报告 + make coverage-frontend

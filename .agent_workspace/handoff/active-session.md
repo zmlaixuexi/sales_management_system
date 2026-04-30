@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-148
-当前任务名称：前端 vitest 覆盖率报告
+当前任务编号：ROUND-149
+当前任务名称：GitHub Actions CI 工作流
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 149：GitHub Actions CI 工作流 + Makefile install 修正 — push/PR 自动 ruff+pytest+eslint+tsc+vitest+build
 - Round 148：前端 vitest 覆盖率报告 + make coverage-frontend — API 层 87%/store 100%，前端 109/109
 - Round 147：审计日志服务单元测试（+7）— _mask_sensitive 脱敏/model_to_dict，后端 314/314
 - Round 146：pytest-cov 覆盖率报告 + make coverage — 93.87% 行覆盖率，307/307 通过
@@ -86,7 +87,7 @@
 - 性能：10 个复合索引 + 3 个 N+1 查询修复（订单明细校验/库存扣减回滚/CSV 导入去重）
 - 安全：权限码全量审计 + RBAC + 数据范围 + 速率限制 + 敏感字段 + LIKE 转义 + 安全响应头 + Token 刷新校验 + JWT 密钥启动检查 + CSV 导入大小限制 + CORS 验证测试
 - 可观测性：健康检查 + degraded + 请求日志 + 慢请求警告 + 请求 ID 全链路追踪 + 启动配置摘要日志 + 全局未处理异常处理器
-- 部署：Docker Compose + Nginx + 备份恢复 + Makefile（quality/typecheck/db-backup/restore）+ 环境变量完整同步 + 多阶段 Docker 构建 + 非 root 用户 + DB 连接池可配置
+- 部署：Docker Compose + Nginx + 备份恢复 + Makefile（quality/typecheck/coverage/db-backup/restore）+ 环境变量完整同步 + 多阶段 Docker 构建 + 非 root 用户 + DB 连接池可配置 + GitHub Actions CI
 - 测试工程：pytest 8 类标记自动分类 + .env.example 前后端对称 + CONTRIBUTING.md + pytest-cov 覆盖率报告 93.87%
 - 文档：README + testing.md + database.md + architecture.md + api.md + deployment.md 全部完成
 
