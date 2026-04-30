@@ -3,7 +3,7 @@
 import json
 import logging
 
-from app.core.logging import _JsonFormatter
+from app.core.logging import _JsonFormatter, get_logger
 from app.services.audit_service import log_action
 
 # ─── _JsonFormatter ─────────────────────────────────────────
@@ -87,3 +87,9 @@ def test_log_action_db_failure_returns_none():
         actor_name="tester",
     )
     assert result is None
+
+
+def test_get_logger_returns_named_logger():
+    """get_logger 返回指定名称的 logger"""
+    logger = get_logger("test_module")
+    assert logger.name == "test_module"

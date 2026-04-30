@@ -1,5 +1,6 @@
 """速率限制中间件测试"""
 
+import time
 import uuid
 
 from fastapi.testclient import TestClient
@@ -7,6 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.api.deps import get_db
+from app.core.ratelimit import _SlidingWindow
 from app.core.security import hash_password
 from app.db.session import Base
 from app.main import app
@@ -95,3 +97,16 @@ def test_03_rate_limit_429():
             assert body["detail"]["code"] == "RATE_LIMIT_EXCEEDED"
             break
     assert got_429, "应在大量请求后触发 429"
+
+
+def test_04_sliding_window_cleans_expired():
+    """滑动窗口清理过期条目"""
+    w = _SlidingWindow()
+    now = time.monotonic()
+    w.record(now - 120)  # 2 分钟前，已过期
+    w.record(now - 61)   # 61 秒前，已过期
+    w.record(now)         # 当前记录
+    # 60 秒窗口应清理 2 条过期
+    count = w.count(60.0, now)
+    assert count == 1
+    assert len(w.timestamps) == 1
