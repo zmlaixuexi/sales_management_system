@@ -2,15 +2,15 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-142
-当前任务名称：NotFound 组件测试
+当前任务编号：ROUND-143
+当前任务名称：列表页 joinedload 优化
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 143：列表页 joinedload 优化 — 商品/客户/订单列表消除 selectin 额外查询，292/292
 - Round 142：NotFound 组件测试（+3）— 404 渲染/按钮/导航，前端 109/109
-- Round 141：里程碑总结更新至 Round 95-141 + 实现记录补齐 FEAT-37~41
 - Round 140：CSV 导入去重 N+1 优化 — 预加载 SKU/手机号集合替代逐行查询，292/292
 - Round 139：库存扣减/回滚 N+1 优化 — _deduct/_restore 批量 FOR UPDATE IN 查询，292/292
 - Round 138：订单明细校验 N+1 优化 — _validate_and_prepare_items 批量 IN 查询替代逐行 get_or_404，292/292

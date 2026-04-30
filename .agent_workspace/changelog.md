@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-04-30（第一百四十三轮）
+
+### 性能：列表页 joinedload 优化
+
+- products list: `joinedload(Product.category)` 替代 selectin 额外查询
+- customers list: `joinedload(Customer.owner)` 替代 selectin 额外查询
+- orders list: `joinedload(SalesOrder.items/payments)` 替代 selectin 额外查询
+- 每个列表页从 2-3 次查询减少为 1 次 JOIN 查询
+- 后端 292/292 通过
+
 ## 2026-04-30（第一百四十二轮）
 
 ### 测试：NotFound 组件测试（+3，前端 109/109）
