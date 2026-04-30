@@ -75,6 +75,19 @@ def has_permission(user: User, permission_code: str) -> bool:
     return permission_code in _get_user_permissions(user)
 
 
+def check_owner_or_forbid(user: User, owner_id, view_all_code: str, label: str = "资源"):
+    """对象级权限：非 view_all 用户只能操作本人数据，否则 403。"""
+    if user.is_superuser:
+        return
+    if has_permission(user, view_all_code):
+        return
+    if owner_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "AUTH_FORBIDDEN", "message": f"无权访问此{label}"},
+        )
+
+
 def get_or_404(db: Session, model: type, entity_id: uuid.UUID | str, label: str = "资源"):
     """按 ID 查询实体，不存在则抛 404。自动过滤软删除。"""
     uid = uuid.UUID(str(entity_id))

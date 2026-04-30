@@ -6,6 +6,21 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-57
+
+### 对象级权限 + 敏感字段泄露修复
+
+- **文件**: `backend/app/api/deps.py`, `backend/app/api/v1/products.py`, `backend/app/api/v1/orders.py`, `backend/app/api/v1/customers.py`, `backend/app/api/v1/reports.py`, `backend/app/api/v1/exports.py`, `backend/app/services/export_service.py`
+- **内容**:
+  - 商品详情/创建/编辑/价格历史：无 `product:view_cost` 不返回成本价/利润/毛利率
+  - 订单列表/详情/创建：无 `product:view_cost` 不返回成本/毛利/成本快照
+  - 客户详情/编辑/删除/转移：非 view_all 用户只能操作本人客户
+  - 订单详情/编辑/确认/取消：非 view_all 用户只能操作本人订单
+  - 报表销售汇总/商品排行：无 `report:profit` 不返回成本/利润
+  - CSV 导出（商品/订单）：无 `product:view_cost` 排除成本列
+- **验证**: 342 后端通过，ruff 0
+- **效果**: 消除了 7 个 API 模块中敏感经营数据对无权限用户的泄露，以及销售只能操作本人数据的对象级权限检查
+
 ## 功能编号：FEAT-20260430-56
 
 ### X-Response-Time 响应头

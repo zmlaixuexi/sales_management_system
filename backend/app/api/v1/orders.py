@@ -7,7 +7,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session, joinedload
 
-from app.api.deps import get_db, get_or_404, has_permission, require_permission, resp
+from app.api.deps import check_owner_or_forbid, get_db, get_or_404, has_permission, require_permission, resp
 from app.core.sanitize import escape_like
 from app.models.customer import Customer
 from app.models.order import InventoryMovement, SalesOrder, SalesOrderItem
@@ -215,6 +215,7 @@ def list_orders(
     current_user: User = Depends(require_permission("order:list")),
 ):
     """订单列表"""
+    can_view_cost = has_permission(current_user, "product:view_cost")
     query = db.query(SalesOrder).filter(SalesOrder.deleted_at.is_(None))
 
     # 数据范围：无 order:view_all 权限只能看本人订单
@@ -238,7 +239,7 @@ def list_orders(
 
     items_out = []
     for o in orders:
-        items_out.append({
+        row: dict = {
             "id": str(o.id),
             "order_no": o.order_no,
             "customer_id": str(o.customer_id),
@@ -246,15 +247,17 @@ def list_orders(
             "status": o.status,
             "status_label": STATUS_LABELS.get(o.status, o.status),
             "total_amount": str(o.total_amount),
-            "total_cost": str(o.total_cost),
-            "gross_profit": str(o.gross_profit),
-            "gross_margin": str(o.gross_margin),
             "paid_amount": str(o.paid_amount),
             "item_count": len(o.items),
             "remark": o.remark,
             "created_at": o.created_at.isoformat() if o.created_at else None,
             "updated_at": o.updated_at.isoformat() if o.updated_at else None,
-        })
+        }
+        if can_view_cost:
+            row["total_cost"] = str(o.total_cost)
+            row["gross_profit"] = str(o.gross_profit)
+            row["gross_margin"] = str(o.gross_margin)
+        items_out.append(row)
 
     return resp(
         data={"items": items_out, "page": page, "page_size": page_size, "total": total},
@@ -313,18 +316,19 @@ def create_order(
     )
     db.commit()
 
-    return resp(
-        data={
-            "id": str(order.id),
-            "order_no": order.order_no,
-            "status": order.status,
-            "total_amount": str(order.total_amount),
-            "total_cost": str(order.total_cost),
-            "gross_profit": str(order.gross_profit),
-            "gross_margin": str(order.gross_margin),
-        },
-        message="创建成功",
-    )
+    can_view_cost = has_permission(current_user, "product:view_cost")
+    data: dict = {
+        "id": str(order.id),
+        "order_no": order.order_no,
+        "status": order.status,
+        "total_amount": str(order.total_amount),
+    }
+    if can_view_cost:
+        data["total_cost"] = str(order.total_cost)
+        data["gross_profit"] = str(order.gross_profit)
+        data["gross_margin"] = str(order.gross_margin)
+
+    return resp(data=data, message="创建成功")
 
 
 @router.get("/{order_id}", response_model=ApiResponse[OrderDetail])
@@ -336,9 +340,14 @@ def get_order(
     """订单详情"""
     order = get_or_404(db, SalesOrder, order_id, "订单")
 
+    # 对象级权限：非 view_all 只能看本人订单
+    check_owner_or_forbid(current_user, order.sales_user_id, "order:view_all", "订单")
+
+    can_view_cost = has_permission(current_user, "product:view_cost")
+
     items_out = []
     for item in order.items:
-        items_out.append({
+        irow: dict = {
             "id": str(item.id),
             "product_id": str(item.product_id),
             "product_sku_snapshot": item.product_sku_snapshot,
@@ -348,10 +357,12 @@ def get_order(
             "unit_price": str(item.unit_price),
             "discount_amount": str(item.discount_amount),
             "discount_rate": str(item.discount_rate),
-            "cost_price_snapshot": str(item.cost_price_snapshot),
             "subtotal_amount": str(item.subtotal_amount),
-            "subtotal_cost": str(item.subtotal_cost),
-        })
+        }
+        if can_view_cost:
+            irow["cost_price_snapshot"] = str(item.cost_price_snapshot)
+            irow["subtotal_cost"] = str(item.subtotal_cost)
+        items_out.append(irow)
 
     payments_out = []
     for p in order.payments:
@@ -365,27 +376,27 @@ def get_order(
                 "created_at": p.created_at.isoformat() if p.created_at else None,
             })
 
-    return resp(
-        data={
-            "id": str(order.id),
-            "order_no": order.order_no,
-            "customer_id": str(order.customer_id),
-            "sales_user_id": str(order.sales_user_id),
-            "status": order.status,
-            "status_label": STATUS_LABELS.get(order.status, order.status),
-            "total_amount": str(order.total_amount),
-            "total_cost": str(order.total_cost),
-            "gross_profit": str(order.gross_profit),
-            "gross_margin": str(order.gross_margin),
-            "paid_amount": str(order.paid_amount),
-            "remark": order.remark,
-            "items": items_out,
-            "payments": payments_out,
-            "created_at": order.created_at.isoformat() if order.created_at else None,
-            "updated_at": order.updated_at.isoformat() if order.updated_at else None,
-        },
-        message="查询成功",
-    )
+    data: dict = {
+        "id": str(order.id),
+        "order_no": order.order_no,
+        "customer_id": str(order.customer_id),
+        "sales_user_id": str(order.sales_user_id),
+        "status": order.status,
+        "status_label": STATUS_LABELS.get(order.status, order.status),
+        "total_amount": str(order.total_amount),
+        "paid_amount": str(order.paid_amount),
+        "remark": order.remark,
+        "items": items_out,
+        "payments": payments_out,
+        "created_at": order.created_at.isoformat() if order.created_at else None,
+        "updated_at": order.updated_at.isoformat() if order.updated_at else None,
+    }
+    if can_view_cost:
+        data["total_cost"] = str(order.total_cost)
+        data["gross_profit"] = str(order.gross_profit)
+        data["gross_margin"] = str(order.gross_margin)
+
+    return resp(data=data, message="查询成功")
 
 
 @router.put("/{order_id}")
@@ -398,6 +409,9 @@ def update_order(
 ):
     """编辑草稿订单"""
     order = get_or_404(db, SalesOrder, order_id, "订单")
+
+    check_owner_or_forbid(current_user, order.sales_user_id, "order:view_all", "订单")
+
     if order.status != "draft":
         raise HTTPException(status_code=400, detail={"code": "ORDER_INVALID_STATUS", "message": "只有草稿订单可以编辑"})
 
@@ -447,6 +461,9 @@ def confirm_order(
 ):
     """确认订单 — 扣减库存"""
     order = get_or_404(db, SalesOrder, order_id, "订单")
+
+    check_owner_or_forbid(current_user, order.sales_user_id, "order:view_all", "订单")
+
     if order.status != "draft":
         raise HTTPException(status_code=400, detail={"code": "ORDER_INVALID_STATUS", "message": "只有草稿订单可以确认"})
 
@@ -476,6 +493,8 @@ def cancel_order(
 ):
     """取消订单 — 回滚库存"""
     order = get_or_404(db, SalesOrder, order_id, "订单")
+
+    check_owner_or_forbid(current_user, order.sales_user_id, "order:view_all", "订单")
 
     allowed = VALID_TRANSITIONS.get(order.status, set())
     if "cancelled" not in allowed:

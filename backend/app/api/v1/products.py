@@ -212,23 +212,24 @@ def create_product(
     )
     db.commit()
 
-    return resp(
-        data={
-            "id": str(product.id),
-            "sku": product.sku,
-            "name": product.name,
-            "main_image_url": product.main_image_url,
-            "category_id": str(product.category_id) if product.category_id else None,
-            "sale_price": str(product.sale_price),
-            "cost_price": str(product.cost_price),
-            "unit_profit": str(unit_profit),
-            "gross_margin": str(gross_margin),
-            "stock_quantity": product.stock_quantity,
-            "status": product.status,
-            "sort_weight": product.sort_weight,
-        },
-        message="创建成功",
-    )
+    can_view_cost = has_permission(current_user, "product:view_cost")
+    data: dict = {
+        "id": str(product.id),
+        "sku": product.sku,
+        "name": product.name,
+        "main_image_url": product.main_image_url,
+        "category_id": str(product.category_id) if product.category_id else None,
+        "sale_price": str(product.sale_price),
+        "stock_quantity": product.stock_quantity,
+        "status": product.status,
+        "sort_weight": product.sort_weight,
+    }
+    if can_view_cost:
+        data["cost_price"] = str(product.cost_price)
+        data["unit_profit"] = str(unit_profit)
+        data["gross_margin"] = str(gross_margin)
+
+    return resp(data=data, message="创建成功")
 
 
 @router.get("/{product_id}", response_model=ApiResponse[ProductDetail])
@@ -241,38 +242,39 @@ def get_product(
     product = get_or_404(db, Product, product_id, "商品")
 
     unit_profit, gross_margin = _calc_profit(product.sale_price, product.cost_price)
+    can_view_cost = has_permission(current_user, "product:view_cost")
 
-    return resp(
-        data={
-            "id": str(product.id),
-            "sku": product.sku,
-            "name": product.name,
-            "main_image_url": product.main_image_url,
-            "category_id": str(product.category_id) if product.category_id else None,
-            "category_name": product.category.name if product.category else None,
-            "sale_price": str(product.sale_price),
-            "cost_price": str(product.cost_price),
-            "unit_profit": str(unit_profit),
-            "gross_margin": str(gross_margin),
-            "stock_quantity": product.stock_quantity,
-            "status": product.status,
-            "sort_weight": product.sort_weight,
-            "remark": product.remark,
-            "images": [
-                {
-                    "id": str(img.id),
-                    "file_id": str(img.file_id),
-                    "url": img.file.public_url if img.file else None,
-                    "is_primary": img.is_primary,
-                    "sort_order": img.sort_order,
-                }
-                for img in product.images
-            ],
-            "created_at": product.created_at.isoformat() if product.created_at else None,
-            "updated_at": product.updated_at.isoformat() if product.updated_at else None,
-        },
-        message="查询成功",
-    )
+    data: dict = {
+        "id": str(product.id),
+        "sku": product.sku,
+        "name": product.name,
+        "main_image_url": product.main_image_url,
+        "category_id": str(product.category_id) if product.category_id else None,
+        "category_name": product.category.name if product.category else None,
+        "sale_price": str(product.sale_price),
+        "stock_quantity": product.stock_quantity,
+        "status": product.status,
+        "sort_weight": product.sort_weight,
+        "remark": product.remark,
+        "images": [
+            {
+                "id": str(img.id),
+                "file_id": str(img.file_id),
+                "url": img.file.public_url if img.file else None,
+                "is_primary": img.is_primary,
+                "sort_order": img.sort_order,
+            }
+            for img in product.images
+        ],
+        "created_at": product.created_at.isoformat() if product.created_at else None,
+        "updated_at": product.updated_at.isoformat() if product.updated_at else None,
+    }
+    if can_view_cost:
+        data["cost_price"] = str(product.cost_price)
+        data["unit_profit"] = str(unit_profit)
+        data["gross_margin"] = str(gross_margin)
+
+    return resp(data=data, message="查询成功")
 
 
 @router.put("/{product_id}", response_model=ApiResponse[ProductBrief])
@@ -366,21 +368,22 @@ def update_product(
 
     unit_profit, gross_margin = _calc_profit(product.sale_price, product.cost_price)
 
-    return resp(
-        data={
-            "id": str(product.id),
-            "sku": product.sku,
-            "name": product.name,
-            "main_image_url": product.main_image_url,
-            "sale_price": str(product.sale_price),
-            "cost_price": str(product.cost_price),
-            "unit_profit": str(unit_profit),
-            "gross_margin": str(gross_margin),
-            "stock_quantity": product.stock_quantity,
-            "status": product.status,
-        },
-        message="更新成功",
-    )
+    can_view_cost = has_permission(current_user, "product:view_cost")
+    data: dict = {
+        "id": str(product.id),
+        "sku": product.sku,
+        "name": product.name,
+        "main_image_url": product.main_image_url,
+        "sale_price": str(product.sale_price),
+        "stock_quantity": product.stock_quantity,
+        "status": product.status,
+    }
+    if can_view_cost:
+        data["cost_price"] = str(product.cost_price)
+        data["unit_profit"] = str(unit_profit)
+        data["gross_margin"] = str(gross_margin)
+
+    return resp(data=data, message="更新成功")
 
 
 @router.delete("/{product_id}")
@@ -439,20 +442,23 @@ def price_history(
     current_user: User = Depends(require_permission("product:list")),
 ):
     """查看价格变更记录"""
+    can_view_cost = has_permission(current_user, "product:view_cost")
     history = db.query(ProductPriceHistory).filter(
         ProductPriceHistory.product_id == product_id
     ).order_by(ProductPriceHistory.created_at.desc()).all()
 
     items = []
     for h in history:
-        items.append({
+        row: dict = {
             "id": str(h.id),
             "old_sale_price": str(h.old_sale_price) if h.old_sale_price is not None else None,
             "new_sale_price": str(h.new_sale_price) if h.new_sale_price is not None else None,
-            "old_cost_price": str(h.old_cost_price) if h.old_cost_price is not None else None,
-            "new_cost_price": str(h.new_cost_price) if h.new_cost_price is not None else None,
             "created_at": h.created_at.isoformat() if h.created_at else None,
-        })
+        }
+        if can_view_cost:
+            row["old_cost_price"] = str(h.old_cost_price) if h.old_cost_price is not None else None
+            row["new_cost_price"] = str(h.new_cost_price) if h.new_cost_price is not None else None
+        items.append(row)
 
     return resp(data={"items": items}, message="查询成功")
 

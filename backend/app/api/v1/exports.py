@@ -41,7 +41,11 @@ def export_products_csv(
     current_user: User = Depends(require_permission("product:list")),
 ):
     """导出商品列表为 CSV"""
-    generator = export_products(db, keyword=keyword, status=status, category_id=category_id)
+    can_view_cost = has_permission(current_user, "product:view_cost")
+    generator = export_products(
+        db, keyword=keyword, status=status,
+        category_id=category_id, can_view_cost=can_view_cost,
+    )
     log_action(db, actor_id=current_user.id, actor_name=current_user.display_name,
                action="export_products", resource_type="product",
                after_data={"keyword": keyword, "status": status},
@@ -90,9 +94,11 @@ def export_orders_csv(
 ):
     """导出订单列表为 CSV"""
     sales_user_id = None if has_permission(current_user, "order:view_all") else current_user.id
+    can_view_cost = has_permission(current_user, "product:view_cost")
     generator = export_orders(
         db, keyword=keyword, status=status, customer_id=customer_id,
         start_date=start_date, end_date=end_date, sales_user_id=sales_user_id,
+        can_view_cost=can_view_cost,
     )
     log_action(db, actor_id=current_user.id, actor_name=current_user.display_name,
                action="export_orders", resource_type="order",

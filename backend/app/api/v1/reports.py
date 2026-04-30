@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, require_permission, resp
+from app.api.deps import get_db, has_permission, require_permission, resp
 from app.core.config import settings
 from app.models.order import SalesOrder, SalesOrderItem
 from app.models.product import Product
@@ -73,16 +73,20 @@ def sales_summary(
         __import__("decimal").Decimal("0.01")
     ) if total_amount and total_amount > 0 else 0
 
-    return resp({
+    can_view_profit = has_permission(current_user, "report:profit")
+    data: dict = {
         "total_amount": str(total_amount),
-        "total_cost": str(total_cost),
-        "gross_profit": str(gross_profit),
-        "gross_margin": str(gross_margin),
         "order_count": order_count,
         "period": period,
         "start_date": start.isoformat(),
         "end_date": end.isoformat(),
-    })
+    }
+    if can_view_profit:
+        data["total_cost"] = str(total_cost)
+        data["gross_profit"] = str(gross_profit)
+        data["gross_margin"] = str(gross_margin)
+
+    return resp(data)
 
 
 @router.get("/sales-trend")
@@ -134,6 +138,7 @@ def product_ranking(
     current_user: User = Depends(require_permission("report:sales")),
 ):
     """商品销售排行：按销售额排序"""
+    can_view_profit = has_permission(current_user, "report:profit")
     start, end = _date_range(period)
     start_dt = datetime.combine(start, datetime.min.time())
     end_dt = datetime.combine(end, datetime.max.time())
@@ -166,15 +171,17 @@ def product_ranking(
 
     items = []
     for idx, r in enumerate(rows, 1):
-        items.append({
+        row: dict = {
             "rank": idx,
             "product_id": str(r.product_id),
             "product_name": r.product_name_snapshot,
             "sku": r.product_sku_snapshot,
             "total_sales": str(r.total_sales),
-            "total_cost": str(r.total_cost),
             "total_quantity": r.total_quantity,
-        })
+        }
+        if can_view_profit:
+            row["total_cost"] = str(r.total_cost)
+        items.append(row)
 
     return resp({"items": items, "period": period})
 

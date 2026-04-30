@@ -8,7 +8,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile
 from sqlalchemy.orm import Session, joinedload
 
-from app.api.deps import get_db, get_or_404, has_permission, require_permission, resp
+from app.api.deps import check_owner_or_forbid, get_db, get_or_404, has_permission, require_permission, resp
 from app.core.config import settings
 from app.core.sanitize import escape_like
 from app.models.customer import Customer
@@ -175,6 +175,8 @@ def get_customer(
     """客户详情"""
     customer = get_or_404(db, Customer, customer_id, "客户")
 
+    check_owner_or_forbid(current_user, customer.owner_user_id, "customer:view_all", "客户")
+
     return resp(
         data={
             "id": str(customer.id),
@@ -205,6 +207,8 @@ def update_customer(
 ):
     """编辑客户"""
     customer = get_or_404(db, Customer, customer_id, "客户")
+
+    check_owner_or_forbid(current_user, customer.owner_user_id, "customer:view_all", "客户")
 
     if data.name is not None:
         name = data.name.strip()
@@ -272,6 +276,8 @@ def delete_customer(
     """删除客户（软删除）"""
     customer = get_or_404(db, Customer, customer_id, "客户")
 
+    check_owner_or_forbid(current_user, customer.owner_user_id, "customer:view_all", "客户")
+
     customer.deleted_at = datetime.now()
     customer.updated_by = current_user.id
     log_action(
@@ -296,6 +302,8 @@ def transfer_customer(
 ):
     """转移客户归属销售"""
     customer = get_or_404(db, Customer, customer_id, "客户")
+
+    check_owner_or_forbid(current_user, customer.owner_user_id, "customer:view_all", "客户")
 
     new_owner_id = data.owner_user_id
 
