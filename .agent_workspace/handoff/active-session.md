@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：测试补强
-当前任务编号：ROUND-164
-当前任务名称：check_owner_or_forbid 单元测试
+当前任务编号：ROUND-165
+当前任务名称：商品列表筛选/排序 + 创建校验测试
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 165：商品列表筛选/排序 + 创建校验测试（+5）— keyword/status/sort/空名称/错误价格，后端 351/351
 - Round 164：check_owner_or_forbid 单元测试（+4）— 超管/view_all/所有者/403 分支覆盖，后端 346/346
 - Round 163：OrderDetail 操作防重复 — actionLoading 统一管理确认/取消/收款/冲正的 loading 和防重复点击，前端 115/115
 - Round 162：前端静默错误修复 + 429 重试测试 — Dashboard/AuditLogs 错误提示 + 拦截器 429 测试（+2），前端 115/115
@@ -81,7 +82,7 @@
 
 ## 当前测试状态
 
-- 后端：346/346 通过
+- 后端：351/351 通过
 - 前端：115/115 通过
 - ruff：0 issues
 - ESLint：0 warnings
