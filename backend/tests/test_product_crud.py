@@ -156,6 +156,17 @@ def test_03c_update_product_sku_duplicate():
     assert resp.json()["detail"]["code"] == "PRODUCT_SKU_DUPLICATED"
 
 
+def test_03c2_update_product_sku_success():
+    """编辑商品 SKU 更新成功"""
+    resp = client.put(f"/api/v1/products/{_product_id}", json={
+        "sku": "SPU-NEW-001",
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    resp = client.get(f"/api/v1/products/{_product_id}", headers=_auth())
+    assert resp.json()["data"]["sku"] == "SPU-NEW-001"
+
+
 def test_03d_update_product_cost_price_negative():
     """编辑商品成本价为负"""
     resp = client.put(f"/api/v1/products/{_product_id}", json={
