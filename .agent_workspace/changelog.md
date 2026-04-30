@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百五十轮）
+
+### 测试：商品利润计算函数单元测试（+6，后端 320/320）
+
+- `_calc_profit`: 基本利润/零售价除零保护/亏损/零利润/精度/高毛利率
+- conftest.py 注册 test_product_calc 为 crud 标记
+- 后端 320/320 通过
+
 ## 2026-04-30（第一百四十九轮）
 
 ### 工程：GitHub Actions CI 工作流 + Makefile install 修正
