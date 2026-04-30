@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-04-30（第二百零四轮）
+
+### 文档：同步测试数至 545（422 后端 + 123 前端）
+
+- README 认证测试 10→13，auth API 4→5，合计更新
+- testing.md test_auth.py 10→13，auth-api.test.ts 4→5，概览同步
+
 ## 2026-04-30（第二百零三轮）
 
 ### 前端：authApi 新增 changePassword 接口调用
