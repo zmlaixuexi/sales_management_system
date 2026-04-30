@@ -120,3 +120,27 @@ def test_unhandled_exception_returns_json():
         assert "something broke" not in str(data)
     finally:
         app.routes[:] = [r for r in app.routes if getattr(r, "path", None) != "/api/v1/_test_crash"]
+
+
+def test_cors_allowed_origin():
+    """允许的 Origin 应返回 CORS 响应头"""
+    response = client.options(
+        "/api/v1/health",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+    assert response.headers.get("access-control-allow-origin") == "http://localhost:5173"
+
+
+def test_cors_disallowed_origin():
+    """不允许的 Origin 不应返回 CORS 响应头"""
+    response = client.options(
+        "/api/v1/health",
+        headers={
+            "Origin": "http://evil.example.com",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+    assert "access-control-allow-origin" not in response.headers
