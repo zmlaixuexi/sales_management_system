@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：P2 前端完善
-当前任务编号：ROUND-162
-当前任务名称：前端静默错误修复 + 429 重试测试
+当前任务编号：ROUND-163
+当前任务名称：OrderDetail 操作防重复 + loading 状态
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 163：OrderDetail 操作防重复 — actionLoading 统一管理确认/取消/收款/冲正的 loading 和防重复点击，前端 115/115
 - Round 162：前端静默错误修复 + 429 重试测试 — Dashboard/AuditLogs 错误提示 + 拦截器 429 测试（+2），前端 115/115
 - Round 161：收款接口对象级权限 — list_payments 数据范围过滤 + create/reverse 归属检查，后端 342/342
 - Round 160：对象级权限 + 敏感字段泄露修复 — 7 个 API 文件修复，后端 342/342
@@ -88,7 +89,7 @@
 
 ## 下一步第一动作
 
-P2 前端静默错误和 429 测试已补齐。建议继续从代码质量（OrderDetail 重构 useSubmit）、测试补强或部署体验中选择下一步。
+OrderDetail 操作防重复已完成。建议继续从测试补强（OrderDetail 页面测试）、代码质量或安全加固中选择下一步。
 
 ## 当前里程碑总结（Round 95-147）
 

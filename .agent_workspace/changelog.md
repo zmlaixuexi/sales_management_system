@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第一百六十三轮）
+
+### 体验：OrderDetail 操作防重复 + loading 状态
+
+- 确认/取消/收款/冲正四个操作统一使用 actionLoading 状态管理
+- 操作进行中显示 loading 动画，其他按钮 disabled 防止并发操作
+- 移除独立的 payLoading 状态，统一到 actionLoading
+- 前端 115/115 通过，tsc/ESLint 0
+
 ## 2026-04-30（第一百六十二轮）
 
 ### 前端：静默错误修复 + 429 重试测试
