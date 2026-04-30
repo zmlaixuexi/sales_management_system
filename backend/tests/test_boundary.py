@@ -732,3 +732,31 @@ def test_38_reverse_payment_on_cancelled_order():
     resp = client.post(f"/api/v1/payments/{payment_id}/reverse", headers=_auth())
     assert resp.status_code == 400
     assert resp.json()["detail"]["code"] == "ORDER_INVALID_STATUS"
+
+
+def test_39_order_with_deleted_product_rejected():
+    """已删除商品不能创建订单"""
+    if not _tokens.get("access"):
+        resp = client.post("/api/v1/auth/login", json={
+            "username": "boundary_admin", "password": "pass123456",
+        })
+        assert resp.status_code == 200
+        _tokens["access"] = resp.json()["data"]["access_token"]
+
+    # 创建新商品 → 软删除
+    resp = client.post("/api/v1/products", json={
+        "name": "待删商品", "sku": "DEL-001", "sale_price": "10", "cost_price": "5",
+    }, headers=_auth())
+    assert resp.status_code == 200
+    del_product_id = resp.json()["data"]["id"]
+
+    resp = client.delete(f"/api/v1/products/{del_product_id}", headers=_auth())
+    assert resp.status_code == 200
+
+    # 用已删除商品创建订单应返回 404
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": del_product_id, "quantity": 1}],
+    }, headers=_auth())
+    assert resp.status_code == 404
+    assert resp.json()["detail"]["code"] == "RESOURCE_NOT_FOUND"

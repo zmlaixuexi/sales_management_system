@@ -122,7 +122,9 @@ def _validate_and_prepare_items(db: Session, raw_items: list) -> list[dict]:
     """校验订单明细行并返回准备好的数据"""
     # 批量查询所有商品，将 N 次查询减少为 1 次
     product_ids = [parse_uuid_or_400(ri.product_id, "商品 ID") for ri in raw_items]
-    products = db.query(Product).filter(Product.id.in_(product_ids)).all()
+    products = db.query(Product).filter(
+        Product.id.in_(product_ids), Product.deleted_at.is_(None),
+    ).all()
     product_map = {p.id: p for p in products}
 
     prepared: list[dict] = []
