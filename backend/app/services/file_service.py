@@ -36,8 +36,6 @@ def _validate_image(filename: str, content_type: str, size: int) -> None:
 
 def _validate_magic_bytes(content: bytes, content_type: str) -> None:
     """校验文件头魔数字节，防止伪装扩展名上传"""
-    if content_type not in MAGIC_SIGNATURES:
-        return
     if not content:
         raise ValueError("文件内容为空")
     for sig in MAGIC_SIGNATURES[content_type]:
