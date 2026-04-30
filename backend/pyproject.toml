@@ -68,4 +68,4 @@ omit = ["app/db/seed.py", "app/main.py"]
 [tool.coverage.report]
 show_missing = true
 skip_covered = false
-fail_under = 95
+fail_under = 99
