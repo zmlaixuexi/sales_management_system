@@ -2,15 +2,17 @@
 
 最后更新时间：2026-04-30
 当前阶段：测试补强
-当前任务编号：ROUND-192
-当前任务名称：CI 覆盖率检查
+当前任务编号：ROUND-193
+当前任务名称：ruff 扩展规则修复
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 193：ruff 扩展规则 B904/SIM/C4/PERF 修复（8 处异常链 + 2 处列表推导式 + 1 处三元表达式 + 1 处 Yoda 条件），pyproject.toml lint select 新增 B/SIM/C4/PERF，ruff 0，后端 415/415
 - Round 192：CI 后端测试添加 --cov 覆盖率检查（阈值 70%），当前实际 99.81%
 - Round 191：里程碑总结更新至 Round 95-190，make ci 全量质量验证通过
+- Round 193：ruff 扩展规则 B904/SIM/C4/PERF 修复并加入 lint 配置（-4 行净减），ruff 0，后端 415/415
 - Round 190：前端 Dockerfile 运行阶段固定 alpine:3.21（避免 latest 不可预测变更）
 - Round 188：移除死代码 MainLayout（已被 AppLayout 取代），-226 行，前端 122/122
 - Round 187：AppLayout 用户加载/导航/退出 + ProtectedRoute 重定向（+6），前端 128/128
@@ -117,7 +119,7 @@
 
 ## 下一步第一动作
 
-后端 99.81%（4 行不可测），前端 122/122。所有 API 模块 100%，前端 ErrorBoundary/ProtectedRoute/AppLayout 已覆盖。建议继续前端页面测试或安全加固。
+后端 99.81%（4 行不可测），前端 122/122。所有 API 模块 100%，前端 ErrorBoundary/ProtectedRoute/AppLayout 已覆盖。ruff 扩展规则已全部修复。建议继续前端页面测试或安全加固。
 
 ## 当前里程碑总结（Round 95-190）
 
@@ -125,7 +127,7 @@
 - 前端测试：97 → 122（+25）
 - 总计 537 测试，全部通过
 - 后端覆盖率：99.81%（415 测试，仅 deps.py get_db 4 行不可测）
-- 代码质量：ruff 0 + ESLint 0 + build 零警告 + tsc 通过 + 代码分割 + 列表页统一 hook + get_or_404 + resp() 响应函数 + useSubmit hook + ErrorBoundary 路由感知 + Pydantic schema 校验 + 死代码清除 + 死代码组件移除（MainLayout）
+- 代码质量：ruff 0（含 B904/SIM/C4/PERF 扩展规则）+ ESLint 0 + build 零警告 + tsc 通过 + 代码分割 + 列表页统一 hook + get_or_404 + resp() 响应函数 + useSubmit hook + ErrorBoundary 路由感知 + Pydantic schema 校验 + 死代码清除 + 死代码组件移除（MainLayout）
 - 性能：10 个复合索引 + 3 个 N+1 查询修复（订单明细校验/库存扣减回滚/CSV 导入去重）
 - 安全：权限码全量审计 + RBAC + 数据范围 + 速率限制 + 敏感字段 + LIKE 转义 + 安全响应头（含静态资源补全）+ Token 刷新校验 + JWT 密钥启动检查 + CSV 导入大小限制 + CORS 验证测试 + XSS 输入消毒（strip_html）
 - 可观测性：健康检查 + degraded + 请求日志 + 慢请求警告 + 请求 ID 全链路追踪 + 启动配置摘要日志 + 全局未处理异常处理器

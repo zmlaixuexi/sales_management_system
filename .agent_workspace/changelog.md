@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-04-30（第一百九十三轮）
+
+### 工程：ruff 扩展规则 B904/SIM/C4/PERF 修复并加入 lint 配置
+
+- B904：8 处 except 块 raise 添加 from None/from e 异常链声明（deps.py/auth.py/files.py/customers.py/products.py）
+- PERF401：customers.py 和 orders.py 循环 append 改为列表推导式（-4 行）
+- SIM108：products.py category_id if-else 改为三元表达式（-3 行）
+- SIM300：test_health.py 修正比较类型不匹配（str vs list → list vs list）
+- pyproject.toml lint select 新增 B/SIM/C4/PERF 规则，B008 按 per-file-ignores 排除（FastAPI Depends 误报）
+- ruff 0 issues，后端 415/415 通过
+
 ## 2026-04-30（第一百九十二轮）
 
 ### 工程：CI 后端测试添加覆盖率检查（--cov，阈值 70%）
