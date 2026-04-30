@@ -4,7 +4,7 @@ import uuid
 from decimal import Decimal
 from unittest.mock import MagicMock
 
-from app.api.v1.orders import _calc_order_totals, _prepare_item  # noqa: I001
+from app.api.v1.orders import _calc_order_totals, _prepare_item
 
 # ─── _calc_order_totals ─────────────────────────────────────
 

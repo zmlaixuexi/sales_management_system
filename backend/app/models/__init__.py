@@ -5,9 +5,20 @@ from app.models.product import File, Product, ProductCategory, ProductImage, Pro
 from app.models.user import Permission, Role, RolePermission, User, UserRole
 
 __all__ = [
-    "User", "Role", "Permission", "UserRole", "RolePermission",
-    "Product", "ProductCategory", "File", "ProductImage", "ProductPriceHistory",
-    "Customer",
-    "SalesOrder", "SalesOrderItem", "InventoryMovement", "Payment",
     "AuditLog",
+    "Customer",
+    "File",
+    "InventoryMovement",
+    "Payment",
+    "Permission",
+    "Product",
+    "ProductCategory",
+    "ProductImage",
+    "ProductPriceHistory",
+    "Role",
+    "RolePermission",
+    "SalesOrder",
+    "SalesOrderItem",
+    "User",
+    "UserRole",
 ]

@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-import app.core.logging  # noqa: F401 — 确保日志初始化
+import app.core.logging
 from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.ratelimit import add_rate_limit
@@ -77,7 +77,7 @@ app = FastAPI(
 
 
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
+def validation_exception_handler(request: Request, exc: RequestValidationError):
     """将 FastAPI 默认 422 校验错误统一为 {detail: {code, message}} 格式"""
     errors = exc.errors()
     first = errors[0] if errors else {}
@@ -91,7 +91,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 
 @app.exception_handler(Exception)
-async def unhandled_exception_handler(request: Request, exc: Exception):
+def unhandled_exception_handler(request: Request, exc: Exception):
     """全局未处理异常：返回一致的 JSON 格式，防止泄露内部详情"""
     rid = request.headers.get("x-request-id", "")
     logger.exception("未处理异常 [%s] %s rid=%s", request.method, request.url.path, rid)
