@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：代码质量
-当前任务编号：ROUND-135
-当前任务名称：Makefile quality 命令
+当前任务编号：ROUND-136
+当前任务名称：前端构建消除警告
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 136：前端构建消除 chunk 大小警告 — Ant Design 已最优拆分，build 零警告
 - Round 135：Makefile 新增 make quality 命令 — lint + typecheck + test 一键质量检查
 - Round 134：文档同步测试数至 398（292 后端 + 106 前端）+ testing.md 新增 pytest 标记分类表
 - Round 133：CORS 来源验证测试 — 允许/拒绝 Origin 响应头检查（+2，292/292）

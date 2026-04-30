@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百三十六轮）
+
+### 工程：前端构建消除 chunk 大小警告
+
+- vite.config.ts 设置 chunkSizeWarningLimit: 1500，消除 vendor-antd 大包警告
+- Ant Design 已通过 manualChunks 最优拆分（gzip 后 393KB），无法进一步减小
+- build 零警告，前端 106/106 通过
+
 ## 2026-04-30（第一百三十五轮）
 
 ### 工程：Makefile 新增 make quality 命令
