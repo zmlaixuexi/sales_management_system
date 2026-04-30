@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-04-30（第二百三十八轮）
+
+### 修复：订单更新未校验客户存在性 + 客户创建/编辑未校验归属用户
+
+- update_order 的 customer_id 更新添加 get_or_404 校验（含 deleted_at 过滤）
+- create_customer / update_customer 的 owner_user_id 添加 _validate_owner_user 校验（存在 + is_active + deleted_at）
+- transfer_customer 重复校验代码提取为 _validate_owner_user 复用
+- 修复前：订单可关联已删除客户；客户可归属于不存在或已禁用的用户
+- 新增 test_43：订单更新客户 ID 为已删除客户返回 404 RESOURCE_NOT_FOUND
+- 新增 test_44：创建客户指定不存在归属用户返回 400 VALIDATION_FAILED
+- 后端 439/439，ruff 0
+
 ## 2026-04-30（第二百三十七轮）
 
 ### 修复：超级管理员可停用自身账号 + 创建用户未校验角色存在性
