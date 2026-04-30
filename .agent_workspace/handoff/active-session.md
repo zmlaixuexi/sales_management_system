@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：测试补强
-当前任务编号：ROUND-190
-当前任务名称：前端 Dockerfile 版本固定
+当前任务编号：ROUND-191
+当前任务名称：里程碑总结更新 + 全量质量验证
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 191：里程碑总结更新至 Round 95-190，make ci 全量质量验证通过
 - Round 190：前端 Dockerfile 运行阶段固定 alpine:3.21（避免 latest 不可预测变更）
 - Round 189：nginx 静态资源补全 Referrer-Policy/Permissions-Policy/CSP 头
 - Round 188：移除死代码 MainLayout（已被 AppLayout 取代），-226 行，前端 122/122
@@ -116,20 +117,20 @@
 
 ## 下一步第一动作
 
-前端 ErrorBoundary 达到 100%。剩余前端组件 MainLayout/AppLayout/路由/页面组件均为 0%。建议继续前端页面测试补强或部署体验改进。
+后端 99.81%（4 行不可测），前端 122/122。所有 API 模块 100%，前端 ErrorBoundary/ProtectedRoute/AppLayout 已覆盖。建议继续前端页面测试或安全加固。
 
-## 当前里程碑总结（Round 95-173）
+## 当前里程碑总结（Round 95-190）
 
-- 后端测试：214 → 385（+171）
-- 前端测试：97 → 115（+18）
-- 总计 500 测试，全部通过
-- 后端覆盖率：98%（385 测试）
-- 代码质量：ruff 0 + ESLint 0 + build 零警告 + tsc 通过 + 代码分割 + 列表页统一 hook + get_or_404 + resp() 响应函数 + useSubmit hook + ErrorBoundary 路由感知 + Pydantic schema 校验 + 死代码清除
+- 后端测试：214 → 415（+201）
+- 前端测试：97 → 122（+25）
+- 总计 537 测试，全部通过
+- 后端覆盖率：99.81%（415 测试，仅 deps.py get_db 4 行不可测）
+- 代码质量：ruff 0 + ESLint 0 + build 零警告 + tsc 通过 + 代码分割 + 列表页统一 hook + get_or_404 + resp() 响应函数 + useSubmit hook + ErrorBoundary 路由感知 + Pydantic schema 校验 + 死代码清除 + 死代码组件移除（MainLayout）
 - 性能：10 个复合索引 + 3 个 N+1 查询修复（订单明细校验/库存扣减回滚/CSV 导入去重）
-- 安全：权限码全量审计 + RBAC + 数据范围 + 速率限制 + 敏感字段 + LIKE 转义 + 安全响应头 + Token 刷新校验 + JWT 密钥启动检查 + CSV 导入大小限制 + CORS 验证测试 + XSS 输入消毒（strip_html）
+- 安全：权限码全量审计 + RBAC + 数据范围 + 速率限制 + 敏感字段 + LIKE 转义 + 安全响应头（含静态资源补全）+ Token 刷新校验 + JWT 密钥启动检查 + CSV 导入大小限制 + CORS 验证测试 + XSS 输入消毒（strip_html）
 - 可观测性：健康检查 + degraded + 请求日志 + 慢请求警告 + 请求 ID 全链路追踪 + 启动配置摘要日志 + 全局未处理异常处理器
-- 部署：Docker Compose + Nginx + 备份恢复 + Makefile（quality/typecheck/coverage/db-backup/restore）+ 环境变量完整同步 + 多阶段 Docker 构建 + 非 root 用户 + DB 连接池可配置 + GitHub Actions CI
-- 测试工程：pytest 8 类标记自动分类 + .env.example 前后端对称 + CONTRIBUTING.md + pytest-cov 覆盖率报告 93.87%
+- 部署：Docker Compose + Nginx + 备份恢复 + Makefile（ci/quality/typecheck/coverage/db-backup/restore）+ 环境变量完整同步 + 多阶段 Docker 构建 + 非 root 用户 + DB 连接池可配置 + GitHub Actions CI + Dockerfile 版本固定
+- 测试工程：pytest 8 类标记自动分类 + .env.example 前后端对称 + CONTRIBUTING.md + pytest-cov 覆盖率报告 99.81% + 前端 vitest 覆盖率
 - 文档：README + testing.md + database.md + architecture.md + api.md + deployment.md 全部完成
 
 ## 阻塞问题
