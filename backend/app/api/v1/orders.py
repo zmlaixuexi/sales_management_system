@@ -5,7 +5,7 @@ from datetime import datetime
 from decimal import ROUND_HALF_UP, Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.api.deps import get_db, get_or_404, has_permission, require_permission, resp
 from app.core.sanitize import escape_like
@@ -229,7 +229,7 @@ def list_orders(
 
     query = query.order_by(SalesOrder.created_at.desc())
     total = query.count()
-    orders = query.offset((page - 1) * page_size).limit(page_size).all()
+    orders = query.options(joinedload(SalesOrder.items), joinedload(SalesOrder.payments)).offset((page - 1) * page_size).limit(page_size).all()
 
     items_out = []
     for o in orders:
