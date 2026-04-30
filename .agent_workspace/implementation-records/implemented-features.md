@@ -6,6 +6,15 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-45
+
+### 前端 vitest 覆盖率报告
+
+- **文件**: `frontend/vite.config.ts`, `frontend/package.json`, `Makefile`
+- **内容**: 安装 @vitest/coverage-v8，配置覆盖率（v8 provider），新增 `make coverage-frontend` 目标
+- **验证**: 前端 109/109 通过，API 层 87%，store 100%
+- **效果**: 前后端覆盖率报告对称，一键查看覆盖情况
+
 ## 功能编号：FEAT-20260430-44
 
 ### 审计日志服务单元测试

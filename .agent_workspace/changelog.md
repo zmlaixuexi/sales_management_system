@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-04-30（第一百四十八轮）
+
+### 工程：前端 vitest 覆盖率报告 + make coverage-frontend
+
+- 安装 `@vitest/coverage-v8`，配置 vite.config.ts coverage（v8 provider）
+- 前端覆盖率：语句 26.17%、分支 19.67%、函数 24%、行 26.24%
+- API 层 87%、store 100%、hooks 已覆盖、pages 0%（需 MSW）
+- Makefile 新增 `make coverage-frontend` 目标
+- 前端 109/109 通过
+
 ## 2026-04-30（第一百四十七轮）
 
 ### 测试：审计日志服务单元测试（+7，后端 314/314）
