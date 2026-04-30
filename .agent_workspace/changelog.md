@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第二百四十三轮）
+
+### 工程：files.py/users.py 移除不可达分支
+
+- delete_image 中 delete_file 返回 False 分支已在上面 file_record 检查后不可达
+- _validate_roles_exist 空列表提前返回不可达（调用方已过滤）
+- files.py 100%，users.py 100%，仅 deps.py get_db 5 行不可测
+- 后端 442/442，覆盖率 99.77%，ruff 0
+
 ## 2026-04-30（第二百四十二轮）
 
 ### 工程：重复问题台账更新
