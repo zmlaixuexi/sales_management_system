@@ -294,3 +294,15 @@ def test_14_delete_other_user_file_forbidden():
     )
     assert resp.status_code == 403
     assert resp.json()["detail"]["code"] == "AUTH_FORBIDDEN"
+
+
+def test_15_delete_file_service_returns_false_for_missing():
+    """file_service.delete_file 对不存在的文件返回 False"""
+    from app.services.file_service import delete_file
+
+    db = TestSession()
+    try:
+        result = delete_file(db, uuid.uuid4())
+        assert result is False
+    finally:
+        db.close()
