@@ -112,9 +112,19 @@ def _prepare_item(
 
 def _validate_and_prepare_items(db: Session, raw_items: list) -> list[dict]:
     """校验订单明细行并返回准备好的数据"""
+    # 批量查询所有商品，将 N 次查询减少为 1 次
+    product_ids = [uuid.UUID(str(ri.product_id)) for ri in raw_items]
+    products = db.query(Product).filter(Product.id.in_(product_ids)).all()
+    product_map = {p.id: p for p in products}
+
     prepared: list[dict] = []
     for ri in raw_items:
-        product = get_or_404(db, Product, str(ri.product_id), "商品")
+        product = product_map.get(uuid.UUID(str(ri.product_id)))
+        if product is None:
+            raise HTTPException(
+                status_code=404,
+                detail={"code": "RESOURCE_NOT_FOUND", "message": "商品不存在"},
+            )
         if product.status != "active":
             raise HTTPException(
                 status_code=400,
