@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百三十三轮）
+
+### 安全：CORS 来源验证测试
+
+- 新增 test_cors_allowed_origin：验证允许的 Origin 返回 CORS 响应头
+- 新增 test_cors_disallowed_origin：验证不允许的 Origin 不返回 CORS 响应头
+- 后端 292/292 通过（+2）
+
 ## 2026-04-30（第一百三十二轮）
 
 ### 工程：pytest 测试标记分类
