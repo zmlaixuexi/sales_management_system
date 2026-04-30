@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第二百零三轮）
+
+### 前端：authApi 新增 changePassword 接口调用
+
+- auth.ts 新增 changePassword(oldPassword, newPassword) 方法
+- auth-api.test.ts 新增 changePassword 调用验证测试
+- 前端 123/123（+1），ESLint 0，tsc 0
+
 ## 2026-04-30（第二百零二轮）
 
 ### 工程：ruff 添加 UP（pyupgrade）规则

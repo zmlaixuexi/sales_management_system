@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：测试补强
-当前任务编号：ROUND-202
-当前任务名称：ruff UP 规则
+当前任务编号：ROUND-203
+当前任务名称：前端 changePassword API
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 203：前端 authApi 新增 changePassword 接口调用 + 测试（+1），前端 123/123
 - Round 202：ruff 添加 UP（pyupgrade）规则，修复 4 处现代化（UTC/Generator），后端 422/422
 - Round 201：密码修改纯字母拒绝测试（+1），覆盖率恢复 99.81%，后端 422/422
 - Round 200：实现记录同步至 Round 192-199（FEAT-58 至 FEAT-62）+ 里程碑总结更新至 Round 95-200
@@ -118,7 +119,7 @@
 ## 当前测试状态
 
 - 后端：422/422 通过
-- 前端：122/122 通过
+- 前端：123/123 通过
 - ruff：0 issues
 - ESLint：0 warnings
 - build：通过
