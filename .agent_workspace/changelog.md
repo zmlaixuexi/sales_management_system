@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-04-30（第二百一十三轮）
+
+### 工程：main.py 消除 lifespan 内延迟 import
+
+- `from app.db.session import engine` 从 lifespan yield 后移至顶层
+- 后端 423/423，ruff 0
+
 ## 2026-04-30（第二百一十二轮）
 
 ### 工程：files.py 消除函数内延迟 import
