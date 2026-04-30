@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-04-30（第二百四十轮）
+
+### 修复：商品创建/编辑未校验分类存在性
+
+- create_product / update_product 的 category_id 添加 _validate_category_id 校验
+- 修复前：指定不存在的分类 ID 导致数据库 IntegrityError（500），而非友好 400
+- 新增 test_45：创建商品指定不存在分类返回 400 VALIDATION_FAILED
+- 新增 test_46：更新商品分类为不存在分类返回 400 VALIDATION_FAILED
+- 后端 442/442，ruff 0
+
 ## 2026-04-30（第二百三十九轮）
 
 ### 修复：文件删除缺少对象级权限校验
