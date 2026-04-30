@@ -6,6 +6,15 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260430-65
+
+### ruff RUF 规则扩展
+
+- **文件**: `backend/pyproject.toml`, `backend/app/main.py`, `backend/app/models/__init__.py`, `backend/tests/test_order_calc.py`
+- **内容**: 添加 RUF 规则（忽略 RUF001/002/003 中文全角字符），修复 2 虚假 async + 2 未使用 noqa + __all__ 排序
+- **验证**: 426 后端通过，ruff 0
+- **效果**: ruff 规则从 B/SIM/C4/PERF 扩展至含 RUF
+
 ## 功能编号：FEAT-20260430-64
 
 ### parse_uuid_or_400 统一到 deps.py

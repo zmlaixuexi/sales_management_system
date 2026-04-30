@@ -131,27 +131,27 @@
 
 ## 当前测试状态
 
-- 后端：423/423 通过
+- 后端：426/426 通过
 - 前端：123/123 通过
-- ruff：0 issues
+- ruff：0 issues（含 RUF 规则）
 - ESLint：0 warnings
 - build：通过
 - tsc：通过
-- 后端覆盖率：99.81%
+- 后端覆盖率：99.81%（仅 deps.py get_db 4 行不可测）
 
 ## 下一步第一动作
 
-后端 99.81%（4 行不可测），前端 122/122。ruff 扩展规则已修复，密码强度校验+修改接口已添加，CORS 已收紧。建议继续安全加固或可观测性改进。
+后端 99.81%，前端 123/123。ruff 含 RUF 扩展规则。建议继续安全加固或可观测性改进。
 
-## 当前里程碑总结（Round 95-200）
+## 当前里程碑总结（Round 95-216）
 
-- 后端测试：214 → 421（+207）
-- 前端测试：97 → 122（+25）
-- 总计 543 测试，全部通过
-- 后端覆盖率：99.81%（421 测试，仅 deps.py get_db 4 行不可测）
-- 代码质量：ruff 0（含 B904/SIM/C4/PERF 扩展规则）+ ESLint 0 + build 零警告 + tsc 通过 + 代码分割 + 列表页统一 hook + get_or_404 + resp() 响应函数 + useSubmit hook + ErrorBoundary 路由感知 + Pydantic schema 校验 + 死代码清除 + 死代码组件移除（MainLayout）
-- 性能：10 个复合索引 + 3 个 N+1 查询修复（订单明细校验/库存扣减回滚/CSV 导入去重）
-- 安全：权限码全量审计 + RBAC + 数据范围 + 速率限制 + 敏感字段 + LIKE 转义 + 安全响应头（含静态资源补全）+ Token 刷新校验 + JWT 密钥启动检查 + CSV 导入大小限制 + CORS 白名单（方法+头精确指定）+ XSS 输入消毒（strip_html）+ 密码强度校验（字母+数字）+ 密码修改接口
+- 后端测试：214 → 426（+212）
+- 前端测试：97 → 123（+26）
+- 总计 549 测试，全部通过
+- 后端覆盖率：99.81%（426 测试，仅 deps.py get_db 4 行不可测）
+- 代码质量：ruff 0（含 B904/SIM/C4/PERF/RUF 扩展规则）+ ESLint 0 + build 零警告 + tsc 通过 + parse_uuid_or_400 统一到 deps.py + get_or_404 + resp() 响应函数 + useSubmit hook + ErrorBoundary 路由感知 + Pydantic schema 校验 + 死代码清除 + 延迟 import 清理 + __import__ 反模式消除 + __all__ 排序
+- 性能：10 个复合索引 + 3 个 N+1 查询修复（订单明细校验/库存扣减回滚/CSV 导入去重）+ 列表推导式优化
+- 安全：权限码全量审计 + RBAC + 数据范围 + 速率限制 + 敏感字段 + LIKE 转义 + 安全响应头（含静态资源补全）+ Token 刷新校验 + JWT 密钥启动检查 + CSV 导入大小限制 + CORS 白名单（方法+头精确指定）+ XSS 输入消毒（strip_html）+ 密码强度校验（字母+数字）+ 密码修改接口 + UUID 安全转换全量覆盖 + sort_by 白名单 + 收款导出数据范围过滤
 - 可观测性：健康检查 + degraded + 请求日志 + 慢请求警告 + 请求 ID 全链路追踪 + 启动配置摘要日志 + 全局未处理异常处理器 + X-Response-Time
 - 部署：Docker Compose + Nginx + 备份恢复 + Makefile（ci/quality/typecheck/coverage/db-backup/restore）+ 环境变量完整同步 + 多阶段 Docker 构建 + 非 root 用户 + DB 连接池可配置 + GitHub Actions CI（含覆盖率）+ Dockerfile/nginx 版本固定
 - 测试工程：pytest 8 类标记自动分类 + .env.example 前后端对称 + CONTRIBUTING.md + pytest-cov 覆盖率报告 99.81% + 前端 vitest 覆盖率 + CI 前后端覆盖率对称
