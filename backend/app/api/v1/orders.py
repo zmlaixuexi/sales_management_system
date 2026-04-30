@@ -358,17 +358,14 @@ def get_order(
             irow["subtotal_cost"] = str(item.subtotal_cost)
         items_out.append(irow)
 
-    payments_out = []
-    for p in order.payments:
-        if p.status == "normal":
-            payments_out.append({
-                "id": str(p.id),
-                "amount": str(p.amount),
-                "payment_method": p.payment_method,
-                "paid_at": p.paid_at.isoformat() if p.paid_at else None,
-                "remark": p.remark,
-                "created_at": p.created_at.isoformat() if p.created_at else None,
-            })
+    payments_out = [{
+        "id": str(p.id),
+        "amount": str(p.amount),
+        "payment_method": p.payment_method,
+        "paid_at": p.paid_at.isoformat() if p.paid_at else None,
+        "remark": p.remark,
+        "created_at": p.created_at.isoformat() if p.created_at else None,
+    } for p in order.payments if p.status == "normal"]
 
     data: dict = {
         "id": str(order.id),

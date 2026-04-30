@@ -165,7 +165,7 @@ def create_product(
         cost_price = Decimal(str(data.cost_price))
         sale_price = Decimal(str(data.sale_price))
     except Exception:
-        raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "价格格式错误"})
+        raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "价格格式错误"}) from None
 
     if cost_price < 0 or sale_price < 0:
         raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "价格不能为负"})
@@ -176,11 +176,7 @@ def create_product(
     if existing_sku:
         raise HTTPException(status_code=400, detail={"code": "PRODUCT_SKU_DUPLICATED", "message": "商品编码已存在"})
 
-    category_id = data.category_id
-    if not category_id:
-        category_id = _get_default_category_id(db)
-    else:
-        category_id = uuid.UUID(str(category_id))
+    category_id = _get_default_category_id(db) if not data.category_id else uuid.UUID(str(data.category_id))
 
     main_image_url = data.main_image_url
 
@@ -302,7 +298,9 @@ def update_product(
         try:
             new_sale_price = Decimal(str(data.sale_price))
         except Exception:
-            raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "销售价格式错误"})
+            raise HTTPException(
+                status_code=400, detail={"code": "VALIDATION_FAILED", "message": "销售价格式错误"},
+            ) from None
         if new_sale_price < 0:
             raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "销售价不能为负"})
         product.sale_price = new_sale_price
@@ -311,7 +309,9 @@ def update_product(
         try:
             new_cost_price = Decimal(str(data.cost_price))
         except Exception:
-            raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "成本价格式错误"})
+            raise HTTPException(
+                status_code=400, detail={"code": "VALIDATION_FAILED", "message": "成本价格式错误"},
+            ) from None
         if new_cost_price < 0:
             raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "成本价不能为负"})
         product.cost_price = new_cost_price
@@ -489,7 +489,7 @@ async def import_products_csv(
     except UnicodeDecodeError:
         raise HTTPException(status_code=400, detail={
             "code": "VALIDATION_FAILED", "message": "文件编码错误，请使用 UTF-8",
-        })
+        }) from None
 
     reader = csv.DictReader(io.StringIO(text))
     if not reader.fieldnames:

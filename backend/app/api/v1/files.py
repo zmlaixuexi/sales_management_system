@@ -34,7 +34,7 @@ async def upload_image_api(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"code": "FILE_INVALID_TYPE", "message": str(e)},
-        )
+        ) from e
 
     return resp({
         "id": str(file_record.id),

@@ -58,7 +58,7 @@ def test_request_log_ignores_non_api(caplog):
     """验证非 API 路径不记录请求日志"""
     with caplog.at_level(logging.INFO, logger="app.request"):
         client.get("/")
-    assert not any("GET /" == r.message.split()[0:2] for r in caplog.records)
+    assert not any(r.message.split()[0:2] == ["GET", "/"] for r in caplog.records)
 
 
 def test_request_id_generated_when_missing():

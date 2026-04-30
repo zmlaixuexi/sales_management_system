@@ -69,23 +69,21 @@ def list_customers(
     total = query.count()
     items = query.options(joinedload(Customer.owner)).offset((page - 1) * page_size).limit(page_size).all()
 
-    result_items = []
-    for c in items:
-        result_items.append({
-            "id": str(c.id),
-            "name": c.name,
-            "contact_name": c.contact_name,
-            "phone": c.phone,
-            "email": c.email,
-            "source": c.source,
-            "level": c.level,
-            "owner_user_id": str(c.owner_user_id) if c.owner_user_id else None,
-            "owner_name": c.owner.display_name if c.owner else None,
-            "follow_status": c.follow_status,
-            "remark": c.remark,
-            "created_at": c.created_at.isoformat() if c.created_at else None,
-            "updated_at": c.updated_at.isoformat() if c.updated_at else None,
-        })
+    result_items = [{
+        "id": str(c.id),
+        "name": c.name,
+        "contact_name": c.contact_name,
+        "phone": c.phone,
+        "email": c.email,
+        "source": c.source,
+        "level": c.level,
+        "owner_user_id": str(c.owner_user_id) if c.owner_user_id else None,
+        "owner_name": c.owner.display_name if c.owner else None,
+        "follow_status": c.follow_status,
+        "remark": c.remark,
+        "created_at": c.created_at.isoformat() if c.created_at else None,
+        "updated_at": c.updated_at.isoformat() if c.updated_at else None,
+    } for c in items]
 
     return resp(
         data={
@@ -349,7 +347,7 @@ async def import_customers_csv(
     except UnicodeDecodeError:
         raise HTTPException(status_code=400, detail={
             "code": "VALIDATION_FAILED", "message": "文件编码错误，请使用 UTF-8",
-        })
+        }) from None
 
     reader = csv.DictReader(io.StringIO(text))
     if not reader.fieldnames:

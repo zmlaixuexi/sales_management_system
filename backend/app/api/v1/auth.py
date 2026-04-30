@@ -70,7 +70,7 @@ def refresh_token(req: RefreshRequest, db: Session = Depends(get_db)):
         if user_id is None or token_type != "refresh":
             raise credentials_exception
     except JWTError:
-        raise credentials_exception
+        raise credentials_exception from None
 
     user = db.query(User).filter(User.id == uuid.UUID(user_id), User.deleted_at.is_(None)).first()
     if user is None or not user.is_active:

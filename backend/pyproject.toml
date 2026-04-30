@@ -39,10 +39,11 @@ target-version = "py311"
 line-length = 120
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "W"]
+select = ["E", "F", "I", "N", "W", "B", "SIM", "C4", "PERF"]
 
 [tool.ruff.lint.per-file-ignores]
 "app/models/*.py" = ["F821"]  # SQLAlchemy forward references in type annotations
+"app/api/**/*.py" = ["B008"]  # FastAPI Depends() in function defaults is intentional
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
