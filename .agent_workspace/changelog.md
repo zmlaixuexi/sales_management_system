@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-04-30（第二百二十一轮）
+
+### 安全：nginx 添加 Strict-Transport-Security 响应头（HSTS）
+
+- nginx.conf 主 server block 和静态资源 block 添加 HSTS 头
+- max-age=63072000（2 年）+ includeSubDomains + preload
+
 ## 2026-04-30（第二百二十轮）
 
 ### 工程：make ci 全量质量验证通过

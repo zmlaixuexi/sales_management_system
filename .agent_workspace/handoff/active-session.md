@@ -2,13 +2,14 @@
 
 最后更新时间：2026-04-30
 当前阶段：安全加固
-当前任务编号：ROUND-220
-当前任务名称：make ci 全量质量验证
+当前任务编号：ROUND-221
+当前任务名称：nginx HSTS 安全响应头
 当前 Agent：Claude
 任务状态：完成
 
 ## 最近完成
 
+- Round 221：nginx 添加 Strict-Transport-Security 响应头（HSTS，max-age=2年）
 - Round 220：make ci 全量质量验证通过（ruff 0 + eslint 0 + tsc 0 + 426/426 + 123/123 + 覆盖率 99.81% + build 零警告）
 - Round 219：pyproject.toml 覆盖率阈值从 70% 提升至 95%（当前实际 99.81%），后端 426/426
 - Round 218：products.py 5 处 except Exception 缩窄为 (ValueError, InvalidOperation)，后端 426/426
