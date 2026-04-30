@@ -138,4 +138,34 @@ describe('apiClient 响应拦截器', () => {
 
     expect(mockAxiosPost).not.toHaveBeenCalled()
   })
+
+  describe('429 速率限制重试', () => {
+    it('429 首次时设置 _retry429 标记防止重复重试', async () => {
+      const handler = apiClient.interceptors.response.handlers[0]?.rejected
+      if (!handler) throw new Error('No error handler')
+
+      const config = { headers: {}, _retry: false, _retry429: false }
+      const error = {
+        config,
+        response: { status: 429, headers: { 'retry-after': '2' }, data: {} },
+      }
+
+      // 不等待重试完成，只验证 flag 已设置
+      vi.useFakeTimers()
+      handler(error).catch(() => {})
+      // 同步检查：handler 在 await setTimeout 之前已设置 flag
+      expect(config._retry429).toBe(true)
+      vi.useRealTimers()
+    })
+
+    it('429 已重试过显示错误提示', async () => {
+      try {
+        await triggerErrorInterceptor(429, { config: { _retry429: true } })
+      } catch {
+        // expected
+      }
+
+      expect(mockMessageError).toHaveBeenCalledWith('请求过于频繁，请稍后再试')
+    })
+  })
 })

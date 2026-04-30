@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Card, Row, Col, Statistic, Table, Select, Tag, Spin, Empty } from 'antd'
+import { Card, Row, Col, Statistic, Table, Select, Tag, Spin, Empty, message } from 'antd'
 import {
   DollarOutlined, ShoppingCartOutlined, RiseOutlined,
   AlertOutlined,
@@ -48,7 +48,7 @@ export default function Dashboard() {
         setWarningThreshold(warnRes.data.threshold)
       }
     } catch {
-      // 静默处理
+      message.error('加载看板数据失败，请稍后重试')
     } finally {
       setLoading(false)
     }

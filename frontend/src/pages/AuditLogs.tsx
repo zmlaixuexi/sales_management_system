@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Table, Select, DatePicker, Input, Tag, Space, Typography, Tooltip } from 'antd';
+import { Table, Select, DatePicker, Input, Tag, Space, Typography, Tooltip, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { fetchAuditLogs, fetchAuditActions, type AuditLogItem } from '@/api/auditLogs';
@@ -67,7 +67,9 @@ export default function AuditLogs() {
       const data = await fetchAuditActions();
       setActions(data.actions || []);
       setResourceTypes(data.resource_types || []);
-    } catch { /* ignore */ }
+    } catch {
+      message.error('加载筛选选项失败')
+    }
   }, []);
 
   useEffect(() => { loadActions(); }, [loadActions]);

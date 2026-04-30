@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-04-30（第一百六十二轮）
+
+### 前端：静默错误修复 + 429 重试测试
+
+- Dashboard.tsx：`catch` 由静默处理改为 `message.error('加载看板数据失败，请稍后重试')`
+- AuditLogs.tsx：`loadActions` 的 `catch` 由静默处理改为 `message.error('加载筛选选项失败')`
+- client-interceptor.test.ts：新增 2 个 429 速率限制重试测试（flag 设置 + 错误提示）
+- 前端 115/115 通过，ESLint 0，tsc 通过
+
 ## 2026-04-30（第一百六十一轮）
 
 ### 安全：收款接口对象级权限补漏
