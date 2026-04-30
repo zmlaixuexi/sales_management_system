@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-04-30（第一百七十三轮）
+
+### 安全：存储型 XSS 防护
+
+- 新增 `strip_html()` 函数，正则移除 HTML 标签
+- 5 个 schema（ProductCreate/Update、CustomerCreate/Update、OrderCreate/Update、PaymentCreate、UserCreate/Update）应用 field_validator
+- 覆盖字段：name、remark、contact_name、display_name
+- 测试（+6）：单元 4 + schema 集成 2
+- 覆盖率：后端 98%，385/385
+
+### 测试：覆盖率和边界补强（合并 Round 172）
+
+- 商品价格变更记录（+1）：超管可见成本价字段
+- 客户归属人筛选 + 更新（+2）
+- 健康检查降级路径（+1）：数据库不可用时 degraded
+- 非管理员编辑用户 403（+1）
+- 后端覆盖率 97% → 98%，379/379
+
+## 2026-04-30（第一百七十二轮）
+
+### 测试：商品价格变更记录测试
+
+- 超管查看价格变更记录验证（含成本价字段）
+- products.py 覆盖率 90% → 92%，后端覆盖率 96.68% → 97%，375/375（+1）
+
 ## 2026-04-30（第一百七十一轮）
 
 ### 测试：商品更新字段测试
