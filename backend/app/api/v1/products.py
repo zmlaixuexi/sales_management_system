@@ -4,7 +4,7 @@ import csv
 import io
 import uuid
 from datetime import datetime
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile
 from sqlalchemy.orm import Session, joinedload
@@ -170,7 +170,7 @@ def create_product(
     try:
         cost_price = Decimal(str(data.cost_price))
         sale_price = Decimal(str(data.sale_price))
-    except Exception:
+    except (ValueError, InvalidOperation):
         raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "价格格式错误"}) from None
 
     if cost_price < 0 or sale_price < 0:
@@ -307,7 +307,7 @@ def update_product(
     if data.sale_price is not None:
         try:
             new_sale_price = Decimal(str(data.sale_price))
-        except Exception:
+        except (ValueError, InvalidOperation):
             raise HTTPException(
                 status_code=400, detail={"code": "VALIDATION_FAILED", "message": "销售价格式错误"},
             ) from None
@@ -318,7 +318,7 @@ def update_product(
     if data.cost_price is not None:
         try:
             new_cost_price = Decimal(str(data.cost_price))
-        except Exception:
+        except (ValueError, InvalidOperation):
             raise HTTPException(
                 status_code=400, detail={"code": "VALIDATION_FAILED", "message": "成本价格式错误"},
             ) from None
@@ -546,12 +546,12 @@ async def import_products_csv(
         sku = (row.get("SKU") or row.get("sku") or "").strip() or None
         try:
             sale_price = Decimal(row.get("销售价") or row.get("sale_price") or "0")
-        except Exception:
+        except (ValueError, InvalidOperation):
             errors.append({"row": row_num, "message": "销售价格式错误"})
             continue
         try:
             cost_price = Decimal(row.get("成本价") or row.get("cost_price") or "0")
-        except Exception:
+        except (ValueError, InvalidOperation):
             errors.append({"row": row_num, "message": "成本价格式错误"})
             continue
 
