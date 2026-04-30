@@ -41,6 +41,7 @@ def pytest_collection_modifyitems(items):
         "test_audit_service": "report",
         "test_product_calc": "crud",
         "test_logging": "infra",
+        "test_export_helpers": "export",
     }
     for item in items:
         for pattern, marker in file_markers.items():
