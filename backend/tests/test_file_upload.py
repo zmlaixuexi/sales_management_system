@@ -229,3 +229,26 @@ def test_11_upload_valid_jpeg_accepted():
         headers=_auth(),
     )
     assert resp.status_code == 200
+
+
+def test_12_upload_empty_content_rejected():
+    """上传空内容的图片应被拒绝"""
+    resp = client.post(
+        "/api/v1/files/images",
+        files={"file": ("empty.jpg", b"", "image/jpeg")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 400
+    assert resp.json()["detail"]["code"] == "FILE_INVALID_TYPE"
+
+
+def test_13_upload_valid_webp_accepted():
+    """上传有效 WebP 文件头应成功"""
+    # WebP: RIFF....WEBP
+    webp_bytes = b"RIFF\x00\x00\x00\x00WEBP" + b"\x00" * 100
+    resp = client.post(
+        "/api/v1/files/images",
+        files={"file": ("photo.webp", webp_bytes, "image/webp")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
