@@ -1,9 +1,7 @@
-import uuid
-
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db, resp
+from app.api.deps import get_current_user, get_db, parse_uuid_or_400, resp
 from app.core.sanitize import escape_like
 from app.core.security import hash_password
 from app.models.user import User, UserRole
@@ -41,21 +39,18 @@ def list_users(
     total = query.count()
     users = query.order_by(User.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
 
-    items = []
-    for u in users:
-        roles = [RoleBrief(id=str(r.id), name=r.name, display_name=r.display_name) for r in u.roles]
-        items.append({
-            "id": str(u.id),
-            "username": u.username,
-            "display_name": u.display_name,
-            "phone": u.phone,
-            "email": u.email,
-            "is_active": u.is_active,
-            "is_superuser": u.is_superuser,
-            "roles": [r.model_dump() for r in roles],
-            "created_at": u.created_at.isoformat() if u.created_at else None,
-            "updated_at": u.updated_at.isoformat() if u.updated_at else None,
-        })
+    items = [{
+        "id": str(u.id),
+        "username": u.username,
+        "display_name": u.display_name,
+        "phone": u.phone,
+        "email": u.email,
+        "is_active": u.is_active,
+        "is_superuser": u.is_superuser,
+        "roles": [RoleBrief(id=str(r.id), name=r.name, display_name=r.display_name).model_dump() for r in u.roles],
+        "created_at": u.created_at.isoformat() if u.created_at else None,
+        "updated_at": u.updated_at.isoformat() if u.updated_at else None,
+    } for u in users]
 
     return resp({"items": items, "page": page, "page_size": page_size, "total": total})
 
@@ -87,7 +82,7 @@ def create_user(req: UserCreate, db: Session = Depends(get_db), current_user: Us
 
     if req.role_ids:
         for rid in req.role_ids:
-            db.add(UserRole(user_id=user.id, role_id=uuid.UUID(rid)))
+            db.add(UserRole(user_id=user.id, role_id=parse_uuid_or_400(rid, "角色 ID")))
 
     db.commit()
     db.refresh(user)
@@ -109,7 +104,7 @@ def update_user(
             detail={"code": "AUTH_FORBIDDEN", "message": "无权限编辑用户"},
         )
 
-    user = db.query(User).filter(User.id == uuid.UUID(user_id), User.deleted_at.is_(None)).first()
+    user = db.query(User).filter(User.id == parse_uuid_or_400(user_id, "用户 ID"), User.deleted_at.is_(None)).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -127,7 +122,7 @@ def update_user(
     if req.role_ids is not None:
         db.query(UserRole).filter(UserRole.user_id == user.id).delete()
         for rid in req.role_ids:
-            db.add(UserRole(user_id=user.id, role_id=uuid.UUID(rid)))
+            db.add(UserRole(user_id=user.id, role_id=parse_uuid_or_400(rid, "角色 ID")))
 
     db.commit()
 
