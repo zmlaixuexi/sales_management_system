@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-30（第一百七十轮）
+
+### 安全：nginx 静态资源安全响应头
+
+- 修复 nginx add_header 继承规则导致静态资源 location 块缺少安全头
+- 补充 X-Content-Type-Options/X-Frame-Options/X-XSS-Protection
+- nginx 配置语法验证通过
+
 ## 2026-04-30（第一百六十九轮）
 
 ### 测试：客户更新边界测试
