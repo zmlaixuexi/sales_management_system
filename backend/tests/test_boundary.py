@@ -777,3 +777,41 @@ def test_40_transfer_to_nonexistent_user():
     }, headers=_auth())
     assert resp.status_code == 400
     assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
+
+
+def test_41_self_deactivation_rejected():
+    """超级管理员不能停用自己的账号"""
+    if not _tokens.get("access"):
+        resp = client.post("/api/v1/auth/login", json={
+            "username": "boundary_admin", "password": "pass123456",
+        })
+        assert resp.status_code == 200
+        _tokens["access"] = resp.json()["data"]["access_token"]
+
+    resp = client.put(f"/api/v1/users/{_user_id}", json={
+        "is_active": False,
+    }, headers=_auth())
+    assert resp.status_code == 400
+    assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
+    assert "不能停用自己的账号" in resp.json()["detail"]["message"]
+
+
+def test_42_create_user_nonexistent_role_rejected():
+    """创建用户时指定不存在的角色应被拒绝"""
+    if not _tokens.get("access"):
+        resp = client.post("/api/v1/auth/login", json={
+            "username": "boundary_admin", "password": "pass123456",
+        })
+        assert resp.status_code == 200
+        _tokens["access"] = resp.json()["data"]["access_token"]
+
+    fake_role_id = str(uuid.uuid4())
+    resp = client.post("/api/v1/users", json={
+        "username": "test_norole",
+        "password": "pass123456",
+        "display_name": "测试用户",
+        "role_ids": [fake_role_id],
+    }, headers=_auth())
+    assert resp.status_code == 400
+    assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
+    assert "角色不存在" in resp.json()["detail"]["message"]
