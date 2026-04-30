@@ -275,3 +275,19 @@ def test_13_update_customer_owner_user_id():
 
     resp = client.get(f"/api/v1/customers/{cid}", headers=_auth())
     assert resp.json()["data"]["owner_user_id"] == _second_user_id
+
+
+def test_14_update_customer_phone():
+    """编辑客户更新手机号（不重复）"""
+    resp = client.post("/api/v1/customers", json={
+        "name": "手机号测试", "phone": "13800005001",
+    }, headers=_auth())
+    cid = resp.json()["data"]["id"]
+
+    resp = client.put(f"/api/v1/customers/{cid}", json={
+        "phone": "13800005002",
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    resp = client.get(f"/api/v1/customers/{cid}", headers=_auth())
+    assert resp.json()["data"]["phone"] == "13800005002"
