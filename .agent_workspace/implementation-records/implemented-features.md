@@ -6,6 +6,40 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-107
+
+### 需求符合性 — 错误码完整性修复 + 前端错误拦截器适配
+
+- **文件**: `backend/app/services/file_service.py`, `backend/app/api/v1/files.py`, `backend/app/api/v1/orders.py`, `backend/app/main.py`, `frontend/src/api/client.ts`
+- **内容**:
+  - file_service.py：FileSizeExceededError/FileTypeError 分离异常类型
+  - files.py：FILE_TOO_LARGE 和 FILE_NOT_BOUND 独立错误码处理
+  - orders.py：ORDER_EMPTY_ITEMS 防御性校验
+  - main.py：INTERNAL_ERROR → SYSTEM_INTERNAL_ERROR
+  - client.ts：错误拦截器从 detail.message 适配为 error.message
+- **验证**: 513+132=645 tests 全部通过，开发文档 8.4 节 16 个错误码全部在代码中使用
+- **测试**: +19（file_upload +1, health +1, client-interceptor +3, product_import +5, customer_import +2, payment_crud +6, export +3, inventory +5）
+
+## 功能编号：FEAT-20260502-106
+
+### 部署 — Docker Compose 环境变量全面同步
+
+- **文件**: `deploy/docker-compose.prod.yml`, `deploy/docker-compose.dev.yml`, `backend/.env.example`, `docs/deployment.md`
+- **内容**: docker-compose 环境变量表从 14 项扩展为 32 项，补全 SLOW_SQL_THRESHOLD_MS、DB_POOL_SIZE 等 18 个缺失变量
+- **验证**: 491+129=620 tests 全部通过
+
+## 功能编号：FEAT-20260502-105
+
+### 需求符合性 — 错误响应格式统一为 API 规范
+
+- **文件**: `backend/app/main.py`, `backend/app/core/ratelimit.py`, `backend/app/api/v1/reports.py`, `backend/tests/test_*.py`（17 个文件）
+- **内容**:
+  - 错误响应从 `{“detail”: {“code”: “...”, “message”: “...”}}` 改为 `{“success”: false, “error”: {“code”: “...”, “message”: “...”}, “request_id”: “...”}`
+  - 新增 HTTPException handler 统一格式化所有 HTTP 异常
+  - ratelimit.py 429 响应同步更新
+  - 17 个测试文件 62 处断言从 `[“detail”]` 改为 `[“error”]`
+- **验证**: 491+129=620 tests 全部通过
+
 ## 功能编号：FEAT-20260502-104
 
 ### 可观测性 — SQL 慢查询日志
