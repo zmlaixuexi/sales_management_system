@@ -77,6 +77,7 @@ backend/
       security_headers.py # 安全响应头中间件
       request_log.py     # 请求日志中间件
       ratelimit.py       # 速率限制中间件
+      slow_query.py      # SQL 慢查询日志
       logging.py         # 结构化日志配置
       sanitize.py        # LIKE 注入防护
     db/
@@ -134,12 +135,14 @@ backend/
 
 ### 数据库迁移
 
-使用 Alembic 管理，共 4 个迁移版本：
+使用 Alembic 管理，共 6 个迁移版本：
 
 1. 初始化用户、权限、产品相关表
 2. 新增客户表
 3. 新增订单、订单项、库存变动、收款表
 4. 新增审计日志表
+5. 添加复合索引优化查询性能
+6. 添加软删除索引和时间排序索引
 
 ## 前端架构
 
@@ -329,6 +332,7 @@ Docker Compose 启动 3 个容器（无 Nginx）：
 - **结构化日志**：生产环境 JSON 格式，支持慢请求警告（可配置阈值）
 - **审计日志**：完整记录所有数据变更操作，含请求元数据
 - **全局异常处理**：未处理异常返回一致 JSON，防泄露内部详情
+- **SQL 慢查询日志**：通过 SQLAlchemy 事件监听，超过阈值（默认 200ms）的 SQL 语句记录 WARNING 日志，包含 request_id 关联
 
 ## 开发工具链
 
@@ -342,4 +346,4 @@ Docker Compose 启动 3 个容器（无 Nginx）：
 | vitest | 前端测试 |
 | pip-audit | Python 依赖漏洞扫描 |
 | npm audit | 前端依赖漏洞扫描 |
-| GitHub Actions | CI 自动化（ruff + mypy + alembic + pytest + eslint + tsc + vitest + build） |
+| GitHub Actions | CI 自动化（ruff + mypy + alembic + pytest + eslint + tsc + vitest + build + pip-audit + npm audit） |
