@@ -6,6 +6,18 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260501-83
+
+### 测试补强 — 覆盖率缺口填充
+
+- **文件**: `backend/tests/test_product_crud.py`, `backend/tests/test_reports_audit.py`
+- **内容**:
+  - test_03c_delete_product_with_order_ref：创建订单引用商品后删除返回 409 PRODUCT_IN_USE
+  - test_30_customer_ranking_data_scope：非 view_all 用户客户排行数据范围过滤验证
+  - products.py 和 reports.py 均达到 100% 覆盖率
+- **验证**: 458 后端通过，ruff 0，覆盖率 99.82%
+- **效果**: 所有 API 模块 100% 覆盖，仅 deps.py get_db 4 行不可测
+
 ## 功能编号：FEAT-20260501-82
 
 ### 文档同步 Round 252-258

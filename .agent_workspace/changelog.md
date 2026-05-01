@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-01（第二百六十轮）
+
+### 测试：补全覆盖缺口 — 商品删除 PRODUCT_IN_USE + 客户排行数据范围
+
+- test_product_crud.py 新增 test_03c：创建订单引用商品后删除返回 409 PRODUCT_IN_USE
+- test_reports_audit.py 新增 test_30：非 view_all 用户客户排行数据范围过滤验证
+- products.py 和 reports.py 覆盖率均达 100%
+- 后端 458/458 通过，ruff 0，覆盖率 99.82%（仅 deps.py get_db 4 行不可测）
+
 ## 2026-05-01（第二百五十九轮）
 
 ### 文档：同步 Round 252-258 变更至 testing.md 和 README
