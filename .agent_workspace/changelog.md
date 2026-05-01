@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百六十三轮）
+
+### 重构：报表查询过滤逻辑提取共享函数
+
+- reports.py 新增 _order_period_filter（日期范围+状态过滤）和 _apply_data_scope（数据范围）
+- 5 个报表端点（sales-summary/trend/product-ranking/customer-ranking/salesperson-ranking）复用共享函数
+- 净减 28 行，reports.py 保持 100% 覆盖率
+- 后端 461/461 通过，覆盖率 99.78%，ruff 0
+
 ## 2026-05-02（第二百六十二轮）
 
 ### 安全：修复 3 个安全审查发现的中等问题
