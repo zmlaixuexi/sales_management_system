@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-02（第三百七十一轮）
+
+### 工程：提取 log_user_action() 包装函数，消除 17 处重复审计日志代码
+
+- `backend/app/services/audit_service.py`：新增 `log_user_action(db, request, user, *, action, ...)` 包装函数
+  - 自动填充 `actor_id`、`actor_name`（含 username 回退）、请求元数据（IP/user_agent/request_id）
+- 重构 6 个 API 路由文件使用 `log_user_action`：
+  - `products.py`（5 处）、`customers.py`（5 处）、`orders.py`（5 处）
+  - `payments.py`（2 处）、`inventory.py`（1 处）、`exports.py`（4 处）
+- `auth.py` 保持 `log_action`（登录场景无 `current_user`）
+
 ## 2026-05-02（第三百七十轮）
 
 ### 工程：提取分页辅助函数 paginate()，消除 7 个 API 文件中的重复代码

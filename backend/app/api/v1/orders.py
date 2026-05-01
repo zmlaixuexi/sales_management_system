@@ -27,7 +27,7 @@ from app.models.user import User
 from app.schemas.order import OrderBrief, OrderCreate, OrderDetail, OrderUpdate
 from app.schemas.payment import PaymentCreate
 from app.schemas.response import ApiResponse
-from app.services.audit_service import get_request_meta, log_action
+from app.services.audit_service import log_user_action
 from app.services.payment_service import register_payment
 
 router = APIRouter(
@@ -313,12 +313,11 @@ def create_order(
     for pi in prepared_items:
         db.add(SalesOrderItem(order_id=order.id, **pi))
 
-    log_action(
-        db, action="order_create", resource_type="order",
-        resource_id=str(order.id), actor_id=current_user.id,
-        actor_name=current_user.display_name or current_user.username,
+    log_user_action(
+        db, request, current_user,
+        action="order_create", resource_type="order",
+        resource_id=str(order.id),
         after_data={"order_no": order_no, "total_amount": str(order.total_amount)},
-        **get_request_meta(request),
     )
     db.commit()
 
@@ -443,12 +442,11 @@ def update_order(
         order.customer_id = new_cid
 
     order.updated_by = current_user.id
-    log_action(
-        db, action="order_update", resource_type="order",
-        resource_id=str(order.id), actor_id=current_user.id,
-        actor_name=current_user.display_name or current_user.username,
+    log_user_action(
+        db, request, current_user,
+        action="order_update", resource_type="order",
+        resource_id=str(order.id),
         after_data={"order_no": order.order_no},
-        **get_request_meta(request),
     )
     db.commit()
 
@@ -475,12 +473,11 @@ def confirm_order(
 
     order.status = "confirmed"
     order.updated_by = current_user.id
-    log_action(
-        db, action="order_confirm", resource_type="order",
-        resource_id=str(order.id), actor_id=current_user.id,
-        actor_name=current_user.display_name or current_user.username,
+    log_user_action(
+        db, request, current_user,
+        action="order_confirm", resource_type="order",
+        resource_id=str(order.id),
         after_data={"order_no": order.order_no, "status": "confirmed"},
-        **get_request_meta(request),
     )
     db.commit()
 
@@ -518,12 +515,11 @@ def cancel_order(
 
     order.status = "cancelled"
     order.updated_by = current_user.id
-    log_action(
-        db, action="order_cancel", resource_type="order",
-        resource_id=str(order.id), actor_id=current_user.id,
-        actor_name=current_user.display_name or current_user.username,
+    log_user_action(
+        db, request, current_user,
+        action="order_cancel", resource_type="order",
+        resource_id=str(order.id),
         after_data={"order_no": order.order_no, "status": "cancelled"},
-        **get_request_meta(request),
     )
     db.commit()
 
@@ -602,16 +598,15 @@ def create_order_payment(
     """登记订单收款（规范路径）"""
     result = register_payment(db, str(order_id), data, current_user)
 
-    log_action(
-        db, action="payment_create", resource_type="payment",
-        resource_id=str(result["payment"].id), actor_id=current_user.id,
-        actor_name=current_user.display_name or current_user.username,
+    log_user_action(
+        db, request, current_user,
+        action="payment_create", resource_type="payment",
+        resource_id=str(result["payment"].id),
         after_data={
             "order_id": str(result["order"].id),
             "amount": str(result["amount"]),
             "method": result["method"],
         },
-        **get_request_meta(request),
     )
     db.commit()
 

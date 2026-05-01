@@ -28,7 +28,7 @@ from app.schemas.customer import (
     CustomerUpdate,
 )
 from app.schemas.response import ApiResponse
-from app.services.audit_service import get_request_meta, log_action
+from app.services.audit_service import log_user_action
 from app.services.csv_import import validate_csv_upload
 
 router = APIRouter(
@@ -163,12 +163,11 @@ def create_customer(
     db.add(customer)
     db.flush()
 
-    log_action(
-        db, action="customer_create", resource_type="customer",
-        resource_id=str(customer.id), actor_id=current_user.id,
-        actor_name=current_user.display_name or current_user.username,
+    log_user_action(
+        db, request, current_user,
+        action="customer_create", resource_type="customer",
+        resource_id=str(customer.id),
         after_data={"name": name, "phone": phone},
-        **get_request_meta(request),
     )
     db.commit()
 
@@ -270,12 +269,11 @@ def update_customer(
         customer.remark = data.remark
 
     customer.updated_by = current_user.id
-    log_action(
-        db, action="customer_update", resource_type="customer",
-        resource_id=str(customer.id), actor_id=current_user.id,
-        actor_name=current_user.display_name or current_user.username,
+    log_user_action(
+        db, request, current_user,
+        action="customer_update", resource_type="customer",
+        resource_id=str(customer.id),
         after_data={"name": customer.name, "phone": customer.phone},
-        **get_request_meta(request),
     )
     db.commit()
 
@@ -304,12 +302,11 @@ def delete_customer(
 
     customer.deleted_at = datetime.now()
     customer.updated_by = current_user.id
-    log_action(
-        db, action="customer_delete", resource_type="customer",
-        resource_id=str(customer.id), actor_id=current_user.id,
-        actor_name=current_user.display_name or current_user.username,
+    log_user_action(
+        db, request, current_user,
+        action="customer_delete", resource_type="customer",
+        resource_id=str(customer.id),
         before_data={"name": customer.name, "phone": customer.phone},
-        **get_request_meta(request),
     )
     db.commit()
 
@@ -337,12 +334,11 @@ def transfer_customer(
 
     customer.owner_user_id = owner_uid
     customer.updated_by = current_user.id
-    log_action(
-        db, action="customer_transfer", resource_type="customer",
-        resource_id=str(customer.id), actor_id=current_user.id,
-        actor_name=current_user.display_name or current_user.username,
+    log_user_action(
+        db, request, current_user,
+        action="customer_transfer", resource_type="customer",
+        resource_id=str(customer.id),
         after_data={"owner_user_id": str(new_owner_id)},
-        **get_request_meta(request),
     )
     db.commit()
 
@@ -436,10 +432,9 @@ async def import_customers_csv(
             detail={"code": "IMPORT_FAILED", "message": "导入失败，请检查数据后重试"},
         ) from None
 
-    log_action(db, actor_id=current_user.id, actor_name=current_user.display_name,
-               action="customer_import", resource_type="customer",
-               after_data={"created": created, "errors": len(errors)},
-               **get_request_meta(request))
+    log_user_action(db, request, current_user,
+                    action="customer_import", resource_type="customer",
+                    after_data={"created": created, "errors": len(errors)})
     db.commit()
 
     return resp(

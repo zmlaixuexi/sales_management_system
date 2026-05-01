@@ -30,7 +30,7 @@ from app.schemas.product import (
     ProductUpdate,
 )
 from app.schemas.response import ApiResponse
-from app.services.audit_service import get_request_meta, log_action
+from app.services.audit_service import log_user_action
 from app.services.csv_import import validate_csv_upload
 
 router = APIRouter(
@@ -247,12 +247,11 @@ def create_product(
 
     unit_profit, gross_margin = _calc_profit(sale_price, cost_price)
 
-    log_action(
-        db, action="product_create", resource_type="product",
-        resource_id=str(product.id), actor_id=current_user.id,
-        actor_name=current_user.display_name or current_user.username,
+    log_user_action(
+        db, request, current_user,
+        action="product_create", resource_type="product",
+        resource_id=str(product.id),
         after_data={"name": name, "sku": sku, "sale_price": str(sale_price), "cost_price": str(cost_price)},
-        **get_request_meta(request),
     )
     db.commit()
 
@@ -419,13 +418,12 @@ def update_product(
             changed_by=current_user.id,
         ))
 
-    log_action(
-        db, action="product_update", resource_type="product",
-        resource_id=str(product.id), actor_id=current_user.id,
-        actor_name=current_user.display_name or current_user.username,
+    log_user_action(
+        db, request, current_user,
+        action="product_update", resource_type="product",
+        resource_id=str(product.id),
         before_data={"name": product.name, "sale_price": str(old_sale_price), "cost_price": str(old_cost_price)},
         after_data={"name": product.name, "sale_price": str(product.sale_price), "cost_price": str(product.cost_price)},
-        **get_request_meta(request),
     )
     db.commit()
 
@@ -478,12 +476,11 @@ def delete_product(
 
     product.deleted_at = datetime.now()
     product.updated_by = current_user.id
-    log_action(
-        db, action="product_delete", resource_type="product",
-        resource_id=str(product.id), actor_id=current_user.id,
-        actor_name=current_user.display_name or current_user.username,
+    log_user_action(
+        db, request, current_user,
+        action="product_delete", resource_type="product",
+        resource_id=str(product.id),
         before_data={"name": product.name, "sku": product.sku},
-        **get_request_meta(request),
     )
     db.commit()
 
@@ -502,12 +499,11 @@ def disable_product(
 
     product.status = "disabled"
     product.updated_by = current_user.id
-    log_action(
-        db, action="product_disable", resource_type="product",
-        resource_id=str(product.id), actor_id=current_user.id,
-        actor_name=current_user.display_name or current_user.username,
+    log_user_action(
+        db, request, current_user,
+        action="product_disable", resource_type="product",
+        resource_id=str(product.id),
         before_data={"status": "active"}, after_data={"status": "disabled"},
-        **get_request_meta(request),
     )
     db.commit()
 
@@ -649,10 +645,9 @@ async def import_products_csv(
             detail={"code": "IMPORT_FAILED", "message": "导入失败，请检查数据后重试"},
         ) from None
 
-    log_action(db, actor_id=current_user.id, actor_name=current_user.display_name,
-               action="product_import", resource_type="product",
-               after_data={"created": created, "errors": len(errors)},
-               **get_request_meta(request))
+    log_user_action(db, request, current_user,
+                    action="product_import", resource_type="product",
+                    after_data={"created": created, "errors": len(errors)})
     db.commit()
 
     return resp(

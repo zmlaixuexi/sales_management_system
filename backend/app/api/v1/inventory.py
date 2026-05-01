@@ -11,7 +11,7 @@ from app.models.product import Product
 from app.models.user import User
 from app.schemas.inventory import InventoryAdjust, InventoryAdjusted
 from app.schemas.response import ApiResponse
-from app.services.audit_service import get_request_meta, log_action
+from app.services.audit_service import log_user_action
 
 router = APIRouter(
     prefix="/inventory", tags=["库存管理"],
@@ -108,13 +108,12 @@ def adjust_inventory(
         remark=data.remark,
     )
     db.add(movement)
-    log_action(
-        db, action="inventory_adjust", resource_type="product",
-        resource_id=str(product.id), actor_id=current_user.id,
-        actor_name=current_user.display_name or current_user.username,
+    log_user_action(
+        db, request, current_user,
+        action="inventory_adjust", resource_type="product",
+        resource_id=str(product.id),
         before_data={"stock_quantity": before},
         after_data={"stock_quantity": after, "change": quantity_change},
-        **get_request_meta(request),
     )
     db.commit()
 

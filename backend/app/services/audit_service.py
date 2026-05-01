@@ -80,6 +80,31 @@ def log_action(
         return None  # type: ignore[return-value]
 
 
+def log_user_action(
+    db: Session,
+    request: Request,
+    user: Any,
+    *,
+    action: str,
+    resource_type: str | None = None,
+    resource_id: str | None = None,
+    before_data: dict | None = None,
+    after_data: dict | None = None,
+) -> AuditLog:
+    """记录操作日志（自动填充 actor_id、actor_name 和请求元数据）"""
+    return log_action(
+        db,
+        action=action,
+        resource_type=resource_type,
+        resource_id=resource_id,
+        actor_id=user.id,
+        actor_name=user.display_name or user.username,
+        before_data=before_data,
+        after_data=after_data,
+        **get_request_meta(request),
+    )
+
+
 def model_to_dict(obj: Any) -> dict:
     """将 SQLAlchemy 模型转为字典，用于日志记录"""
     result = {}
