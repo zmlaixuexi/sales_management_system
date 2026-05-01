@@ -6,6 +6,17 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-102
+
+### 前端 — auditLogs API 统一使用 request.ts 包装器
+
+- **文件**: `frontend/src/api/auditLogs.ts`, `frontend/src/__tests__/auditLogs-api.test.ts`
+- **内容**:
+  - auditLogs.ts 从 apiClient.get 迁移到 get() 包装函数
+  - 测试 mock 从 @/api/client 迁移到 @/api/request（与其他 API 模块一致）
+  - auth.ts 保留 apiClient 直接调用（登录/刷新需要原始 AxiosResponse）
+- **验证**: 127/127 通过，tsc 零错误
+
 ## 功能编号：FEAT-20260502-101
 
 ### 安全 — 生产环境禁用 OpenAPI 文档 + Nginx 安全加固

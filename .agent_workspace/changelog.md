@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第三百零三轮）
+
+### 前端：auditLogs API 统一使用 request.ts 包装器
+
+- auditLogs.ts: 从 apiClient.get 迁移到 get() 包装函数
+- 测试同步更新为 mock @/api/request（与其他 API 模块一致）
+- auth.ts 保留 apiClient 直接调用（登录/刷新需要原始 AxiosResponse）
+- 127/127 通过，tsc 零错误
+
 ## 2026-05-02（第三百零二轮）
 
 ### 文档：同步测试数 486+127=613 + 安全加固记录
