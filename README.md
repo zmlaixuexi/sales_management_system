@@ -139,7 +139,7 @@ cd backend
 source .venv/bin/activate
 pytest tests/ -v
 
-# 前端测试（301 个）
+# 前端测试（307 个）
 cd frontend
 npm test
 
@@ -181,7 +181,7 @@ npm run build
 | 导出辅助函数 | 13 | _dec/_str/_dt CSV 格式化 |
 | 文件服务 | 4 | 扩展名/MIME/大小/正常 |
 | CSV 导入校验 | 9 | 文件名/扩展名/BOM/编码/大小限制/空文件/仅有表头 |
-| 慢查询 | 5 | 慢查询日志记录与阈值验证 |
+| 慢查询 | 5 | 慢查询结构化日志记录、SQL 截断、阈值验证 |
 | **合计** | **609** | |
 
 ### 前端测试覆盖
@@ -204,10 +204,10 @@ npm run build
 | 商品 API | 8 | fetchProducts/fetchProduct/create/update/delete/disable/uploadImage/priceHistory |
 | 收款列表 | 12 | 渲染/筛选/表格数据/loading 状态/错误重试/收款 ID 截断/空备注显示 |
 | 库存列表 | 11 | 渲染/筛选/表格数据/loading 状态/错误重试/空备注显示 |
-| 报表中心 | 8 | 渲染标题/周期选择器/五个标签页 |
+| 报表中心 | 11 | 渲染标题/周期选择器/五个标签页/客户排行/销售排行数据/周期切换重载/API 默认周期 |
 | 客户详情 | 9 | 加载显示客户名称/返回按钮/loading 状态 |
 | 订单详情 | 9 | 加载显示订单号/返回按钮/loading 状态 |
-| Dashboard | 8 | 渲染看板标题/期间选择器/数据卡片 |
+| Dashboard | 11 | 渲染看板标题/期间选择器/数据卡片/趋势汇总/库存预警数据/期间选项数/切换重载 |
 | 客户 API | 7 | fetchCustomers（含无参数）/fetchCustomer/create/update/delete/transfer |
 | 状态映射 | 6 | 商品/客户/订单状态映射完整性 |
 | 订单 API | 6 | fetchOrders/fetchOrder/create/update/confirm/cancel |
@@ -225,7 +225,7 @@ npm run build
 | 登录页 | 5 | 渲染标题/输入框/登录按钮/提交调用 login/登录失败错误提示 |
 | API client | 3 | baseURL、token 附加、无 token |
 | NotFound | 3 | 404 渲染/返回首页按钮/按钮点击导航 |
-| **合计** | **301** | |
+| **合计** | **307** | |
 
 ## API 概览
 
