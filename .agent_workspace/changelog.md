@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百六十五轮）
+
+### 功能：前端添加客户排行和销售人员排行 API 函数
+
+- reports.ts 新增 fetchCustomerRanking 和 fetchSalespersonRanking 函数及类型定义
+- 新增 2 个前端测试验证 API 调用路径和参数
+- 前端 125/125 通过（+2），tsc 通过
+
 ## 2026-05-02（第二百六十四轮）
 
 ### 重构：序号生成函数统一
