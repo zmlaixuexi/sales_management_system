@@ -174,4 +174,18 @@ describe('OrdersPage', () => {
     ]
     _paginatedListReturn.total = 3
   })
+
+  it('加载失败时显示错误和重试链接', () => {
+    Object.assign(_paginatedListReturn, { data: [], total: 0, error: true })
+    renderOrders()
+    expect(screen.getByText('加载失败，')).toBeInTheDocument()
+    expect(screen.getByText('重试')).toBeInTheDocument()
+    _paginatedListReturn.data = [
+      { id: 'o1', order_no: 'ORD-20260501-001', status: 'draft', item_count: 3, total_amount: '1000', paid_amount: '0', gross_profit: '400', gross_margin: '40', created_at: '2026-05-01T10:00:00Z' },
+      { id: 'o2', order_no: 'ORD-20260501-002', status: 'completed', item_count: 1, total_amount: '500', paid_amount: '500', gross_profit: '200', gross_margin: '40', created_at: '2026-05-01T12:00:00Z' },
+      { id: 'o3', order_no: 'ORD-20260501-003', status: 'cancelled', item_count: 2, total_amount: '300', paid_amount: '0', gross_profit: '0', gross_margin: '0', created_at: null },
+    ]
+    _paginatedListReturn.total = 3
+    _paginatedListReturn.error = false
+  })
 })

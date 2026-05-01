@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第三百八十轮）
+
+### 测试补强：前端列表页错误状态测试（+4 tests）
+
+- `frontend/src/__tests__/Customers.test.tsx`：新增错误状态测试（加载失败 + 重试链接）
+- `frontend/src/__tests__/Orders.test.tsx`：同上
+- `frontend/src/__tests__/Products.test.tsx`：同上
+- `frontend/src/__tests__/AuditLogs.test.tsx`：同上
+- 前端 274→278 tests，总计 874→878
+
 ## 2026-05-02（第三百七十九轮）
 
 ### 安全加固：登录速率限制 + 文件访问控制（+2 tests）

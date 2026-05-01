@@ -187,4 +187,18 @@ describe('AuditLogs', () => {
     ]
     _paginatedListReturn.total = 3
   })
+
+  it('加载失败时显示错误和重试链接', () => {
+    Object.assign(_paginatedListReturn, { data: [], total: 0, error: true })
+    renderAuditLogs()
+    expect(screen.getByText('加载失败，')).toBeInTheDocument()
+    expect(screen.getByText('重试')).toBeInTheDocument()
+    _paginatedListReturn.data = [
+      { id: 'al1', created_at: '2026-05-01T10:00:00Z', actor_name: '管理员', action: 'product_create', resource_type: 'product', resource_id: 'abc-def012345', after_data: { name: '新商品', status: 'active' }, ip_address: '192.168.1.1', request_id: 'req-001', user_agent: 'Mozilla/5.0' },
+      { id: 'al2', created_at: '2026-05-01T11:00:00Z', actor_name: '销售A', action: 'order_confirm', resource_type: 'order', resource_id: null, after_data: null, ip_address: null, request_id: null, user_agent: null },
+      { id: 'al3', created_at: null, actor_name: null, action: 'login_success', resource_type: 'user', resource_id: 'xyz-123', after_data: null, ip_address: '10.0.0.1', request_id: null, user_agent: null },
+    ]
+    _paginatedListReturn.total = 3
+    _paginatedListReturn.error = false
+  })
 })
