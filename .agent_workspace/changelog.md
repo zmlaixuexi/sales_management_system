@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第一百五十二轮·自动循环）
+
+### 可观测：慢查询日志改用结构化格式，记录 SQL 和参数
+
+- `backend/app/core/slow_query.py`：改用 `LogRecord + extra_fields` 结构化日志，记录 SQL 语句（500 字符）、参数、耗时、阈值
+- `backend/tests/test_slow_query.py`：更新截断测试匹配新格式（200→500 字符），修复小数格式断言
+- 后端 609 tests 全部通过
+
 ## 2026-05-02（第一百五十一轮·自动循环）
 
 ### 可观测：JSON 日志全局关联 request_id 和 user_id
