@@ -2,14 +2,15 @@
 
 最后更新时间：2026-05-02
 当前阶段：需求符合性验证 + 代码质量
-当前任务编号：ROUND-288
-当前任务名称：测试补强 — CSV 导入行数上限 + XSS 消毒测试（+4）
+当前任务编号：ROUND-289
+当前任务名称：文档 — 同步测试数至 478+125=603，覆盖率 99.52%
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 288：测试补强 — CSV 导入行数上限截断测试（products + customers）+ HTML 标签剥离测试（products + customers），覆盖率 99.35% → 99.52%，测试 474 → 478
+- Round 289：文档 — 同步 testing.md 和 README 测试数（474→478, 599→603, 99.78%→99.52%），导入测试描述更新
+- Round 288：测试补强 — CSV 导入行数上限 + XSS 消毒测试（+4），覆盖率 99.35% → 99.52%
 - Round 287：验证 — make ci 全量通过 + 里程碑总结更新
 - Round 286：安全 — CSV 导入添加行数上限（MAX_CSV_IMPORT_ROWS=1000）
 - Round 285：安全 — CSV 导入添加 strip_html() 消毒和 commit 失败回滚
@@ -22,10 +23,10 @@
 
 - 后端：478/478 通过
 - 前端：125/125 通过
+- 总计：603 测试
 - ruff：0 issues
 - mypy：51 文件 0 错误
-- 后端覆盖率：99.52%（阈值 99%）
-- 不可测行：deps.py get_db 4 行 + orders.py 1 行 + products.py rollback 3 行 + customers.py rollback 3 行 = 11 行
+- 后端覆盖率：99.52%
 
 ## 下一步第一动作
 
