@@ -31,7 +31,7 @@ export async function createPayment(orderId: string, data: {
     amount: string
     payment_method: string
     order_status: string
-  }>(`/payments/orders/${orderId}/payments`, data)
+  }>(`/sales-orders/${orderId}/payments`, data)
 }
 
 export async function reversePayment(paymentId: string) {

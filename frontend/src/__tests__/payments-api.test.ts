@@ -32,13 +32,13 @@ describe('收款 API', () => {
     expect(mockGet).toHaveBeenCalledWith('/payments', { order_id: 'o1' })
   })
 
-  it('createPayment 调用 POST /payments/orders/:id/payments', async () => {
+  it('createPayment 调用 POST /sales-orders/:id/payments', async () => {
     mockPost.mockResolvedValueOnce(ok({
       id: 'pay1', order_id: 'o1',
       amount: '100', payment_method: 'cash', order_status: 'confirmed',
     }))
     const res = await createPayment('o1', { amount: '100', payment_method: 'cash' })
-    expect(mockPost).toHaveBeenCalledWith('/payments/orders/o1/payments', {
+    expect(mockPost).toHaveBeenCalledWith('/sales-orders/o1/payments', {
       amount: '100', payment_method: 'cash',
     })
     expect(res.data.order_status).toBe('confirmed')
@@ -50,7 +50,7 @@ describe('收款 API', () => {
       amount: '200', payment_method: 'bank_transfer', order_status: 'completed',
     }))
     await createPayment('o1', { amount: '200', payment_method: 'bank_transfer', remark: '尾款' })
-    expect(mockPost).toHaveBeenCalledWith('/payments/orders/o1/payments', {
+    expect(mockPost).toHaveBeenCalledWith('/sales-orders/o1/payments', {
       amount: '200', payment_method: 'bank_transfer', remark: '尾款',
     })
   })

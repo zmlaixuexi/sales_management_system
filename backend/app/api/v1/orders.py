@@ -20,10 +20,11 @@ from app.api.deps import (
 from app.core.sanitize import escape_like
 from app.models.audit import AuditLog
 from app.models.customer import Customer
-from app.models.order import InventoryMovement, SalesOrder, SalesOrderItem
+from app.models.order import InventoryMovement, Payment, SalesOrder, SalesOrderItem
 from app.models.product import Product
 from app.models.user import User
 from app.schemas.order import OrderBrief, OrderCreate, OrderDetail, OrderUpdate
+from app.schemas.payment import PaymentCreate
 from app.schemas.response import ApiResponse
 from app.services.audit_service import get_request_meta, log_action
 
@@ -583,4 +584,68 @@ def order_logs(
     return resp(
         data={"items": result_items, "page": page, "page_size": page_size, "total": total},
         message="查询成功",
+    )
+
+
+@router.post("/{order_id}/payments")
+def create_order_payment(
+    order_id: uuid.UUID,
+    data: PaymentCreate,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("payment:create")),
+):
+    """登记订单收款（规范路径）"""
+    order = get_or_404(db, SalesOrder, order_id, "订单")
+    check_owner_or_forbid(current_user, order.sales_user_id, "order:view_all", "订单")
+
+    if order.status not in ("confirmed", "partially_paid"):
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "ORDER_INVALID_STATUS", "message": "只有已确认/部分收款的订单可以登记收款"},
+        )
+
+    amount = Decimal(str(data.amount))
+    remaining = order.total_amount - order.paid_amount
+    if amount > remaining:
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "PAYMENT_AMOUNT_EXCEEDED", "message": f"收款金额超过剩余应收（剩余 ¥{remaining}）"},
+        )
+
+    payment = Payment(
+        order_id=order.id,
+        amount=amount,
+        payment_method=data.payment_method,
+        operator_id=current_user.id,
+        status="normal",
+        remark=data.remark,
+    )
+    db.add(payment)
+
+    order.paid_amount += amount
+    if order.paid_amount >= order.total_amount:
+        order.status = "completed"
+    else:
+        order.status = "partially_paid"
+
+    order.updated_by = current_user.id
+    log_action(
+        db, action="payment_create", resource_type="payment",
+        resource_id=str(payment.id), actor_id=current_user.id,
+        actor_name=current_user.display_name or current_user.username,
+        after_data={"order_id": str(order.id), "amount": str(amount), "method": data.payment_method},
+        **get_request_meta(request),
+    )
+    db.commit()
+
+    return resp(
+        data={
+            "id": str(payment.id),
+            "order_id": str(order.id),
+            "amount": str(payment.amount),
+            "payment_method": payment.payment_method,
+            "order_status": order.status,
+        },
+        message="收款登记成功",
     )

@@ -162,7 +162,7 @@ class TestPaymentCreate:
     """登记收款"""
 
     def test_01_create_payment_success(self):
-        resp = client.post(f"/api/v1/payments/orders/{_confirmed_order_id}/payments", json={
+        resp = client.post(f"/api/v1/sales-orders/{_confirmed_order_id}/payments", json={
             "amount": "100.00",
             "payment_method": "cash",
             "remark": "第一笔",
@@ -177,7 +177,7 @@ class TestPaymentCreate:
 
     def test_02_create_second_payment_complete(self):
         """全额付完 → 订单完成"""
-        resp = client.post(f"/api/v1/payments/orders/{_confirmed_order_id}/payments", json={
+        resp = client.post(f"/api/v1/sales-orders/{_confirmed_order_id}/payments", json={
             "amount": "200.00",
             "payment_method": "bank_transfer",
         }, headers=_auth())
@@ -196,7 +196,7 @@ class TestPaymentCreate:
         oid = resp.json()["data"]["id"]
         client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
 
-        resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
+        resp = client.post(f"/api/v1/sales-orders/{oid}/payments", json={
             "amount": "999.00",
             "payment_method": "cash",
         }, headers=_auth())
@@ -204,21 +204,21 @@ class TestPaymentCreate:
         assert "超过剩余应收" in resp.json()["detail"]["message"]
 
     def test_04_payment_zero_amount_422(self):
-        resp = client.post(f"/api/v1/payments/orders/{_confirmed_order_id}/payments", json={
+        resp = client.post(f"/api/v1/sales-orders/{_confirmed_order_id}/payments", json={
             "amount": "0",
             "payment_method": "cash",
         }, headers=_auth())
         assert resp.status_code == 422
 
     def test_05_payment_draft_order_400(self):
-        resp = client.post(f"/api/v1/payments/orders/{_draft_order_id}/payments", json={
+        resp = client.post(f"/api/v1/sales-orders/{_draft_order_id}/payments", json={
             "amount": "50.00",
             "payment_method": "cash",
         }, headers=_auth())
         assert resp.status_code == 400
 
     def test_06_payment_bad_order_404(self):
-        resp = client.post(f"/api/v1/payments/orders/{uuid.uuid4()}/payments", json={
+        resp = client.post(f"/api/v1/sales-orders/{uuid.uuid4()}/payments", json={
             "amount": "50.00",
             "payment_method": "cash",
         }, headers=_auth())
