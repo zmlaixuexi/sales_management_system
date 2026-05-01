@@ -52,6 +52,16 @@ npm run dev
 
 数据库需要 PostgreSQL 运行在 localhost:5432，或修改 `.env` 中的 `DATABASE_URL`。
 
+## 开发工作流常用命令
+
+```bash
+make test-unit           # 快速运行非集成测试（~15s）
+make test-integration    # 仅运行集成测试（~2s）
+make test                # 运行全部测试
+make quality             # lint + typecheck + test
+make ci                  # 完整质量门禁（lint + typecheck + coverage + build）
+```
+
 ## 生产部署
 
 ### 1. 配置环境变量
