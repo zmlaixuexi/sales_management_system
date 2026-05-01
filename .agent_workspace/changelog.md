@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百一十一轮）
+
+### 数据库索引优化：软删除索引 + 时间排序索引
+
+- 新增 alembic 迁移 519c97faaed2：8 个索引（4 个 deleted_at + 4 个 created_at DESC）
+- 模型更新：SalesOrder/Product/Customer/User 的 deleted_at 添加 index=True
+- make ci 全量通过：615 tests
+
 ## 2026-05-02（第三百一十轮）
 
 ### CI 全量验证：make ci 通过 + 615 测试全绿

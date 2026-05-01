@@ -6,6 +6,18 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-103
+
+### 性能 — 数据库索引优化：软删除索引 + 时间排序索引
+
+- **文件**: `backend/alembic/versions/519c97faaed2_添加软删除和时间索引.py`, `backend/app/models/order.py`, `backend/app/models/product.py`, `backend/app/models/customer.py`, `backend/app/models/user.py`
+- **内容**:
+  - 新增 4 个 deleted_at 单列索引（sales_orders/products/customers/users）
+  - 新增 4 个 created_at DESC 单列索引（products/customers/users/payments）
+  - 模型定义中 deleted_at 添加 index=True 保持声明一致
+- **验证**: make ci 全量通过，615/615 测试
+- **影响**: 列表查询中 `WHERE deleted_at IS NULL` 和 `ORDER BY created_at DESC` 将使用索引扫描替代全表扫描
+
 ## 功能编号：FEAT-20260502-102
 
 ### 前端 — auditLogs API 统一使用 request.ts 包装器
