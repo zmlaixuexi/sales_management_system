@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-05-01（第二百五十二轮）
+
+### 修复：test_health_check 数据库连接测试
+
+- test_health_check 无 PostgreSQL 时 health 端点返回 degraded 导致断言失败
+- 改用 monkeypatch 模拟 SessionLocal 返回 mock session，使 health 检查返回 ok
+- 全量 make ci 验证通过：ruff 0 + eslint 0 + tsc 0 + 443/443 + 123/123 + 覆盖率 99.82% + build 零警告
+
+### 需求符合性验证 + 安全/业务逻辑修复
+
+- 需求符合性全量扫描，对照开发文档 DoD 逐项检查，发现 10+ 处缺口
+- 修复审计日志敏感字段脱敏：添加 phone/email 到 SENSITIVE_FIELDS（+1 测试）
+- 修复商品删除未检查订单引用：添加 SalesOrderItem 引用检查，返回 409 PRODUCT_IN_USE
+- 修复订单成交单价低于成本价未阻止：添加 PRICE_BELOW_COST 校验（+1 测试）
+- 后端 445/445 通过，make ci 全量通过
+
 ## 2026-04-30（第二百五十一轮）
 
 ### 阻塞：后续改进需产品决策

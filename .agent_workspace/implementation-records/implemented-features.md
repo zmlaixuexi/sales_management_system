@@ -6,6 +6,27 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260501-75
+
+### 需求符合性验证 + 安全/业务逻辑修复
+
+- **文件**: `backend/app/services/audit_service.py`, `backend/app/api/v1/products.py`, `backend/app/api/v1/orders.py`, `backend/tests/test_audit_service.py`, `backend/tests/test_order_calc.py`
+- **内容**:
+  - 审计日志敏感字段脱敏扩展：phone/email 加入 SENSITIVE_FIELDS
+  - 商品删除添加订单引用检查（SalesOrderItem），返回 409 PRODUCT_IN_USE
+  - 订单成交单价低于成本价阻止（PRICE_BELOW_COST）
+- **验证**: 445 后端通过（+2），ruff 0，make ci 全量通过
+- **效果**: 防止敏感信息泄露到审计日志、防止删除在用商品、防止亏本销售
+
+## 功能编号：FEAT-20260501-74
+
+### 修复：test_health_check 无数据库环境适配
+
+- **文件**: `backend/tests/test_health.py`
+- **内容**: test_health_check 改用 monkeypatch 模拟 SessionLocal，解决无 PostgreSQL 时 health 返回 degraded 的断言失败
+- **验证**: 445 后端通过，ruff 0
+- **效果**: 测试环境不再依赖运行中的 PostgreSQL
+
 ## 功能编号：FEAT-20260430-72
 
 ### 安全加固：外键引用存在性校验全量覆盖
