@@ -94,9 +94,9 @@ def sales_summary(
     result = query.first()
 
     total_amount, total_cost, gross_profit, order_count = result
-    gross_margin = (gross_profit / total_amount * 100).quantize(
+    gross_margin = (gross_profit / total_amount * Decimal("100")).quantize(
         Decimal("0.01")
-    ) if total_amount and total_amount > 0 else 0
+    ) if total_amount and total_amount > 0 else Decimal("0")
 
     can_view_profit = has_permission(current_user, "report:profit")
     data: dict = {

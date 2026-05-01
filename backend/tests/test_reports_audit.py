@@ -622,3 +622,20 @@ def test_41_inventory_warning_negative_threshold_422():
     """库存预警负数阈值返回 422"""
     resp = client.get("/api/v1/reports/inventory-warning?threshold=-1", headers=_auth())
     assert resp.status_code == 422
+
+
+def test_42_sales_summary_decimal_precision():
+    """销售汇总毛利率使用 Decimal 精度（不使用 float）"""
+    resp = client.get("/api/v1/reports/sales-summary?period=7d", headers=_auth())
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert "gross_margin" in data
+    # 验证返回值是合法的 Decimal 字符串，无浮点误差
+    margin = Decimal(data["gross_margin"])
+    assert margin >= Decimal("0")
+    # 确保返回的是字符串形式的小数（非科学计数法、无浮点误差）
+    assert "e" not in data["gross_margin"].lower()
+    # 验证精度为两位小数（quantize("0.01")）
+    assert data["gross_margin"].count(".") == 1
+    decimal_places = len(data["gross_margin"].rstrip("0").split(".")[1])
+    assert decimal_places <= 2
