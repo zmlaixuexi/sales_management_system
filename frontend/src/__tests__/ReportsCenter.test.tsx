@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 
 const _reportMocks = {
@@ -233,6 +233,32 @@ describe('ReportsCenter', () => {
     renderReportsCenter()
     await waitFor(() => {
       expect(_messageError).toHaveBeenCalledWith('加载销售概览失败')
+    })
+  })
+
+  it('渲染客户排行表格数据', async () => {
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('客户X')).toBeInTheDocument()
+    })
+  })
+
+  it('渲染销售排行表格数据', async () => {
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('销售员A')).toBeInTheDocument()
+    })
+  })
+
+  it('切换周期选择器触发新的数据加载', async () => {
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(_reportMocks.fetchSalesSummary).toHaveBeenCalledWith('30d')
+    })
+    const select = screen.getByTestId('select')
+    fireEvent.change(select, { target: { value: '7d' } })
+    await waitFor(() => {
+      expect(_reportMocks.fetchSalesSummary).toHaveBeenCalledWith('7d')
     })
   })
 })
