@@ -1,4 +1,4 @@
-.PHONY: help dev dev-backend dev-frontend install test test-backend test-frontend coverage coverage-frontend lint lint-backend lint-frontend typecheck quality ci build build-frontend db-migrate db-check db-seed db-backup db-restore docker-up docker-down clean
+.PHONY: help dev dev-backend dev-frontend install test test-unit test-integration test-backend test-frontend coverage coverage-frontend lint lint-backend lint-frontend typecheck quality ci build build-frontend db-migrate db-check db-seed db-backup db-restore docker-up docker-down clean
 
 help: ## 显示帮助信息
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -29,6 +29,12 @@ test-frontend: ## 运行前端测试
 	cd frontend && npx vitest run
 
 test: test-backend test-frontend ## 运行全部测试
+
+test-unit: ## 快速运行非集成测试（排除 integration 标记）
+	cd backend && python -m pytest tests/ -v -m "not integration"
+
+test-integration: ## 仅运行集成测试
+	cd backend && python -m pytest tests/ -v -m integration
 
 coverage: ## 后端测试覆盖率报告
 	cd backend && python -m pytest tests/ --cov --cov-report=term-missing -q

@@ -42,6 +42,7 @@ def pytest_collection_modifyitems(items):
         "test_product_calc": "crud",
         "test_logging": "infra",
         "test_export_helpers": "export",
+        "test_csv_import": "import",
     }
     for item in items:
         for pattern, marker in file_markers.items():
