@@ -1,0 +1,173 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
+
+const _auditMocks = {
+  fetchAuditActions: vi.fn(),
+}
+
+vi.mock('@/api/auditLogs', () => ({
+  fetchAuditLogs: vi.fn(),
+  fetchAuditActions: (...args: any[]) => _auditMocks.fetchAuditActions(...args),
+}))
+
+vi.mock('@/hooks/usePaginatedList', () => ({
+  usePaginatedList: () => ({
+    data: [
+      { id: 'al1', created_at: '2026-05-01T10:00:00Z', actor_name: '管理员', action: 'product_create', resource_type: 'product', resource_id: 'abc-def012345', after_data: { name: '新商品', status: 'active' }, ip_address: '192.168.1.1', request_id: 'req-001', user_agent: 'Mozilla/5.0' },
+      { id: 'al2', created_at: '2026-05-01T11:00:00Z', actor_name: '销售A', action: 'order_confirm', resource_type: 'order', resource_id: null, after_data: null, ip_address: null, request_id: null, user_agent: null },
+      { id: 'al3', created_at: null, actor_name: null, action: 'login_success', resource_type: 'user', resource_id: 'xyz-123', after_data: null, ip_address: '10.0.0.1', request_id: null, user_agent: null },
+    ],
+    total: 3,
+    loading: false,
+    page: 1,
+    pageSize: 10,
+    keyword: '',
+    setPage: vi.fn(),
+    setKeyword: vi.fn(),
+    onPageChange: vi.fn(),
+    refresh: vi.fn(),
+  }),
+}))
+
+vi.mock('antd', () => ({
+  Table: ({ dataSource, columns, rowKey }: any) => (
+    <table data-testid="audit-table">
+      <thead>
+        <tr>{columns?.map((col: any) => <th key={col.dataIndex || col.title}>{col.title}</th>)}</tr>
+      </thead>
+      <tbody>
+        {dataSource?.map((row: any) => (
+          <tr key={row[rowKey]} data-testid={`row-${row[rowKey]}`}>
+            {columns?.map((col: any) => (
+              <td key={col.dataIndex} data-col={col.dataIndex}>
+                {col.render ? col.render(row[col.dataIndex], row) : row[col.dataIndex]}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  ),
+  Select: ({ value, onChange, options, placeholder, allowClear }: any) => (
+    <select data-testid="action-select" value={value || ''} onChange={(e: any) => onChange?.(e.target.value)}>
+      <option value="">{placeholder || '全部'}</option>
+      {options?.map((o: any) => <option key={o.value} value={o.value}>{o.label}</option>)}
+    </select>
+  ),
+  Input: Object.assign(
+    ({ value, onChange, placeholder }: any) => (
+      <input data-testid="search-input" placeholder={placeholder} value={value || ''} onChange={(e: any) => onChange?.(e)} />
+    ),
+    {
+      Search: ({ placeholder, onSearch, allowClear }: any) => (
+        <input data-testid="search-input" placeholder={placeholder} />
+      ),
+    },
+  ),
+  Space: ({ children }: any) => <span>{children}</span>,
+  Tag: ({ children, color }: any) => <span data-testid="tag" data-color={color}>{children}</span>,
+  Typography: {
+    Title: ({ children }: any) => <h2>{children}</h2>,
+    Text: ({ children }: any) => <span>{children}</span>,
+  },
+  Tooltip: ({ children }: any) => <span>{children}</span>,
+  DatePicker: { RangePicker: ({ value, onChange }: any) => <input data-testid="date-range" /> },
+  message: { error: vi.fn(), success: vi.fn() },
+}))
+
+vi.mock('dayjs', () => {
+  const mockDayjs = (v: any) => ({
+    format: (fmt: string) => {
+      if (!v) return ''
+      const d = new Date(v)
+      if (fmt === 'YYYY-MM-DD') return d.toISOString().slice(0, 10)
+      if (fmt === 'YYYY-MM-DD HH:mm:ss') return d.toISOString().replace('T', ' ').slice(0, 19)
+      return String(v)
+    },
+  })
+  return { default: mockDayjs }
+})
+
+vi.mock('@ant-design/icons', () => ({}))
+
+import AuditLogs from '@/pages/AuditLogs'
+
+function renderAuditLogs() {
+  return render(
+    <MemoryRouter initialEntries={['/audit-logs']}>
+      <Routes>
+        <Route path="/audit-logs" element={<AuditLogs />} />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
+describe('AuditLogs', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    _auditMocks.fetchAuditActions.mockResolvedValue({
+      actions: ['product_create', 'order_confirm', 'login_success'],
+      resource_types: ['product', 'order', 'user'],
+    })
+  })
+
+  it('渲染页面标题', () => {
+    renderAuditLogs()
+    expect(screen.getByText('操作日志')).toBeInTheDocument()
+  })
+
+  it('渲染筛选器', () => {
+    renderAuditLogs()
+    const selects = screen.getAllByTestId('action-select')
+    expect(selects.length).toBeGreaterThanOrEqual(2)
+    expect(screen.getByTestId('date-range')).toBeInTheDocument()
+  })
+
+  it('渲染审计日志表格', () => {
+    renderAuditLogs()
+    expect(screen.getByTestId('audit-table')).toBeInTheDocument()
+    expect(screen.getByTestId('row-al1')).toBeInTheDocument()
+  })
+
+  it('操作标签正确映射为中文', () => {
+    renderAuditLogs()
+    const tags = screen.getAllByTestId('tag')
+    const tagTexts = tags.map((t) => t.textContent)
+    expect(tagTexts).toContain('新增商品')
+    expect(tagTexts).toContain('确认订单')
+    expect(tagTexts).toContain('登录成功')
+  })
+
+  it('资源类型映射为中文', () => {
+    renderAuditLogs()
+    expect(screen.getByText('商品')).toBeInTheDocument()
+    expect(screen.getByText('订单')).toBeInTheDocument()
+    expect(screen.getByText('用户')).toBeInTheDocument()
+  })
+
+  it('空值显示短横线', () => {
+    renderAuditLogs()
+    const row2 = screen.getByTestId('row-al2')
+    expect(row2.textContent).toContain('-')
+  })
+
+  it('表格列包含必要字段', () => {
+    renderAuditLogs()
+    const table = screen.getByTestId('audit-table')
+    const headerTexts = Array.from(table.querySelectorAll('th')).map((th) => th.textContent)
+    expect(headerTexts).toContain('时间')
+    expect(headerTexts).toContain('操作人')
+    expect(headerTexts).toContain('操作')
+    expect(headerTexts).toContain('资源类型')
+    expect(headerTexts).toContain('IP')
+  })
+
+  it('fetchAuditActions 在挂载时调用', async () => {
+    renderAuditLogs()
+    await waitFor(() => {
+      expect(_auditMocks.fetchAuditActions).toHaveBeenCalled()
+    })
+  })
+})
