@@ -2,13 +2,14 @@
 
 最后更新时间：2026-05-02
 当前阶段：需求符合性验证 + 代码质量
-当前任务编号：ROUND-266
-当前任务名称：安全 — 报表 period 参数严格校验
+当前任务编号：ROUND-267
+当前任务名称：文档 — 测试数同步至 590
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 267：文档 — 测试数同步 testing.md 和 README 至 465+125=590，覆盖率 99.78%，make ci 全量通过
 - Round 266：安全 — 报表 period 参数严格校验，无效值返回 400 替代静默回退，+4 测试，465/465 通过
 - Round 265：前端 — 添加客户排行和销售人员排行 API 函数（fetchCustomerRanking/fetchSalespersonRanking）+ 类型定义 + 测试，125/125 通过
 - Round 264：代码质量 — 序号生成函数统一为 deps.generate_sequential_code，消除 orders/products 重复
