@@ -139,7 +139,7 @@ cd backend
 source .venv/bin/activate
 pytest tests/ -v
 
-# 前端测试（127 个）
+# 前端测试（129 个）
 cd frontend
 npm test
 
@@ -203,12 +203,12 @@ npm run build
 | auth API | 5 | login/refresh/logout/getMe/changePassword 路径验证 |
 | auth store | 11 | login/logout/fetchUser/hasPermission/loading 状态 |
 | downloadCsv | 6 | 成功下载、查询参数、过滤、错误、文件名提取 |
-| usePaginatedList | 9 | 初始加载、错误处理、筛选、分页切换、刷新、空结果 |
+| usePaginatedList | 10 | 初始加载、错误处理、筛选、分页切换、刷新、空结果、_toastDisplayed 跳过 |
 | 拦截器 | 11 | 401 刷新重试、401 无 refresh 跳转、403/404/500 错误提示、网络错误、429 重试、_toastDisplayed 标记 |
-| useSubmit | 5 | 成功调用/提交中状态/错误提示/Ant Design 校验静默/防重 |
+| useSubmit | 6 | 成功调用/提交中状态/错误提示/Ant Design 校验静默/防重/_toastDisplayed 跳过 |
 | NotFound | 3 | 404 渲染/返回首页按钮/按钮点击导航 |
 | ProtectedRoute | 5 | 无 token 重定向/加载中/已认证渲染/fetchUser 失败/异步重定向 |
-| **合计** | **127** | |
+| **合计** | **129** | |
 
 ## API 概览
 
