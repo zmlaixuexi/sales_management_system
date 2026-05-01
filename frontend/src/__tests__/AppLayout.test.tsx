@@ -141,4 +141,49 @@ describe('AppLayout', () => {
       expect(screen.getByText('fallback_user')).toBeInTheDocument()
     })
   })
+
+  it('显示系统标题', () => {
+    ;(authApi.getMe as any).mockResolvedValue({ data: { success: false } })
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="*" element={<AppLayout />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('销售管理系统')).toBeInTheDocument()
+  })
+
+  it('菜单包含全部 9 个导航项', () => {
+    ;(authApi.getMe as any).mockResolvedValue({ data: { success: false } })
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="*" element={<AppLayout />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    const menu = screen.getByTestId('menu')
+    const buttons = menu.querySelectorAll('button[data-testid^="menu-"]')
+    expect(buttons.length).toBe(9)
+  })
+
+  it('当前路径对应的菜单项高亮', () => {
+    ;(authApi.getMe as any).mockResolvedValue({ data: { success: false } })
+
+    render(
+      <MemoryRouter initialEntries={['/orders']}>
+        <Routes>
+          <Route path="*" element={<AppLayout />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    const menu = screen.getByTestId('menu')
+    expect(menu.getAttribute('data-selected')).toBe('/orders')
+  })
 })
