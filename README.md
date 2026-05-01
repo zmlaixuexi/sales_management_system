@@ -134,7 +134,7 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（465 个）
+# 后端测试（474 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
@@ -181,7 +181,8 @@ npm run build
 | 日志格式器 | 6 | _JsonFormatter JSON 输出/异常/extra_fields，log_action 容错 |
 | 导出辅助函数 | 13 | _dec/_str/_dt CSV 格式化 |
 | 文件服务 | 4 | 扩展名/MIME/大小/正常 |
-| **合计** | **465** | |
+| CSV 导入校验 | 9 | 文件名/扩展名/BOM/编码/大小限制/空文件/仅有表头 |
+| **合计** | **474** | |
 
 ### 前端测试覆盖
 
