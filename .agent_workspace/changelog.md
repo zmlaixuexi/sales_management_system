@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第三百零五轮）
+
+### 部署：Docker Compose 补齐 MAX_CSV_IMPORT_ROWS 环境变量 + 文档同步
+
+- docker-compose.prod.yml: 新增 MAX_CSV_IMPORT_ROWS=${MAX_CSV_IMPORT_ROWS:-1000}
+- docker-compose.dev.yml: 同上
+- docs/deployment.md: 新增 MAX_CSV_IMPORT_ROWS 配置说明
+- docs/api.md: 新增 MAX_CSV_IMPORT_ROWS 配置说明
+
 ## 2026-05-02（第三百零四轮）
 
 ### 前端：修复 auditLogs 重构遗留（未使用导入 + any 类型）
