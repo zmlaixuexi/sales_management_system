@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百六十八轮）
+
+### 重构：收款登记逻辑去重
+
+- 新增 services/payment_service.py，提取 register_payment 共享函数
+- payments.py 和 orders.py 的 create_payment/create_order_payment 改为调用共享函数
+- 净减 89 行重复代码，465/465 通过，ruff 0
+
 ## 2026-05-02（第二百六十七轮）
 
 ### 文档：测试数同步至 590
