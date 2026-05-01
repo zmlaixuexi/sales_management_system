@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第一百五十一轮·自动循环）
+
+### 可观测：JSON 日志全局关联 request_id 和 user_id
+
+- `backend/app/core/logging.py`：`_JsonFormatter` 自动注入 `request_id` 和 `user_id` 到所有 JSON 日志条目
+- 便于按请求链路追踪和按用户过滤日志，生产环境 JSON 格式下所有日志均可通过 request_id 关联
+- 后端 609 tests 全部通过
+
 ## 2026-05-02（第一百五十轮·自动循环）
 
 ### 全量 DoD 验证 + deleted_at 审计：零遗漏

@@ -2,16 +2,16 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-150
-当前任务名称：全量 DoD 验证 + deleted_at 审计
+当前任务编号：ROUND-151
+当前任务名称：JSON 日志全局关联 request_id/user_id
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 151：JSON 日志全局关联 request_id 和 user_id（可观测性增强）
 - Round 150：全量 DoD 验证 + deleted_at 审计（零遗漏）
 - Round 149：Nginx Gzip 压缩 + API Cache-Control
-- Round 148：全量 CI 验证通过（916 tests）
 
 ## 最终验证状态
 
@@ -29,7 +29,7 @@
 
 继续 keep-going 模式。可选方向：
 - 前端组件测试补强
-- 可观测性（结构化日志增强）
+- 可观测性（慢查询日志增加 SQL 语句内容）
 - 部署体验
 - 安全加固
 
