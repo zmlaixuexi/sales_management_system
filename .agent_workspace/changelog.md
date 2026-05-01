@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第三百六十三轮）
+
+### 安全：客户和用户邮箱字段 XSS 消毒一致性修复
+
+- `backend/app/schemas/customer.py`：CustomerCreate/Update 的 `email` 字段添加 `strip_html` 校验
+- `backend/app/schemas/auth.py`：UserCreate/Update 的 `email` 字段添加 `strip_html` 校验
+- 修复安全不一致：CSV 导入路径对 email 做了 strip_html 但 API 路径未做
+- `backend/tests/test_sanitize.py`：新增 2 个 schema 邮箱消毒测试
+- 总测试：561 后端 + 258 前端 = 819
+
 ## 2026-05-02（第三百六十二轮）
 
 ### 测试：PRICE_BELOW_COST 订单创建集成测试
