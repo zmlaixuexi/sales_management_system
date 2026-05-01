@@ -1,17 +1,17 @@
 # 当前工作现场
 
 最后更新时间：2026-05-02
-当前阶段：文档同步 + 代码质量
-当前任务编号：ROUND-313
-当前任务名称：文档同步 — testing.md + architecture.md 至 618 tests
+当前阶段：部署配置 + 代码质量
+当前任务编号：ROUND-314
+当前任务名称：部署配置完善 — Docker Compose 环境变量对齐
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 314：部署配置完善 — Docker Compose 环境变量对齐
 - Round 313：文档同步 — testing.md + architecture.md 至 618 tests
 - Round 312：SQL 慢查询日志 — SQLAlchemy 事件监听
-- Round 311：数据库索引优化 — 软删除索引 + 时间排序索引
 
 ## 最终验证状态
 
@@ -38,7 +38,7 @@ ruff + mypy + alembic check + pytest + eslint + tsc + vitest + build + pip-audit
 - 安全：token 撤销/refresh token rotation（需架构决策）
 - 测试补强：前端页面组件测试
 - 可观测性：请求链路追踪增强
-- 部署：docker-compose 环境变量完善
+- 部署：docs/deployment.md 环境变量同步
 
 ## 阻塞问题
 

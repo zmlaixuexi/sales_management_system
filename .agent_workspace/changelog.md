@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百一十四轮）
+
+### 部署：Docker Compose 和 .env.example 环境变量补全
+
+- docker-compose.prod.yml：新增 SLOW_SQL_THRESHOLD_MS、JWT_REFRESH_TOKEN_EXPIRE_DAYS
+- docker-compose.dev.yml：新增 SLOW_SQL_THRESHOLD_MS、SLOW_REQUEST_THRESHOLD_MS、DB_POOL_SIZE/MAX_OVERFLOW/RECYCLE_SECONDS、JWT_ACCESS_TOKEN_EXPIRE_MINUTES/REFRESH_TOKEN_EXPIRE_DAYS
+- .env.example：新增 SLOW_SQL_THRESHOLD_MS
+
 ## 2026-05-02（第三百一十三轮）
 
 ### 文档：同步 testing.md 和 architecture.md 至 618 tests
