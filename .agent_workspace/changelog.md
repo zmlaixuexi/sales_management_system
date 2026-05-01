@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第二百六十二轮）
+
+### 安全：修复 3 个安全审查发现的中等问题
+
+- payment_method 从 str 改为 Literal 枚举类型，拒绝无效值（422）
+- PRODUCT_IN_USE 检查现在只查未删除订单（join SalesOrder 过滤 deleted_at）
+- 订单日志 before_data/after_data 按 product:view_cost 权限过滤成本字段
+- 测试银行转账统一为 transfer，+3 测试（无效支付方式 + 日志字段验证 + 集成测试）
+- 后端 461/461 通过，覆盖率 99.78%
+
 ## 2026-05-01（第二百六十一轮）
 
 ### 文档：api.md 同步 Round 252-258 接口变更

@@ -6,6 +6,18 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-85
+
+### 安全加固 — 安全审查问题修复
+
+- **文件**: `backend/app/schemas/payment.py`, `backend/app/api/v1/products.py`, `backend/app/api/v1/orders.py`
+- **内容**:
+  - payment_method 从 str 改为 Literal["cash","transfer","wechat","alipay","other"] 枚举校验
+  - PRODUCT_IN_USE 检查改为 join SalesOrder 过滤 deleted_at，仅检查未删除订单
+  - 订单日志 before_data/after_data 按 product:view_cost 权限过滤成本字段
+- **测试**: +3 测试（无效支付方式 + 日志字段验证 + 集成测试），461/461 通过
+- **验证**: 覆盖率 99.78%，ruff 0
+
 ## 功能编号：FEAT-20260501-84
 
 ### 文档同步 api.md
