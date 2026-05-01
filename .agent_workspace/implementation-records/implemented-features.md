@@ -6,6 +6,17 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-99
+
+### 前端 — downloadCsv 迁移至 Axios 统一拦截器
+
+- **文件**: `frontend/src/api/request.ts`, `frontend/src/utils/index.ts`, `frontend/src/pages/Orders.tsx`, `frontend/src/pages/Products.tsx`, `frontend/src/pages/Customers.tsx`
+- **内容**:
+  - downloadCsv 从原生 fetch 迁移到 apiClient.get()（responseType: blob）
+  - CSV 导出现在覆盖 auth 自动注入、401 token 刷新、429 自动重试、统一错误提示
+  - 消除前端请求层最后一个绕过 Axios 拦截器的路径
+- **测试**: 测试重写为 apiClient mock，127/127 通过
+
 ## 功能编号：FEAT-20260502-98
 
 ### 前端 — 修复双重错误 toast（拦截器 _toastDisplayed 标记）

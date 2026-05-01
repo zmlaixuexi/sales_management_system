@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百九十九轮）
+
+### 前端：downloadCsv 迁移至 Axios — 统一拦截器覆盖
+
+- downloadCsv 从 utils/index.ts（原生 fetch）迁移到 api/request.ts（apiClient）
+- 获得 auth 自动注入、401 刷新、429 重试、统一错误提示
+- 更新 Orders/Products/Customers 页面 import 路径
+- 重写测试使用 apiClient mock，127/127 通过
+
 ## 2026-05-02（第二百九十八轮）
 
 ### 前端：修复双重错误 toast — 拦截器标记 _toastDisplayed 避免重复提示
