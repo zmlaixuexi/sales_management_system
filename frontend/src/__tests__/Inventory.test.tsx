@@ -7,6 +7,17 @@ const _inventoryMocks = {
   fetchInventoryMovements: vi.fn(),
 }
 
+const _paginatedListReturn: any = {
+  data: [],
+  total: 0,
+  loading: false,
+  error: false,
+  page: 1,
+  pageSize: 20,
+  onPageChange: vi.fn(),
+  refresh: vi.fn(),
+}
+
 vi.mock('@/api/inventory', () => ({
   fetchInventoryMovements: (...args: any[]) => _inventoryMocks.fetchInventoryMovements(...args),
 }))
@@ -14,20 +25,16 @@ vi.mock('@/api/inventory', () => ({
 vi.mock('@/hooks/usePaginatedList', () => ({
   usePaginatedList: (_fetchFn: any, _filters: any, _errorMsg: string) => {
     const result = _inventoryMocks.fetchInventoryMovements()
-    return {
-      data: result?.data?.items ?? [],
-      total: result?.data?.total ?? 0,
-      loading: false,
-      page: 1,
-      pageSize: 20,
-      onPageChange: vi.fn(),
-    }
+    _paginatedListReturn.data = result?.data?.items ?? []
+    _paginatedListReturn.total = result?.data?.total ?? 0
+    return _paginatedListReturn
   },
 }))
 
 vi.mock('antd', () => ({
-  Table: ({ dataSource, columns, rowKey, locale }: any) => (
+  Table: ({ dataSource, columns, rowKey, locale, loading }: any) => (
     <div>
+      {loading ? <span>加载中...</span> : (
       <table data-testid="table">
         <tbody>
           {dataSource?.map((row: any) => (
@@ -41,7 +48,8 @@ vi.mock('antd', () => ({
           ))}
         </tbody>
       </table>
-      {(!dataSource || dataSource.length === 0) && locale?.emptyText && <span>{locale.emptyText}</span>}
+      )}
+      {(!dataSource || dataSource.length === 0) && !loading && locale?.emptyText && <span>{locale.emptyText}</span>}
     </div>
   ),
   Space: ({ children }: any) => <span>{children}</span>,
@@ -140,5 +148,30 @@ describe('InventoryPage', () => {
     _inventoryMocks.fetchInventoryMovements.mockReturnValue({ data: { items: [], total: 0 } })
     renderInventory()
     expect(screen.getByText('暂无库存变动记录')).toBeInTheDocument()
+  })
+
+  it('加载中显示加载提示', () => {
+    _paginatedListReturn.loading = true
+    _paginatedListReturn.data = []
+    _inventoryMocks.fetchInventoryMovements.mockReturnValue({ data: { items: [], total: 0 } })
+    renderInventory()
+    expect(screen.getByText('加载中...')).toBeInTheDocument()
+    _paginatedListReturn.loading = false
+  })
+
+  it('错误状态显示重试链接', () => {
+    _paginatedListReturn.loading = false
+    _paginatedListReturn.error = true
+    _paginatedListReturn.data = []
+    _inventoryMocks.fetchInventoryMovements.mockReturnValue({ data: { items: [], total: 0 } })
+    renderInventory()
+    expect(screen.getByText('重试')).toBeInTheDocument()
+    _paginatedListReturn.error = false
+  })
+
+  it('空备注显示为 --', () => {
+    renderInventory()
+    const row = screen.getByTestId('row-mov-002')
+    expect(row.textContent).toContain('--')
   })
 })
