@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百六十九轮）
+
+### 文档：同步 testing.md 至 850 tests
+
+- `docs/testing.md`：后端 561→592、总计 819→850
+- 更新测试文件计数：test_reports_audit 28→46、test_export 31→37、test_file_upload 16→22、test_audit_log 9→17、test_order_crud 39→40、test_boundary 37→47、test_edge_cases 27→31、test_validation 23→25、test_auth 13→14、test_audit_service 8→11、test_logging 5→6
+- 更新标记计数：crud 147→189、export 44→50、report 56→74、integration 44→50
+
 ## 2026-05-02（第三百六十八轮）
 
 ### 测试：审计日志 API 异常路径补强（+6 tests）

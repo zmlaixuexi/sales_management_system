@@ -4,11 +4,11 @@
 
 | 指标 | 值 |
 |---|---|
-| 后端测试总数 | 561 |
+| 后端测试总数 | 592 |
 | 后端测试文件 | 30 |
 | 前端测试总数 | 258 |
 | 前端测试文件 | 36 |
-| 测试总计 | 819 |
+| 测试总计 | 850 |
 | 后端覆盖率 | 99.79% |
 | 覆盖模块 | 认证、商品、客户、订单、库存、收款、报表（含客户/销售人员排行）、审计日志（含手机号/邮箱脱敏）、数据导出（含权限/数据范围/敏感字段边界）、批量导入（含负价格/非法格式/英文表头/批量内去重）、权限校验、速率限制、SQL 注入防护、XSS 防护、请求 ID 中间件、CORS 验证、日志格式器、金额计算、文件服务（含 FILE_TOO_LARGE/FILE_NOT_BOUND 错误码）、密码强度、订单操作日志、支付路径（含已取消/已完成订单拒绝、无权限 403）、派生销售字段、响应体 request_id、报表 period 参数校验、CSV 导入校验（含行数上限+XSS 消毒+commit 回滚）、客户 source/level 枚举校验、生产环境 OpenAPI 禁用、SQL 慢查询日志、用户管理（含角色列表 API 和权限边界） |
 
@@ -94,13 +94,13 @@ pytest -m "not slow"  # 排除慢速测试
 
 | 标记 | 说明 | 测试数 |
 |---|---|---|
-| crud | CRUD 操作测试 | 147 |
+| crud | CRUD 操作测试 | 189 |
 | boundary | 边界值和异常路径 | 103 |
 | security | 认证/权限/速率限制/XSS 防护 | 56 |
-| export | 导出功能 | 44 |
+| export | 导出功能 | 50 |
 | import | 导入功能 | 42 |
-| report | 报表和审计日志 | 56 |
-| integration | 集成测试 | 44 |
+| report | 报表和审计日志 | 74 |
+| integration | 集成测试 | 50 |
 | infra | 基础设施（健康检查/中间件/日志） | 23 |
 
 ---
@@ -129,7 +129,7 @@ pytest -m "not slow"  # 排除慢速测试
 | test_request_id_in_response_body_passthrough | 响应体透传请求中的 request_id |
 | test_openapi_disabled_in_production | 生产环境 OpenAPI 文档端点配置为 None |
 
-### test_auth.py（13 个测试）
+### test_auth.py（14 个测试）
 
 认证模块，测试用户为非超级用户。
 
@@ -159,37 +159,37 @@ pytest -m "not slow"  # 排除慢速测试
 | TestReport | 4 | 销售汇总、趋势、商品排行、库存预警 |
 | TestOrderLogs | 3 | 订单日志查询、分页、404 |
 
-### test_audit_log.py（9 个测试）
+### test_audit_log.py（17 个测试）
 
-审计日志验证。每个测试先执行业务操作，再查询审计日志确认记录正确。
+审计日志验证。每个测试先执行业务操作，再查询审计日志确认记录正确。新增：未认证 401（列表/操作类型）、无效 actor_id 422、分页参数越界 422。
 
-### test_export.py（31 个测试）
+### test_export.py（37 个测试）
 
-CSV 数据导出验证，包括基本导出、多维度筛选（keyword/status/date/customer/order）、认证和 CSV 格式验证（BOM、表头顺序、字段数一致性、状态中文映射、数据值精确匹配）、无权限用户 403、成本价字段按权限隐藏、数据范围过滤。
+CSV 数据导出验证，包括基本导出、多维度筛选（keyword/status/date/customer/order）、认证和 CSV 格式验证（BOM、表头顺序、字段数一致性、状态中文映射、数据值精确匹配）、无权限用户 403、成本价字段按权限隐藏、数据范围过滤、未认证 401（客户/订单/收款）、无效 UUID 422。
 
-### test_file_upload.py（16 个测试）
+### test_file_upload.py（22 个测试）
 
-图片上传、类型/大小校验（FILE_INVALID_TYPE/FILE_TOO_LARGE 独立错误码）、获取/删除、认证验证、已绑定商品图片 FILE_NOT_BOUND 拒绝、伪装扩展名拒绝。
+图片上传、类型/大小校验（FILE_INVALID_TYPE/FILE_TOO_LARGE 独立错误码）、获取/删除、认证验证、已绑定商品图片 FILE_NOT_BOUND 拒绝、伪装扩展名拒绝、GET/DELETE 未认证 401、无效 UUID 422、缺少 file 字段 422、跨用户文件查看权限验证。
 
 ### test_permissions.py（9 个测试）
 
 数据范围权限、敏感字段过滤、权限码拦截、导出数据范围过滤。
 
-### test_edge_cases.py（27 个测试）
+### test_edge_cases.py（31 个测试）
 
 6 大业务模块异常路径：缺字段、负值、重复、404、状态转换、库存不足、伪造 Token。
 
-### test_validation.py（23 个测试）
+### test_validation.py（25 个测试）
 
 refresh_token 异常、价格/库存/名称校验、CSV 边界、用户列表、密码强度校验。
 
-### test_boundary.py（37 个测试）
+### test_boundary.py（47 个测试）
 
 认证边界、订单状态机、收款边界（草稿收款、超额、冲正回退）、用户管理、库存调整、流水类型筛选。
 
-### test_reports_audit.py（28 个测试）
+### test_reports_audit.py（46 个测试）
 
-销售汇总（6 种 period）、趋势、排行、预警、审计日志查询/筛选/权限、客户排行（含数据范围过滤和利润可见性）、销售人员排行（含数据范围过滤和利润可见性）。
+销售汇总（6 种 period）、趋势、排行、预警、审计日志查询/筛选/权限、客户排行（含数据范围过滤和利润可见性）、销售人员排行（含数据范围过滤和利润可见性）、未认证 401（6 端点 parametrize）、排行 limit 边界值 422、库存预警负数阈值 422、无效 period 错误码验证。
 
 ### test_product_import.py（17 个测试）
 
@@ -219,9 +219,9 @@ refresh_token 异常、价格/库存/名称校验、CSV 边界、用户列表、
 
 商品 CRUD 成功路径 + CSV 导入：详情获取、软删除、删除后不可见、列表排除已删除、分类筛选/排序、SKU 更新、CSV 导入（成功/编码错误/空表头/行错误/SKU 重复/大小限制）。
 
-### test_order_crud.py（39 个测试）
+### test_order_crud.py（40 个测试）
 
-订单 CRUD + 状态流转全生命周期：创建（正常/空明细/客户不存在/商品不存在/零数量/负价拒绝/低于成本价拒绝）、详情/404/列表/状态筛选/客户筛选、编辑草稿（修改明细+金额重算+负价拒绝）、确认（库存扣减验证）、取消（库存回滚/商品已删除跳过）、库存不足确认失败、低于成本价阻止下单、订单号后缀回退。
+订单 CRUD + 状态流转全生命周期：创建（正常/空明细/客户不存在/商品不存在/零数量/负价拒绝/低于成本价拒绝）、详情/404/列表/状态筛选/客户筛选、编辑草稿（修改明细+金额重算+负价拒绝/低于成本价拒绝）、确认（库存扣减验证）、取消（库存回滚/商品已删除跳过）、库存不足确认失败、低于成本价阻止下单、订单号后缀回退。
 
 ### test_payment_crud.py（25 个测试）
 
@@ -251,11 +251,11 @@ CSV 导出辅助函数单元测试：`_dec` Decimal/None/零/负数，`_str` 字
 
 商品利润计算纯函数测试：`_calc_profit` 基本利润/零售价除零保护/亏损/零利润/精度/高毛利率。
 
-### test_audit_service.py（8 个测试）
+### test_audit_service.py（11 个测试）
 
 审计服务内部函数测试：`_mask_sensitive` None/空字典/密码脱敏/token 脱敏/手机号脱敏/邮箱脱敏/无匹配，`model_to_dict` UUID 转字符串/None 跳过。
 
-### test_logging.py（5 个测试）
+### test_logging.py（6 个测试）
 
 日志模块测试：`_JsonFormatter` 基本 JSON/异常信息/extra_fields 合并/无异常字段，`log_action` 数据库失败返回 None。
 
