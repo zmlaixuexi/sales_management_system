@@ -2,16 +2,16 @@
 
 最后更新时间：2026-05-02
 当前阶段：需求符合性验证 + 代码质量
-当前任务编号：ROUND-277
-当前任务名称：安全 — 依赖漏洞审计
+当前任务编号：ROUND-278
+当前任务名称：工程 — 测试标记补全 + 前端依赖审计
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 277：安全 — pip-audit 扫描项目 venv，全部运行时依赖无已知漏洞（仅 pip 自身 2 个低危 CVE）
+- Round 278：工程 — test_file_service 添加 security 标记，npm audit 0 漏洞，474/474 通过
+- Round 277：安全 — pip-audit 扫描项目 venv，全部运行时依赖无已知漏洞
 - Round 276：文档 — deployment.md 新增开发工作流命令，env/api 文档完整性验证通过
-- Round 275：工程 — 新增 make test-unit/test-integration 快速反馈目标
 - Round 274：文档 — implemented-features.md 新增 FEAT-86 至 FEAT-90（5 条），make ci 全量通过
 - Round 273：文档 — architecture.md 同步中间件栈、服务层、安全措施（17项）、可观测性（7项）
 - Round 272：文档 — 测试数同步 testing.md 和 README 至 474+125=599，make ci 全量通过

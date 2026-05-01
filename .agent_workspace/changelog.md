@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百七十八轮）
+
+### 工程：测试标记补全 + 前端依赖审计
+
+- conftest.py 为 test_file_service 添加 security 标记（之前遗漏）
+- npm audit 前端 0 漏洞，pip-audit 后端仅 pip 自身低危 CVE
+- 474/474 全量通过，431 unit + 43 integration
+
 ## 2026-05-02（第二百七十七轮）
 
 ### 安全：依赖漏洞审计
