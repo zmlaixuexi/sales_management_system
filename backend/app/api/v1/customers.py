@@ -300,6 +300,17 @@ def delete_customer(
 
     check_owner_or_forbid(current_user, customer.owner_user_id, "customer:view_all", "客户")
 
+    # 有订单关联的客户不可删除
+    from app.models.order import SalesOrder
+    has_orders = db.query(SalesOrder).filter(
+        SalesOrder.customer_id == customer_id, SalesOrder.deleted_at.is_(None),
+    ).first()
+    if has_orders:
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "CUSTOMER_HAS_ORDERS", "message": "该客户有未删除的订单，无法删除"},
+        )
+
     customer.deleted_at = datetime.now()
     customer.updated_by = current_user.id
     log_user_action(

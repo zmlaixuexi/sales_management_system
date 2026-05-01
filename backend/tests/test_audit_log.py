@@ -22,6 +22,7 @@ _tokens: dict = {}
 _product_id: str = ""
 _customer_id: str = ""
 _order_id: str = ""
+_payment_id: str = ""
 
 
 def override_get_db():
@@ -221,6 +222,36 @@ def test_06_payment_audit_logs():
     items = resp.json()["data"]["items"]
     assert len(items) >= 1
     assert items[0]["resource_type"] == "payment"
+
+    # 保存收款 ID 用于冲正测试
+    global _payment_id
+    _payment_id = items[0]["resource_id"]
+
+
+def test_06a_payment_reverse_audit_log():
+    """冲正收款产生审计日志"""
+    resp = client.post(f"/api/v1/payments/{_payment_id}/reverse", headers=_auth())
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=payment_reverse", headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    assert items[0]["resource_type"] == "payment"
+    assert items[0]["before_data"]["status"] == "normal"
+    assert items[0]["after_data"]["status"] == "reversed"
+
+
+def test_06b_order_cancel_audit_log():
+    """取消订单产生审计日志"""
+    resp = client.post(f"/api/v1/sales-orders/{_order_id}/cancel", headers=_auth())
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=order_cancel", headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    assert items[0]["resource_type"] == "order"
 
 
 def test_07_inventory_adjust_audit_log():

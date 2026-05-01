@@ -363,3 +363,38 @@ def test_22_update_customer_invalid_follow_status():
         "follow_status": "bad_status",
     }, headers=_auth())
     assert resp.status_code == 422
+
+
+def test_23_delete_customer_with_order_ref_blocked():
+    """有订单关联的客户不可删除"""
+    # 创建新客户和商品，下订单
+    resp = client.post("/api/v1/customers", json={
+        "name": "订单关联客户", "phone": "13800007777",
+    }, headers=_auth())
+    cid = resp.json()["data"]["id"]
+
+    resp = client.post("/api/v1/products", json={
+        "name": "关联测试商品", "cost_price": "10.00", "sale_price": "20.00",
+        "stock_quantity": 5, "status": "active",
+    }, headers=_auth())
+    pid = resp.json()["data"]["id"]
+
+    # 创建订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cid,
+        "items": [{"product_id": pid, "quantity": 1}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    # 尝试删除客户 → 应被拒绝
+    resp = client.delete(f"/api/v1/customers/{cid}", headers=_auth())
+    assert resp.status_code == 400
+    assert resp.json()["error"]["code"] == "CUSTOMER_HAS_ORDERS"
+
+    # 无订单的客户可以正常删除
+    resp = client.post("/api/v1/customers", json={
+        "name": "无订单客户", "phone": "13800007778",
+    }, headers=_auth())
+    free_cid = resp.json()["data"]["id"]
+    resp = client.delete(f"/api/v1/customers/{free_cid}", headers=_auth())
+    assert resp.status_code == 200

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第三百七十三轮）
+
+### 验收：客户订单关联删除保护 + 收款冲正/订单取消审计日志测试（+3 tests）
+
+- `backend/app/api/v1/customers.py`：新增删除前检查 — 有未删除订单的客户不可删除，返回 CUSTOMER_HAS_ORDERS
+- `backend/tests/test_customer_crud.py`：新增 test_23_delete_customer_with_order_ref_blocked
+- `backend/tests/test_audit_log.py`：新增 test_06a（收款冲正审计日志）、test_06b（订单取消审计日志）
+- 后端 593→596 tests，总计 851→854
+
 ## 2026-05-02（第三百七十二轮）
 
 ### 测试：订单快照保留验收测试（验收标准 6.5）
