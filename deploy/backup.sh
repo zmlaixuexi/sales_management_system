@@ -37,6 +37,18 @@ fi
 FILE_SIZE=$(du -h "${BACKUP_FILE}" | cut -f1)
 echo "[$(date)] 备份完成: ${BACKUP_FILE} (${FILE_SIZE})"
 
-# 清理 30 天前的备份
-find "${BACKUP_DIR}" -name "sales_mgmt_*.sql.gz" -mtime +30 -delete
-echo "[$(date)] 已清理 30 天前的旧备份"
+# 清理旧备份：保留最近 7 天每日备份 + 最近 4 周每周保留一份
+# 删除超过 7 天的非周一备份
+find "${BACKUP_DIR}" -name "sales_mgmt_*.sql.gz" -mtime +7 ! -name "*_周一*" | while read -r f; do
+    # 检查是否为周一（保留周一备份 4 周）
+    FILE_DATE=$(echo "$f" | grep -oP '\d{8}' | head -1)
+    if [ -n "${FILE_DATE}" ]; then
+        DOW=$(date -d "${FILE_DATE:0:4}-${FILE_DATE:4:2}-${FILE_DATE:6:2}" +%u 2>/dev/null || echo "0")
+        if [ "${DOW}" != "1" ]; then
+            rm -f "$f"
+        fi
+    fi
+done
+# 删除超过 28 天的周一备份
+find "${BACKUP_DIR}" -name "sales_mgmt_*.sql.gz" -mtime +28 -delete
+echo "[$(date)] 已清理旧备份（保留 7 天每日 + 4 周每周）"
