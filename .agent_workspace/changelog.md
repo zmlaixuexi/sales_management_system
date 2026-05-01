@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-02（第一百四十四轮·自动循环）
+
+### 测试：库存流水页面补强 3 个测试用例（298→301）
+
+- `frontend/src/__tests__/Inventory.test.tsx`：新增 3 个测试
+  - loading 状态显示加载提示
+  - error 状态显示重试链接
+  - 空备注显示为 `--`
+- Table mock 添加 loading 状态渲染
+- usePaginatedList mock 改用 `_paginatedListReturn` 可变对象模式
+- 前端 298→301 tests
+
 ## 2026-05-02（第一百四十三轮·自动循环）
 
 ### 测试：收款记录页面补强 4 个测试用例（294→298）

@@ -8,6 +8,13 @@
 
 ## 功能编号：FEAT-20260502-144
 
+## 功能编号：FEAT-20260502-148
+
+- 名称：库存流水页面测试补强
+- 轮次：Round 144（自动循环）
+- 描述：Inventory.test.tsx 新增 3 个测试（loading/error/空备注），Table mock 添加 loading 支持，usePaginatedList mock 改用可变对象模式
+- 验证：前端 301 tests 全部通过，ESLint 无错误
+
 ## 功能编号：FEAT-20260502-147
 
 - 名称：收款记录页面测试补强
