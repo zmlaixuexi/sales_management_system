@@ -2,14 +2,15 @@
 
 最后更新时间：2026-05-02
 当前阶段：需求符合性验证 + 代码质量
-当前任务编号：ROUND-263
-当前任务名称：代码质量 — 报表查询过滤逻辑重构
+当前任务编号：ROUND-264
+当前任务名称：代码质量 — 序号生成函数统一
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 263：代码质量 — reports.py 提取 _order_period_filter 和 _apply_data_scope 共享函数，净减 28 行，100% 覆盖率保持
+- Round 264：代码质量 — 序号生成函数统一为 deps.generate_sequential_code，消除 orders/products 重复
+- Round 263：代码质量 — reports.py 提取 _order_period_filter 和 _apply_data_scope 共享函数，净减 28 行
 - Round 262：安全加固 — 修复 3 个安全审查 MEDIUM 问题（payment_method 枚举 + PRODUCT_IN_USE 软删除 + 审计日志敏感字段），+3 测试，461/461 通过，覆盖率 99.78%
 - Round 261：文档同步 — api.md 新增客户/销售人员排行、订单日志、支付路径、密码修改等接口文档，补充错误码和响应字段
 - Round 260：测试补强 — 补全 products.py PRODUCT_IN_USE 分支和 reports.py 客户排行数据范围过滤，+2 测试，458/458 通过，products.py+reports.py 100% 覆盖
@@ -186,7 +187,7 @@
 
 ## 下一步第一动作
 
-继续 keep-going 模式。剩余代码质量改进：支付创建逻辑去重（payments.py + orders.py）、CSV 导入样板代码提取、序号生成函数统一。可继续方向：测试补强、异常路径、安全加固、可观测性。
+继续 keep-going 模式。剩余代码质量改进：支付创建逻辑去重（payments.py + orders.py）、CSV 导入样板代码提取。可继续方向：测试补强、异常路径、安全加固、可观测性。
 
 ## 当前里程碑总结（Round 95-246）
 

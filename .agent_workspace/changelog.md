@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百六十四轮）
+
+### 重构：序号生成函数统一
+
+- deps.py 新增 generate_sequential_code(db, model, column, prefix) 通用函数
+- orders.py _generate_order_no 和 products.py _generate_sku 改为调用共享函数
+- 净减代码，461/461 通过，覆盖率 99.78%
+
 ## 2026-05-02（第二百六十三轮）
 
 ### 重构：报表查询过滤逻辑提取共享函数
