@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百零九轮）
+
+### CI：新增 pip-audit + npm audit 依赖漏洞扫描
+
+- GitHub Actions backend job: 新增 `pip-audit` 步骤
+- GitHub Actions frontend job: 新增 `npm audit --audit-level=moderate` 步骤
+- CI 质量门禁现已覆盖：ruff + mypy + alembic + pytest + eslint + tsc + vitest + build + pip-audit + npm-audit
+
 ## 2026-05-02（第三百零八轮）
 
 ### 代码质量审计：前端零 console.log、后端零 print/pdb、零硬编码密钥、.gitignore 完整
