@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第三百零一轮）
+
+### 安全：生产环境禁用 OpenAPI 文档 + Nginx 隐藏版本号 + 统一 X-Frame-Options
+
+- main.py: docs_url/redoc_url/openapi_url 在 APP_ENV=production 时设为 None
+- nginx.conf: 添加 server_tokens off 隐藏版本号
+- nginx.conf: X-Frame-Options 从 SAMEORIGIN 统一为 DENY（与应用层一致）
+- 新增 test_openapi_disabled_in_production 测试
+- 后端 485 → 486，486/486 通过
+
 ## 2026-05-02（第三百轮）
 
 ### 工程：Makefile 自动检测 backend venv python + make ci 全量通过

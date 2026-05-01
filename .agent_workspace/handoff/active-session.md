@@ -2,23 +2,23 @@
 
 最后更新时间：2026-05-02
 当前阶段：需求符合性验证 + 代码质量
-当前任务编号：ROUND-300
-当前任务名称：工程 — Makefile 自动检测 backend venv python + make ci 全量通过
+当前任务编号：ROUND-301
+当前任务名称：安全 — 生产环境禁用 OpenAPI 文档 + Nginx 安全加固
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 301：安全 — 生产环境禁用 OpenAPI + Nginx 隐藏版本号 + 统一 X-Frame-Options
 - Round 300：工程 — Makefile venv python 自动检测 + make ci 全量通过
-- Round 299：前端 — downloadCsv 从 fetch 迁移到 apiClient，统一拦截器覆盖
-- Round 298：前端 — 修复双重错误 toast，拦截器标记 _toastDisplayed（+2 测试）
-- Round 297：测试补强 — CSV 导入 commit 失败 + 用户更新无效角色（+3 测试）
+- Round 299：前端 — downloadCsv 从 fetch 迁移到 apiClient
+- Round 298：前端 — 修复双重错误 toast
 
 ## 当前测试状态
 
-- 后端：485/485 通过
+- 后端：486/486 通过
 - 前端：127/127 通过
-- 总计：612 测试
+- 总计：613 测试
 - ruff：0 issues
 - mypy：51 文件 0 错误
 - tsc：0 错误
@@ -26,7 +26,7 @@
 
 ## 下一步第一动作
 
-继续 keep-going 模式。可继续方向：安全加固、可观测性、部署体验、文档完善、代码质量。
+继续 keep-going 模式。安全审计已完成，剩余项为 TLS（需基础设施/证书决策）、token 撤销（需架构决策）。可继续方向：代码质量、文档完善、可观测性、部署体验。
 
 ## 阻塞问题
 
