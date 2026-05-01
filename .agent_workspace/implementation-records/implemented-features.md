@@ -6,6 +6,18 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-116
+
+### 测试 — 前端 API 模块测试补全（users + inventory）
+
+- **文件**: `frontend/src/__tests__/users-api.test.ts`, `frontend/src/__tests__/inventory-api.test.ts`
+- **内容**:
+  - users-api.test.ts（5 个）：fetchUsers 基本调用/关键词搜索、createUser、updateUser、fetchRoles
+  - inventory-api.test.ts（5 个）：fetchInventoryMovements 基本调用/product_id 筛选/movement_type 筛选、adjustInventory/adjustInventory 带备注
+  - 前端 API 模块测试覆盖率从 7/9 提升至 9/9
+- **验证**: 522+254=776 tests，全 CI 门禁通过
+- **关联**: Round 349
+
 ## 功能编号：FEAT-20260502-115
 
 ### 文档 — testing.md 同步至 766 tests

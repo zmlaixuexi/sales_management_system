@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-05-02（第三百四十九轮）
+
+### 测试：新增前端 API 模块测试（+10 tests）
+
+新增 `users-api.test.ts`（5 个：fetchUsers/keyword/createUser/updateUser/fetchRoles）和 `inventory-api.test.ts`（5 个：fetchMovements/product_id 筛选/movement_type 筛选/adjustInventory/adjustInventory 带备注）。前端 API 模块测试覆盖率从 7/9 提升至 9/9。总计 522+254=776 tests。
+
 ## 2026-05-02（第三百四十八轮）
 
 ### 文档：同步 testing.md 至 766 tests
