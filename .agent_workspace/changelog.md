@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第一百四十一轮·自动循环）
+
+### 安全：API 响应添加 Cache-Control: no-store
+
+- `backend/app/core/security_headers.py`：SecurityHeadersMiddleware 新增 `Cache-Control: no-store`，防止敏感 API 数据被浏览器或中间代理缓存
+- `backend/tests/test_health.py`：安全头测试补充 Cache-Control 断言
+- 全量安全审计确认：安全头、CORS、错误响应脱敏、生产环境配置、速率限制、输入过滤均合规
+
 ## 2026-05-02（第一百四十轮·自动循环）
 
 ### 安全：修复报表毛利率 Decimal 精度 + 金融计算全量审计

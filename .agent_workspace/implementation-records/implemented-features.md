@@ -8,6 +8,13 @@
 
 ## 功能编号：FEAT-20260502-144
 
+## 功能编号：FEAT-20260502-145
+
+- 名称：API 响应 Cache-Control 安全头
+- 轮次：Round 141（自动循环）
+- 描述：SecurityHeadersMiddleware 新增 Cache-Control: no-store，防止敏感 API 数据被缓存。全量安全审计确认安全头/CORS/错误脱敏/生产配置/速率限制/输入过滤均已实现。
+- 验证：609 后端 tests 全部通过，安全头测试包含 Cache-Control 断言
+
 - 名称：报表毛利率 Decimal 精度修复
 - 轮次：Round 140（自动循环）
 - 描述：reports.py sales_summary 毛利率计算使用裸 int 100 和 0，改为 Decimal(“100”) 和 Decimal(“0”)，符合开发文档”金额计算统一使用 Decimal”要求。全量审计确认其余金融代码均使用 Decimal，无 float 违规。新增 test_42 验证毛利率返回 Decimal 精度字符串。
