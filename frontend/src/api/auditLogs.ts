@@ -1,5 +1,4 @@
 import { get } from './request'
-import type { ApiResponse } from '@/types'
 
 export interface AuditLogItem {
   id: string;

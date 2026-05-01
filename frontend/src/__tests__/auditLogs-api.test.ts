@@ -9,8 +9,8 @@ import { get } from '@/api/request'
 
 const mockGet = get as ReturnType<typeof vi.fn>
 
-const apiOk = (data: unknown): Promise<{ success: boolean; data: unknown }> =>
-  Promise.resolve({ success: true, data, message: 'ok' } as any)
+const apiOk = (data: unknown) =>
+  Promise.resolve({ success: true, data, message: 'ok' })
 
 describe('审计日志 API', () => {
   beforeEach(() => {
