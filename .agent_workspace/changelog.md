@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第一百四十轮·自动循环）
+
+### 安全：修复报表毛利率 Decimal 精度 + 金融计算全量审计
+
+- `backend/app/api/v1/reports.py`：sales_summary 毛利率计算使用 `Decimal("100")` 和 `Decimal("0")` 替代裸 `int` `100` 和 `0`
+- 全量审计后端金融代码：models 全部 `Numeric`，schemas 全部 `str` + `Decimal` 验证，orders/payments/products 均 `Decimal` 运算；无 float 违规
+- `backend/tests/test_reports_audit.py`：新增 test_42 验证毛利率返回 Decimal 精度字符串
+- 后端 608→609 tests
+
 ## 2026-05-02（第三百九十二轮）
 
 ### 测试补强：软删除商品订单确认/取消回归测试（+2 tests）
