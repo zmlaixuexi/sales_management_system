@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-02（第三百二十轮）
+
+### 需求符合性：补全开发文档 8.4 节缺失的 4 个错误码
+
+审计发现 16 个规范错误码中 4 个未使用：FILE_TOO_LARGE、FILE_NOT_BOUND、ORDER_EMPTY_ITEMS、SYSTEM_INTERNAL_ERROR。逐一修复：
+- file_service.py：FileSizeExceededError/FileTypeError 分离异常类型
+- files.py：FILE_TOO_LARGE 和 FILE_NOT_BOUND 独立处理
+- orders.py：ORDER_EMPTY_ITEMS 防御性校验
+- main.py：INTERNAL_ERROR → SYSTEM_INTERNAL_ERROR
+- +1 测试（test_16_delete_bound_image_rejected），总计 492+129=621 tests
+
 ## 2026-05-02（第三百一十九轮）
 
 ### 需求符合性：分页格式验证

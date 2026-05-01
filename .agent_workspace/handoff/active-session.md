@@ -2,35 +2,40 @@
 
 最后更新时间：2026-05-02
 当前阶段：需求符合性验证
-当前任务编号：ROUND-319
-当前任务名称：需求符合性验证 — 分页格式合规
+当前任务编号：ROUND-320
+当前任务名称：需求符合性验证 — 错误码完整性修复
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 320：补全开发文档 8.4 节缺失的 4 个错误码（FILE_TOO_LARGE、FILE_NOT_BOUND、ORDER_EMPTY_ITEMS、SYSTEM_INTERNAL_ERROR）
 - Round 319：分页格式验证 — 7 个列表端点全部返回 {items, page, page_size, total}
 - Round 318：金额序列化和时间格式 — 全链路 Decimal→str、ISO 8601 合规
-- Round 317：错误响应格式统一 — 符合开发文档第 8.1 节 API 响应规范
 
 ## 最终验证状态
 
 | 门禁 | 结果 |
 |---|---|
 | ruff | 0 issues |
-| mypy | 0 errors (51 files) |
+| mypy | 0 errors (52 files) |
 | eslint | 0 warnings |
 | tsc | 0 errors |
-| 后端测试 | 491/491 |
+| 后端测试 | 492/492 |
 | 前端测试 | 129/129 |
-| 总计 | 620 tests |
+| 总计 | 621 tests |
 | build | 零警告 |
 | npm audit | 0 vulnerabilities |
-| 覆盖率 | 99.79% |
+| 覆盖率 | 99.79%+ |
 
 ## CI 质量门禁（10 项）
 
 ruff + mypy + alembic check + pytest + eslint + tsc + vitest + build + pip-audit + npm audit
+
+## 错误码合规状态
+
+开发文档 8.4 节 16 个错误码全部已在代码中使用。
+额外错误码（不在规范中但合理）：RATE_LIMIT_EXCEEDED、PRICE_BELOW_COST、IMPORT_FAILED、INVALID_PASSWORD。
 
 ## 下一步第一动作
 
@@ -39,7 +44,7 @@ ruff + mypy + alembic check + pytest + eslint + tsc + vitest + build + pip-audit
 - 安全：token 撤销/refresh token rotation（需架构决策）
 - 测试补强：前端页面组件测试
 - 代码质量：前端 ErrorBoundary 覆盖、Axios 超时配置
-- 需求符合性：开发文档错误码完整性验证
+- 代码质量：后端 pytest 覆盖率提升
 
 ## 阻塞问题
 
