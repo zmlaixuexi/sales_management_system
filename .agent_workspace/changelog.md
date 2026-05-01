@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第三百九十二轮）
+
+### 测试补强：软删除商品订单确认/取消回归测试（+2 tests）
+
+- `backend/tests/test_order_crud.py`：新增 2 个回归测试
+  - 确认订单时商品已被软删除 → 404（验证 _deduct_inventory 的 deleted_at 过滤）
+  - 取消已确认订单时商品已被软删除 → 成功但跳过库存回滚（验证 _restore_inventory 的 deleted_at 过滤）
+- 后端 606→608 tests，总计 895→897
+
 ## 2026-05-02（第三百九十一轮）
 
 ### 文档：更新 README 测试覆盖表
