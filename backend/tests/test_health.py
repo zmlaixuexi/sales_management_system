@@ -7,7 +7,17 @@ from app.main import app
 client = TestClient(app)
 
 
-def test_health_check():
+def test_health_check(monkeypatch):
+    """数据库可用时返回 ok"""
+    from unittest.mock import MagicMock
+
+    from app.api.v1 import health as health_mod
+
+    mock_session = MagicMock()
+    mock_session.execute.return_value = None
+    mock_session.close.return_value = None
+    monkeypatch.setattr(health_mod, "SessionLocal", lambda: mock_session)
+
     response = client.get("/api/v1/health")
     assert response.status_code == 200
     data = response.json()
