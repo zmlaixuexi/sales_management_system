@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-02（第三百六十七轮）
+
+### 测试：文件上传 API 异常路径补强（+6 tests）
+
+- `backend/tests/test_file_upload.py`：新增 6 个异常路径测试
+  - GET/DELETE 未认证 401
+  - GET/DELETE 无效 UUID 格式 422
+  - 上传缺少 file 字段 422
+  - 其他用户可查看文件信息（GET 权限验证）
+- 后端 580→586 tests，总计 838→844
+
 ## 2026-05-02（第三百六十六轮）
 
 ### 测试：报表和导出 API 异常路径补强（+18 tests）

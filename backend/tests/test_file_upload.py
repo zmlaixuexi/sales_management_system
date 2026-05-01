@@ -347,3 +347,78 @@ def test_16_delete_bound_image_rejected():
     resp = client.delete(f"/api/v1/files/images/{file_id}", headers=_auth())
     assert resp.status_code == 400
     assert resp.json()["error"]["code"] == "FILE_NOT_BOUND"
+
+
+# ── 异常路径测试 ──────────────────────────────────────────
+
+
+def test_17_get_image_requires_auth():
+    """获取图片信息需要认证返回 401"""
+    fake_id = str(uuid.uuid4())
+    resp = client.get(f"/api/v1/files/images/{fake_id}")
+    assert resp.status_code == 401
+
+
+def test_18_delete_image_requires_auth():
+    """删除图片需要认证返回 401"""
+    fake_id = str(uuid.uuid4())
+    resp = client.delete(f"/api/v1/files/images/{fake_id}")
+    assert resp.status_code == 401
+
+
+def test_19_get_image_invalid_uuid_422():
+    """获取图片信息无效 UUID 格式返回 422"""
+    resp = client.get("/api/v1/files/images/not-a-uuid", headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_20_delete_image_invalid_uuid_422():
+    """删除图片无效 UUID 格式返回 422"""
+    resp = client.delete("/api/v1/files/images/not-a-uuid", headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_21_upload_no_file_field_422():
+    """上传不提供 file 字段返回 422"""
+    resp = client.post("/api/v1/files/images", headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_22_get_other_user_file_allowed():
+    """超级用户可查看其他用户的文件信息"""
+    # 先上传一个文件
+    png_bytes = _make_png_bytes()
+    resp = client.post(
+        "/api/v1/files/images",
+        files={"file": ("viewable.png", png_bytes, "image/png")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    file_id = resp.json()["data"]["id"]
+
+    # 其他用户登录
+    other_user = User(
+        id=uuid.uuid4(),
+        username="file_viewer",
+        hashed_password=hash_password("testpass123"),
+        display_name="查看用户",
+        is_active=True,
+        is_superuser=False,
+    )
+    db = TestSession()
+    db.add(other_user)
+    db.commit()
+    db.close()
+
+    resp = client.post("/api/v1/auth/login", json={
+        "username": "file_viewer", "password": "testpass123",
+    })
+    other_token = resp.json()["data"]["access_token"]
+
+    # 其他用户应能查看文件信息
+    resp = client.get(
+        f"/api/v1/files/images/{file_id}",
+        headers={"Authorization": f"Bearer {other_token}"},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["original_name"] == "viewable.png"
