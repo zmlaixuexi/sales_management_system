@@ -439,3 +439,81 @@ def test_23_report_data_scope_filtered():
     assert resp.status_code == 200
     items = resp.json()["data"]["items"]
     assert len(items) == 0  # scope_tester 的订单没有 SalesOrderItem
+
+
+# ─── 报表：客户排行 ─────────────────────────────────────────
+
+def test_24_customer_ranking():
+    """客户销售排行"""
+    resp = client.get("/api/v1/reports/customer-ranking?period=30d", headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    first = items[0]
+    assert "rank" in first
+    assert "customer_name" in first
+    assert "total_sales" in first
+    assert "order_count" in first
+    assert first["customer_name"] == "报表测试客户"
+
+
+def test_25_customer_ranking_limit():
+    """客户排行 limit 参数"""
+    resp = client.get("/api/v1/reports/customer-ranking?limit=1", headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) <= 1
+
+
+def test_26_customer_ranking_profit_visible():
+    """超管用户应看到成本和毛利"""
+    resp = client.get("/api/v1/reports/customer-ranking?period=30d", headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    first = items[0]
+    assert "total_cost" in first
+    assert "gross_profit" in first
+
+
+# ─── 报表：销售人员排行 ─────────────────────────────────────────
+
+def test_27_salesperson_ranking():
+    """销售人员业绩排行"""
+    resp = client.get("/api/v1/reports/salesperson-ranking?period=30d", headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    first = items[0]
+    assert "rank" in first
+    assert "name" in first
+    assert "total_sales" in first
+    assert "order_count" in first
+    assert first["name"] == "报表测试员"
+
+
+def test_28_salesperson_ranking_limit():
+    """销售人员排行 limit 参数"""
+    resp = client.get("/api/v1/reports/salesperson-ranking?limit=1", headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) <= 1
+
+
+def test_29_salesperson_ranking_data_scope():
+    """非 view_all 用户的销售人员排行只包含本人"""
+    db = TestSession()
+    try:
+        # 复用 scope_tester 用户
+        scope_user = db.query(User).filter(User.username == "scope_tester").first()
+        token = create_access_token(subject=str(scope_user.id))
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/reports/salesperson-ranking?period=30d", headers={
+        "Authorization": f"Bearer {token}",
+    })
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) == 1
+    assert items[0]["total_sales"] == "200.00"

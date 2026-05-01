@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, has_permission, require_permission, resp
 from app.core.config import settings
+from app.models.customer import Customer
 from app.models.order import SalesOrder, SalesOrderItem
 from app.models.product import Product
 from app.models.user import User
@@ -201,6 +202,126 @@ def product_ranking(
         }
         if can_view_profit:
             row["total_cost"] = str(r.total_cost)
+        items.append(row)
+
+    return resp({"items": items, "period": period})
+
+
+@router.get("/customer-ranking")
+def customer_ranking(
+    period: str = Query("30d"),
+    limit: int = Query(10, ge=1, le=50),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("report:sales")),
+):
+    """客户销售排行：按销售额排序"""
+    can_view_profit = has_permission(current_user, "report:profit")
+    start, end = _date_range(period)
+    start_dt = datetime.combine(start, datetime.min.time())
+    end_dt = datetime.combine(end, datetime.max.time())
+
+    query = (
+        db.query(
+            SalesOrder.customer_id,
+            Customer.name.label("customer_name"),
+            func.coalesce(func.sum(SalesOrder.total_amount), 0).label("total_sales"),
+            func.coalesce(func.sum(SalesOrder.total_cost), 0).label("total_cost"),
+            func.coalesce(func.sum(SalesOrder.gross_profit), 0).label("gross_profit"),
+            func.count(SalesOrder.id).label("order_count"),
+        )
+        .join(Customer, SalesOrder.customer_id == Customer.id)
+        .filter(
+            SalesOrder.deleted_at.is_(None),
+            Customer.deleted_at.is_(None),
+            SalesOrder.status.in_(["confirmed", "partially_paid", "completed"]),
+            SalesOrder.created_at >= start_dt,
+            SalesOrder.created_at <= end_dt,
+        )
+    )
+
+    if not has_permission(current_user, "order:view_all"):
+        query = query.filter(SalesOrder.sales_user_id == current_user.id)
+
+    rows = (
+        query
+        .group_by(SalesOrder.customer_id, Customer.name)
+        .order_by(func.sum(SalesOrder.total_amount).desc())
+        .limit(limit)
+        .all()
+    )
+
+    items = []
+    for idx, r in enumerate(rows, 1):
+        row: dict = {
+            "rank": idx,
+            "customer_id": str(r.customer_id),
+            "customer_name": r.customer_name,
+            "total_sales": str(r.total_sales),
+            "order_count": r.order_count,
+        }
+        if can_view_profit:
+            row["total_cost"] = str(r.total_cost)
+            row["gross_profit"] = str(r.gross_profit)
+        items.append(row)
+
+    return resp({"items": items, "period": period})
+
+
+@router.get("/salesperson-ranking")
+def salesperson_ranking(
+    period: str = Query("30d"),
+    limit: int = Query(10, ge=1, le=50),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("report:sales")),
+):
+    """销售人员业绩排行：按销售额排序"""
+    can_view_profit = has_permission(current_user, "report:profit")
+    start, end = _date_range(period)
+    start_dt = datetime.combine(start, datetime.min.time())
+    end_dt = datetime.combine(end, datetime.max.time())
+
+    query = (
+        db.query(
+            SalesOrder.sales_user_id,
+            User.display_name.label("salesperson_name"),
+            User.username.label("salesperson_username"),
+            func.coalesce(func.sum(SalesOrder.total_amount), 0).label("total_sales"),
+            func.coalesce(func.sum(SalesOrder.total_cost), 0).label("total_cost"),
+            func.coalesce(func.sum(SalesOrder.gross_profit), 0).label("gross_profit"),
+            func.count(SalesOrder.id).label("order_count"),
+        )
+        .join(User, SalesOrder.sales_user_id == User.id)
+        .filter(
+            SalesOrder.deleted_at.is_(None),
+            SalesOrder.status.in_(["confirmed", "partially_paid", "completed"]),
+            SalesOrder.created_at >= start_dt,
+            SalesOrder.created_at <= end_dt,
+        )
+    )
+
+    if not has_permission(current_user, "order:view_all"):
+        query = query.filter(SalesOrder.sales_user_id == current_user.id)
+
+    rows = (
+        query
+        .group_by(SalesOrder.sales_user_id, User.display_name, User.username)
+        .order_by(func.sum(SalesOrder.total_amount).desc())
+        .limit(limit)
+        .all()
+    )
+
+    items = []
+    for idx, r in enumerate(rows, 1):
+        row: dict = {
+            "rank": idx,
+            "user_id": str(r.sales_user_id),
+            "name": r.salesperson_name or r.salesperson_username,
+            "total_sales": str(r.total_sales),
+            "order_count": r.order_count,
+        }
+        if can_view_profit:
+            row["total_cost"] = str(r.total_cost)
+            row["gross_profit"] = str(r.gross_profit)
         items.append(row)
 
     return resp({"items": items, "period": period})
