@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第三百一十三轮）
+
+### 文档：同步 testing.md 和 architecture.md 至 618 tests
+
+- testing.md：489+129=618 tests，99.66% 覆盖率，新增 test_csv_import + test_slow_query 条目
+- architecture.md：6 个迁移版本、slow_query.py 目录结构、SQL 慢查询可观测性、CI 10 项门禁
+
 ## 2026-05-02（第三百一十二轮）
 
 ### 可观测性：SQL 慢查询日志
