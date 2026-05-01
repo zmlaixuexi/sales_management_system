@@ -179,6 +179,29 @@ def test_04_customer_crud_audit_logs():
     items = resp.json()["data"]["items"]
     assert len(items) >= 1
 
+    # 客户归属转移
+    other_user = User(
+        id=uuid.uuid4(), username="transfer_target",
+        hashed_password=hash_password("testpass123"),
+        display_name="转移目标用户", is_active=True, is_superuser=False,
+    )
+    db2 = TestSession()
+    db2.add(other_user)
+    db2.commit()
+    other_uid = str(other_user.id)
+    db2.close()
+
+    client.post(f"/api/v1/customers/{_customer_id}/transfer", json={
+        "owner_user_id": other_uid,
+    }, headers=_auth())
+
+    resp = client.get("/api/v1/audit-logs?action=customer_transfer", headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    assert items[0]["resource_type"] == "customer"
+    assert items[0]["after_data"]["owner_user_id"] == other_uid
+
 
 def test_05_order_audit_logs():
     """订单操作产生审计日志"""
