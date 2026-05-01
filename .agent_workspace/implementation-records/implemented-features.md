@@ -6,6 +6,19 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-127
+
+### 测试 — PRICE_BELOW_COST 订单创建集成测试
+
+- **文件**: `backend/tests/test_order_crud.py`
+- **内容**:
+  - 新增 test_28_create_order_price_below_cost_400 集成测试
+  - 验证创建订单时 unit_price 低于成本价（cost_price）返回 400 PRICE_BELOW_COST
+  - 此前仅在 test_order_calc.py 有纯函数单元测试，现在补全 API 端到端验证
+  - 创建独立商品避免与前序测试（硬删除商品）冲突
+- **验证**: 559 后端测试全通过，make ci 全量通过
+- **关联**: Round 362
+
 ## 功能编号：FEAT-20260502-126
 
 ### 修复 — getApiErrorMessage 支持 error.message 新格式

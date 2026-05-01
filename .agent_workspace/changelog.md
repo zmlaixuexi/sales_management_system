@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百六十二轮）
+
+### 测试：PRICE_BELOW_COST 订单创建集成测试
+
+- `backend/tests/test_order_crud.py`：新增 test_28_create_order_price_below_cost_400，验证创建订单时 unit_price 低于成本价返回 400 PRICE_BELOW_COST
+- 此前仅在 test_order_calc.py 有纯函数单元测试，现在补全 API 集成测试
+- 总测试：559 后端 + 258 前端 = 817
+
 ## 2026-05-02（第三百六十一轮）
 
 ### 修复：getApiErrorMessage 支持 error.message 新格式
