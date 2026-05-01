@@ -6,6 +6,20 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-121
+
+### 安全 — 商品状态和客户跟进状态枚举约束
+
+- **文件**: `backend/app/schemas/product.py`, `backend/app/schemas/customer.py`, `backend/tests/test_product_crud.py`, `backend/tests/test_customer_crud.py`
+- **内容**:
+  - ProductCreate/Update `status` 改为 `Literal["active","inactive","disabled"]`，拒绝任意字符串
+  - CustomerCreate/Update `follow_status` 改为 `Literal["new","following","closed","lost"]`，拒绝任意字符串
+  - 新增 4 个验证测试：无效 status 422、无效 follow_status 422（create + update 各一）
+  - 批量赋值审计：确认所有路由使用逐字段赋值，无 `**data.model_dump()` 漏洞
+  - 待处理中等风险：stock_quantity 直接设置绕过库存审计、cost_price 可由非特权用户设置
+- **验证**: 555+254=809 tests，ruff 0 errors
+- **关联**: Round 354
+
 ## 功能编号：FEAT-20260502-120
 
 ### 前端 — 表格空状态中文文案统一

@@ -2,37 +2,37 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-353
-当前任务名称：前端表格空状态中文文案统一
+当前任务编号：ROUND-354
+当前任务名称：后端 Schema 枚举约束安全加固
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 353：ReportsCenter +4 表格、OrderForm +2 表格、Users +1 表格、OrderDetail +1 表格空状态中文文案
+- Round 354：商品 status 和客户 follow_status 添加 Literal 枚举约束 + 4 个验证测试
+- Round 353：前端 8 个 Table 组件空状态中文文案统一
 - Round 352：商品/订单/收款认证边界测试 → 805 tests
 - Round 351：客户 CRUD 认证边界测试 + 文档同步 785
-- Round 350：后端库存边界 +5 测试
 
 ## 最终验证状态
 
 | 门禁 | 结果 |
 |---|---|
-| 后端测试 | 551/551 |
+| 后端测试 | 555/555 |
 | 前端测试 | 254/254 |
 | ruff | 0 errors |
 | ESLint | 0 errors |
 | TypeScript | 0 errors |
 | 构建 | ✓ |
-| 总计 | 805 tests |
+| 总计 | 809 tests |
 
 ## 下一步第一动作
 
 继续 keep-going 模式。可选方向：
+- 安全加固：批量赋值审计中发现的其余中等问题（stock_quantity 直接设置绕过库存审计、cost_price 可由非特权用户设置）
 - 代码质量（重复代码检查、类型安全增强）
-- 安全加固（输入验证、XSS/SQL 注入审计）
 - 文档完善
-- 可观测性（结构化日志、链路追踪）
+- 可观测性
 
 ## 阻塞问题
 

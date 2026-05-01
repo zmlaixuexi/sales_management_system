@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-02（第三百五十四轮）
+
+### 安全：商品状态和客户跟进状态添加枚举约束
+
+批量赋值安全审计结果：
+- ProductCreate/Update 的 `status` 字段从 `str` 改为 `Literal["active","inactive","disabled"]`
+- CustomerCreate/Update 的 `follow_status` 字段从 `str` 改为 `Literal["new","following","closed","lost"]`
+- 新增 4 个测试验证无效枚举值被 Pydantic 拒绝（422）
+- 审计确认：所有路由使用逐字段赋值，无 `**data.model_dump()` 批量赋值漏洞
+- 测试总计：后端 555 + 前端 254 = 809 tests
+
 ## 2026-05-02（第三百五十三轮）
 
 ### 前端：统一表格空状态中文文案
