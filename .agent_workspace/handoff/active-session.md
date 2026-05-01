@@ -2,16 +2,16 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-152
-当前任务名称：慢查询日志结构化格式增强
+当前任务编号：ROUND-153
+当前任务名称：README 测试覆盖表更新
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 152：慢查询日志改用结构化格式（SQL/参数/阈值）
+- Round 153：README 测试覆盖表更新（前端 301→307）
+- Round 152：慢查询日志结构化格式增强
 - Round 151：JSON 日志全局关联 request_id/user_id
-- Round 150：全量 DoD 验证 + deleted_at 审计
 
 ## 最终验证状态
 
