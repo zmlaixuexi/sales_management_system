@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-05-02（第一百四十二轮·自动循环）
+
+### 测试：用户管理页面测试补强（+5 tests，289→294）
+
+- `frontend/src/__tests__/Users.test.tsx`：新增 5 个测试
+  - 搜索框存在并可输入
+  - loading 状态显示加载提示
+  - 错误状态显示重试链接
+  - 点击编辑按钮打开编辑弹窗
+  - 切换用户启用状态调用 updateUser
+- Table mock 添加 loading 状态渲染
+- usePaginatedList mock 改用 `_paginatedListReturn` 可变对象模式
+- 前端 289→294 tests，37 files，全部通过
+
 ## 2026-05-02（第一百四十一轮·自动循环）
 
 ### 安全：API 响应添加 Cache-Control: no-store

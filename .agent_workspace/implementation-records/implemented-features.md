@@ -8,6 +8,13 @@
 
 ## 功能编号：FEAT-20260502-144
 
+## 功能编号：FEAT-20260502-146
+
+- 名称：用户管理页面测试补强
+- 轮次：Round 142（自动循环）
+- 描述：Users.test.tsx 新增 5 个测试用例（搜索框、loading、error 重试、编辑弹窗、启用/停用切换），Table mock 添加 loading 支持，usePaginatedList mock 改用可变对象模式
+- 验证：前端 294 tests 全部通过，ESLint/tsc 无错误
+
 ## 功能编号：FEAT-20260502-145
 
 - 名称：API 响应 Cache-Control 安全头
