@@ -17,4 +17,6 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         # API 不提供 HTML 内容，使用严格 CSP
         response.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'"
+        # 禁止缓存 API 响应，防止敏感数据被中间代理或浏览器缓存
+        response.headers["Cache-Control"] = "no-store"
         return response

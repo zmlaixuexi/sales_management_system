@@ -55,6 +55,7 @@ def test_security_headers():
     assert response.headers["referrer-policy"] == "strict-origin-when-cross-origin"
     assert "content-security-policy" in response.headers
     assert "permissions-policy" in response.headers
+    assert response.headers["cache-control"] == "no-store"
 
 
 def test_request_log_records_api_calls(caplog):
