@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第二百九十四轮）
+
+### 文档：architecture.md 同步 Round 281-293 变更
+
+- CSV 导入安全措施更新：新增行数上限、XSS 消毒、commit 回滚
+- 新增开发工具链章节：ruff、mypy、ESLint、tsc、pytest、vitest、pip-audit、npm audit、GitHub Actions
+
 ## 2026-05-02（第二百九十三轮）
 
 ### 文档：同步测试数至 482+125=607 + make ci 验证
