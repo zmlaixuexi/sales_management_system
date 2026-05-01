@@ -155,3 +155,10 @@ def generate_sequential_code(db: Session, model: type[Base], column: Instrumente
     else:
         seq = 1
     return f"{full_prefix}{seq:04d}"
+
+
+def paginate(query, page: int, page_size: int):
+    """对 SQLAlchemy query 执行分页，返回 (items, total)。"""
+    total = query.count()
+    items = query.offset((page - 1) * page_size).limit(page_size).all()
+    return items, total

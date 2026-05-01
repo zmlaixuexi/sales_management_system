@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第三百七十轮）
+
+### 工程：提取分页辅助函数 paginate()，消除 7 个 API 文件中的重复代码
+
+- `backend/app/api/deps.py`：新增 `paginate(query, page, page_size)` 辅助函数
+- 重构 7 个 API 路由文件使用 paginate：
+  - `products.py`、`customers.py`、`orders.py`（2处）、`payments.py`、`inventory.py`、`audit_logs.py`、`users.py`
+- 消除了 8 处 `total = query.count()` + `query.offset().limit().all()` 的重复模式
+
 ## 2026-05-02（第三百六十九轮）
 
 ### 文档：同步 testing.md 至 850 tests

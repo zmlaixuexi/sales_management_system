@@ -13,6 +13,7 @@ from app.api.deps import (
     get_db,
     get_or_404,
     has_permission,
+    paginate,
     parse_uuid_or_400,
     require_permission,
     resp,
@@ -137,8 +138,7 @@ def list_products(
     else:
         query = query.order_by(sort_col.desc(), Product.created_at.desc())
 
-    total = query.count()
-    items = query.options(joinedload(Product.category)).offset((page - 1) * page_size).limit(page_size).all()
+    items, total = paginate(query.options(joinedload(Product.category)), page, page_size)
 
     # 批量查询销售统计
     product_ids = [p.id for p in items]

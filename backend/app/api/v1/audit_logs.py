@@ -6,7 +6,7 @@ import uuid
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, require_permission, resp
+from app.api.deps import get_db, paginate, require_permission, resp
 from app.core.sanitize import escape_like
 from app.models.audit import AuditLog
 from app.models.user import User
@@ -53,12 +53,8 @@ def list_audit_logs(
             | AuditLog.resource_id.ilike(f"%{escaped}%", escape="\\")
         )
 
-    total = query.count()
-    items = (
-        query.order_by(AuditLog.created_at.desc())
-        .offset((page - 1) * page_size)
-        .limit(page_size)
-        .all()
+    items, total = paginate(
+        query.order_by(AuditLog.created_at.desc()), page, page_size,
     )
 
     result_items = []

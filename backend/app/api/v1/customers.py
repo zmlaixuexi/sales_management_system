@@ -11,6 +11,7 @@ from app.api.deps import (
     get_db,
     get_or_404,
     has_permission,
+    paginate,
     parse_uuid_or_400,
     require_permission,
     resp,
@@ -85,8 +86,7 @@ def list_customers(
 
     query = query.order_by(Customer.created_at.desc())
 
-    total = query.count()
-    items = query.options(joinedload(Customer.owner)).offset((page - 1) * page_size).limit(page_size).all()
+    items, total = paginate(query.options(joinedload(Customer.owner)), page, page_size)
 
     result_items = [{
         "id": str(c.id),

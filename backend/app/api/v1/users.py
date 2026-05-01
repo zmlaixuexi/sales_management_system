@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db, parse_uuid_or_400, resp
+from app.api.deps import get_current_user, get_db, paginate, parse_uuid_or_400, resp
 from app.core.sanitize import escape_like
 from app.core.security import hash_password
 from app.models.user import Role, User, UserRole
@@ -48,8 +48,7 @@ def list_users(
     if keyword:
         query = query.filter(User.username.ilike(f"%{escape_like(keyword)}%", escape="\\"))
 
-    total = query.count()
-    users = query.order_by(User.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+    users, total = paginate(query.order_by(User.created_at.desc()), page, page_size)
 
     items = [{
         "id": str(u.id),

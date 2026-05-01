@@ -13,6 +13,7 @@ from app.api.deps import (
     get_db,
     get_or_404,
     has_permission,
+    paginate,
     parse_uuid_or_400,
     require_permission,
     resp,
@@ -233,12 +234,9 @@ def list_orders(
         query = query.filter(SalesOrder.customer_id == customer_id)
 
     query = query.order_by(SalesOrder.created_at.desc())
-    total = query.count()
-    orders = (
-        query.options(joinedload(SalesOrder.items), joinedload(SalesOrder.payments))
-        .offset((page - 1) * page_size)
-        .limit(page_size)
-        .all()
+    orders, total = paginate(
+        query.options(joinedload(SalesOrder.items), joinedload(SalesOrder.payments)),
+        page, page_size,
     )
 
     items_out = []
@@ -549,12 +547,8 @@ def order_logs(
         AuditLog.resource_id == str(order_id),
     )
 
-    total = query.count()
-    items = (
-        query.order_by(AuditLog.created_at.desc())
-        .offset((page - 1) * page_size)
-        .limit(page_size)
-        .all()
+    items, total = paginate(
+        query.order_by(AuditLog.created_at.desc()), page, page_size,
     )
 
     # 无 product:view_cost 权限时，从审计数据中移除敏感字段

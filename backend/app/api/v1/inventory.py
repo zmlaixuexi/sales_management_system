@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, parse_uuid_or_400, require_permission, resp
+from app.api.deps import get_db, paginate, parse_uuid_or_400, require_permission, resp
 from app.models.order import InventoryMovement
 from app.models.product import Product
 from app.models.user import User
@@ -42,8 +42,7 @@ def list_movements(
         query = query.filter(InventoryMovement.movement_type == movement_type)
 
     query = query.order_by(InventoryMovement.created_at.desc())
-    total = query.count()
-    items = query.offset((page - 1) * page_size).limit(page_size).all()
+    items, total = paginate(query, page, page_size)
 
     return resp({
         "items": [

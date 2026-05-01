@@ -6,7 +6,7 @@ from decimal import Decimal
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
-from app.api.deps import check_owner_or_forbid, get_db, has_permission, require_permission, resp
+from app.api.deps import check_owner_or_forbid, get_db, has_permission, paginate, require_permission, resp
 from app.models.order import Payment, SalesOrder
 from app.models.user import User
 from app.schemas.payment import PaymentCreate, PaymentCreated, PaymentReversed
@@ -49,8 +49,7 @@ def list_payments(
         query = query.filter(Payment.order_id == order_id)
     query = query.order_by(Payment.created_at.desc())
 
-    total = query.count()
-    items = query.offset((page - 1) * page_size).limit(page_size).all()
+    items, total = paginate(query, page, page_size)
 
     return resp(
         data={
