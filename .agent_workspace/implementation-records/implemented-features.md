@@ -6,6 +6,22 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-110
+
+### 前端 — 报表中心页面（ISSUE-003 缺失页面之一）
+
+- **文件**: `frontend/src/pages/ReportsCenter.tsx`, `frontend/src/routes/index.tsx`, `frontend/src/routes/AppLayout.tsx`, `frontend/src/__tests__/ReportsCenter.test.tsx`, `frontend/src/__tests__/AppLayout.test.tsx`
+- **内容**:
+  - 新增 ReportsCenter 页面：5 个标签页（销售概览、商品排行、客户排行、销售排行、库存预警）
+  - 销售概览：统计卡片（总额/订单数/成本/毛利）+ 趋势表格
+  - 三个排行表格均支持成本/毛利字段（条件显示，依赖 report:profit 权限）
+  - 库存预警表格：库存数量颜色标签
+  - 全局周期选择器（today/7d/30d/this_month/last_month）
+  - 侧边栏添加"报表中心"菜单项（BarChartOutlined 图标）
+  - 新增 8 个组件测试 + 修复 AppLayout 测试图标 mock
+- **验证**: 517+220=737 tests，tsc/ESLint/build 全通过
+- **关联**: Round 343, ISSUE-003
+
 ## 功能编号：FEAT-20260502-109
 
 ### 前端 — 客户详情页面（ISSUE-003 缺失页面之一）

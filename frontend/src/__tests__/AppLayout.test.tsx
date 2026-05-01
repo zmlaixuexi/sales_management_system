@@ -40,6 +40,7 @@ vi.mock('@ant-design/icons', () => ({
   FileTextOutlined: () => null,
   LogoutOutlined: (props: any) => <span data-testid="logout-icon" onClick={props.onClick} />,
   UserOutlined: () => null,
+  BarChartOutlined: () => null,
 }))
 
 import { authApi } from '@/api/auth'
