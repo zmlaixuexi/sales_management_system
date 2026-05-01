@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import {
   fetchSalesSummary, fetchSalesTrend, fetchProductRanking, fetchInventoryWarning,
+  fetchCustomerRanking, fetchSalespersonRanking,
 } from '@/api/reports'
 
 vi.mock('@/api/request', () => ({
@@ -53,5 +54,17 @@ describe('报表 API', () => {
     mockGet.mockResolvedValueOnce(ok({ items: [], threshold: 10, total: 0 }))
     await fetchInventoryWarning()
     expect(mockGet).toHaveBeenCalledWith('/reports/inventory-warning', {})
+  })
+
+  it('fetchCustomerRanking 调用 GET /reports/customer-ranking', async () => {
+    mockGet.mockResolvedValueOnce(ok({ items: [], period: '30d' }))
+    await fetchCustomerRanking({ period: '30d', limit: 5 })
+    expect(mockGet).toHaveBeenCalledWith('/reports/customer-ranking', { period: '30d', limit: 5 })
+  })
+
+  it('fetchSalespersonRanking 调用 GET /reports/salesperson-ranking', async () => {
+    mockGet.mockResolvedValueOnce(ok({ items: [], period: '7d' }))
+    await fetchSalespersonRanking({ period: '7d' })
+    expect(mockGet).toHaveBeenCalledWith('/reports/salesperson-ranking', { period: '7d' })
   })
 })
