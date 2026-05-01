@@ -6,6 +6,18 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-125
+
+### 前端 — 列表页加载失败显示重试按钮
+
+- **文件**: `frontend/src/hooks/usePaginatedList.ts`, 7 个列表页（Customers, Products, Orders, Payments, Inventory, Users, AuditLogs）
+- **内容**:
+  - usePaginatedList 新增 `error` 布尔状态，fetch 失败时设为 true，成功或加载中重置为 false
+  - 7 个列表页 Table locale.emptyText 添加 error 优先判断，显示"加载失败，重试"链接
+  - 符合 spec 16.2 节前端测试"空/加载/错误状态"要求
+- **验证**: 254 前端测试全通过，ESLint 0 errors，TypeScript 0 errors
+- **关联**: Round 358
+
 ## 功能编号：FEAT-20260502-124
 
 ### 可观测性 — 请求日志补充用户 ID
