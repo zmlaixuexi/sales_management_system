@@ -12,7 +12,7 @@ from app.core.security import create_access_token, hash_password
 from app.db.session import Base
 from app.main import app
 from app.models.product import Product, ProductCategory
-from app.models.user import User
+from app.models.user import Permission, Role, RolePermission, User, UserRole
 
 TEST_DB_URL = "sqlite:///./test_inventory_crud.db"
 engine = create_engine(TEST_DB_URL, connect_args={"check_same_thread": False})
@@ -195,3 +195,89 @@ class TestInventoryMovements:
         }, headers=_auth())
         assert resp.status_code == 200
         assert resp.json()["data"]["quantity_after"] == 0
+
+
+def test_11_adjust_no_permission_403():
+    """无 inventory:adjust 权限用户返回 403"""
+    db = TestSession()
+    try:
+        nop = User(
+            id=uuid.uuid4(), username="no_inv_adjust",
+            hashed_password=hash_password("testpass123"),
+            display_name="无库存调整权限", is_active=True, is_superuser=False,
+        )
+        db.add(nop)
+        db.commit()
+        token = create_access_token(str(nop.id))
+    finally:
+        db.close()
+
+    resp = client.post("/api/v1/inventory/adjustments", json={
+        "product_id": _product_id, "quantity_change": 1,
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
+
+
+def test_12_list_no_permission_403():
+    """无 inventory:list 权限用户返回 403"""
+    db = TestSession()
+    try:
+        nop = User(
+            id=uuid.uuid4(), username="no_inv_list",
+            hashed_password=hash_password("testpass123"),
+            display_name="无库存列表权限", is_active=True, is_superuser=False,
+        )
+        db.add(nop)
+        db.commit()
+        token = create_access_token(str(nop.id))
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/inventory/movements", headers={
+        "Authorization": f"Bearer {token}",
+    })
+    assert resp.status_code == 403
+
+
+def test_13_adjust_deleted_product_404():
+    """已删除商品不可调整库存"""
+    db = TestSession()
+    try:
+        from datetime import datetime, timezone
+        user = db.query(User).filter(User.username == "inv_tester").first()
+        cat = db.query(ProductCategory).first()
+        deleted_p = Product(
+            id=uuid.uuid4(), name="已删除商品", sku="INV-DEL-001",
+            sale_price=10, cost_price=5, stock_quantity=5,
+            status="active", category_id=cat.id,
+            deleted_at=datetime.now(timezone.utc),
+        )
+        db.add(deleted_p)
+        db.commit()
+        pid = str(deleted_p.id)
+    finally:
+        db.close()
+
+    resp = client.post("/api/v1/inventory/adjustments", json={
+        "product_id": pid, "quantity_change": 1,
+    }, headers=_auth())
+    assert resp.status_code == 404
+
+
+def test_14_movements_pagination():
+    """库存流水分页"""
+    resp = client.get("/api/v1/inventory/movements?page=1&page_size=1", headers=_auth())
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert len(data["items"]) <= 1
+    assert data["page"] == 1
+    assert data["page_size"] == 1
+    assert data["total"] >= 2
+
+
+def test_15_movements_filter_order_confirm_type():
+    """筛选 order_confirm 类型流水（无匹配）"""
+    resp = client.get("/api/v1/inventory/movements?movement_type=order_confirm", headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) == 0
