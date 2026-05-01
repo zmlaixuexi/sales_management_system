@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第一百四十九轮·自动循环）
+
+### 部署：Nginx 添加 Gzip 压缩和 API 响应 Cache-Control
+
+- `deploy/nginx.conf`：启用 Gzip 压缩（JS/CSS/JSON/SVG 等，min_length 256），减小前端资源传输大小
+- API 路径添加 `Cache-Control: no-store`（防御在深度，后端中间件已有此头）
+- Nginx 配置语法验证通过
+
 ## 2026-05-02（第一百四十八轮·自动循环）
 
 ### 全量 CI 验证通过（916 tests）

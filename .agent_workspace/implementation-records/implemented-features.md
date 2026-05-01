@@ -8,6 +8,13 @@
 
 ## 功能编号：FEAT-20260502-144
 
+## 功能编号：FEAT-20260502-152
+
+- 名称：Nginx Gzip 压缩和 API 缓存控制
+- 轮次：Round 149（自动循环）
+- 描述：nginx.conf 启用 Gzip 压缩（JS/CSS/JSON/SVG），API 路径添加 Cache-Control: no-store。Nginx 配置语法验证通过。
+- 验证：docker nginx -t 测试通过
+
 ## 功能编号：FEAT-20260502-151
 
 - 名称：报表中心测试补强
