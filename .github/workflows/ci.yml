@@ -35,6 +35,8 @@ jobs:
         run: pip install ".[dev]"
       - name: Ruff 检查
         run: ruff check .
+      - name: Mypy 类型检查
+        run: python -m mypy app/
       - name: 数据库迁移一致性检查
         env:
           DATABASE_URL: postgresql+psycopg://test:test@localhost:5432/test_ci
