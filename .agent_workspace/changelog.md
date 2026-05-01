@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-05-02（第三百三十一轮）
+
+### 测试：添加 Dashboard 页面组件测试
+
+新增 frontend Dashboard.test.tsx（8 tests）：标题和期间选择器渲染、初始 loading 状态、统计卡片显示、API 调用参数验证、数值正确性、表格数据渲染、API 失败错误提示、期间切换触发新数据加载。前端 132→140，总计 517+140=657 tests。
+
 ## 2026-05-02（第三百三十轮）
 
 ### 文档：同步 testing.md 至 649 tests
