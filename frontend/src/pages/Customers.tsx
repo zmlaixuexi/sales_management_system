@@ -30,7 +30,7 @@ export default function CustomersPage() {
   const [sourceFilter, setSourceFilter] = useState<string | undefined>(undefined)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const { data, total, loading, page, pageSize, keyword, setPage, setKeyword, onPageChange, refresh: loadData } = usePaginatedList<Customer>(
+  const { data, total, loading, error, page, pageSize, keyword, setPage, setKeyword, onPageChange, refresh: loadData } = usePaginatedList<Customer>(
     (params) => fetchCustomers(params).then(r => r.data),
     { source: sourceFilter },
     '加载客户列表失败',
@@ -150,7 +150,7 @@ export default function CustomersPage() {
         dataSource={data}
         rowKey="id"
         loading={loading}
-        locale={{ emptyText: loading ? '加载中...' : keyword || sourceFilter ? '没有匹配的客户' : '暂无客户，点击"新增客户"添加' }}
+        locale={{ emptyText: error && !loading ? <span>加载失败，<a onClick={loadData}>重试</a></span> : loading ? '加载中...' : keyword || sourceFilter ? '没有匹配的客户' : '暂无客户，点击"新增客户"添加' }}
         pagination={{
           current: page,
           pageSize,

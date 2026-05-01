@@ -21,7 +21,7 @@ export default function OrdersPage() {
   const navigate = useNavigate()
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined)
 
-  const { data, total, loading, page, pageSize, keyword, setPage, setKeyword, onPageChange } = usePaginatedList<Order>(
+  const { data, total, loading, error, page, pageSize, keyword, setPage, setKeyword, onPageChange, refresh } = usePaginatedList<Order>(
     (params) => fetchOrders(params).then(r => r.data),
     { status: statusFilter },
     '加载订单列表失败',
@@ -127,7 +127,7 @@ export default function OrdersPage() {
         dataSource={data}
         rowKey="id"
         loading={loading}
-        locale={{ emptyText: loading ? '加载中...' : keyword || statusFilter ? '没有匹配的订单' : '暂无订单，点击"新建订单"添加' }}
+        locale={{ emptyText: error && !loading ? <span>加载失败，<a onClick={refresh}>重试</a></span> : loading ? '加载中...' : keyword || statusFilter ? '没有匹配的订单' : '暂无订单，点击"新建订单"添加' }}
         pagination={{
           current: page,
           pageSize,

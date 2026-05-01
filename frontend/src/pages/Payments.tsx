@@ -22,7 +22,7 @@ const statusMap: Record<string, { color: string; label: string }> = {
 export default function PaymentsPage() {
   const navigate = useNavigate()
 
-  const { data, total, loading, page, pageSize, onPageChange } = usePaginatedList<Payment>(
+  const { data, total, loading, error, page, pageSize, onPageChange, refresh } = usePaginatedList<Payment>(
     (params) => fetchPayments(params).then(r => r.data),
     {},
     '加载收款列表失败',
@@ -97,7 +97,7 @@ export default function PaymentsPage() {
         dataSource={data}
         rowKey="id"
         loading={loading}
-        locale={{ emptyText: loading ? '加载中...' : '暂无收款记录' }}
+        locale={{ emptyText: error && !loading ? <span>加载失败，<a onClick={refresh}>重试</a></span> : loading ? '加载中...' : '暂无收款记录' }}
         pagination={{
           current: page,
           pageSize,

@@ -15,7 +15,7 @@ const relatedTypeMap: Record<string, string> = {
 }
 
 export default function InventoryPage() {
-  const { data, total, loading, page, pageSize, onPageChange } = usePaginatedList<InventoryMovement>(
+  const { data, total, loading, error, page, pageSize, onPageChange, refresh } = usePaginatedList<InventoryMovement>(
     (params) => fetchInventoryMovements(params).then(r => r.data),
     {},
     '加载库存流水失败',
@@ -84,7 +84,7 @@ export default function InventoryPage() {
         dataSource={data}
         rowKey="id"
         loading={loading}
-        locale={{ emptyText: loading ? '加载中...' : '暂无库存变动记录' }}
+        locale={{ emptyText: error && !loading ? <span>加载失败，<a onClick={refresh}>重试</a></span> : loading ? '加载中...' : '暂无库存变动记录' }}
         pagination={{
           current: page,
           pageSize,

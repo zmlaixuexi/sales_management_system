@@ -14,6 +14,7 @@ export function usePaginatedList<T>(
   const [data, setData] = useState<T[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
   const [keyword, setKeyword] = useState('')
@@ -25,6 +26,7 @@ export function usePaginatedList<T>(
 
   const loadData = useCallback(async () => {
     setLoading(true)
+    setError(false)
     try {
       const result = await fetchFnRef.current({
         page,
@@ -35,6 +37,7 @@ export function usePaginatedList<T>(
       setData(result.items ?? [])
       setTotal(result.total ?? 0)
     } catch (e: unknown) {
+      setError(true)
       // 拦截器已展示过 toast 时跳过，避免重复提示
       if ((e as Record<string, boolean>)?._toastDisplayed) {
         // nothing
@@ -50,7 +53,7 @@ export function usePaginatedList<T>(
   useEffect(() => { loadData() }, [loadData])
 
   return {
-    data, total, loading,
+    data, total, loading, error,
     page, pageSize, keyword,
     setPage,
     setKeyword: (value: string) => { setKeyword(value); setPage(1) },

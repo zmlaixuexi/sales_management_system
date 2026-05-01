@@ -24,7 +24,7 @@ export default function ProductsPage() {
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const { data, total, loading, page, pageSize, keyword, setPage, setKeyword, onPageChange, refresh: loadData } = usePaginatedList<Product>(
+  const { data, total, loading, error, page, pageSize, keyword, setPage, setKeyword, onPageChange, refresh: loadData } = usePaginatedList<Product>(
     (params) => fetchProducts(params).then(r => r.data),
     { status: statusFilter },
     '加载商品列表失败',
@@ -172,7 +172,7 @@ export default function ProductsPage() {
         dataSource={data}
         rowKey="id"
         loading={loading}
-        locale={{ emptyText: loading ? '加载中...' : keyword || statusFilter ? '没有匹配的商品' : '暂无商品，点击"新增商品"添加' }}
+        locale={{ emptyText: error && !loading ? <span>加载失败，<a onClick={loadData}>重试</a></span> : loading ? '加载中...' : keyword || statusFilter ? '没有匹配的商品' : '暂无商品，点击"新增商品"添加' }}
         pagination={{
           current: page,
           pageSize,

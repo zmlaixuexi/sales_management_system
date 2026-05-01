@@ -56,7 +56,7 @@ export default function AuditLogs() {
     end_date: dateRange?.[1]?.format('YYYY-MM-DD'),
   };
 
-  const { data: logs, total, loading, page, pageSize, setPage, setKeyword, onPageChange } = usePaginatedList<AuditLogItem>(
+  const { data: logs, total, loading, error, page, pageSize, setPage, setKeyword, onPageChange, refresh } = usePaginatedList<AuditLogItem>(
     fetchAuditLogs,
     filters,
     '加载操作日志失败',
@@ -178,7 +178,7 @@ export default function AuditLogs() {
         columns={columns}
         dataSource={logs}
         loading={loading}
-        locale={{ emptyText: loading ? '加载中...' : '暂无操作日志' }}
+        locale={{ emptyText: error && !loading ? <span>加载失败，<a onClick={refresh}>重试</a></span> : loading ? '加载中...' : '暂无操作日志' }}
         pagination={{
           current: page,
           pageSize,

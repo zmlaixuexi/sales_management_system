@@ -14,7 +14,7 @@ export default function UsersPage() {
   const [saving, setSaving] = useState(false)
   const [form] = Form.useForm()
 
-  const { data, total, loading, page, pageSize, keyword, setKeyword, onPageChange, refresh } = usePaginatedList<User>(
+  const { data, total, loading, error, page, pageSize, keyword, setKeyword, onPageChange, refresh } = usePaginatedList<User>(
     (params) => fetchUsers(params).then(r => r.data),
     {},
     '加载用户列表失败',
@@ -196,7 +196,7 @@ export default function UsersPage() {
           showTotal: (t) => `共 ${t} 条`,
           onChange: onPageChange,
         }}
-        locale={{ emptyText: '暂无用户数据' }}
+        locale={{ emptyText: error && !loading ? <span>加载失败，<a onClick={refresh}>重试</a></span> : '暂无用户数据' }}
       />
 
       <Modal
