@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百一十五轮）
+
+### 文档：deployment.md 环境变量表补全至 32 项
+
+- 环境变量表从 14 项扩展为完整 32 项，按类别分组
+- 新增 SLOW_SQL_THRESHOLD_MS、JWT_REFRESH_TOKEN_EXPIRE_DAYS、DB_POOL_SIZE 等 18 项
+- 备份保留策略从 "30 天" 更正为 "7 天每日 + 4 周每周"
+
 ## 2026-05-02（第三百一十四轮）
 
 ### 部署：Docker Compose 和 .env.example 环境变量补全
