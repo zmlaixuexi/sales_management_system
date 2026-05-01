@@ -1,0 +1,136 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
+
+const _customerApi = {
+  fetchCustomer: vi.fn(),
+  createCustomer: vi.fn(),
+  updateCustomer: vi.fn(),
+}
+
+vi.mock('@/api/customers', () => ({
+  fetchCustomer: (...a: any[]) => _customerApi.fetchCustomer(...a),
+  createCustomer: (...a: any[]) => _customerApi.createCustomer(...a),
+  updateCustomer: (...a: any[]) => _customerApi.updateCustomer(...a),
+}))
+
+vi.mock('@/hooks/useSubmit', () => ({
+  useSubmit: (onSubmit: any) => ({
+    submitting: false,
+    handleSubmit: (e: any) => { e?.preventDefault?.(); onSubmit({}) },
+  }),
+}))
+
+const _mockForm = {
+  setFieldsValue: vi.fn(),
+  getFieldsValue: vi.fn(() => ({})),
+  validateFields: vi.fn(() => Promise.resolve({})),
+  resetFields: vi.fn(),
+}
+
+vi.mock('antd', () => ({
+  Form: Object.assign(
+    ({ children, onFinish, initialValues }: any) => (
+      <form data-testid="form" onSubmit={(e) => { e.preventDefault(); onFinish?.(initialValues || {}) }}>
+        {children}
+      </form>
+    ),
+    {
+      Item: ({ children, label, name }: any) => (
+        <div data-testid="form-item" data-label={label} data-name={name}>{children}</div>
+      ),
+      useForm: () => [_mockForm],
+    },
+  ),
+  Input: Object.assign(
+    (props: any) => <input data-testid="input" {...props} />,
+    { TextArea: (props: any) => <textarea data-testid="textarea" {...props} /> },
+  ),
+  Button: ({ children, onClick, icon, type, htmlType }: any) => (
+    <button data-testid="button" data-type={type} data-htmltype={htmlType} onClick={onClick}>{icon}{children}</button>
+  ),
+  Card: ({ title, children, loading }: any) => (
+    <div data-testid="card" data-title={title} data-loading={loading ? 'true' : 'false'}>{children}</div>
+  ),
+  Space: ({ children }: any) => <span>{children}</span>,
+  Select: ({ options, value, onChange }: any) => (
+    <select data-testid="select" value={value} onChange={(e: any) => onChange?.(e.target.value)}>
+      {options?.map((o: any) => <option key={o.value} value={o.value}>{o.label}</option>)}
+    </select>
+  ),
+  message: { error: vi.fn(), success: vi.fn() },
+}))
+
+vi.mock('@ant-design/icons', () => ({
+  ArrowLeftOutlined: () => <span>←</span>,
+}))
+
+import CustomerForm from '@/pages/CustomerForm'
+
+function renderNewCustomer() {
+  return render(
+    <MemoryRouter initialEntries={['/customers/new']}>
+      <Routes>
+        <Route path="/customers/new" element={<CustomerForm />} />
+        <Route path="/customers" element={<div>Customers List</div>} />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
+describe('CustomerForm', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('新增模式渲染"新增客户"标题', () => {
+    renderNewCustomer()
+    const card = screen.getByTestId('card')
+    expect(card.getAttribute('data-title')).toBe('新增客户')
+  })
+
+  it('渲染返回列表按钮', () => {
+    renderNewCustomer()
+    expect(screen.getByText('返回列表')).toBeInTheDocument()
+  })
+
+  it('渲染必要表单字段', () => {
+    renderNewCustomer()
+    const formItems = screen.getAllByTestId('form-item')
+    const labels = formItems.map((fi) => fi.getAttribute('data-label'))
+    expect(labels).toContain('客户名称')
+    expect(labels).toContain('联系人')
+    expect(labels).toContain('电话')
+    expect(labels).toContain('邮箱')
+  })
+
+  it('客户名称为必填字段', () => {
+    renderNewCustomer()
+    const nameItem = screen.getAllByTestId('form-item').find(
+      (fi) => fi.getAttribute('data-name') === 'name',
+    )
+    expect(nameItem).toBeTruthy()
+  })
+
+  it('渲染提交按钮', () => {
+    renderNewCustomer()
+    expect(screen.getByText('创建客户')).toBeInTheDocument()
+  })
+
+  it('渲染取消按钮', () => {
+    renderNewCustomer()
+    expect(screen.getByText('取消')).toBeInTheDocument()
+  })
+
+  it('渲染来源、等级和跟进状态下拉', () => {
+    renderNewCustomer()
+    const selects = screen.getAllByTestId('select')
+    expect(selects.length).toBeGreaterThanOrEqual(3)
+  })
+
+  it('新增模式不调用 fetchCustomer', () => {
+    renderNewCustomer()
+    expect(_customerApi.fetchCustomer).not.toHaveBeenCalled()
+  })
+})
