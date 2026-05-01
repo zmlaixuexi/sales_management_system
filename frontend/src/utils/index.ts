@@ -25,30 +25,3 @@ export function getApiErrorMessage(e: unknown, fallback = '操作失败'): strin
   const err = e as { response?: { data?: { detail?: { message?: string } } } }
   return err.response?.data?.detail?.message || fallback
 }
-
-export async function downloadCsv(path: string, params: Record<string, string | undefined> = {}): Promise<void> {
-  const token = localStorage.getItem('access_token')
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1'
-
-  const query = new URLSearchParams()
-  Object.entries(params).forEach(([k, v]) => {
-    if (v !== undefined && v !== '') query.set(k, v)
-  })
-  const url = `${baseUrl}${path}?${query.toString()}`
-
-  const resp = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  })
-  if (!resp.ok) throw new Error('导出失败')
-
-  const blob = await resp.blob()
-  const disposition = resp.headers.get('Content-Disposition') || ''
-  const match = disposition.match(/filename=(.+)/)
-  const filename = match ? match[1] : 'export.csv'
-
-  const a = document.createElement('a')
-  a.href = URL.createObjectURL(blob)
-  a.download = filename
-  a.click()
-  URL.revokeObjectURL(a.href)
-}

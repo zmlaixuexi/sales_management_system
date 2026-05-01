@@ -34,3 +34,27 @@ export async function upload<T>(url: string, file: File): Promise<ApiResponse<T>
   })
   return res.data
 }
+
+// 下载 CSV 文件（使用 apiClient 统一拦截器覆盖：auth、429 重试、错误提示）
+export async function downloadCsv(path: string, params: Record<string, string | undefined> = {}): Promise<void> {
+  const filteredParams: Record<string, string> = {}
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== '') filteredParams[k] = v
+  })
+
+  const resp = await apiClient.get(path, {
+    params: filteredParams,
+    responseType: 'blob',
+  })
+
+  const blob = resp.data as Blob
+  const disposition = resp.headers['content-disposition'] || ''
+  const match = disposition.match(/filename=(.+)/)
+  const filename = match ? match[1] : 'export.csv'
+
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(a.href)
+}

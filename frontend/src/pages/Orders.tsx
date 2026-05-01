@@ -5,7 +5,8 @@ import { useNavigate } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
 import { fetchOrders } from '@/api/orders'
 import type { Order } from '@/api/orders'
-import { formatAmount, formatPercent, downloadCsv } from '@/utils'
+import { formatAmount, formatPercent } from '@/utils'
+import { downloadCsv } from '@/api/request'
 import { usePaginatedList } from '@/hooks/usePaginatedList'
 
 const statusMap: Record<string, { color: string; label: string }> = {
