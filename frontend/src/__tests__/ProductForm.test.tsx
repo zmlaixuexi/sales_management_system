@@ -1,0 +1,142 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
+
+const _productApi = {
+  fetchProduct: vi.fn(),
+  createProduct: vi.fn(),
+  updateProduct: vi.fn(),
+  uploadImage: vi.fn(),
+}
+
+vi.mock('@/api/products', () => ({
+  fetchProduct: (...a: any[]) => _productApi.fetchProduct(...a),
+  createProduct: (...a: any[]) => _productApi.createProduct(...a),
+  updateProduct: (...a: any[]) => _productApi.updateProduct(...a),
+  uploadImage: (...a: any[]) => _productApi.uploadImage(...a),
+}))
+
+vi.mock('@/hooks/useSubmit', () => ({
+  useSubmit: (onSubmit: any) => ({
+    submitting: false,
+    handleSubmit: (e: any) => { e?.preventDefault?.(); onSubmit({}) },
+  }),
+}))
+
+const _mockForm = {
+  setFieldsValue: vi.fn(),
+  getFieldsValue: vi.fn(() => ({})),
+  validateFields: vi.fn(() => Promise.resolve({})),
+  resetFields: vi.fn(),
+}
+
+vi.mock('antd', () => ({
+  Form: Object.assign(
+    ({ children, onFinish, initialValues }: any) => (
+      <form data-testid="form" onSubmit={(e) => { e.preventDefault(); onFinish?.(initialValues || {}) }}>
+        {children}
+      </form>
+    ),
+    {
+      Item: ({ children, label, name, rules }: any) => (
+        <div data-testid="form-item" data-label={label} data-name={name}>
+          {children}
+        </div>
+      ),
+      useForm: () => [_mockForm],
+    },
+  ),
+  Input: Object.assign(
+    (props: any) => <input data-testid="input" {...props} />,
+    { TextArea: (props: any) => <textarea data-testid="textarea" {...props} /> },
+  ),
+  InputNumber: (props: any) => <input data-testid="input-number" type="number" {...props} />,
+  Button: ({ children, onClick, icon, type, loading, htmlType }: any) => (
+    <button data-testid="button" data-type={type} data-htmltype={htmlType} onClick={onClick} disabled={loading}>{icon}{children}</button>
+  ),
+  Card: ({ title, children, loading }: any) => (
+    <div data-testid="card" data-title={title} data-loading={loading ? 'true' : 'false'}>{children}</div>
+  ),
+  Space: ({ children }: any) => <span>{children}</span>,
+  Upload: ({ children, beforeUpload }: any) => <div data-testid="upload">{children}</div>,
+  Image: ({ src }: any) => <img data-testid="image" src={src} />,
+  Select: ({ options, value, onChange }: any) => (
+    <select data-testid="select" value={value} onChange={(e: any) => onChange?.(e.target.value)}>
+      {options?.map((o: any) => <option key={o.value} value={o.value}>{o.label}</option>)}
+    </select>
+  ),
+  message: { error: vi.fn(), success: vi.fn() },
+}))
+
+vi.mock('@ant-design/icons', () => ({
+  PlusOutlined: () => <span>+</span>,
+  ArrowLeftOutlined: () => <span>←</span>,
+}))
+
+import ProductForm from '@/pages/ProductForm'
+
+function renderNewProduct() {
+  return render(
+    <MemoryRouter initialEntries={['/products/new']}>
+      <Routes>
+        <Route path="/products/new" element={<ProductForm />} />
+        <Route path="/products" element={<div>Products List</div>} />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
+describe('ProductForm', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('新增模式渲染"新增商品"标题', () => {
+    renderNewProduct()
+    const card = screen.getByTestId('card')
+    expect(card.getAttribute('data-title')).toBe('新增商品')
+  })
+
+  it('渲染返回列表按钮', () => {
+    renderNewProduct()
+    expect(screen.getByText('返回列表')).toBeInTheDocument()
+  })
+
+  it('渲染必要表单字段', () => {
+    renderNewProduct()
+    const formItems = screen.getAllByTestId('form-item')
+    const labels = formItems.map((fi) => fi.getAttribute('data-label'))
+    expect(labels).toContain('商品名称')
+    expect(labels).toContain('成本价')
+    expect(labels).toContain('销售价')
+  })
+
+  it('商品名称为必填字段', () => {
+    renderNewProduct()
+    const nameItem = screen.getAllByTestId('form-item').find(
+      (fi) => fi.getAttribute('data-name') === 'name',
+    )
+    expect(nameItem).toBeTruthy()
+  })
+
+  it('渲染提交按钮', () => {
+    renderNewProduct()
+    expect(screen.getByText('创建商品')).toBeInTheDocument()
+  })
+
+  it('渲染取消按钮', () => {
+    renderNewProduct()
+    expect(screen.getByText('取消')).toBeInTheDocument()
+  })
+
+  it('渲染图片上传区域', () => {
+    renderNewProduct()
+    expect(screen.getByTestId('upload')).toBeInTheDocument()
+  })
+
+  it('新增模式不调用 fetchProduct', () => {
+    renderNewProduct()
+    expect(_productApi.fetchProduct).not.toHaveBeenCalled()
+  })
+})
