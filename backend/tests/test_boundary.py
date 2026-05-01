@@ -391,7 +391,7 @@ def test_18_payment_on_cancelled_order():
 def test_19_payment_exact_amount():
     """精确金额收款完成订单"""
     resp = client.post(f"/api/v1/payments/orders/{_confirmed_order_id}/payments", json={
-        "amount": "200", "payment_method": "bank_transfer",
+        "amount": "200", "payment_method": "transfer",
     }, headers=_auth())
     assert resp.status_code == 200
     assert resp.json()["data"]["order_status"] == "completed"

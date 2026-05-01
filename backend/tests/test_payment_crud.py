@@ -179,7 +179,7 @@ class TestPaymentCreate:
         """全额付完 → 订单完成"""
         resp = client.post(f"/api/v1/sales-orders/{_confirmed_order_id}/payments", json={
             "amount": "200.00",
-            "payment_method": "bank_transfer",
+            "payment_method": "transfer",
         }, headers=_auth())
         assert resp.status_code == 200
         data = resp.json()["data"]
@@ -371,6 +371,54 @@ def test_13_reverse_payment_order_deleted():
         assert "关联订单" in resp.json()["detail"]["message"]
     finally:
         db.close()
+
+
+def test_14_invalid_payment_method():
+    """无效的收款方式被拒绝"""
+    db = TestSession()
+    try:
+        admin = db.query(User).filter(User.id == uuid.UUID(_admin_id)).first()
+        customer = Customer(
+            id=uuid.uuid4(),
+            name="收款方式测试客户",
+            phone="13900990099",
+            owner_user_id=admin.id,
+            created_by=admin.id,
+        )
+        db.add(customer)
+        db.flush()
+        product = Product(
+            id=uuid.uuid4(),
+            name="收款方式测试商品",
+            sku="PAY-METHOD-001",
+            sale_price=100,
+            cost_price=50,
+            stock_quantity=10,
+            status="active",
+            created_by=admin.id,
+            updated_by=admin.id,
+        )
+        db.add(product)
+        db.flush()
+        order = SalesOrder(
+            id=uuid.uuid4(),
+            order_no="SO-PAY-METHOD",
+            customer_id=customer.id,
+            sales_user_id=admin.id,
+            status="confirmed",
+            total_amount="100.00",
+            created_by=admin.id,
+        )
+        db.add(order)
+        db.commit()
+        oid = str(order.id)
+    finally:
+        db.close()
+
+    resp = client.post(f"/api/v1/sales-orders/{oid}/payments", json={
+        "amount": "50", "payment_method": "bitcoin",
+    }, headers=_auth())
+    assert resp.status_code == 422
 
 
 app.dependency_overrides[get_db] = override_get_db

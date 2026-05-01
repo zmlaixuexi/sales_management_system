@@ -565,14 +565,32 @@ def order_logs(
         .all()
     )
 
+    # 无 product:view_cost 权限时，从审计数据中移除敏感字段
+    cost_fields = {"cost_price", "unit_profit", "gross_margin", "total_cost", "subtotal_cost"}
+    can_view_cost = has_permission(current_user, "product:view_cost")
+
+    def _safe_parse(raw):
+        return json.loads(raw) if raw else None
+
+    def _strip_sensitive(data):
+        if not isinstance(data, dict):
+            return data
+        return {k: v for k, v in data.items() if k not in cost_fields}
+
+    def _filter(raw):
+        parsed = _safe_parse(raw)
+        if parsed and not can_view_cost:
+            return _strip_sensitive(parsed)
+        return parsed
+
     result_items = [
         {
             "id": str(item.id),
             "actor_id": str(item.actor_id) if item.actor_id else None,
             "actor_name": item.actor_name,
             "action": item.action,
-            "before_data": json.loads(item.before_data) if item.before_data else None,
-            "after_data": json.loads(item.after_data) if item.after_data else None,
+            "before_data": _filter(item.before_data),
+            "after_data": _filter(item.after_data),
             "ip_address": item.ip_address,
             "user_agent": item.user_agent,
             "request_id": item.request_id,

@@ -446,11 +446,17 @@ def delete_product(
     """删除或软删除商品"""
     product = get_or_404(db, Product, product_id, "商品")
 
-    # 检查是否有订单引用
-    from app.models.order import SalesOrderItem
-    order_ref = db.query(SalesOrderItem).filter(
-        SalesOrderItem.product_id == product_id,
-    ).first()
+    # 检查是否有未删除订单引用
+    from app.models.order import SalesOrder, SalesOrderItem
+    order_ref = (
+        db.query(SalesOrderItem)
+        .join(SalesOrder, SalesOrderItem.order_id == SalesOrder.id)
+        .filter(
+            SalesOrderItem.product_id == product_id,
+            SalesOrder.deleted_at.is_(None),
+        )
+        .first()
+    )
     if order_ref:
         raise HTTPException(
             status_code=409,

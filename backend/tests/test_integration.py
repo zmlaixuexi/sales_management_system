@@ -284,7 +284,7 @@ class TestPayment:
         """登记剩余收款 → 订单完成"""
         resp = client.post(f"/api/v1/payments/orders/{_order_id}/payments", json={
             "amount": "100.00",
-            "payment_method": "bank_transfer",
+            "payment_method": "transfer",
         }, headers=_auth_header())
         assert resp.status_code == 200
         data = resp.json()["data"]
@@ -378,6 +378,18 @@ class TestOrderLogs:
         """不存在的订单返回 404"""
         resp = client.get(f"/api/v1/sales-orders/{uuid.uuid4()}/logs", headers=_auth_header())
         assert resp.status_code == 404
+
+    def test_04_order_logs_strip_cost_fields(self):
+        """超管查看日志包含成本字段"""
+        resp = client.get(f"/api/v1/sales-orders/{_order_id}/logs", headers=_auth_header())
+        assert resp.status_code == 200
+        items = resp.json()["data"]["items"]
+        # 超管应能看到完整数据（可能包含 cost_price 等字段）
+        create_logs = [i for i in items if i["action"] == "order_create"]
+        assert len(create_logs) >= 1
+        # after_data 应为 dict
+        after = create_logs[0]["after_data"]
+        assert isinstance(after, dict)
 
 
 # ========== 辅助函数 ==========

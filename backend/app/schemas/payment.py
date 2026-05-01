@@ -1,13 +1,18 @@
 from decimal import Decimal
+from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
 from app.core.sanitize import strip_html
 
+VALID_PAYMENT_METHODS = ("cash", "transfer", "wechat", "alipay", "other")
+
 
 class PaymentCreate(BaseModel):
     amount: str = Field(..., description="收款金额")
-    payment_method: str = Field(..., description="收款方式：cash/transfer/wechat/alipay/other")
+    payment_method: Literal["cash", "transfer", "wechat", "alipay", "other"] = Field(
+        ..., description="收款方式"
+    )
     remark: str | None = Field(None, description="备注")
 
     @field_validator("amount")

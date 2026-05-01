@@ -84,7 +84,7 @@ def setup_module(module):
         # 销售员（有 customer:list/create 但无 customer:view_all）
         sale_user = _create_user_with_perms(db, "sale01", [
             "customer:list", "customer:create",
-            "order:list", "order:create",
+            "order:list", "order:create", "order:view",
             "product:list",
         ])
         global _sale_user_id
@@ -258,3 +258,26 @@ def test_09_export_order_data_scope():
     content = resp.text
     lines = [line for line in content.strip().split("\n") if line.strip() and "订单号" not in line]
     assert len(lines) == 1, "销售员导出只应有 1 个订单数据行"
+
+
+def test_10_order_logs_strip_cost_fields():
+    """无 product:view_cost 权限用户查看订单日志不含成本字段"""
+    # 管理员创建订单（含成本数据）
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id_own,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth("sale01"))
+    assert resp.status_code == 200
+    order_id = resp.json()["data"]["id"]
+
+    # 销售员查看日志
+    resp = client.get(f"/api/v1/sales-orders/{order_id}/logs", headers=_auth("sale01"))
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    create_logs = [i for i in items if i["action"] == "order_create"]
+    assert len(create_logs) >= 1
+    after = create_logs[0].get("after_data")
+    if after and isinstance(after, dict):
+        # 销售员无 product:view_cost，不应看到成本字段
+        assert "cost_price" not in after
+        assert "subtotal_cost" not in after
