@@ -43,6 +43,8 @@ jobs:
         run: alembic upgrade head && alembic check
       - name: 运行测试（含覆盖率）
         run: python -m pytest tests/ --cov -q
+      - name: 依赖漏洞扫描
+        run: pip-audit
 
   frontend:
     runs-on: ubuntu-latest
@@ -66,3 +68,5 @@ jobs:
         run: npx vitest run --coverage
       - name: 构建验证
         run: npm run build
+      - name: 依赖漏洞扫描
+        run: npm audit --audit-level=moderate
