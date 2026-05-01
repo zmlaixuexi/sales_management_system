@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-05-02（第二百九十五轮）
+
+### 部署：.env.example 新增 MAX_CSV_IMPORT_ROWS 配置项
+
+- .env.example 添加 MAX_CSV_IMPORT_ROWS=1000（与 config.py 默认值一致）
+
 ## 2026-05-02（第二百九十四轮）
 
 ### 文档：architecture.md 同步 Round 281-293 变更
