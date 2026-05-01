@@ -2,36 +2,45 @@
 
 最后更新时间：2026-05-02
 当前阶段：需求符合性验证 + 代码质量
-当前任务编号：ROUND-309
-当前任务名称：CI — 新增 pip-audit + npm audit 依赖漏洞扫描
+当前任务编号：ROUND-310
+当前任务名称：CI 全量验证 — make ci 通过 + 615 测试全绿
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 310：CI 全量验证 — make ci 通过 + 615 测试全绿
 - Round 309：CI — 新增 pip-audit + npm audit 依赖漏洞扫描
-- Round 308：代码质量审计 — 前端零 console.log，后端零 print/pdb，零硬编码密钥
-- Round 307：文档 — 同步测试数 486+129=615 + make ci 全量通过
+- Round 308：代码质量审计 — 零调试语句、零硬编码密钥
 
-## 当前测试状态
+## 最终验证状态
 
-- 后端：486/486 通过
-- 前端：129/129 通过
-- 总计：615 测试
-- make ci：全量通过
-- npm audit：0 vulnerabilities
+| 门禁 | 结果 |
+|---|---|
+| ruff | 0 issues |
+| mypy | 0 errors (51 files) |
+| eslint | 0 warnings |
+| tsc | 0 errors |
+| 后端测试 | 486/486 |
+| 前端测试 | 129/129 |
+| 总计 | 615 tests |
+| build | 零警告 |
+| npm audit | 0 vulnerabilities |
 
-## CI 质量门禁覆盖
+## CI 质量门禁（10 项）
 
 ruff + mypy + alembic check + pytest + eslint + tsc + vitest + build + pip-audit + npm audit
 
 ## 下一步第一动作
 
-继续 keep-going 模式。可继续方向：可观测性、部署体验。
+继续 keep-going 模式。剩余有价值方向：
+- 安全：TLS/HTTPS（需用户决策证书方案）
+- 安全：token 撤销/refresh token rotation（需架构决策）
+- 可观测性：请求链路追踪增强
 
 ## 阻塞问题
 
-暂无。
+TLS、token 撤销、refresh token rotation 需要用户提供产品决策或基础设施配置。
 
 ## 恢复检查清单
 

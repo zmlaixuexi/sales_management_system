@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百一十轮）
+
+### CI 全量验证：make ci 通过 + 615 测试全绿
+
+- make ci 全量通过：ruff 0 + mypy 0 + eslint 0 + 486/486 + 129/129 + build 零警告
+- architecture.md 已包含 pip-audit/npm audit 开发工具链描述
+- CI 质量门禁 10 项全覆盖
+
 ## 2026-05-02（第三百零九轮）
 
 ### CI：新增 pip-audit + npm audit 依赖漏洞扫描
