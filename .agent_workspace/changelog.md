@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-05-02（第三百五十三轮）
+
+### 前端：统一表格空状态中文文案
+
+为 ReportsCenter（趋势/商品排行/客户排行/销售排行）、OrderForm（明细/商品选择）、Users（用户列表）、OrderDetail（订单明细）共 8 个 Table 补充 locale.emptyText 中文文案，消除 Ant Design 默认英文 "No Data" 显示，符合 DoD 用户可见文案中文要求。
+
 ## 2026-05-02（第三百五十二轮）
 
 ### 测试：后端商品/订单/收款认证边界测试 → 805

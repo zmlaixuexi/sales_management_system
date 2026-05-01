@@ -6,6 +6,20 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-120
+
+### 前端 — 表格空状态中文文案统一
+
+- **文件**: `frontend/src/pages/ReportsCenter.tsx`, `frontend/src/pages/OrderForm.tsx`, `frontend/src/pages/Users.tsx`, `frontend/src/pages/OrderDetail.tsx`
+- **内容**:
+  - ReportsCenter +4 表格：趋势/商品排行/客户排行/销售排行补充中文 emptyText
+  - OrderForm +2 表格：明细表和商品选择表补充中文 emptyText
+  - Users +1 表格：用户列表补充中文 emptyText
+  - OrderDetail +1 表格：订单明细补充中文 emptyText
+  - 消除所有 Ant Design 默认英文 "No Data"，符合 DoD 用户可见文案中文要求
+- **验证**: 254 前端测试全通过，ESLint 0 errors，TypeScript 0 errors
+- **关联**: Round 353
+
 ## 功能编号：FEAT-20260502-119
 
 ### 测试 — 后端商品/订单/收款认证边界测试 → 805
