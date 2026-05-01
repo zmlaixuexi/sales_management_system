@@ -312,7 +312,7 @@ Docker Compose 启动 3 个容器（无 Nginx）：
 | 输入验证 | Pydantic Schema 约束 + Literal 枚举 |
 | 并发防护 | 收款登记/冲正 `with_for_update()` 行锁 |
 | 文件上传 | 扩展名 + MIME + 魔数字节 + 大小限制 |
-| CSV 导入 | 大小限制 + UTF-8 编码校验 + 逐行错误收集 |
+| CSV 导入 | 大小限制 + 行数上限 + UTF-8 编码校验 + XSS 消毒 + commit 回滚 + 逐行错误收集 |
 | CORS | 白名单（非通配符） |
 | 排序注入 | `sort_by` 白名单校验 |
 | 成本价保护 | 低于成本价阻止下单 |
@@ -327,3 +327,17 @@ Docker Compose 启动 3 个容器（无 Nginx）：
 - **结构化日志**：生产环境 JSON 格式，支持慢请求警告（可配置阈值）
 - **审计日志**：完整记录所有数据变更操作，含请求元数据
 - **全局异常处理**：未处理异常返回一致 JSON，防泄露内部详情
+
+## 开发工具链
+
+| 工具 | 用途 |
+|---|---|
+| ruff | Python lint + 格式化（含 B904/SIM/C4/PERF/RUF 扩展规则） |
+| mypy | Python 静态类型检查（含 SQLAlchemy plugin） |
+| ESLint | 前端 lint |
+| tsc | 前端 TypeScript 类型检查 |
+| pytest | 后端测试（8 类标记自动分类，覆盖率 99%+） |
+| vitest | 前端测试 |
+| pip-audit | Python 依赖漏洞扫描 |
+| npm audit | 前端依赖漏洞扫描 |
+| GitHub Actions | CI 自动化（ruff + mypy + alembic + pytest + eslint + tsc + vitest + build） |
