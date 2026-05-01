@@ -43,6 +43,7 @@ vi.mock('@ant-design/icons', () => ({
   BarChartOutlined: () => null,
   WalletOutlined: () => null,
   UserSwitchOutlined: () => null,
+  InboxOutlined: () => null,
 }))
 
 import { authApi } from '@/api/auth'

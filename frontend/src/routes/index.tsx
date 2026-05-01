@@ -31,6 +31,7 @@ const routes: RouteObject[] = [
       { path: 'products', element: lazyPage(() => import('@/pages/Products')) },
       { path: 'products/new', element: lazyPage(() => import('@/pages/ProductForm')) },
       { path: 'products/:id/edit', element: lazyPage(() => import('@/pages/ProductForm')) },
+      { path: 'inventory', element: lazyPage(() => import('@/pages/Inventory')) },
       { path: 'customers', element: lazyPage(() => import('@/pages/Customers')) },
       { path: 'customers/new', element: lazyPage(() => import('@/pages/CustomerForm')) },
       { path: 'customers/:id', element: lazyPage(() => import('@/pages/CustomerDetail')) },

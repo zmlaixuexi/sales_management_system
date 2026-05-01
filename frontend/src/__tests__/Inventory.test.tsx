@@ -1,0 +1,144 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
+
+const _inventoryMocks = {
+  fetchInventoryMovements: vi.fn(),
+}
+
+vi.mock('@/api/inventory', () => ({
+  fetchInventoryMovements: (...args: any[]) => _inventoryMocks.fetchInventoryMovements(...args),
+}))
+
+vi.mock('@/hooks/usePaginatedList', () => ({
+  usePaginatedList: (_fetchFn: any, _filters: any, _errorMsg: string) => {
+    const result = _inventoryMocks.fetchInventoryMovements()
+    return {
+      data: result?.data?.items ?? [],
+      total: result?.data?.total ?? 0,
+      loading: false,
+      page: 1,
+      pageSize: 20,
+      onPageChange: vi.fn(),
+    }
+  },
+}))
+
+vi.mock('antd', () => ({
+  Table: ({ dataSource, columns, rowKey, locale }: any) => (
+    <div>
+      <table data-testid="table">
+        <tbody>
+          {dataSource?.map((row: any) => (
+            <tr key={row[rowKey]} data-testid={`row-${row[rowKey]}`}>
+              {columns?.map((col: any) => (
+                <td key={col.dataIndex} data-col={col.dataIndex}>
+                  {col.render ? col.render(row[col.dataIndex], row) : row[col.dataIndex]}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {(!dataSource || dataSource.length === 0) && locale?.emptyText && <span>{locale.emptyText}</span>}
+    </div>
+  ),
+  Space: ({ children }: any) => <span>{children}</span>,
+  message: { error: vi.fn(), success: vi.fn() },
+}))
+
+import InventoryPage from '@/pages/Inventory'
+
+const mockData = {
+  data: {
+    items: [
+      {
+        id: 'mov-001',
+        product_id: 'prod-001',
+        movement_type: 'order_deduct',
+        quantity_before: 100,
+        quantity_change: -5,
+        quantity_after: 95,
+        related_type: 'sales_order',
+        related_id: 'order-001',
+        remark: '订单扣减库存',
+        created_at: '2026-05-01T10:00:00Z',
+      },
+      {
+        id: 'mov-002',
+        product_id: 'prod-002',
+        movement_type: 'manual_adjust',
+        quantity_before: 50,
+        quantity_change: 10,
+        quantity_after: 60,
+        related_type: null,
+        related_id: null,
+        remark: null,
+        created_at: '2026-05-01T12:00:00Z',
+      },
+    ],
+    total: 2,
+  },
+}
+
+function renderInventory() {
+  return render(
+    <MemoryRouter initialEntries={['/inventory']}>
+      <Routes>
+        <Route path="/inventory" element={<InventoryPage />} />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
+describe('InventoryPage', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    _inventoryMocks.fetchInventoryMovements.mockReturnValue(mockData)
+  })
+
+  it('渲染页面标题', () => {
+    renderInventory()
+    expect(screen.getByText('库存流水')).toBeInTheDocument()
+  })
+
+  it('显示总记录数', () => {
+    renderInventory()
+    expect(screen.getByText(/共 2 条记录/)).toBeInTheDocument()
+  })
+
+  it('渲染库存变动行', () => {
+    renderInventory()
+    expect(screen.getByTestId('row-mov-001')).toBeInTheDocument()
+    expect(screen.getByTestId('row-mov-002')).toBeInTheDocument()
+  })
+
+  it('显示变动类型标签', () => {
+    renderInventory()
+    expect(screen.getByText('订单扣减')).toBeInTheDocument()
+    expect(screen.getByText('手动调整')).toBeInTheDocument()
+  })
+
+  it('变动量正数显示绿色 + 号', () => {
+    renderInventory()
+    expect(screen.getByText('+10')).toBeInTheDocument()
+  })
+
+  it('变动量负数显示红色', () => {
+    renderInventory()
+    const negEl = screen.getByText('-5')
+    expect(negEl).toBeInTheDocument()
+  })
+
+  it('显示关联类型', () => {
+    renderInventory()
+    expect(screen.getByText('销售订单')).toBeInTheDocument()
+  })
+
+  it('空数据显示空状态', () => {
+    _inventoryMocks.fetchInventoryMovements.mockReturnValue({ data: { items: [], total: 0 } })
+    renderInventory()
+    expect(screen.getByText('暂无库存变动记录')).toBeInTheDocument()
+  })
+})

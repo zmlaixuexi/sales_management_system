@@ -11,6 +11,7 @@ import {
   BarChartOutlined,
   WalletOutlined,
   UserSwitchOutlined,
+  InboxOutlined,
 } from '@ant-design/icons'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { authApi, type CurrentUser } from '@/api/auth'
@@ -22,6 +23,7 @@ const { Header, Sider, Content } = Layout
 const menuItems = [
   { key: '/', icon: <DashboardOutlined />, label: '首页看板' },
   { key: '/products', icon: <ShopOutlined />, label: '商品管理' },
+  { key: '/inventory', icon: <InboxOutlined />, label: '库存流水' },
   { key: '/customers', icon: <TeamOutlined />, label: '客户管理' },
   { key: '/orders', icon: <ShoppingCartOutlined />, label: '销售订单' },
   { key: '/payments', icon: <WalletOutlined />, label: '收款记录' },

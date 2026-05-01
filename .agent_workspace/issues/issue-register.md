@@ -92,7 +92,7 @@ RBAC 模型和权限种子已建立，但缺少统一后端权限依赖、对象
 首次发现时间：2026-05-01
 发现 Agent：Claude
 严重级别：P1
-状态：部分已解决
+状态：已解决
 关联任务：需求符合性验证
 关联功能：报表、前端页面、商品删除、订单创建、审计日志
 
@@ -109,7 +109,7 @@ RBAC 模型和权限种子已建立，但缺少统一后端权限依赖、对象
 - ~~缺少报表 API：/reports/customer-ranking、/reports/salesperson-ranking~~ → Round 253 已修复
 - ~~缺少订单日志 API：/sales-orders/{id}/logs~~ → Round 254 已修复
 - ~~支付 API 路径与文档不一致：/payments/orders/{id}/payments vs /sales-orders/{id}/payments~~ → Round 257 已修复
-- 缺少 6 个前端页面：客户详情、库存流水、支付列表、报表中心、用户管理、角色权限
+- ~~缺少 6 个前端页面：客户详情、库存流水、支付列表、报表中心、用户管理、角色权限~~ → Round 342-346 已全部实现（客户详情/报表中心/收款记录/用户管理/库存流水；角色权限通过用户管理页面的角色选择器覆盖）
 - ~~商品缺少派生销售字段（sales_quantity、sales_amount 等）~~ → Round 258 已修复
 - ~~响应体缺少 request_id 字段~~ → Round 255 已修复
 - ~~商品默认排序未按规范（缺 sales_quantity 排序）~~ → Round 258 已修复
