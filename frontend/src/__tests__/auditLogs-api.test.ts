@@ -1,18 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { fetchAuditLogs, fetchAuditActions } from '@/api/auditLogs'
 
-vi.mock('@/api/client', () => ({
-  default: {
-    get: vi.fn(),
-    post: vi.fn(),
-  },
+vi.mock('@/api/request', () => ({
+  get: vi.fn(),
 }))
 
-import apiClient from '@/api/client'
+import { get } from '@/api/request'
 
-const mockGet = apiClient.get as ReturnType<typeof vi.fn>
+const mockGet = get as ReturnType<typeof vi.fn>
 
-const apiOk = (data: unknown) => Promise.resolve({ data: { success: true, data, message: 'ok' } })
+const apiOk = (data: unknown): Promise<{ success: boolean; data: unknown }> =>
+  Promise.resolve({ success: true, data, message: 'ok' } as any)
 
 describe('审计日志 API', () => {
   beforeEach(() => {
@@ -24,7 +22,7 @@ describe('审计日志 API', () => {
       items: [], page: 1, page_size: 20, total: 0,
     }))
     const data = await fetchAuditLogs({})
-    expect(mockGet).toHaveBeenCalledWith('/audit-logs', { params: {} })
+    expect(mockGet).toHaveBeenCalledWith('/audit-logs', {})
     expect(data.total).toBe(0)
   })
 
@@ -34,7 +32,7 @@ describe('审计日志 API', () => {
     }))
     await fetchAuditLogs({ action: 'product_create', resource_type: 'product', page: 2 })
     expect(mockGet).toHaveBeenCalledWith('/audit-logs', {
-      params: { action: 'product_create', resource_type: 'product', page: 2 },
+      action: 'product_create', resource_type: 'product', page: 2,
     })
   })
 
@@ -44,7 +42,7 @@ describe('审计日志 API', () => {
     }))
     await fetchAuditLogs({ start_date: '2026-04-01', end_date: '2026-04-30' })
     expect(mockGet).toHaveBeenCalledWith('/audit-logs', {
-      params: { start_date: '2026-04-01', end_date: '2026-04-30' },
+      start_date: '2026-04-01', end_date: '2026-04-30',
     })
   })
 

@@ -1,4 +1,5 @@
-import apiClient from './client';
+import { get } from './request'
+import type { ApiResponse } from '@/types'
 
 export interface AuditLogItem {
   id: string;
@@ -15,6 +16,18 @@ export interface AuditLogItem {
   created_at: string | null;
 }
 
+interface AuditLogListResult {
+  items: AuditLogItem[];
+  page: number;
+  page_size: number;
+  total: number;
+}
+
+interface AuditActionsResult {
+  actions: string[];
+  resource_types: string[];
+}
+
 export async function fetchAuditLogs(params: {
   page?: number;
   page_size?: number;
@@ -24,11 +37,11 @@ export async function fetchAuditLogs(params: {
   end_date?: string;
   keyword?: string;
 }) {
-  const { data } = await apiClient.get('/audit-logs', { params });
-  return data.data;
+  const res = await get<AuditLogListResult>('/audit-logs', params as Record<string, unknown>)
+  return res.data
 }
 
 export async function fetchAuditActions() {
-  const { data } = await apiClient.get('/audit-logs/actions');
-  return data.data;
+  const res = await get<AuditActionsResult>('/audit-logs/actions')
+  return res.data
 }
