@@ -16,9 +16,12 @@ Authorization: Bearer <access_token>
 {
   "success": true,
   "data": { ... },
-  "message": "操作成功"
+  "message": "操作成功",
+  "request_id": "uuid"
 }
 ```
+
+`request_id` 字段在有请求 ID 上下文时自动附加（由 `X-Request-ID` 请求头透传或自动生成）。
 
 错误响应：
 
@@ -51,11 +54,13 @@ Authorization: Bearer <access_token>
 | 400 | ORDER_INVALID_STATUS | 订单状态不允许此操作 |
 | 400 | INVENTORY_NOT_ENOUGH | 库存不足 |
 | 400 | PAYMENT_AMOUNT_EXCEEDED | 收款金额超过剩余应收 |
+| 400 | PRICE_BELOW_COST | 订单明细单价低于商品成本价 |
 | 400 | PRODUCT_SKU_DUPLICATED | 商品编码重复 |
 | 401 | AUTH_UNAUTHORIZED | 未认证或 Token 无效 |
 | 403 | AUTH_FORBIDDEN | 无权限执行此操作 |
 | 404 | RESOURCE_NOT_FOUND | 资源不存在 |
 | 409 | CUSTOMER_DUPLICATED_WARNING | 客户手机号重复 |
+| 409 | PRODUCT_IN_USE | 商品已被订单引用，无法删除 |
 | 429 | RATE_LIMIT_EXCEEDED | 请求过于频繁，请稍后再试 |
 
 ## 速率限制
@@ -172,6 +177,18 @@ JSON 日志格式示例：
 }
 ```
 
+### POST /auth/change-password
+
+修改当前用户密码。
+
+**请求体**：
+```json
+{ "old_password": "oldpass123", "new_password": "newpass456" }
+```
+
+**校验**：旧密码必须正确，新密码必须包含字母和数字。
+```
+
 ---
 
 ## 用户管理
@@ -231,6 +248,10 @@ JSON 日志格式示例：
 
 **查询参数**：`page`, `page_size`, `keyword`, `status`, `category_id`, `sort_by`, `sort_order`
 
+**排序字段**：`name`、`sku`、`sale_price`、`cost_price`、`stock_quantity`、`status`、`sort_weight`、`created_at`、`updated_at`、`sales_quantity`、`sales_amount`
+
+**响应**：每个商品包含 `sales_quantity`（累计销售数量）和 `sales_amount`（累计销售额）。
+
 **权限**：`product:list`。无 `product:view_cost` 权限时不返回 cost_price、unit_profit、gross_margin。
 
 ### POST /products
@@ -253,7 +274,7 @@ JSON 日志格式示例：
 
 ### GET /products/{product_id}
 
-商品详情，含图片列表。
+商品详情，含图片列表、派生销售字段（`sales_quantity`、`sales_amount`）。
 
 **权限**：`product:list`
 
@@ -436,6 +457,29 @@ JSON 日志格式示例：
 
 **状态流转**：draft → confirmed → cancelled（draft 也可直接取消）
 
+### GET /sales-orders/{order_id}/logs
+
+订单操作日志查询。
+
+**查询参数**：`page`, `page_size`
+
+**权限**：`order:list`。非 `order:view_all` 用户只能查看本人订单的日志。
+
+### POST /sales-orders/{order_id}/payments
+
+登记收款（规范路径）。收款金额达到订单总额时自动标记为 completed。
+
+**请求体**：
+```json
+{
+  "amount": "500.00",
+  "payment_method": "cash",
+  "remark": "首期款"
+}
+```
+
+**权限**：`payment:create`
+
 ---
 
 ## 收款管理
@@ -450,16 +494,9 @@ JSON 日志格式示例：
 
 ### POST /payments/orders/{order_id}/payments
 
-登记收款。收款金额达到订单总额时自动标记为 completed。
+登记收款（旧路径，向后兼容，推荐使用 `POST /sales-orders/{order_id}/payments`）。
 
-**请求体**：
-```json
-{
-  "amount": "500.00",
-  "payment_method": "cash",
-  "remark": "首期款"
-}
-```
+**请求体**：同 `POST /sales-orders/{order_id}/payments`。
 
 **权限**：`payment:create`
 
@@ -536,6 +573,30 @@ JSON 日志格式示例：
 
 **权限**：`report:sales`
 
+### GET /reports/customer-ranking
+
+客户销售排行（按销售额降序）。
+
+**查询参数**：`period`（同上）、`limit`（可选，默认 10，最大 50）
+
+**响应字段**：每项含 `rank`、`customer_id`、`customer_name`、`order_count`、`total_sales`、`total_cost`、`gross_profit`。无 `order:view_cost` 权限时 `total_cost` 和 `gross_profit` 不返回。
+
+**数据范围**：无 `order:view_all` 权限时仅统计本人订单数据。
+
+**权限**：`report:sales`
+
+### GET /reports/salesperson-ranking
+
+销售人员业绩排行（按销售额降序）。
+
+**查询参数**：`period`（同上）、`limit`（可选，默认 10，最大 50）
+
+**响应字段**：每项含 `rank`、`name`（销售姓名）、`order_count`、`total_sales`、`total_cost`、`gross_profit`。无 `order:view_cost` 权限时 `total_cost` 和 `gross_profit` 不返回。
+
+**数据范围**：无 `order:view_all` 权限时仅统计本人订单数据。
+
+**权限**：`report:sales`
+
 ---
 
 ## 审计日志
@@ -546,7 +607,7 @@ JSON 日志格式示例：
 
 **查询参数**：`page`, `page_size`, `action`, `resource_type`, `actor_id`, `start_date`, `end_date`, `keyword`
 
-**响应字段**：每条日志包含 `ip_address`、`user_agent`、`request_id`（请求元数据）。
+**响应字段**：每条日志包含 `ip_address`、`user_agent`、`request_id`（请求元数据）。敏感字段（password、phone、email 等）自动脱敏。
 
 **权限**：`audit:view`
 
