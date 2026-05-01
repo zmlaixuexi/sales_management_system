@@ -113,8 +113,8 @@ RBAC 模型和权限种子已建立，但缺少统一后端权限依赖、对象
 - 商品缺少派生销售字段（sales_quantity、sales_amount 等）
 - ~~响应体缺少 request_id 字段~~ → Round 255 已修复
 - 商品默认排序未按规范（缺 sales_quantity 排序）
-- 缺少 Windows PowerShell 备份/恢复脚本
-- 备份清理保留期与文档不符（30 天 vs 7 天+4 周）
+- ~~缺少 Windows PowerShell 备份/恢复脚本~~ → Round 256 已修复
+- ~~备份清理保留期与文档不符（30 天 vs 7 天+4 周）~~ → Round 256 已修复
 
 ### 影响范围
 

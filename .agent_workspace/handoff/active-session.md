@@ -2,13 +2,14 @@
 
 最后更新时间：2026-05-01
 当前阶段：需求符合性验证 + 功能补全
-当前任务编号：ROUND-255
-当前任务名称：需求缺口补全 — 响应体 request_id
+当前任务编号：ROUND-256
+当前任务名称：需求缺口补全 — 部署脚本
 当前 Agent：Claude
 任务状态：进行中
 
 ## 最近完成
 
+- Round 256：修复备份保留策略（30d→7d每日+4周每周）+ 新增 Windows PowerShell 备份/恢复脚本（backup.ps1 + restore.ps1）
 - Round 255：API 响应体添加 request_id 字段 — resp() 函数从 contextvars 提取 request_id 写入所有 API 响应，+2 测试，456/456 通过，make ci 全量通过
 - Round 254：新增订单操作日志查询 API — GET /sales-orders/{id}/logs，含数据范围控制和分页，+3 测试，454/454 通过，make ci 全量通过
 - Round 253：新增客户排行和销售人员排行报表 API — GET /reports/customer-ranking + GET /reports/salesperson-ranking，含数据范围过滤和利润可见性控制，+6 测试，451/451 通过，make ci 全量通过
@@ -179,7 +180,7 @@
 
 ## 下一步第一动作
 
-继续需求缺口补全。已完成报表 API + 订单日志 API + 响应体 request_id。待修复缺口：6 个前端页面、支付路径对齐、派生销售字段、商品排序规范、备份策略等。
+继续需求缺口补全。已完成报表 API + 订单日志 + request_id + 部署脚本。待修复缺口：6 个前端页面、支付路径对齐、派生销售字段、商品排序规范。
 
 ## 当前里程碑总结（Round 95-246）
 

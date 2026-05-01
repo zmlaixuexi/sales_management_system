@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-01（第二百五十六轮）
+
+### 部署：修复备份保留策略 + 新增 Windows PowerShell 脚本
+
+- backup.sh 保留策略从 30 天改为 7 天每日备份 + 4 周每周保留（符合开发文档第 19 节规范）
+- 新增 deploy/backup.ps1：Windows PowerShell 备份脚本
+- 新增 deploy/restore.ps1：Windows PowerShell 恢复脚本
+- 两脚本均支持 .env 配置读取和交互确认
+
 ## 2026-05-01（第二百五十五轮）
 
 ### 功能：API 响应体添加 request_id 字段
