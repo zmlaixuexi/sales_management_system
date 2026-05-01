@@ -2,6 +2,7 @@
 
 import os
 import uuid
+from datetime import UTC
 
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -12,7 +13,7 @@ from app.core.security import create_access_token, hash_password
 from app.db.session import Base
 from app.main import app
 from app.models.product import Product, ProductCategory
-from app.models.user import Permission, Role, RolePermission, User, UserRole
+from app.models.user import User
 
 TEST_DB_URL = "sqlite:///./test_inventory_crud.db"
 engine = create_engine(TEST_DB_URL, connect_args={"check_same_thread": False})
@@ -243,14 +244,14 @@ def test_13_adjust_deleted_product_404():
     """已删除商品不可调整库存"""
     db = TestSession()
     try:
-        from datetime import datetime, timezone
-        user = db.query(User).filter(User.username == "inv_tester").first()
+        from datetime import datetime
+        db.query(User).filter(User.username == "inv_tester").first()
         cat = db.query(ProductCategory).first()
         deleted_p = Product(
             id=uuid.uuid4(), name="已删除商品", sku="INV-DEL-001",
             sale_price=10, cost_price=5, stock_quantity=5,
             status="active", category_id=cat.id,
-            deleted_at=datetime.now(timezone.utc),
+            deleted_at=datetime.now(UTC),
         )
         db.add(deleted_p)
         db.commit()

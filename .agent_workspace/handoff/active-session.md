@@ -2,16 +2,16 @@
 
 最后更新时间：2026-05-02
 当前阶段：测试补强
-当前任务编号：ROUND-340
-当前任务名称：ESLint 修复（测试文件未使用变量/参数）
+当前任务编号：ROUND-341
+当前任务名称：后端 ruff/mypy lint 修复
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 340：修复 6 个测试文件中 20 个 ESLint 错误，全 CI 门禁通过
+- Round 341：修复后端测试文件 16 个 ruff 错误（未使用导入、未使用变量、歧义变量名）
+- Round 340：修复 6 个前端测试文件中 20 个 ESLint 错误
 - Round 339：OrderForm 页面组件测试（+8 frontend tests）+ 文档同步 721
-- Round 338：CustomerForm 页面组件测试（+8 frontend tests）+ 文档同步 713
 
 ## 最终验证状态
 
@@ -19,6 +19,8 @@
 |---|---|
 | 后端测试 | 517/517 |
 | 前端测试 | 204/204 |
+| ruff | 0 errors |
+| mypy | 0 errors |
 | ESLint | 0 errors |
 | TypeScript | 0 errors |
 | 构建 | ✓ |
@@ -26,9 +28,10 @@
 
 ## 下一步第一动作
 
-继续 keep-going 模式。剩余有价值方向：
+继续 keep-going 模式。全 CI 门禁通过。剩余有价值方向：
 - 后端测试补强
 - 安全：TLS/HTTPS（需用户决策）
+- 文档完善
 
 ## 阻塞问题
 

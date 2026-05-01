@@ -438,7 +438,6 @@ def test_28_export_orders_customer_filter():
 def test_29_export_requires_permission():
     """导出需要对应权限，无权限用户返回 403"""
     from app.core.security import create_access_token
-    from app.models.user import Permission, Role, RolePermission, UserRole
 
     db = TestSession()
     try:
@@ -497,13 +496,11 @@ def test_30_export_products_cost_hidden_without_permission():
 def test_31_export_orders_data_scope_filtered():
     """非 order:view_all 用户导出订单只包含本人数据"""
     from app.core.security import create_access_token
-    from app.models.customer import Customer
-    from app.models.order import SalesOrder
     from app.models.user import Permission, Role, RolePermission, UserRole
 
     db = TestSession()
     try:
-        admin = db.query(User).filter(User.username == "export_tester").first()
+        db.query(User).filter(User.username == "export_tester").first()
 
         # 创建只有 order:list 权限的用户
         perm = db.query(Permission).filter(Permission.code == "order:list").first()
@@ -533,5 +530,5 @@ def test_31_export_orders_data_scope_filtered():
     # scope_user 没有订单，应只有表头行
     lines = [line for line in resp.text.strip().split("\n") if line.strip()]
     # BOM 行 + header = 1 或 2 行（BOM 可能在 header 行内）
-    data_lines = [l for l in lines if "订单号" not in l]
+    data_lines = [ln for ln in lines if "订单号" not in ln]
     assert len(data_lines) == 0
