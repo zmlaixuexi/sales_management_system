@@ -6,6 +6,21 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-109
+
+### 前端 — 客户详情页面（ISSUE-003 缺失页面之一）
+
+- **文件**: `frontend/src/pages/CustomerDetail.tsx`, `frontend/src/routes/index.tsx`, `frontend/src/pages/Customers.tsx`, `frontend/src/__tests__/CustomerDetail.test.tsx`
+- **内容**:
+  - 新增 CustomerDetail 页面：客户基本信息（Descriptions 组件）+ 关联订单列表（Table 组件，使用 customer_id 筛选）
+  - 客户列表页名称列改为可点击链接（navigate to /customers/:id）
+  - 路由添加 `customers/:id` → CustomerDetail
+  - 详情页包含返回列表、编辑、删除操作
+  - 订单号可点击跳转到订单详情
+  - 新增 8 个组件测试
+- **验证**: 517+212=729 tests，tsc/ESLint/build 全通过
+- **关联**: Round 342, ISSUE-003
+
 ## 功能编号：FEAT-20260502-108
 
 ### 测试补强 — 前端页面组件全覆盖 + 后端边界路径补强

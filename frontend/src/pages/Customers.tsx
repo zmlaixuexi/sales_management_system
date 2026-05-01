@@ -64,7 +64,14 @@ export default function CustomersPage() {
   }
 
   const columns: ColumnsType<Customer> = [
-    { title: '客户名称', dataIndex: 'name', ellipsis: true },
+    {
+      title: '客户名称',
+      dataIndex: 'name',
+      ellipsis: true,
+      render: (name: string, record) => (
+        <a onClick={() => navigate(`/customers/${record.id}`)}>{name}</a>
+      ),
+    },
     { title: '联系人', dataIndex: 'contact_name', width: 100, render: (v: string | null) => v || '--' },
     { title: '电话', dataIndex: 'phone', width: 130, render: (v: string | null) => v || '--' },
     {
