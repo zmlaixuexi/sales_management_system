@@ -1,17 +1,17 @@
 # 当前工作现场
 
 最后更新时间：2026-05-02
-当前阶段：需求符合性验证
-当前任务编号：ROUND-320
-当前任务名称：需求符合性验证 — 错误码完整性修复
+当前阶段：代码质量提升
+当前任务编号：ROUND-321
+当前任务名称：前端错误拦截器修复
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 320：补全开发文档 8.4 节缺失的 4 个错误码（FILE_TOO_LARGE、FILE_NOT_BOUND、ORDER_EMPTY_ITEMS、SYSTEM_INTERNAL_ERROR）
+- Round 321：前端错误拦截器适配新 API 错误格式 {error: {code, message}}
+- Round 320：补全开发文档 8.4 节缺失的 4 个错误码
 - Round 319：分页格式验证 — 7 个列表端点全部返回 {items, page, page_size, total}
-- Round 318：金额序列化和时间格式 — 全链路 Decimal→str、ISO 8601 合规
 
 ## 最终验证状态
 
@@ -28,14 +28,11 @@
 | npm audit | 0 vulnerabilities |
 | 覆盖率 | 99.79%+ |
 
-## CI 质量门禁（10 项）
+## 已确认的就绪项
 
-ruff + mypy + alembic check + pytest + eslint + tsc + vitest + build + pip-audit + npm audit
-
-## 错误码合规状态
-
-开发文档 8.4 节 16 个错误码全部已在代码中使用。
-额外错误码（不在规范中但合理）：RATE_LIMIT_EXCEEDED、PRICE_BELOW_COST、IMPORT_FAILED、INVALID_PASSWORD。
+- ErrorBoundary：路由感知、自动重置、重试/返回首页
+- Axios timeout：15s 默认超时
+- 错误拦截器：已适配 {error: {code, message}} 格式 + 401 刷新 + 429 重试
 
 ## 下一步第一动作
 
@@ -43,7 +40,7 @@ ruff + mypy + alembic check + pytest + eslint + tsc + vitest + build + pip-audit
 - 安全：TLS/HTTPS（需用户决策证书方案）
 - 安全：token 撤销/refresh token rotation（需架构决策）
 - 测试补强：前端页面组件测试
-- 代码质量：前端 ErrorBoundary 覆盖、Axios 超时配置
+- 测试补强：为 client-interceptor 添加 error.message 提取测试
 - 代码质量：后端 pytest 覆盖率提升
 
 ## 阻塞问题

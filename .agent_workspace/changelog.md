@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-05-02（第三百二十一轮）
+
+### 修复：前端错误拦截器适配新 API 错误格式
+
+client.ts 错误拦截器仍引用旧格式 `error.response.data.detail.message`，与 Round 317 后端统一的 `{error: {code, message}}` 不匹配，导致前端无法正确展示后端错误消息。已修复为 `error.response.data.error.message`。同时确认 ErrorBoundary 和 Axios timeout（15s）已就位。
+
 ## 2026-05-02（第三百二十轮）
 
 ### 需求符合性：补全开发文档 8.4 节缺失的 4 个错误码
