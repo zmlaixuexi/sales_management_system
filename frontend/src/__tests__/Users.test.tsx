@@ -21,20 +21,25 @@ vi.mock('@/utils', () => ({
   getApiErrorMessage: (_e: any, fallback: string) => fallback,
 }))
 
+const _paginatedListReturn: any = {
+  data: [],
+  total: 0,
+  loading: false,
+  error: false,
+  page: 1,
+  pageSize: 20,
+  keyword: '',
+  setKeyword: vi.fn(),
+  onPageChange: vi.fn(),
+  refresh: vi.fn(),
+}
+
 vi.mock('@/hooks/usePaginatedList', () => ({
   usePaginatedList: (_fetchFn: any, _filters: any, _errorMsg: string) => {
     const result = _userMocks.fetchUsers()
-    return {
-      data: result?.data?.items ?? [],
-      total: result?.data?.total ?? 0,
-      loading: false,
-      page: 1,
-      pageSize: 20,
-      keyword: '',
-      setKeyword: vi.fn(),
-      onPageChange: vi.fn(),
-      refresh: vi.fn(),
-    }
+    _paginatedListReturn.data = result?.data?.items ?? []
+    _paginatedListReturn.total = result?.data?.total ?? 0
+    return _paginatedListReturn
   },
 }))
 
@@ -45,7 +50,8 @@ vi.mock('antd', () => {
     return <div data-testid="form-item" data-label={label}>{children}</div>
   }
   return {
-    Table: ({ dataSource, columns, rowKey, locale }: any) => (
+    Table: ({ dataSource, columns, rowKey, locale, loading }: any) => (
+      loading ? <span>加载中...</span> : (
       <div>
         <table data-testid="table">
           <tbody>
@@ -63,7 +69,7 @@ vi.mock('antd', () => {
           </tbody>
         </table>
       </div>
-    ),
+      )),
     Button: ({ children, onClick, type, icon }: any) => (
       <button data-testid="button" data-type={type} onClick={onClick}>{icon}{children}</button>
     ),
@@ -214,5 +220,49 @@ describe('UsersPage', () => {
     _userMocks.fetchUsers.mockReturnValue({ data: { items: [], total: 0 } })
     renderUsers()
     expect(screen.getByText('暂无用户数据')).toBeInTheDocument()
+  })
+
+  it('搜索框存在并可输入', () => {
+    renderUsers()
+    const input = screen.getByPlaceholderText('搜索用户名')
+    expect(input).toBeInTheDocument()
+  })
+
+  it('加载中显示加载提示', () => {
+    Object.assign(_paginatedListReturn, { data: [], total: 0, loading: true, error: false })
+    renderUsers()
+    expect(screen.getByText('加载中...')).toBeInTheDocument()
+    Object.assign(_paginatedListReturn, { loading: false, error: false })
+  })
+
+  it('错误状态显示重试链接', () => {
+    _paginatedListReturn.data = []
+    _paginatedListReturn.total = 0
+    _paginatedListReturn.loading = false
+    _paginatedListReturn.error = true
+    _userMocks.fetchUsers.mockReturnValue({ data: { items: [], total: 0 } })
+    renderUsers()
+    expect(screen.getByText('重试')).toBeInTheDocument()
+    _paginatedListReturn.error = false
+  })
+
+  it('点击编辑按钮打开编辑弹窗', async () => {
+    renderUsers()
+    const editButtons = screen.getAllByText('编辑')
+    editButtons[0].click()
+    await waitFor(() => {
+      expect(screen.getByTestId('modal')).toBeInTheDocument()
+      expect(screen.getByTestId('modal').getAttribute('data-title')).toBe('编辑用户')
+    })
+  })
+
+  it('切换用户启用状态调用 updateUser', async () => {
+    _userMocks.updateUser.mockResolvedValue({ success: true })
+    renderUsers()
+    const switches = screen.getAllByTestId('switch')
+    switches[0].click()
+    await waitFor(() => {
+      expect(_userMocks.updateUser).toHaveBeenCalled()
+    })
   })
 })
