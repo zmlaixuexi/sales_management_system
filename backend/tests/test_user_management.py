@@ -239,3 +239,43 @@ def test_12_update_user_invalid_role_ids():
     }, headers=_auth())
     assert resp.status_code == 400
     assert "角色不存在" in resp.json()["error"]["message"]
+
+
+def test_13_list_users_pagination():
+    """用户列表分页"""
+    resp = client.get("/api/v1/users?page=1&page_size=1", headers=_auth())
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert len(data["items"]) <= 1
+    assert data["page"] == 1
+    assert data["page_size"] == 1
+    assert data["total"] >= 2
+
+
+def test_14_list_users_requires_auth():
+    """用户列表需要认证"""
+    resp = client.get("/api/v1/users")
+    assert resp.status_code == 401
+
+
+def test_15_create_user_weak_password_422():
+    """创建用户弱密码被拒绝"""
+    resp = client.post("/api/v1/users", json={
+        "username": "weakpwuser",
+        "password": "123456",
+        "display_name": "弱密码用户",
+    }, headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_16_create_user_invalid_role_ids_400():
+    """创建用户时传入不存在的角色 ID 返回 400"""
+    fake_role_id = str(uuid.uuid4())
+    resp = client.post("/api/v1/users", json={
+        "username": "badroleuser",
+        "password": "password123",
+        "display_name": "无效角色用户",
+        "role_ids": [fake_role_id],
+    }, headers=_auth())
+    assert resp.status_code == 400
+    assert "角色不存在" in resp.json()["error"]["message"]
