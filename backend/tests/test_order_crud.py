@@ -490,6 +490,27 @@ class TestOrderFilterAndEdge:
         assert resp.status_code == 200
         assert resp.json()["data"]["order_no"] == f"{prefix}0001"
 
+    def test_28_create_order_price_below_cost_400(self):
+        """成交单价低于成本价阻止下单"""
+        # 创建新商品（_product_id 可能已被之前的测试删除）
+        db = TestSession()
+        prod = Product(
+            id=uuid.uuid4(), sku="ORD-BELOW-COST",
+            name="低于成本测试商品", sale_price=100, cost_price=60,
+            stock_quantity=10, status="active",
+        )
+        db.add(prod)
+        db.commit()
+        pid = str(prod.id)
+        db.close()
+
+        resp = client.post("/api/v1/sales-orders", json={
+            "customer_id": _customer_id,
+            "items": [{"product_id": pid, "quantity": 1, "unit_price": "30"}],
+        }, headers=_auth())
+        assert resp.status_code == 400
+        assert resp.json()["error"]["code"] == "PRICE_BELOW_COST"
+
 
 class TestOrderAuthBoundary:
     """订单认证边界测试"""
