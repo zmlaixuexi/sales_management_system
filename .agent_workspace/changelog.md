@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第三百七十五轮）
+
+### 功能补全：用户管理 API 审计日志（+2 tests）
+
+- `backend/app/api/v1/users.py`：create_user / update_user 新增 `request: Request` 参数和 `log_user_action()` 调用
+  - user_create：记录新建用户 username、display_name
+  - user_update：记录编辑后 username、display_name、is_active
+- `backend/tests/test_user_management.py`：新增 test_22（创建用户审计日志）、test_23（编辑用户审计日志）
+- 后端 596→598 tests，总计 854→856
+
 ## 2026-05-02（第三百七十四轮）
 
 ### 验收：客户归属变更审计日志测试

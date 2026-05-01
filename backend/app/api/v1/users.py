@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db, paginate, parse_uuid_or_400, resp
@@ -6,6 +6,7 @@ from app.core.sanitize import escape_like
 from app.core.security import hash_password
 from app.models.user import Role, User, UserRole
 from app.schemas.auth import RoleBrief, UserCreate, UserUpdate
+from app.services.audit_service import log_user_action
 
 router = APIRouter(
     prefix="/users", tags=["用户管理"],
@@ -67,7 +68,10 @@ def list_users(
 
 
 @router.post("")
-def create_user(req: UserCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def create_user(
+    req: UserCreate, request: Request,
+    db: Session = Depends(get_db), current_user: User = Depends(get_current_user),
+):
     """新增用户"""
     if not current_user.is_superuser:
         raise HTTPException(
@@ -100,6 +104,13 @@ def create_user(req: UserCreate, db: Session = Depends(get_db), current_user: Us
     db.commit()
     db.refresh(user)
 
+    log_user_action(
+        db, request, current_user,
+        action="user_create", resource_type="user", resource_id=str(user.id),
+        after_data={"username": user.username, "display_name": user.display_name},
+    )
+    db.commit()
+
     return resp({"id": str(user.id), "username": user.username}, "创建成功")
 
 
@@ -107,6 +118,7 @@ def create_user(req: UserCreate, db: Session = Depends(get_db), current_user: Us
 def update_user(
     user_id: str,
     req: UserUpdate,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -145,6 +157,16 @@ def update_user(
         for rid in parsed_role_ids:
             db.add(UserRole(user_id=user.id, role_id=rid))
 
+    db.commit()
+
+    after = {"username": user.username, "display_name": user.display_name}
+    if req.is_active is not None:
+        after["is_active"] = req.is_active
+    log_user_action(
+        db, request, current_user,
+        action="user_update", resource_type="user", resource_id=str(user.id),
+        after_data=after,
+    )
     db.commit()
 
     return resp(message="更新成功")

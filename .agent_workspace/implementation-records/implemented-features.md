@@ -6,6 +6,18 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-131
+
+### 功能补全 — 用户管理 API 审计日志
+
+- **文件**: `backend/app/api/v1/users.py`, `backend/tests/test_user_management.py`
+- **内容**:
+  - create_user 新增 request: Request 参数和 log_user_action(action=”user_create”)
+  - update_user 新增 request: Request 参数和 log_user_action(action=”user_update”)
+  - 测试 test_22（创建用户审计日志）、test_23（编辑用户审计日志）
+- **验证**: 598 后端测试全通过，ruff/ESLint/TypeScript 全通过
+- **关联**: Round 375
+
 ## 功能编号：FEAT-20260502-130
 
 ### 测试 — 报表和导出 API 异常路径补强

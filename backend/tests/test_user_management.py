@@ -341,3 +341,41 @@ def test_21_list_users_non_admin_forbidden():
 
     resp = client.get("/api/v1/users", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 403
+
+
+def test_22_create_user_audit_log():
+    """创建用户产生审计日志"""
+    resp = client.post("/api/v1/users", json={
+        "username": "audit_target",
+        "password": "password123",
+        "display_name": "审计目标用户",
+    }, headers=_auth())
+    assert resp.status_code == 200
+    uid = resp.json()["data"]["id"]
+
+    resp = client.get("/api/v1/audit-logs?action=user_create", headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    log = items[0]
+    assert log["resource_type"] == "user"
+    assert log["resource_id"] == uid
+    assert log["after_data"]["username"] == "audit_target"
+
+
+def test_23_update_user_audit_log():
+    """编辑用户产生审计日志"""
+    user_id = resp_id_from_list("audit_target")
+    resp = client.put(f"/api/v1/users/{user_id}", json={
+        "display_name": "审计后改名",
+        "is_active": False,
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=user_update", headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    log = items[0]
+    assert log["resource_type"] == "user"
+    assert log["after_data"]["display_name"] == "审计后改名"
