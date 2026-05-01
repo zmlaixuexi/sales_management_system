@@ -1,5 +1,59 @@
 # Changelog
 
+## 2026-05-02（第三百四十一轮）
+
+### 工程：修复后端测试文件 16 个 ruff 错误
+
+未使用导入（Permission/Role/RolePermission/UserRole/Customer/SalesOrder）、未使用变量（admin/user）、歧义变量名（l→ln）。ruff 0 errors、mypy 0 errors。
+
+## 2026-05-02（第三百四十轮）
+
+### 工程：修复 6 个前端测试文件中 20 个 ESLint 未使用变量/参数错误
+
+涉及 AuditLogs/OrderDetail/OrderForm/ProductForm/Products/CustomerForm 测试文件。全 CI 门禁通过：ESLint 0、tsc 0、517+204=721 tests。
+
+## 2026-05-02（第三百三十九轮）
+
+### 测试：添加 OrderForm 页面组件测试（+8 tests）+ 文档同步 721
+
+前端页面组件测试全部完成（Dashboard/Products/Customers/Orders/AuditLogs/OrderDetail/ProductForm/CustomerForm/OrderForm）。前端 196→204，总计 517+204=721。
+
+## 2026-05-02（第三百三十八轮）
+
+### 测试：添加 CustomerForm 页面组件测试（+8 tests）+ 文档同步 713
+
+前端 188→196，总计 517+196=713。
+
+## 2026-05-02（第三百三十七轮）
+
+### 测试：添加 ProductForm 页面组件测试（+8 tests）+ 文档同步 705
+
+前端 180→188，总计 517+188=705。
+
+## 2026-05-02（第三百三十六轮）
+
+### 测试：添加 OrderDetail 页面组件测试（+8 tests）+ 文档同步 697
+
+前端 172→180，总计 517+180=697。
+
+## 2026-05-02（第三百三十五轮）
+
+### 测试：添加 AuditLogs 页面组件测试（+8 tests）+ 文档同步 689
+
+前端 164→172，总计 517+172=689。
+
+## 2026-05-02（第三百三十四轮）
+
+### 测试：添加 Orders 页面组件测试（+8 tests）+ 文档同步 681
+
+前端 156→164，总计 517+164=681。
+
+## 2026-05-02（第三百三十三轮）
+
+### 测试：添加 Customers 页面组件测试（+8 tests）+ 文档同步 673
+
+前端 148→156，总计 517+156=673。
+
 ## 2026-05-02（第三百三十二轮）
 
 ### 测试：添加 Products 页面组件测试 + 文档同步 665 tests

@@ -6,6 +6,19 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-108
+
+### 测试补强 — 前端页面组件全覆盖 + 后端边界路径补强
+
+- **文件**: `frontend/src/__tests__/Dashboard.test.tsx`, `Products.test.tsx`, `Customers.test.tsx`, `Orders.test.tsx`, `AuditLogs.test.tsx`, `OrderDetail.test.tsx`, `ProductForm.test.tsx`, `CustomerForm.test.tsx`, `OrderForm.test.tsx`, `backend/tests/test_inventory_crud.py`, `test_user_management.py`
+- **内容**:
+  - 前端 9 个页面组件新增测试（各 +8 tests）：Dashboard、Products、Customers、Orders、AuditLogs、OrderDetail、ProductForm、CustomerForm、OrderForm
+  - 后端库存边界测试 +5（权限 403、已删除商品 404、分页、类型筛选）
+  - 后端用户管理边界测试 +4（分页、未认证 401、弱密码 422、无效角色 ID 400）
+  - 修复 6 个前端测试文件 20 个 ESLint 错误、2 个后端测试文件 16 个 ruff 错误
+- **验证**: 721 tests（517 backend + 204 frontend），全 CI 门禁通过（ruff/mypy/ESLint/tsc/build）
+- **关联**: Rounds 330–341
+
 ## 功能编号：FEAT-20260502-107
 
 ### 需求符合性 — 错误码完整性修复 + 前端错误拦截器适配
