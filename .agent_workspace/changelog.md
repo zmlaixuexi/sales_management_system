@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百六十九轮）
+
+### 重构：CSV 导入文件校验去重
+
+- 新增 services/csv_import.py，提取 validate_csv_upload 共享函数
+- products.py 和 customers.py 的 CSV 导入改为调用共享函数
+- 净减 10 行重复代码（55→45），465/465 通过，ruff 0
+
 ## 2026-05-02（第二百六十八轮）
 
 ### 重构：收款登记逻辑去重

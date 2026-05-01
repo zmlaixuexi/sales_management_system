@@ -2,16 +2,16 @@
 
 最后更新时间：2026-05-02
 当前阶段：需求符合性验证 + 代码质量
-当前任务编号：ROUND-268
-当前任务名称：重构 — 收款登记逻辑去重
+当前任务编号：ROUND-269
+当前任务名称：重构 — CSV 导入文件校验去重
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 268：重构 — 提取 register_payment 共享函数，消除 payments.py + orders.py 重复，净减 89 行，465/465 通过
+- Round 269：重构 — 提取 validate_csv_upload 共享函数，消除 products.py + customers.py CSV 导入校验重复，465/465 通过
+- Round 268：重构 — 提取 register_payment 共享函数，消除 payments.py + orders.py 重复，465/465 通过
 - Round 267：文档 — 测试数同步 testing.md 和 README 至 465+125=590，覆盖率 99.78%，make ci 全量通过
-- Round 266：安全 — 报表 period 参数严格校验，无效值返回 400 替代静默回退，+4 测试，465/465 通过
 - Round 265：前端 — 添加客户排行和销售人员排行 API 函数（fetchCustomerRanking/fetchSalespersonRanking）+ 类型定义 + 测试，125/125 通过
 - Round 264：代码质量 — 序号生成函数统一为 deps.generate_sequential_code，消除 orders/products 重复
 - Round 262：安全加固 — 修复 3 个安全审查 MEDIUM 问题（payment_method 枚举 + PRODUCT_IN_USE 软删除 + 审计日志敏感字段），+3 测试，461/461 通过，覆盖率 99.78%
@@ -190,7 +190,7 @@
 
 ## 下一步第一动作
 
-继续 keep-going 模式。剩余代码质量改进：支付创建逻辑去重（payments.py + orders.py）、CSV 导入样板代码提取。可继续方向：测试补强、异常路径、安全加固、可观测性。
+继续 keep-going 模式。代码质量改进已完成：支付创建逻辑去重 + CSV 导入样板提取。可继续方向：测试补强、异常路径、安全加固、可观测性、部署体验。
 
 ## 当前里程碑总结（Round 95-246）
 
