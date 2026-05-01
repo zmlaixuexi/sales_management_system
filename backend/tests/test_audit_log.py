@@ -272,3 +272,42 @@ def test_11_audit_log_filter_by_date_range():
     resp = client.get("/api/v1/audit-logs?start_date=2020-01-01&end_date=2099-12-31", headers=_auth())
     assert resp.status_code == 200
     assert resp.json()["data"]["total"] > 0
+
+
+# ── 异常路径测试 ──────────────────────────────────────────
+
+
+def test_12_audit_log_list_requires_auth():
+    """审计日志列表未认证返回 401"""
+    resp = client.get("/api/v1/audit-logs")
+    assert resp.status_code == 401
+
+
+def test_13_audit_actions_requires_auth():
+    """操作类型列表未认证返回 401"""
+    resp = client.get("/api/v1/audit-logs/actions")
+    assert resp.status_code == 401
+
+
+def test_14_audit_log_invalid_actor_id_422():
+    """无效 actor_id 格式返回 422"""
+    resp = client.get("/api/v1/audit-logs?actor_id=not-a-uuid", headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_15_audit_log_page_size_zero_422():
+    """page_size=0 返回 422"""
+    resp = client.get("/api/v1/audit-logs?page_size=0", headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_16_audit_log_page_size_over_max_422():
+    """page_size=101 超出上限返回 422"""
+    resp = client.get("/api/v1/audit-logs?page_size=101", headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_17_audit_log_page_zero_422():
+    """page=0 返回 422"""
+    resp = client.get("/api/v1/audit-logs?page=0", headers=_auth())
+    assert resp.status_code == 422
