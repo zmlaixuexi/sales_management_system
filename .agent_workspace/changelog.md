@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-02（第三百三十轮）
+
+### 文档：同步 testing.md 至 649 tests
+
+更新概览表 517+132=649、测试标记计数（boundary 103/security 54/import 42/report 56/integration 44/infra 23）、test_inventory_crud.py 15 测试、test_user_management.py 16 测试。
+
+## 2026-05-02（第三百二十九轮）
+
+### 测试：补强用户管理边界路径覆盖
+
++4 用户管理边界测试：列表分页参数、未认证 401、弱密码创建 422、无效角色 ID 创建 400。后端 513→517，总计 517+132=649 tests。
+
 ## 2026-05-02（第三百二十八轮）
 
 ### 文档：同步 implemented-features.md 至 Round 327
