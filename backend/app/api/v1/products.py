@@ -559,7 +559,7 @@ async def import_products_csv(
     sku_prefix = f"SPU-{today}-"
     last_product = (
         db.query(Product)
-        .filter(Product.sku.like(f"{sku_prefix}%"))
+        .filter(Product.sku.like(f"{sku_prefix}%"), Product.deleted_at.is_(None))
         .order_by(Product.sku.desc())
         .first()
     )

@@ -226,6 +226,7 @@ def customer_ranking(
         .join(Customer, SalesOrder.customer_id == Customer.id)
     )
     query, _, _ = _order_period_filter(query, period)
+    query = query.filter(Customer.deleted_at.is_(None))
     query = _apply_data_scope(query, current_user)
 
     rows = (
