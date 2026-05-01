@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第三百六十一轮）
+
+### 修复：getApiErrorMessage 支持 error.message 新格式
+
+- `frontend/src/utils/index.ts`：`getApiErrorMessage` 增加 `error.message` 提取路径，优先于旧 `detail.message`
+- `frontend/src/__tests__/utils.test.ts`：新增 2 个测试（新格式提取、新格式优先于旧格式），原 3 个测试重构为 5 个
+- 后端已统一使用 `{error: {code, message}}` 格式，前端拦截器已适配，但 `getApiErrorMessage` 作为 useSubmit 的兜底仍需正确提取
+- 总测试：558 后端 + 258 前端 = 816
+
 ## 2026-05-02（第三百六十轮）
 
 ### 安全审计：SQL 注入和 XSS 防护一致性检查

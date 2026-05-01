@@ -6,6 +6,18 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-126
+
+### 修复 — getApiErrorMessage 支持 error.message 新格式
+
+- **文件**: `frontend/src/utils/index.ts`, `frontend/src/__tests__/utils.test.ts`
+- **内容**:
+  - `getApiErrorMessage` 增加 `error.message` 提取路径（后端统一格式 `{error: {code, message}}`）
+  - `error.message` 优先于旧 `detail.message`，保证兜底错误提取与后端格式一致
+  - 新增 2 个测试（新格式提取、新旧格式优先级），原 3 个重构为 5 个
+- **验证**: 258 前端测试全通过，make ci 全量通过
+- **关联**: Round 361
+
 ## 功能编号：FEAT-20260502-125
 
 ### 前端 — 列表页加载失败显示重试按钮
