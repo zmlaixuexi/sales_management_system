@@ -129,4 +129,18 @@ describe('usePaginatedList', () => {
     expect(result.current.data).toEqual([])
     expect(result.current.total).toBe(0)
   })
+
+  it('拦截器已展示 toast 时不重复提示', async () => {
+    const error = Object.assign(new Error('已提示'), { _toastDisplayed: true })
+    mockFetch.mockRejectedValueOnce(error)
+
+    const { result } = renderHook(() =>
+      usePaginatedList(mockFetch, {}, '兜底错误'),
+    )
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    expect(message.error).not.toHaveBeenCalled()
+    expect(result.current.data).toEqual([])
+  })
 })

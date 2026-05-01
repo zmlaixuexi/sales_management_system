@@ -69,4 +69,14 @@ describe('useSubmit', () => {
 
     expect(onSubmit).toHaveBeenCalledTimes(1)
   })
+
+  it('拦截器已展示 toast 时不重复提示', async () => {
+    const error = Object.assign(new Error('已提示'), { _toastDisplayed: true })
+    const onSubmit = vi.fn().mockRejectedValue(error)
+    const { result } = renderHook(() => useSubmit(onSubmit, '兜底'))
+
+    await act(async () => { await result.current.handleSubmit('values') })
+
+    expect(message.error).not.toHaveBeenCalled()
+  })
 })
