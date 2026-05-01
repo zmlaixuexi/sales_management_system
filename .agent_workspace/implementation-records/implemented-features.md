@@ -6,6 +6,18 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-98
+
+### 前端 — 修复双重错误 toast（拦截器 _toastDisplayed 标记）
+
+- **文件**: `frontend/src/api/client.ts`, `frontend/src/hooks/useSubmit.ts`, `frontend/src/hooks/usePaginatedList.ts`
+- **内容**:
+  - client.ts: 拦截器展示 toast 后设置 `error._toastDisplayed = true`
+  - useSubmit.ts: catch 中检查标记，已展示则跳过 message.error
+  - usePaginatedList.ts: catch 中检查标记，已展示则跳过 message.error
+  - 消除全局拦截器 + 页面层 hook 的重复错误提示
+- **测试**: +2（_toastDisplayed 设置验证），127/127 通过
+
 ## 功能编号：FEAT-20260502-97
 
 ### 测试补强 — CSV 导入 commit 失败 + 用户更新无效角色（+3）

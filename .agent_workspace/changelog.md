@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第二百九十八轮）
+
+### 前端：修复双重错误 toast — 拦截器标记 _toastDisplayed 避免重复提示
+
+- client.ts: 拦截器展示 toast 后设置 error._toastDisplayed 标记
+- useSubmit.ts: 检查标记跳过重复提示
+- usePaginatedList.ts: 检查标记跳过重复提示
+- 新增 2 个拦截器测试（_toastDisplayed 设置/401 不设置）
+- 前端测试 125 → 127，127/127 通过
+
 ## 2026-05-02（第二百九十七轮）
 
 ### 测试补强：CSV 导入 commit 失败 + 用户更新无效角色（+3）
