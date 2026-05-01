@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百零四轮）
+
+### 前端：修复 auditLogs 重构遗留（未使用导入 + any 类型）
+
+- auditLogs.ts: 移除未使用的 ApiResponse 导入
+- auditLogs-api.test.ts: 消除 `as any` 类型转换
+- ESLint 零警告，127/127 通过
+
 ## 2026-05-02（第三百零三轮）
 
 ### 前端：auditLogs API 统一使用 request.ts 包装器
