@@ -6,6 +6,17 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-95
+
+### 安全 — CSV 导入行数上限保护
+
+- **文件**: `backend/app/core/config.py`, `backend/app/api/v1/products.py`, `backend/app/api/v1/customers.py`
+- **内容**:
+  - config.py 新增 MAX_CSV_IMPORT_ROWS = 1000 可配置项
+  - 商品/客户导入 for 循环添加行数检查，超出时 break 并返回错误
+  - 防止恶意或意外的超大批量导入消耗服务器资源
+- **验证**: 474/474 通过，ruff 0
+
 ## 功能编号：FEAT-20260502-94
 
 ### 安全 — CSV 导入 XSS 消毒 + commit 回滚保护
