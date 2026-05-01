@@ -7,6 +7,26 @@ const _paymentMocks = {
   fetchPayments: vi.fn(),
 }
 
+const _paginatedListReturn: any = {
+  data: [],
+  total: 0,
+  loading: false,
+  error: false,
+  page: 1,
+  pageSize: 20,
+  onPageChange: vi.fn(),
+  refresh: vi.fn(),
+}
+
+vi.mock('@/hooks/usePaginatedList', () => ({
+  usePaginatedList: (_fetchFn: any, _filters: any, _errorMsg: string) => {
+    const result = _paymentMocks.fetchPayments()
+    _paginatedListReturn.data = result?.data?.items ?? []
+    _paginatedListReturn.total = result?.data?.total ?? 0
+    return _paginatedListReturn
+  },
+}))
+
 vi.mock('@/api/payments', () => ({
   fetchPayments: (...args: any[]) => _paymentMocks.fetchPayments(...args),
 }))
@@ -15,23 +35,10 @@ vi.mock('@/utils', () => ({
   formatAmount: (v: any) => String(v),
 }))
 
-vi.mock('@/hooks/usePaginatedList', () => ({
-  usePaginatedList: (_fetchFn: any, _filters: any, _errorMsg: string) => {
-    const result = _paymentMocks.fetchPayments()
-    return {
-      data: result?.data?.items ?? [],
-      total: result?.data?.total ?? 0,
-      loading: false,
-      page: 1,
-      pageSize: 20,
-      onPageChange: vi.fn(),
-    }
-  },
-}))
-
 vi.mock('antd', () => ({
-  Table: ({ dataSource, columns, rowKey, locale }: any) => (
+  Table: ({ dataSource, columns, rowKey, locale, loading }: any) => (
     <div>
+      {loading ? <span>加载中...</span> : (
       <table data-testid="table">
         <tbody>
           {dataSource?.map((row: any) => (
@@ -45,7 +52,8 @@ vi.mock('antd', () => ({
           ))}
         </tbody>
       </table>
-      {(!dataSource || dataSource.length === 0) && locale?.emptyText && <span>{locale.emptyText}</span>}
+      )}
+      {(!dataSource || dataSource.length === 0) && !loading && locale?.emptyText && <span>{locale.emptyText}</span>}
     </div>
   ),
   Button: ({ children, onClick, type }: any) => (
@@ -150,5 +158,35 @@ describe('PaymentsPage', () => {
     _paymentMocks.fetchPayments.mockReturnValue({ data: { items: [], total: 0 } })
     renderPayments()
     expect(screen.getByText('暂无收款记录')).toBeInTheDocument()
+  })
+
+  it('加载中显示加载提示', () => {
+    _paginatedListReturn.loading = true
+    _paginatedListReturn.data = []
+    _paymentMocks.fetchPayments.mockReturnValue({ data: { items: [], total: 0 } })
+    renderPayments()
+    expect(screen.getByText('加载中...')).toBeInTheDocument()
+    _paginatedListReturn.loading = false
+  })
+
+  it('错误状态显示重试链接', () => {
+    _paginatedListReturn.loading = false
+    _paginatedListReturn.error = true
+    _paginatedListReturn.data = []
+    _paymentMocks.fetchPayments.mockReturnValue({ data: { items: [], total: 0 } })
+    renderPayments()
+    expect(screen.getByText('重试')).toBeInTheDocument()
+    _paginatedListReturn.error = false
+  })
+
+  it('收款 ID 截断显示前 8 位', () => {
+    renderPayments()
+    expect(screen.getByText('pay-001-')).toBeInTheDocument()
+  })
+
+  it('空备注显示为 --', () => {
+    renderPayments()
+    const row = screen.getByTestId('row-pay-002-mnopqr')
+    expect(row.textContent).toContain('--')
   })
 })
