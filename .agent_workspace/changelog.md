@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第一百五十五轮·自动循环）
+
+### 可观测：健康检查端点添加数据库连接池状态（+1 test，609→610）
+
+- `backend/app/api/v1/health.py`：`/health` 返回连接池 size/checked_in/checked_out/overflow
+- `backend/tests/test_health.py`：新增 test_health_check_pool_info 验证连接池信息
+- 后端 609→610 tests
+
 ## 2026-05-02（第一百五十四轮·自动循环）
 
 ### 代码质量：全量扫描零问题
