@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百零六轮）
+
+### 测试补强：useSubmit/usePaginatedList _toastDisplayed 跳过逻辑（+2）
+
+- useSubmit: 新增测试 — 拦截器已展示 toast 时不重复提示
+- usePaginatedList: 新增测试 — 拦截器已展示 toast 时不重复提示
+- 前端 127 → 129，129/129 通过
+
 ## 2026-05-02（第三百零五轮）
 
 ### 部署：Docker Compose 补齐 MAX_CSV_IMPORT_ROWS 环境变量 + 文档同步
