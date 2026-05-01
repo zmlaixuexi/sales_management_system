@@ -1,5 +1,8 @@
 .PHONY: help dev dev-backend dev-frontend install test test-unit test-integration test-backend test-frontend coverage coverage-frontend lint lint-backend lint-frontend typecheck typecheck-backend quality ci build build-frontend db-migrate db-check db-seed db-backup db-restore docker-up docker-down clean
 
+# 后端 Python：优先使用 venv，回退到系统 python
+PYTHON ?= $(shell [ -f backend/.venv/bin/python ] && echo ".venv/bin/python" || echo "python")
+
 help: ## 显示帮助信息
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
@@ -23,7 +26,7 @@ install: ## 安装前后端依赖
 # ─── 测试 ─────────────────────────────────────────────────
 
 test-backend: ## 运行后端测试
-	cd backend && python -m pytest tests/ -v
+	cd backend && $(PYTHON) -m pytest tests/ -v
 
 test-frontend: ## 运行前端测试
 	cd frontend && npx vitest run
@@ -31,13 +34,13 @@ test-frontend: ## 运行前端测试
 test: test-backend test-frontend ## 运行全部测试
 
 test-unit: ## 快速运行非集成测试（排除 integration 标记）
-	cd backend && python -m pytest tests/ -v -m "not integration"
+	cd backend && $(PYTHON) -m pytest tests/ -v -m "not integration"
 
 test-integration: ## 仅运行集成测试
-	cd backend && python -m pytest tests/ -v -m integration
+	cd backend && $(PYTHON) -m pytest tests/ -v -m integration
 
 coverage: ## 后端测试覆盖率报告
-	cd backend && python -m pytest tests/ --cov --cov-report=term-missing -q
+	cd backend && $(PYTHON) -m pytest tests/ --cov --cov-report=term-missing -q
 
 coverage-frontend: ## 前端测试覆盖率报告
 	cd frontend && npx vitest run --coverage
@@ -55,7 +58,7 @@ lint: lint-backend lint-frontend ## 全部 lint 检查
 typecheck: typecheck-backend typecheck-frontend ## 全部类型检查（mypy + tsc）
 
 typecheck-backend: ## 后端 mypy 静态类型检查
-	cd backend && python -m mypy app/
+	cd backend && $(PYTHON) -m mypy app/
 
 typecheck-frontend: ## 前端 TypeScript 类型检查
 	cd frontend && npx tsc --noEmit
@@ -80,7 +83,7 @@ db-check: ## 检查模型与迁移是否同步
 	cd backend && alembic upgrade head && alembic check
 
 db-seed: ## 初始化种子数据
-	cd backend && python -m app.db.seed
+	cd backend && $(PYTHON) -m app.db.seed
 
 db-backup: ## 备份数据库（PostgreSQL）
 	bash deploy/backup.sh
