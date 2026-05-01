@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, paginate, parse_uuid_or_400, require_permission, resp
+from app.api.deps import get_db, paginate, paginated_resp, parse_uuid_or_400, require_permission, resp
 from app.models.order import InventoryMovement
 from app.models.product import Product
 from app.models.user import User
@@ -44,8 +44,8 @@ def list_movements(
     query = query.order_by(InventoryMovement.created_at.desc())
     items, total = paginate(query, page, page_size)
 
-    return resp({
-        "items": [
+    return paginated_resp(
+        [
             {
                 "id": str(m.id),
                 "product_id": str(m.product_id),
@@ -60,10 +60,10 @@ def list_movements(
             }
             for m in items
         ],
-        "page": page,
-        "page_size": page_size,
-        "total": total,
-    })
+        page,
+        page_size,
+        total,
+    )
 
 
 @router.post("/adjustments", response_model=ApiResponse[InventoryAdjusted])

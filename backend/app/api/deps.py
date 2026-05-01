@@ -162,3 +162,8 @@ def paginate(query, page: int, page_size: int):
     total = query.count()
     items = query.offset((page - 1) * page_size).limit(page_size).all()
     return items, total
+
+
+def paginated_resp(items: list, page: int, page_size: int, total: int, message: str = "查询成功") -> dict:
+    """构建标准分页响应。"""
+    return resp(data={"items": items, "page": page, "page_size": page_size, "total": total}, message=message)

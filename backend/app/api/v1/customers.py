@@ -12,6 +12,7 @@ from app.api.deps import (
     get_or_404,
     has_permission,
     paginate,
+    paginated_resp,
     parse_uuid_or_400,
     require_permission,
     resp,
@@ -104,15 +105,7 @@ def list_customers(
         "updated_at": c.updated_at.isoformat() if c.updated_at else None,
     } for c in items]
 
-    return resp(
-        data={
-            "items": result_items,
-            "page": page,
-            "page_size": page_size,
-            "total": total,
-        },
-        message="查询成功",
-    )
+    return paginated_resp(result_items, page, page_size, total)
 
 
 @router.post("", response_model=ApiResponse[CustomerBrief])

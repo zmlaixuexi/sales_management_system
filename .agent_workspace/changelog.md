@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第三百八十一轮）
+
+### 工程：提取 paginated_resp 辅助函数，消除 7 处分页响应重复
+
+- `backend/app/api/deps.py`：新增 `paginated_resp(items, page, page_size, total, message)` 辅助函数
+- `backend/app/api/v1/` 下 7 个列表端点（products、customers、orders×2、payments、inventory、audit_logs、users）统一使用 `paginated_resp` 替代手动构造 `{"items":..., "page":..., "page_size":..., "total":...}`
+
 ## 2026-05-02（第三百八十轮）
 
 ### 测试补强：前端列表页错误状态测试（+4 tests）

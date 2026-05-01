@@ -6,7 +6,15 @@ from decimal import Decimal
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
-from app.api.deps import check_owner_or_forbid, get_db, has_permission, paginate, require_permission, resp
+from app.api.deps import (
+    check_owner_or_forbid,
+    get_db,
+    has_permission,
+    paginate,
+    paginated_resp,
+    require_permission,
+    resp,
+)
 from app.models.order import Payment, SalesOrder
 from app.models.user import User
 from app.schemas.payment import PaymentCreate, PaymentCreated, PaymentReversed
@@ -51,26 +59,23 @@ def list_payments(
 
     items, total = paginate(query, page, page_size)
 
-    return resp(
-        data={
-            "items": [
-                {
-                    "id": str(p.id),
-                    "order_id": str(p.order_id),
-                    "amount": str(p.amount),
-                    "payment_method": p.payment_method,
-                    "status": p.status,
-                    "remark": p.remark,
-                    "paid_at": p.paid_at.isoformat() if p.paid_at else None,
-                    "created_at": p.created_at.isoformat() if p.created_at else None,
-                }
-                for p in items
-            ],
-            "page": page,
-            "page_size": page_size,
-            "total": total,
-        },
-        message="查询成功",
+    return paginated_resp(
+        [
+            {
+                "id": str(p.id),
+                "order_id": str(p.order_id),
+                "amount": str(p.amount),
+                "payment_method": p.payment_method,
+                "status": p.status,
+                "remark": p.remark,
+                "paid_at": p.paid_at.isoformat() if p.paid_at else None,
+                "created_at": p.created_at.isoformat() if p.created_at else None,
+            }
+            for p in items
+        ],
+        page,
+        page_size,
+        total,
     )
 
 

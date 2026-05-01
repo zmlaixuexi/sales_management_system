@@ -6,7 +6,7 @@ import uuid
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, paginate, require_permission, resp
+from app.api.deps import get_db, paginate, paginated_resp, require_permission, resp
 from app.core.sanitize import escape_like
 from app.models.audit import AuditLog
 from app.models.user import User
@@ -75,15 +75,7 @@ def list_audit_logs(
         }
         result_items.append(row)
 
-    return resp(
-        data={
-            "items": result_items,
-            "page": page,
-            "page_size": page_size,
-            "total": total,
-        },
-        message="查询成功",
-    )
+    return paginated_resp(result_items, page, page_size, total)
 
 
 @router.get("/actions")

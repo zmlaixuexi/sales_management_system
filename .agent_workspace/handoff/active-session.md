@@ -2,16 +2,16 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-380
-当前任务名称：前端列表页错误状态测试补强
+当前任务编号：ROUND-381
+当前任务名称：代码质量：提取 paginated_resp 辅助函数
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 380：前端列表页错误状态测试 — Customers/Orders/Products/AuditLogs 各 +1 error test
+- Round 381：提取 paginated_resp 辅助函数，消除 7 个列表端点重复的分页响应构造
+- Round 380：前端列表页错误状态测试 +4
 - Round 379：安全加固（登录速率限制 + 文件所有权检查）
-- Round 378：前端列表页空状态测试 +5
 
 ## 最终验证状态
 
@@ -28,7 +28,7 @@
 ## 下一步第一动作
 
 继续 keep-going 模式。可选方向：
-- 代码质量优化（重复代码消除）
+- 代码质量：提取 apply_owner_scope 辅助函数（数据范围过滤 8 处重复）
 - API 文档完善
 - 前端 loading 状态测试
 
