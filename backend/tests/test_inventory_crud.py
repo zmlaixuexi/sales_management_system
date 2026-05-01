@@ -282,3 +282,50 @@ def test_15_movements_filter_order_confirm_type():
     assert resp.status_code == 200
     items = resp.json()["data"]["items"]
     assert len(items) == 0
+
+
+def test_16_movements_requires_auth():
+    """未认证访问流水列表返回 401"""
+    resp = client.get("/api/v1/inventory/movements")
+    assert resp.status_code == 401
+
+
+def test_17_adjust_requires_auth():
+    """未认证调整库存返回 401"""
+    resp = client.post("/api/v1/inventory/adjustments", json={
+        "product_id": _product_id,
+        "quantity_change": 1,
+    })
+    assert resp.status_code == 401
+
+
+def test_18_adjust_invalid_product_uuid():
+    """无效商品 UUID 返回 400"""
+    resp = client.post("/api/v1/inventory/adjustments", json={
+        "product_id": "not-a-uuid",
+        "quantity_change": 1,
+    }, headers=_auth())
+    assert resp.status_code == 400
+
+
+def test_19_adjust_response_fields():
+    """调整成功返回完整字段"""
+    resp = client.post("/api/v1/inventory/adjustments", json={
+        "product_id": _product_id,
+        "quantity_change": 3,
+        "remark": "边界测试",
+    }, headers=_auth())
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["product_id"] == _product_id
+    assert data["quantity_change"] == 3
+    assert "quantity_before" in data
+    assert "quantity_after" in data
+
+
+def test_20_movements_filter_invalid_product():
+    """按不存在 product_id 筛选返回空列表"""
+    fake_id = str(uuid.uuid4())
+    resp = client.get(f"/api/v1/inventory/movements?product_id={fake_id}", headers=_auth())
+    assert resp.status_code == 200
+    assert resp.json()["data"]["total"] == 0

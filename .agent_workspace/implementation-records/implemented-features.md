@@ -6,6 +6,20 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-117
+
+### 测试 — 后端库存边界路径测试补强
+
+- **文件**: `backend/tests/test_inventory_crud.py`
+- **内容**:
+  - 未认证访问流水列表 401
+  - 未认证调整库存 401
+  - 无效商品 UUID 返回 400（parse_uuid_or_400）
+  - 调整成功返回完整字段（product_id/quantity_change/quantity_before/quantity_after）
+  - 不存在 product_id 筛选返回空列表
+- **验证**: 527+254=781 tests，后端全量通过
+- **关联**: Round 350
+
 ## 功能编号：FEAT-20260502-116
 
 ### 测试 — 前端 API 模块测试补全（users + inventory）
