@@ -23,6 +23,15 @@ class _JsonFormatter(logging.Formatter):
             )
         if hasattr(record, "extra_fields"):
             log_entry.update(record.extra_fields)
+        # 所有日志条目关联 request_id 和 user_id，便于日志检索
+        from app.core.request_id import request_id_ctx
+        from app.core.user_context import user_id_ctx
+        rid = request_id_ctx.get("")
+        if rid:
+            log_entry["request_id"] = rid
+        uid = user_id_ctx.get("")
+        if uid:
+            log_entry["user_id"] = uid
         return json.dumps(log_entry, ensure_ascii=False)
 
 
