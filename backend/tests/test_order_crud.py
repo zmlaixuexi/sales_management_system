@@ -12,6 +12,7 @@ from app.core.security import create_access_token, hash_password
 from app.db.session import Base
 from app.main import app
 from app.models.customer import Customer
+from app.models.order import SalesOrder
 from app.models.product import Product, ProductCategory
 from app.models.user import User
 
@@ -506,6 +507,50 @@ class TestOrderFilterAndEdge:
 
         resp = client.post("/api/v1/sales-orders", json={
             "customer_id": _customer_id,
+            "items": [{"product_id": pid, "quantity": 1, "unit_price": "30"}],
+        }, headers=_auth())
+        assert resp.status_code == 400
+        assert resp.json()["error"]["code"] == "PRICE_BELOW_COST"
+
+    def test_29_update_order_price_below_cost_400(self):
+        """编辑草稿订单时成交单价低于成本价阻止"""
+        from jose import jwt
+
+        from app.core.config import settings
+
+        db = TestSession()
+        prod = Product(
+            id=uuid.uuid4(), sku="ORD-UPD-BELOW-COST",
+            name="编辑低于成本测试", sale_price=100, cost_price=60,
+            stock_quantity=10, status="active",
+        )
+        db.add(prod)
+        db.flush()
+
+        pid = str(prod.id)
+
+        # 直接在数据库创建草稿订单，避免 order_no 与已有订单冲突
+        payload = jwt.decode(_tokens["access"], settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        user_id = uuid.UUID(payload["sub"])
+        draft = SalesOrder(
+            id=uuid.uuid4(),
+            order_no=f"ORD-UPD-TEST-{uuid.uuid4().hex[:8]}",
+            customer_id=uuid.UUID(_customer_id),
+            sales_user_id=user_id,
+            status="draft",
+            total_amount=0,
+            total_cost=0,
+            gross_profit=0,
+            gross_margin=0,
+            paid_amount=0,
+        )
+        db.add(draft)
+        db.commit()
+        draft_id = str(draft.id)
+        db.close()
+
+        # 编辑订单时使用低于成本价的单价
+        resp = client.put(f"/api/v1/sales-orders/{draft_id}", json={
             "items": [{"product_id": pid, "quantity": 1, "unit_price": "30"}],
         }, headers=_auth())
         assert resp.status_code == 400

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第三百六十五轮）
+
+### 测试：修复 PRICE_BELOW_COST 订单更新路径集成测试
+
+- `backend/tests/test_order_crud.py`：修复 `test_29_update_order_price_below_cost_400` — 直接在 DB 创建草稿订单（唯一 order_no），避免与 test_27 的 order_no UNIQUE 冲突
+- 后端 561→562 tests，总计 819→820
+
 ## 2026-05-02（第三百六十四轮）
 
 ### 文档：同步测试计数至 819
