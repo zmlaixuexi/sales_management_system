@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第二百九十一轮）
+
+### 安全：客户 source/level 字段添加枚举值校验
+
+- schema CustomerCreate/CustomerUpdate 的 source 和 level 改为 Literal 类型
+- source 限定: referral/online/offline/ad/other
+- level 限定: vip/important/normal/potential
+- CSV 导入路径同步添加枚举校验，无效值跳过并返回行级错误
+- 478/478 通过，ruff 0
+
 ## 2026-05-02（第二百八十九轮）
 
 ### 文档：同步测试数至 478+125=603，覆盖率 99.52%
