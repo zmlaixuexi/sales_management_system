@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百八十八轮）
+
+### 测试补强：CSV 导入行数上限 + XSS 消毒测试（+4）
+
+- test_product_import: 新增 test_10（行数上限截断，monkeypatch MAX=3）+ test_11（HTML 标签剥离）
+- test_customer_import: 新增 test_10（行数上限截断，monkeypatch MAX=2）+ test_11（HTML 标签剥离）
+- 覆盖率 99.35% → 99.52%，测试 474 → 478
+- 478/478 通过，ruff 0
+
 ## 2026-05-02（第二百八十七轮）
 
 ### 验证：make ci 全量通过 + 里程碑总结更新
