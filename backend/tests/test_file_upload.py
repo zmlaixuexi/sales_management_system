@@ -170,7 +170,7 @@ def test_05_upload_oversized():
     )
     fs.MAX_SIZE_BYTES = old_max
     assert resp.status_code == 400
-    assert resp.json()["error"]["code"] == "FILE_INVALID_TYPE"
+    assert resp.json()["error"]["code"] == "FILE_TOO_LARGE"
 
 
 def test_06_get_image_not_found():
@@ -306,3 +306,44 @@ def test_15_delete_file_service_returns_false_for_missing():
         assert result is False
     finally:
         db.close()
+
+
+def test_16_delete_bound_image_rejected():
+    """已绑定商品的图片不可删除，返回 FILE_NOT_BOUND"""
+    from app.models.product import Product, ProductCategory, ProductImage
+
+    png_bytes = _make_png_bytes()
+    resp = client.post(
+        "/api/v1/files/images",
+        files={"file": ("bound.png", png_bytes, "image/png")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    file_id = resp.json()["data"]["id"]
+
+    db = TestSession()
+    try:
+        # 创建分类、商品并绑定该图片
+        cat = ProductCategory(id=uuid.uuid4(), name="绑定测试分类", sort_order=0)
+        db.add(cat)
+        db.flush()
+        product = Product(
+            id=uuid.uuid4(), sku="SKU-BOUND-001", name="绑定测试商品",
+            sale_price=100, cost_price=60, stock_quantity=10,
+            category_id=cat.id, status="active",
+            created_by=uuid.uuid4(), updated_by=uuid.uuid4(),
+        )
+        db.add(product)
+        db.flush()
+        pi = ProductImage(
+            id=uuid.uuid4(), product_id=product.id,
+            file_id=uuid.UUID(file_id), is_primary=True, sort_order=0,
+        )
+        db.add(pi)
+        db.commit()
+    finally:
+        db.close()
+
+    resp = client.delete(f"/api/v1/files/images/{file_id}", headers=_auth())
+    assert resp.status_code == 400
+    assert resp.json()["error"]["code"] == "FILE_NOT_BOUND"

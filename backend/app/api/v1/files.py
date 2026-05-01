@@ -6,9 +6,9 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db, resp
-from app.models.product import File
+from app.models.product import File, ProductImage
 from app.models.user import User
-from app.services.file_service import delete_file, upload_image
+from app.services.file_service import FileSizeExceededError, FileTypeError, delete_file, upload_image
 
 router = APIRouter(
     prefix="/files", tags=["文件管理"],
@@ -31,7 +31,12 @@ async def upload_image_api(
     try:
         file_record = await upload_image(db, file, current_user.id)
         db.commit()
-    except ValueError as e:
+    except FileSizeExceededError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"code": "FILE_TOO_LARGE", "message": str(e)},
+        ) from e
+    except FileTypeError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"code": "FILE_INVALID_TYPE", "message": str(e)},
@@ -87,6 +92,14 @@ def delete_image(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": "AUTH_FORBIDDEN", "message": "无权删除此文件"},
+        )
+
+    # 已绑定商品的图片不可删除
+    bound = db.query(ProductImage).filter(ProductImage.file_id == file_id).first()
+    if bound:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"code": "FILE_NOT_BOUND", "message": "该图片已绑定商品，无法删除"},
         )
 
     delete_file(db, file_id)

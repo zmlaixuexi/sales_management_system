@@ -283,6 +283,12 @@ def create_order(
 
     raw_items = data.items
 
+    if not raw_items:
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "ORDER_EMPTY_ITEMS", "message": "订单明细不能为空"},
+        )
+
     # 构建明细行（含快照）
     prepared_items = _validate_and_prepare_items(db, raw_items)
 

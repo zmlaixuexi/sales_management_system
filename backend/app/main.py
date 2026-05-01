@@ -83,11 +83,11 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
     detail = exc.detail
     if isinstance(detail, dict):
-        error = {"code": detail.get("code", "INTERNAL_ERROR"), "message": detail.get("message", str(detail))}
+        error = {"code": detail.get("code", "SYSTEM_INTERNAL_ERROR"), "message": detail.get("message", str(detail))}
         if "details" in detail:
             error["details"] = detail["details"]
     else:
-        error = {"code": "INTERNAL_ERROR", "message": str(detail)}
+        error = {"code": "SYSTEM_INTERNAL_ERROR", "message": str(detail)}
     result: dict = {"success": False, "error": error}
     rid = request_id_ctx.get("")
     if rid:
@@ -121,7 +121,7 @@ def unhandled_exception_handler(request: Request, exc: Exception):
     logger.exception("未处理异常 [%s] %s rid=%s", request.method, request.url.path, rid)
     result: dict = {
         "success": False,
-        "error": {"code": "INTERNAL_ERROR", "message": "服务器内部错误，请稍后重试"},
+        "error": {"code": "SYSTEM_INTERNAL_ERROR", "message": "服务器内部错误，请稍后重试"},
     }
     if rid:
         result["request_id"] = rid

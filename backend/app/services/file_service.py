@@ -15,6 +15,14 @@ ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp"}
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 MAX_SIZE_BYTES = settings.MAX_IMAGE_SIZE_MB * 1024 * 1024
 
+
+class FileSizeExceededError(ValueError):
+    """文件大小超过限制"""
+
+
+class FileTypeError(ValueError):
+    """文件类型不支持"""
+
 # 文件头魔数字节映射
 MAGIC_SIGNATURES: dict[str, list[bytes]] = {
     "image/jpeg": [b"\xff\xd8\xff"],
@@ -27,21 +35,21 @@ def _validate_image(filename: str, content_type: str, size: int) -> None:
     """校验图片类型和大小"""
     ext = Path(filename).suffix.lower()
     if ext not in ALLOWED_EXTENSIONS:
-        raise ValueError(f"不支持的图片类型: {ext}，仅支持 jpg/jpeg/png/webp")
+        raise FileTypeError(f"不支持的图片类型: {ext}，仅支持 jpg/jpeg/png/webp")
     if content_type not in ALLOWED_TYPES:
-        raise ValueError(f"不支持的 MIME 类型: {content_type}")
+        raise FileTypeError(f"不支持的 MIME 类型: {content_type}")
     if size > MAX_SIZE_BYTES:
-        raise ValueError(f"图片大小超过限制: {size / 1024 / 1024:.1f}MB > {settings.MAX_IMAGE_SIZE_MB}MB")
+        raise FileSizeExceededError(f"图片大小超过限制: {size / 1024 / 1024:.1f}MB > {settings.MAX_IMAGE_SIZE_MB}MB")
 
 
 def _validate_magic_bytes(content: bytes, content_type: str) -> None:
     """校验文件头魔数字节，防止伪装扩展名上传"""
     if not content:
-        raise ValueError("文件内容为空")
+        raise FileTypeError("文件内容为空")
     for sig in MAGIC_SIGNATURES[content_type]:
         if content.startswith(sig):
             return
-    raise ValueError(f"文件内容与声明的类型 {content_type} 不匹配")
+    raise FileTypeError(f"文件内容与声明的类型 {content_type} 不匹配")
 
 
 async def upload_image(db: Session, file: UploadFile, user_id: uuid.UUID | None = None) -> File:
