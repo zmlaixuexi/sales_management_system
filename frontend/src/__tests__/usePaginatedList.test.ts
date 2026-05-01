@@ -143,4 +143,29 @@ describe('usePaginatedList', () => {
     expect(message.error).not.toHaveBeenCalled()
     expect(result.current.data).toEqual([])
   })
+
+  it('加载失败时 error 设为 true', async () => {
+    mockFetch.mockRejectedValueOnce(new Error('网络错误'))
+
+    const { result } = renderHook(() => usePaginatedList(mockFetch))
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    expect(result.current.error).toBe(true)
+  })
+
+  it('成功加载后 error 重置为 false', async () => {
+    mockFetch.mockRejectedValueOnce(new Error('网络错误'))
+
+    const { result } = renderHook(() => usePaginatedList(mockFetch))
+
+    await waitFor(() => expect(result.current.error).toBe(true))
+
+    // 第二次加载成功
+    mockFetch.mockResolvedValueOnce({ ...mockData })
+    await act(async () => { await result.current.refresh() })
+
+    expect(result.current.error).toBe(false)
+    expect(result.current.data).toEqual(mockData.items)
+  })
 })
