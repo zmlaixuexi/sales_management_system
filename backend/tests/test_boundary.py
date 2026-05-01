@@ -497,7 +497,7 @@ def test_25_user_create_duplicate_username():
         "display_name": "重复用户",
     }, headers=_auth())
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
+    assert resp.json()["error"]["code"] == "VALIDATION_FAILED"
 
 
 def test_26_user_update_not_found():
@@ -731,7 +731,7 @@ def test_38_reverse_payment_on_cancelled_order():
     # 尝试冲正收款应被拒绝
     resp = client.post(f"/api/v1/payments/{payment_id}/reverse", headers=_auth())
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "ORDER_INVALID_STATUS"
+    assert resp.json()["error"]["code"] == "ORDER_INVALID_STATUS"
 
 
 def test_39_order_with_deleted_product_rejected():
@@ -759,7 +759,7 @@ def test_39_order_with_deleted_product_rejected():
         "items": [{"product_id": del_product_id, "quantity": 1}],
     }, headers=_auth())
     assert resp.status_code == 404
-    assert resp.json()["detail"]["code"] == "RESOURCE_NOT_FOUND"
+    assert resp.json()["error"]["code"] == "RESOURCE_NOT_FOUND"
 
 
 def test_40_transfer_to_nonexistent_user():
@@ -776,7 +776,7 @@ def test_40_transfer_to_nonexistent_user():
         "owner_user_id": fake_user_id,
     }, headers=_auth())
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
+    assert resp.json()["error"]["code"] == "VALIDATION_FAILED"
 
 
 def test_41_self_deactivation_rejected():
@@ -792,8 +792,8 @@ def test_41_self_deactivation_rejected():
         "is_active": False,
     }, headers=_auth())
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
-    assert "不能停用自己的账号" in resp.json()["detail"]["message"]
+    assert resp.json()["error"]["code"] == "VALIDATION_FAILED"
+    assert "不能停用自己的账号" in resp.json()["error"]["message"]
 
 
 def test_42_create_user_nonexistent_role_rejected():
@@ -813,8 +813,8 @@ def test_42_create_user_nonexistent_role_rejected():
         "role_ids": [fake_role_id],
     }, headers=_auth())
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
-    assert "角色不存在" in resp.json()["detail"]["message"]
+    assert resp.json()["error"]["code"] == "VALIDATION_FAILED"
+    assert "角色不存在" in resp.json()["error"]["message"]
 
 
 def test_43_order_update_deleted_customer_rejected():
@@ -849,7 +849,7 @@ def test_43_order_update_deleted_customer_rejected():
         "customer_id": deleted_cid,
     }, headers=_auth())
     assert resp.status_code == 404
-    assert resp.json()["detail"]["code"] == "RESOURCE_NOT_FOUND"
+    assert resp.json()["error"]["code"] == "RESOURCE_NOT_FOUND"
 
 
 def test_44_customer_create_nonexistent_owner_rejected():
@@ -868,8 +868,8 @@ def test_44_customer_create_nonexistent_owner_rejected():
         "owner_user_id": fake_user_id,
     }, headers=_auth())
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
-    assert "归属用户不存在或已禁用" in resp.json()["detail"]["message"]
+    assert resp.json()["error"]["code"] == "VALIDATION_FAILED"
+    assert "归属用户不存在或已禁用" in resp.json()["error"]["message"]
 
 
 def test_45_product_create_nonexistent_category_rejected():
@@ -889,8 +889,8 @@ def test_45_product_create_nonexistent_category_rejected():
         "category_id": fake_category_id,
     }, headers=_auth())
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
-    assert "商品分类不存在" in resp.json()["detail"]["message"]
+    assert resp.json()["error"]["code"] == "VALIDATION_FAILED"
+    assert "商品分类不存在" in resp.json()["error"]["message"]
 
 
 def test_46_product_update_nonexistent_category_rejected():
@@ -907,5 +907,5 @@ def test_46_product_update_nonexistent_category_rejected():
         "category_id": fake_category_id,
     }, headers=_auth())
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
-    assert "商品分类不存在" in resp.json()["detail"]["message"]
+    assert resp.json()["error"]["code"] == "VALIDATION_FAILED"
+    assert "商品分类不存在" in resp.json()["error"]["message"]

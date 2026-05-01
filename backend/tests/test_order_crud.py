@@ -169,7 +169,7 @@ class TestOrderCreate:
             "items": [{"product_id": _product_id, "quantity": 1, "unit_price": "-10.00"}],
         }, headers=_auth())
         assert resp.status_code == 422
-        assert "不能为负" in resp.json()["detail"]["message"]
+        assert "不能为负" in resp.json()["error"]["message"]
 
 
 class TestOrderRead:
@@ -238,7 +238,7 @@ class TestOrderUpdate:
             "items": [{"product_id": _product_id, "quantity": 1, "unit_price": "-5.00"}],
         }, headers=_auth())
         assert resp.status_code == 422
-        assert "不能为负" in resp.json()["detail"]["message"]
+        assert "不能为负" in resp.json()["error"]["message"]
 
 
 class TestOrderConfirm:
@@ -296,7 +296,7 @@ class TestOrderInventoryInsufficient:
 
         resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
         assert resp.status_code == 400
-        assert "库存不足" in resp.json()["detail"]["message"]
+        assert "库存不足" in resp.json()["error"]["message"]
 
 
 class TestOrderFilterAndEdge:
@@ -319,7 +319,7 @@ class TestOrderFilterAndEdge:
             "items": [{"product_id": _product2_id, "quantity": 1}],
         }, headers=_auth())
         assert resp.status_code == 400
-        assert "已停用" in resp.json()["detail"]["message"]
+        assert "已停用" in resp.json()["error"]["message"]
 
     def test_22_order_detail_shows_payments(self):
         """订单详情显示收款记录"""

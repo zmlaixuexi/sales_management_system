@@ -211,7 +211,7 @@ def test_06_forbidden_without_permission():
         "name": "非法商品", "sale_price": "10", "cost_price": "5", "stock_quantity": 1,
     }, headers=_auth("sale01"))
     assert resp.status_code == 403
-    assert resp.json()["detail"]["code"] == "AUTH_FORBIDDEN"
+    assert resp.json()["error"]["code"] == "AUTH_FORBIDDEN"
 
 
 def test_07_order_data_scope_own_only():

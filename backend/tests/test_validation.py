@@ -146,7 +146,7 @@ def test_06_product_update_duplicate_sku():
         "sku": existing_sku,
     }, headers=_auth())
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "PRODUCT_SKU_DUPLICATED"
+    assert resp.json()["error"]["code"] == "PRODUCT_SKU_DUPLICATED"
 
 
 def test_07_product_update_invalid_price():

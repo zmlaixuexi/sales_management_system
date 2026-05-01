@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
-from fastapi.exceptions import RequestValidationError
+from fastapi.exceptions import HTTPException, RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -76,29 +76,56 @@ app = FastAPI(
 )
 
 
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """将 HTTPException 统一为 {success: false, error: {code, message}, request_id} 格式"""
+    from app.core.request_id import request_id_ctx
+
+    detail = exc.detail
+    if isinstance(detail, dict):
+        error = {"code": detail.get("code", "INTERNAL_ERROR"), "message": detail.get("message", str(detail))}
+        if "details" in detail:
+            error["details"] = detail["details"]
+    else:
+        error = {"code": "INTERNAL_ERROR", "message": str(detail)}
+    result: dict = {"success": False, "error": error}
+    rid = request_id_ctx.get("")
+    if rid:
+        result["request_id"] = rid
+    return JSONResponse(status_code=exc.status_code, content=result)
+
+
 @app.exception_handler(RequestValidationError)
 def validation_exception_handler(request: Request, exc: RequestValidationError):
-    """将 FastAPI 默认 422 校验错误统一为 {detail: {code, message}} 格式"""
+    """将 FastAPI 默认 422 校验错误统一为规范格式"""
+    from app.core.request_id import request_id_ctx
+
     errors = exc.errors()
     first = errors[0] if errors else {}
     loc = " → ".join(str(part) for part in first.get("loc", []))
     msg = first.get("msg", "请求参数错误")
     detail_msg = f"{loc}: {msg}" if loc else msg
-    return JSONResponse(
-        status_code=422,
-        content={"detail": {"code": "VALIDATION_FAILED", "message": detail_msg}},
-    )
+    result: dict = {"success": False, "error": {"code": "VALIDATION_FAILED", "message": detail_msg}}
+    rid = request_id_ctx.get("")
+    if rid:
+        result["request_id"] = rid
+    return JSONResponse(status_code=422, content=result)
 
 
 @app.exception_handler(Exception)
 def unhandled_exception_handler(request: Request, exc: Exception):
-    """全局未处理异常：返回一致的 JSON 格式，防止泄露内部详情"""
-    rid = request.headers.get("x-request-id", "")
+    """全局未处理异常：返回一致 JSON 格式，防泄露内部详情"""
+    from app.core.request_id import request_id_ctx
+
+    rid = request_id_ctx.get("")
     logger.exception("未处理异常 [%s] %s rid=%s", request.method, request.url.path, rid)
-    return JSONResponse(
-        status_code=500,
-        content={"detail": {"code": "INTERNAL_ERROR", "message": "服务器内部错误，请稍后重试"}},
-    )
+    result: dict = {
+        "success": False,
+        "error": {"code": "INTERNAL_ERROR", "message": "服务器内部错误，请稍后重试"},
+    }
+    if rid:
+        result["request_id"] = rid
+    return JSONResponse(status_code=500, content=result)
 
 app.add_middleware(
     CORSMiddleware,

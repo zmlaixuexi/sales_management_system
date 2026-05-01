@@ -135,7 +135,7 @@ class TestInventoryAdjust:
             "quantity_change": 0,
         }, headers=_auth())
         assert resp.status_code == 400
-        assert "不能为 0" in resp.json()["detail"]["message"]
+        assert "不能为 0" in resp.json()["error"]["message"]
 
     def test_04_adjust_over_decrease_400(self):
         """调整后库存不能为负"""
@@ -144,7 +144,7 @@ class TestInventoryAdjust:
             "quantity_change": -999,
         }, headers=_auth())
         assert resp.status_code == 400
-        assert "不能为负" in resp.json()["detail"]["message"]
+        assert "不能为负" in resp.json()["error"]["message"]
 
     def test_05_adjust_bad_product_404(self):
         resp = client.post("/api/v1/inventory/adjustments", json={

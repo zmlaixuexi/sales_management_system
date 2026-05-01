@@ -94,7 +94,7 @@ def test_03_rate_limit_429():
         if resp.status_code == 429:
             got_429 = True
             body = resp.json()
-            assert body["detail"]["code"] == "RATE_LIMIT_EXCEEDED"
+            assert body["error"]["code"] == "RATE_LIMIT_EXCEEDED"
             break
     assert got_429, "应在大量请求后触发 429"
 

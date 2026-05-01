@@ -208,7 +208,7 @@ def test_10_update_customer_empty_name():
 
     resp = client.put(f"/api/v1/customers/{cid}", json={"name": "  "}, headers=_auth())
     assert resp.status_code == 400
-    assert "不能为空" in resp.json()["detail"]["message"]
+    assert "不能为空" in resp.json()["error"]["message"]
 
 
 def test_11_update_customer_duplicate_phone():
@@ -225,7 +225,7 @@ def test_11_update_customer_duplicate_phone():
     # 尝试把 A 的手机号改成 B 的
     resp = client.put(f"/api/v1/customers/{cid_a}", json={"phone": "13800002002"}, headers=_auth())
     assert resp.status_code == 409
-    assert "已被其他客户使用" in resp.json()["detail"]["message"]
+    assert "已被其他客户使用" in resp.json()["error"]["message"]
 
 
 def test_11b_list_customers_by_owner():
@@ -302,7 +302,7 @@ def test_15_csv_import_encoding_error():
         headers=_auth(),
     )
     assert resp.status_code == 400
-    assert "编码" in resp.json()["detail"]["message"]
+    assert "编码" in resp.json()["error"]["message"]
 
 
 def test_16_csv_import_empty_header():
@@ -314,4 +314,4 @@ def test_16_csv_import_empty_header():
         headers=_auth(),
     )
     assert resp.status_code == 400
-    assert "表头" in resp.json()["detail"]["message"]
+    assert "表头" in resp.json()["error"]["message"]

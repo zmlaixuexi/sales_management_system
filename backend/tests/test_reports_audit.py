@@ -187,7 +187,7 @@ def test_07_sales_summary_invalid_period():
     """无效 period 返回 400"""
     resp = client.get("/api/v1/reports/sales-summary?period=invalid", headers=_auth())
     assert resp.status_code == 400
-    assert "period" in resp.json()["detail"]
+    assert "period" in resp.json()["error"]["message"]
 
 
 # ─── 报表：销售趋势 ─────────────────────────────────────────

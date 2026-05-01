@@ -44,7 +44,7 @@ def _date_range(period: str):
         valid = "today, 7d, 30d, this_month, last_month"
         raise HTTPException(
             status_code=400,
-            detail=f"不支持的 period 参数: {period}，可选值: {valid}",
+            detail={"code": "VALIDATION_FAILED", "message": f"不支持的 period 参数: {period}，可选值: {valid}"},
         )
     return start, today
 

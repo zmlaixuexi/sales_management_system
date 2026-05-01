@@ -128,7 +128,7 @@ def test_04_product_create_duplicate_sku():
         "sale_price": "10", "cost_price": "5",
     }, headers=_auth())
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "PRODUCT_SKU_DUPLICATED"
+    assert resp.json()["error"]["code"] == "PRODUCT_SKU_DUPLICATED"
 
 
 def test_05_product_get_not_found():
@@ -136,7 +136,7 @@ def test_05_product_get_not_found():
     fake_id = str(uuid.uuid4())
     resp = client.get(f"/api/v1/products/{fake_id}", headers=_auth())
     assert resp.status_code == 404
-    assert resp.json()["detail"]["code"] == "RESOURCE_NOT_FOUND"
+    assert resp.json()["error"]["code"] == "RESOURCE_NOT_FOUND"
 
 
 def test_06_product_update_not_found():
@@ -167,7 +167,7 @@ def test_09_customer_create_duplicate_phone():
         "name": "重复手机号客户", "phone": "13800000001",
     }, headers=_auth())
     assert resp.status_code == 409
-    assert resp.json()["detail"]["code"] == "CUSTOMER_DUPLICATED_WARNING"
+    assert resp.json()["error"]["code"] == "CUSTOMER_DUPLICATED_WARNING"
 
 
 def test_10_customer_get_not_found():
@@ -234,7 +234,7 @@ def test_16_order_confirm_insufficient_stock():
 
     resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "INVENTORY_NOT_ENOUGH"
+    assert resp.json()["error"]["code"] == "INVENTORY_NOT_ENOUGH"
 
 
 def test_17_order_confirm_not_draft():
@@ -255,7 +255,7 @@ def test_17_order_confirm_not_draft():
     # 再次确认
     resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "ORDER_INVALID_STATUS"
+    assert resp.json()["error"]["code"] == "ORDER_INVALID_STATUS"
 
 
 def test_18_order_cancel_already_cancelled():
@@ -301,7 +301,7 @@ def test_21_payment_exceed_remaining():
         "amount": "99999", "payment_method": "cash",
     }, headers=_auth())
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "PAYMENT_AMOUNT_EXCEEDED"
+    assert resp.json()["error"]["code"] == "PAYMENT_AMOUNT_EXCEEDED"
 
 
 def test_22_payment_order_not_found():
@@ -344,7 +344,7 @@ def test_26_inventory_adjust_below_zero():
         "product_id": _product_id, "quantity_change": -9999,
     }, headers=_auth())
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "INVENTORY_NOT_ENOUGH"
+    assert resp.json()["error"]["code"] == "INVENTORY_NOT_ENOUGH"
 
 
 # ─── 认证异常路径 ────────────────────────────────────────────

@@ -152,7 +152,7 @@ def test_03c_update_product_sku_duplicate():
         "sku": "SPU-DUP-001",
     }, headers=_auth())
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "PRODUCT_SKU_DUPLICATED"
+    assert resp.json()["error"]["code"] == "PRODUCT_SKU_DUPLICATED"
 
 
 def test_03c2_update_product_sku_success():
@@ -172,7 +172,7 @@ def test_03d_update_product_cost_price_negative():
         "cost_price": "-10.00",
     }, headers=_auth())
     assert resp.status_code == 400
-    assert "成本价不能为负" in resp.json()["detail"]["message"]
+    assert "成本价不能为负" in resp.json()["error"]["message"]
 
 
 def test_03e_list_with_category_filter():
@@ -195,7 +195,7 @@ def test_03g_update_product_cost_price_format_error():
         "cost_price": "abc",
     }, headers=_auth())
     assert resp.status_code == 400
-    assert "成本价格式错误" in resp.json()["detail"]["message"]
+    assert "成本价格式错误" in resp.json()["error"]["message"]
 
 
 def test_03h_update_product_category():
@@ -284,7 +284,7 @@ def test_03c_delete_product_with_order_ref():
 
     resp = client.delete(f"/api/v1/products/{_product_id}", headers=_auth())
     assert resp.status_code == 409
-    assert resp.json()["detail"]["code"] == "PRODUCT_IN_USE"
+    assert resp.json()["error"]["code"] == "PRODUCT_IN_USE"
 
 
 def test_04_delete_product():
@@ -381,7 +381,7 @@ def test_10b_create_empty_name_rejected():
         "name": "  ", "sale_price": "10", "cost_price": "5", "stock_quantity": 1,
     }, headers=_auth())
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
+    assert resp.json()["error"]["code"] == "VALIDATION_FAILED"
 
 
 def test_11_create_bad_price_rejected():
@@ -390,7 +390,7 @@ def test_11_create_bad_price_rejected():
         "name": "测试", "sale_price": "abc", "cost_price": "5", "stock_quantity": 1,
     }, headers=_auth())
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "VALIDATION_FAILED"
+    assert resp.json()["error"]["code"] == "VALIDATION_FAILED"
 
 
 def test_12_csv_import_success():
@@ -421,7 +421,7 @@ def test_12b_csv_import_encoding_error():
         headers=_auth(),
     )
     assert resp.status_code == 400
-    assert "编码" in resp.json()["detail"]["message"]
+    assert "编码" in resp.json()["error"]["message"]
 
 
 def test_12c_csv_import_empty_header():
@@ -433,7 +433,7 @@ def test_12c_csv_import_empty_header():
         headers=_auth(),
     )
     assert resp.status_code == 400
-    assert "表头" in resp.json()["detail"]["message"]
+    assert "表头" in resp.json()["error"]["message"]
 
 
 def test_12d_csv_import_row_errors():
@@ -497,4 +497,4 @@ def test_13_csv_import_not_csv():
         headers=_auth(),
     )
     assert resp.status_code == 400
-    assert "CSV" in resp.json()["detail"]["message"]
+    assert "CSV" in resp.json()["error"]["message"]

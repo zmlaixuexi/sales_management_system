@@ -201,7 +201,7 @@ class TestPaymentCreate:
             "payment_method": "cash",
         }, headers=_auth())
         assert resp.status_code == 400
-        assert "超过剩余应收" in resp.json()["detail"]["message"]
+        assert "超过剩余应收" in resp.json()["error"]["message"]
 
     def test_04_payment_zero_amount_422(self):
         resp = client.post(f"/api/v1/sales-orders/{_confirmed_order_id}/payments", json={
@@ -368,7 +368,7 @@ def test_13_reverse_payment_order_deleted():
         # 冲正 → 关联订单不存在
         resp = client.post(f"/api/v1/payments/{pid}/reverse", headers=_auth())
         assert resp.status_code == 404
-        assert "关联订单" in resp.json()["detail"]["message"]
+        assert "关联订单" in resp.json()["error"]["message"]
     finally:
         db.close()
 

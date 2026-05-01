@@ -64,8 +64,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                     status_code=429,
                     content={
                         "success": False,
-                        "message": "请求过于频繁，请稍后再试",
-                        "detail": {"code": "RATE_LIMIT_EXCEEDED"},
+                        "error": {"code": "RATE_LIMIT_EXCEEDED", "message": "请求过于频繁，请稍后再试"},
                     },
                 )
             bucket.record(now)

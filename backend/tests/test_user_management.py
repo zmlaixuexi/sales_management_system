@@ -126,7 +126,7 @@ def test_05_create_duplicate_username():
         "display_name": "重复用户",
     }, headers=_auth())
     assert resp.status_code == 400
-    assert "已存在" in resp.json()["detail"]["message"]
+    assert "已存在" in resp.json()["error"]["message"]
 
 
 def test_06_update_user():
@@ -238,4 +238,4 @@ def test_12_update_user_invalid_role_ids():
         "role_ids": [fake_role_id],
     }, headers=_auth())
     assert resp.status_code == 400
-    assert "角色不存在" in resp.json()["detail"]["message"]
+    assert "角色不存在" in resp.json()["error"]["message"]

@@ -184,7 +184,7 @@ def test_change_password_wrong_old():
         "new_password": "newpass456",
     }, headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 400
-    assert "原密码" in resp.json()["detail"]["message"]
+    assert "原密码" in resp.json()["error"]["message"]
 
 
 def test_change_password_weak_new():

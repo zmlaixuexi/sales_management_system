@@ -177,7 +177,7 @@ def test_09_import_file_too_large(monkeypatch):
         headers=_auth(),
     )
     assert resp.status_code == 400
-    assert "CSV 文件不能超过" in resp.json()["detail"]["message"]
+    assert "CSV 文件不能超过" in resp.json()["error"]["message"]
 
 
 def test_10_import_row_limit(monkeypatch):
@@ -254,4 +254,4 @@ def test_14_import_commit_failure():
             headers=_auth(),
         )
     assert resp.status_code == 500
-    assert resp.json()["detail"]["code"] == "IMPORT_FAILED"
+    assert resp.json()["error"]["code"] == "IMPORT_FAILED"

@@ -154,7 +154,7 @@ def test_04_upload_invalid_type():
         headers=_auth(),
     )
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "FILE_INVALID_TYPE"
+    assert resp.json()["error"]["code"] == "FILE_INVALID_TYPE"
 
 
 def test_05_upload_oversized():
@@ -170,7 +170,7 @@ def test_05_upload_oversized():
     )
     fs.MAX_SIZE_BYTES = old_max
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "FILE_INVALID_TYPE"
+    assert resp.json()["error"]["code"] == "FILE_INVALID_TYPE"
 
 
 def test_06_get_image_not_found():
@@ -178,7 +178,7 @@ def test_06_get_image_not_found():
     fake_id = str(uuid.uuid4())
     resp = client.get(f"/api/v1/files/images/{fake_id}", headers=_auth())
     assert resp.status_code == 404
-    assert resp.json()["detail"]["code"] == "FILE_NOT_FOUND"
+    assert resp.json()["error"]["code"] == "FILE_NOT_FOUND"
 
 
 def test_07_delete_image():
@@ -216,7 +216,7 @@ def test_10_upload_fake_image_rejected():
         headers=_auth(),
     )
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "FILE_INVALID_TYPE"
+    assert resp.json()["error"]["code"] == "FILE_INVALID_TYPE"
 
 
 def test_11_upload_valid_jpeg_accepted():
@@ -239,7 +239,7 @@ def test_12_upload_empty_content_rejected():
         headers=_auth(),
     )
     assert resp.status_code == 400
-    assert resp.json()["detail"]["code"] == "FILE_INVALID_TYPE"
+    assert resp.json()["error"]["code"] == "FILE_INVALID_TYPE"
 
 
 def test_13_upload_valid_webp_accepted():
@@ -293,7 +293,7 @@ def test_14_delete_other_user_file_forbidden():
         headers={"Authorization": f"Bearer {other_token}"},
     )
     assert resp.status_code == 403
-    assert resp.json()["detail"]["code"] == "AUTH_FORBIDDEN"
+    assert resp.json()["error"]["code"] == "AUTH_FORBIDDEN"
 
 
 def test_15_delete_file_service_returns_false_for_missing():

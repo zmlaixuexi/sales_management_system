@@ -155,8 +155,8 @@ def test_unhandled_exception_returns_json():
         response = no_raise_client.get("/api/v1/_test_crash")
         assert response.status_code == 500
         data = response.json()
-        assert data["detail"]["code"] == "INTERNAL_ERROR"
-        assert data["detail"]["message"] == "服务器内部错误，请稍后重试"
+        assert data["error"]["code"] == "INTERNAL_ERROR"
+        assert data["error"]["message"] == "服务器内部错误，请稍后重试"
         assert "something broke" not in str(data)
     finally:
         app.routes[:] = [r for r in app.routes if getattr(r, "path", None) != "/api/v1/_test_crash"]
