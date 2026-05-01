@@ -19,9 +19,9 @@ export function formatPercent(value: number | string | null | undefined): string
 }
 
 /**
- * 显示 API 错误消息（提取后端 detail.message）
+ * 显示 API 错误消息（提取后端 error.message 或 detail.message）
  */
 export function getApiErrorMessage(e: unknown, fallback = '操作失败'): string {
-  const err = e as { response?: { data?: { detail?: { message?: string } } } }
-  return err.response?.data?.detail?.message || fallback
+  const err = e as { response?: { data?: { error?: { message?: string }; detail?: { message?: string } } } }
+  return err.response?.data?.error?.message || err.response?.data?.detail?.message || fallback
 }

@@ -45,9 +45,19 @@ describe('formatPercent', () => {
 })
 
 describe('getApiErrorMessage', () => {
-  it('提取 detail.message', () => {
+  it('提取 error.message（新格式）', () => {
+    const err = { response: { data: { error: { code: 'VALIDATION_FAILED', message: '参数校验失败' } } } }
+    expect(getApiErrorMessage(err)).toBe('参数校验失败')
+  })
+
+  it('提取 detail.message（旧格式）', () => {
     const err = { response: { data: { detail: { message: '库存不足' } } } }
     expect(getApiErrorMessage(err)).toBe('库存不足')
+  })
+
+  it('error.message 优先于 detail.message', () => {
+    const err = { response: { data: { error: { code: 'X', message: '新消息' }, detail: { message: '旧消息' } } } }
+    expect(getApiErrorMessage(err)).toBe('新消息')
   })
 
   it('无 response 时使用 fallback', () => {
@@ -55,7 +65,7 @@ describe('getApiErrorMessage', () => {
     expect(getApiErrorMessage({}, '删除失败')).toBe('删除失败')
   })
 
-  it('无 detail.message 时使用 fallback', () => {
+  it('无 error.message 且无 detail.message 时使用 fallback', () => {
     const err = { response: { data: {} } }
     expect(getApiErrorMessage(err)).toBe('操作失败')
   })
