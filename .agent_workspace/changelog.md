@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-05-02（第三百四十八轮）
+
+### 文档：同步 testing.md 至 766 tests
+
+更新 `docs/testing.md`：后端 517→522、前端 204→244、总计 721→766。新增 CustomerDetail/ReportsCenter/Payments/Users/Inventory 页面组件测试记录。更新 test_user_management.py 16→21。新增 API 模块（users/inventory）。新增覆盖模块描述（用户管理+角色列表 API+权限边界）。
+
 ## 2026-05-02（第三百四十七轮）
 
 ### 测试：后端用户管理测试补强（+5 tests）

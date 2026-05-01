@@ -6,6 +6,19 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-115
+
+### 文档 — testing.md 同步至 766 tests
+
+- **文件**: `docs/testing.md`
+- **内容**:
+  - 后端 517→522、前端 204→244、总计 721→766
+  - 新增 5 个页面组件测试记录（CustomerDetail/ReportsCenter/Payments/Users/Inventory）
+  - 更新 test_user_management.py 16→21
+  - 新增 API 模块（users/inventory）
+  - 覆盖模块新增"用户管理（含角色列表 API 和权限边界）"
+- **关联**: Round 348
+
 ## 功能编号：FEAT-20260502-114
 
 ### 测试 — 后端用户管理测试补强（角色列表 + 权限边界）
