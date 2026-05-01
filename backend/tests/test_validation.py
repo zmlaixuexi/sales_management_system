@@ -312,3 +312,19 @@ def test_23_password_valid_strength():
         "username": "strong_user", "password": "pass123",
     }, headers=_auth())
     assert resp.status_code == 200
+
+
+def test_24_customer_create_invalid_source():
+    """创建客户使用无效 source 值被拒绝"""
+    resp = client.post("/api/v1/customers", json={
+        "name": "无效来源客户", "phone": "13800138000", "source": "invalid_source",
+    }, headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_25_customer_create_invalid_level():
+    """创建客户使用无效 level 值被拒绝"""
+    resp = client.post("/api/v1/customers", json={
+        "name": "无效等级客户", "phone": "13800138001", "level": "super_vip",
+    }, headers=_auth())
+    assert resp.status_code == 422

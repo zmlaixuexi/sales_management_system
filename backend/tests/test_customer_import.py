@@ -208,3 +208,29 @@ def test_11_import_strips_html():
     )
     assert resp.status_code == 200
     assert resp.json()["data"]["created"] == 1
+
+
+def test_12_import_invalid_source():
+    """CSV 导入无效 source 值跳过"""
+    csv_content = "客户名称,电话,来源\n无效来源客户,13800008888,invalid_source"
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 0
+    assert any("来源值无效" in e["message"] for e in resp.json()["data"]["errors"])
+
+
+def test_13_import_invalid_level():
+    """CSV 导入无效 level 值跳过"""
+    csv_content = "客户名称,电话,等级\n无效等级客户,13800008889,super_vip"
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 0
+    assert any("等级值无效" in e["message"] for e in resp.json()["data"]["errors"])
