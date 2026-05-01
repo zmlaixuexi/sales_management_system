@@ -186,4 +186,41 @@ describe('apiClient 响应拦截器', () => {
       expect((e as Record<string, boolean>)._toastDisplayed).toBeUndefined()
     }
   })
+
+  it('400 从 error.message 提取后端错误消息', async () => {
+    try {
+      await triggerErrorInterceptor(400, {
+        data: { success: false, error: { code: 'VALIDATION_FAILED', message: '参数校验失败：名称不能为空' } },
+      })
+    } catch {
+      // expected
+    }
+
+    expect(mockMessageError).toHaveBeenCalledWith('参数校验失败：名称不能为空')
+  })
+
+  it('400 旧格式 detail.message 兼容', async () => {
+    try {
+      await triggerErrorInterceptor(400, {
+        data: { success: false, detail: { code: 'VALIDATION_FAILED', message: '旧格式错误' } },
+      })
+    } catch {
+      // expected
+    }
+
+    // 旧格式不应匹配（无 error.message），走 data.message fallback
+    expect(mockMessageError).not.toHaveBeenCalledWith('旧格式错误')
+  })
+
+  it('409 展示后端业务错误消息', async () => {
+    try {
+      await triggerErrorInterceptor(409, {
+        data: { success: false, error: { code: 'PRODUCT_IN_USE', message: '商品已被引用，不能删除' } },
+      })
+    } catch {
+      // expected
+    }
+
+    expect(mockMessageError).toHaveBeenCalledWith('商品已被引用，不能删除')
+  })
 })
