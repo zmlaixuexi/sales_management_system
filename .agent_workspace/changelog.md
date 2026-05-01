@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第二百八十二轮）
+
+### 工程：Makefile 新增 typecheck-backend（mypy）目标，集成到 ci/quality 门禁
+
+- 新增 typecheck-backend 目标：cd backend && python -m mypy app/
+- typecheck 拆分为 typecheck-backend（mypy）+ typecheck-frontend（tsc）
+- ci 和 quality 命令自动包含 mypy 检查
+- deps.py 移除 Round 281 遗留的未使用 Column import
+- make ci 全量通过（ruff 0 + mypy 0 + tsc 0 + 474/474 + 125/125 + 覆盖率 99.78% + build 零警告）
+
 ## 2026-05-02（第二百八十一轮）
 
 ### 工程：添加 mypy 静态类型检查，修复 15 处类型错误

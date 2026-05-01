@@ -2,13 +2,14 @@
 
 最后更新时间：2026-05-02
 当前阶段：需求符合性验证 + 代码质量
-当前任务编号：ROUND-281
-当前任务名称：工程 — 添加 mypy 静态类型检查，修复 15 处类型错误
+当前任务编号：ROUND-282
+当前任务名称：工程 — Makefile 新增 typecheck-backend（mypy）目标，集成到 ci/quality 门禁
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 282：工程 — Makefile 新增 typecheck-backend（mypy）目标，拆分 typecheck 为 typecheck-backend + typecheck-frontend，ci 和 quality 自动包含 mypy。deps.py 移除未使用 Column import。make ci 全量通过。
 - Round 281：工程 — 添加 mypy 静态类型检查配置（pyproject.toml + SQLAlchemy plugin），修复 15 处类型错误（deps.py 类型注解、security.py str() 包装、customer.py TYPE_CHECKING、audit_service.py type ignore、export_service.py owner_name、file_service.py import-untyped、main.py overrides），mypy 51 文件 0 错误通过，474+125=599 测试全绿
 - Round 280：验证 — make ci 全量通过，里程碑总结更新至 Round 95-279
 - Round 279：部署 — 前端 Dockerfile 固定 node:24.12-alpine，Docker 构建验证通过
@@ -37,13 +38,13 @@
 
 继续 keep-going 模式。可继续方向：测试补强、异常路径、安全加固、可观测性、部署体验。
 
-## 当前里程碑总结（Round 95-281）
+## 当前里程碑总结（Round 95-282）
 
 - 后端测试：214 → 474（+260）
 - 前端测试：97 → 125（+28）
 - 总计 599 测试，全部通过
 - 后端覆盖率：99.78%（仅 deps.py get_db 4 行不可测）
-- 代码质量：ruff 0（含 B904/SIM/C4/PERF/RUF 扩展规则）+ ESLint 0 + build 零警告 + tsc 通过 + mypy 0 错误 + 共享函数提取（register_payment / validate_csv_upload / generate_sequential_code / resp / get_or_404 / parse_uuid_or_400）
+- 代码质量：ruff 0（含 B904/SIM/C4/PERF/RUF 扩展规则）+ ESLint 0 + build 零警告 + tsc 通过 + mypy 0 错误（CI 集成）+ 共享函数提取（register_payment / validate_csv_upload / generate_sequential_code / resp / get_or_404 / parse_uuid_or_400）
 - 性能：10 个复合索引 + 3 个 N+1 查询修复 + 收款并发行锁防护
 - 安全：17 项措施（RBAC + 数据范围 + 速率限制 + 敏感字段 + LIKE 转义 + 安全响应头 + Token 校验 + CSV 限制 + CORS 白名单 + XSS 消毒 + 密码强度 + UUID 转换 + sort_by 白名单 + 成本价保护 + 文件上传魔数字节 + period 校验 + 收款行锁）
 - 可观测性：7 项（健康检查 + 请求 ID + 请求日志 + X-Response-Time + 结构化日志 + 审计日志 + 全局异常处理）

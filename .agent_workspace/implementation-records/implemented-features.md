@@ -6,6 +6,18 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-92
+
+### 代码质量 — Makefile 集成 mypy 到 CI 质量门禁
+
+- **文件**: `Makefile`, `backend/app/api/deps.py`
+- **内容**:
+  - 新增 typecheck-backend 目标：cd backend && python -m mypy app/
+  - typecheck 拆分为 typecheck-backend（mypy）+ typecheck-frontend（tsc）
+  - ci 和 quality 命令自动包含 mypy 检查
+  - deps.py 移除 Round 281 遗留的未使用 Column import
+- **验证**: make ci 全量通过（ruff 0 + mypy 0 + tsc 0 + 474/474 + 125/125 + 覆盖率 99.78% + build 零警告）
+
 ## 功能编号：FEAT-20260502-91
 
 ### 代码质量 — mypy 静态类型检查配置 + 15 处类型错误修复
