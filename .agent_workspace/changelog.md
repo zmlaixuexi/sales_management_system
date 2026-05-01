@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第三百八十七轮）
+
+### 测试补强：商品/客户输入长度溢出测试 + 全量 CI 验证（+4 tests）
+
+- `backend/tests/test_product_crud.py`：新增 2 个测试（商品名称 201 字符、备注 501 字符返回 422）
+- `backend/tests/test_customer_crud.py`：新增 2 个测试（客户名称 201 字符、邮箱 201 字符返回 422）
+- 全量 CI 验证通过：606 后端 + 284 前端 = 890 tests，ruff/ESLint/tsc/build 均通过
+- 后端 602→606 tests，总计 886→890
+
 ## 2026-05-02（第三百八十六轮）
 
 ### 安全加固：Pydantic 模型字符串字段添加 max_length 约束 + OrderDetail 类型重命名
