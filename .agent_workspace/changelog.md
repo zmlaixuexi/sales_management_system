@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百八十三轮）
+
+### 工程：GitHub Actions CI 添加 mypy 类型检查步骤
+
+- CI workflow 在 Ruff 检查之后、数据库迁移之前添加 Mypy 类型检查
+- 确保每次 push/PR 自动运行静态类型检查
+- 与本地 make ci 质量门禁保持一致
+
 ## 2026-05-02（第二百八十二轮）
 
 ### 工程：Makefile 新增 typecheck-backend（mypy）目标，集成到 ci/quality 门禁

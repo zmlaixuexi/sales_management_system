@@ -6,6 +6,17 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-93
+
+### 代码质量 — GitHub Actions CI 集成 mypy 类型检查
+
+- **文件**: `.github/workflows/ci.yml`
+- **内容**:
+  - backend job 添加 Mypy 类型检查步骤（Ruff 之后、数据库迁移之前）
+  - `pip install ".[dev]"` 自动安装 mypy，`python -m mypy app/` 执行检查
+  - 与本地 make ci 质量门禁保持一致
+- **验证**: YAML 语法通过，步骤顺序正确
+
 ## 功能编号：FEAT-20260502-92
 
 ### 代码质量 — Makefile 集成 mypy 到 CI 质量门禁
