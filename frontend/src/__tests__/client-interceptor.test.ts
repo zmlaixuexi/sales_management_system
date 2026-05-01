@@ -168,4 +168,22 @@ describe('apiClient 响应拦截器', () => {
       expect(mockMessageError).toHaveBeenCalledWith('请求过于频繁，请稍后再试')
     })
   })
+
+  it('展示 toast 后设置 _toastDisplayed 标记', async () => {
+    try {
+      await triggerErrorInterceptor(403)
+    } catch (e) {
+      expect((e as Record<string, boolean>)._toastDisplayed).toBe(true)
+    }
+  })
+
+  it('401 不设置 _toastDisplayed 标记', async () => {
+    delete window.location
+    window.location = { href: '' } as Location
+    try {
+      await triggerErrorInterceptor(401)
+    } catch (e) {
+      expect((e as Record<string, boolean>)._toastDisplayed).toBeUndefined()
+    }
+  })
 })

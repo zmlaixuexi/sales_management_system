@@ -59,22 +59,33 @@ apiClient.interceptors.response.use(
     }
 
     // 统一错误提示（排除 401 已处理和登录接口的 401）
+    let _displayed = false
     if (error.response?.status === 429) {
       message.error('请求过于频繁，请稍后再试')
+      _displayed = true
     } else if (error.response?.status === 403) {
       message.error('没有操作权限')
+      _displayed = true
     } else if (error.response?.status === 404) {
       message.error('请求的资源不存在')
+      _displayed = true
     } else if (error.response?.status === 500) {
       message.error('服务器错误，请稍后重试')
+      _displayed = true
     } else if (error.response?.data?.detail?.message && error.response?.status !== 401) {
       message.error(error.response.data.detail.message)
+      _displayed = true
     } else if (error.response?.data?.message && error.response?.status !== 401) {
       message.error(error.response.data.message)
+      _displayed = true
     } else if (!error.response) {
       message.error('网络连接失败，请检查网络')
+      _displayed = true
     }
 
+    if (_displayed) {
+      ;(error as unknown as Record<string, boolean>)._toastDisplayed = true
+    }
     return Promise.reject(error)
   },
 )

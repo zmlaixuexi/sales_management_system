@@ -34,8 +34,13 @@ export function usePaginatedList<T>(
       })
       setData(result.items ?? [])
       setTotal(result.total ?? 0)
-    } catch {
-      message.error(errorMessage)
+    } catch (e: unknown) {
+      // 拦截器已展示过 toast 时跳过，避免重复提示
+      if ((e as Record<string, boolean>)?._toastDisplayed) {
+        // nothing
+      } else {
+        message.error(errorMessage)
+      }
     } finally {
       setLoading(false)
     }

@@ -28,6 +28,8 @@ export function useSubmit<T>(
     } catch (e: unknown) {
       // Ant Design 表单校验错误（errorFields）不弹提示
       if (e && typeof e === 'object' && 'errorFields' in e) return
+      // 拦截器已展示过 toast 时跳过，避免重复提示
+      if ((e as Record<string, boolean>)?._toastDisplayed) return
       message.error(getApiErrorMessage(e, fallbackError))
     } finally {
       setSubmitting(false)
