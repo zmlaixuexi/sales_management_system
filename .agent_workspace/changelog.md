@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第二百七十三轮）
+
+### 文档：architecture.md 同步
+
+- 中间件栈新增 RequestIDMiddleware + X-Response-Time
+- 服务层目录展开至 5 个服务文件（含 payment_service、csv_import）
+- 安全措施扩充至 17 项（含并发防护、文件上传、CSV 导入、排序注入、成本价保护、period 校验）
+- 可观测性扩充至 7 项（含请求 ID、响应耗时、慢请求警告、全局异常处理）
+- 库存联动新增 partially_paid 回滚说明 + 收款并发保护段
+
 ## 2026-05-02（第二百七十二轮）
 
 ### 文档：测试数同步至 599
