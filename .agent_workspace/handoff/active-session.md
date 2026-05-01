@@ -2,13 +2,14 @@
 
 最后更新时间：2026-05-02
 当前阶段：需求符合性验证 + 代码质量
-当前任务编号：ROUND-269
-当前任务名称：重构 — CSV 导入文件校验去重
+当前任务编号：ROUND-270
+当前任务名称：测试补强 — validate_csv_upload 单元测试
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 270：测试补强 — 新增 validate_csv_upload 单元测试（+9），覆盖文件名/编码/大小/BOM/空文件，474/474 通过
 - Round 269：重构 — 提取 validate_csv_upload 共享函数，消除 products.py + customers.py CSV 导入校验重复，465/465 通过
 - Round 268：重构 — 提取 register_payment 共享函数，消除 payments.py + orders.py 重复，465/465 通过
 - Round 267：文档 — 测试数同步 testing.md 和 README 至 465+125=590，覆盖率 99.78%，make ci 全量通过
@@ -180,7 +181,7 @@
 
 ## 当前测试状态
 
-- 后端：465/465 通过
+- 后端：474/474 通过
 - 前端：125/125 通过
 - ruff：0 issues（含 RUF 规则）
 - ESLint：0 warnings
@@ -190,13 +191,13 @@
 
 ## 下一步第一动作
 
-继续 keep-going 模式。代码质量改进已完成：支付创建逻辑去重 + CSV 导入样板提取。可继续方向：测试补强、异常路径、安全加固、可观测性、部署体验。
+继续 keep-going 模式。可继续方向：测试补强、异常路径、安全加固、可观测性、部署体验。
 
 ## 当前里程碑总结（Round 95-246）
 
-- 后端测试：214 → 465（+251）
+- 后端测试：214 → 474（+260）
 - 前端测试：97 → 125（+28）
-- 总计 590 测试，全部通过
+- 总计 599 测试，全部通过
 - 后端覆盖率：99.82%（443 测试，仅 deps.py get_db 4 行不可测，其余模块全部 100%）
 - 代码质量：ruff 0（含 B904/SIM/C4/PERF/RUF 扩展规则）+ ESLint 0 + build 零警告 + tsc 通过 + parse_uuid_or_400 统一到 deps.py + get_or_404 + resp() 响应函数 + useSubmit hook + ErrorBoundary 路由感知 + Pydantic schema 校验 + 死代码清除 + 延迟 import 清理 + __import__ 反模式消除 + __all__ 排序
 - 性能：10 个复合索引 + 3 个 N+1 查询修复（订单明细校验/库存扣减回滚/CSV 导入去重）+ 列表推导式优化
