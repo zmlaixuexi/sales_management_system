@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百九十二轮）
+
+### 测试补强：客户 source/level 枚举校验测试（+4）
+
+- test_validation: 创建客户无效 source 值返回 422、无效 level 值返回 422
+- test_customer_import: CSV 导入无效 source 值跳过并报错、无效 level 值跳过并报错
+- 测试 478 → 482，482/482 通过
+
 ## 2026-05-02（第二百九十一轮）
 
 ### 安全：客户 source/level 字段添加枚举值校验
