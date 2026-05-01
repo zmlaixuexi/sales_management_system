@@ -305,7 +305,7 @@ Docker Compose 启动 3 个容器（无 Nginx）：
 | 密码存储 | bcrypt 哈希 + 强度校验（必须含字母和数字） |
 | SQL 注入防护 | SQLAlchemy ORM + `escape_like()` |
 | XSS 防护 | 安全响应头（CSP、X-XSS-Protection）+ 输入消毒 strip_html |
-| 点击劫持防护 | X-Frame-Options: DENY |
+| 点击劫持防护 | X-Frame-Options: DENY（应用层 + Nginx 统一） |
 | 速率限制 | 基于 IP 的滑动窗口 |
 | 敏感数据 | 审计日志密码/令牌字段掩码 + 成本价按权限过滤 |
 | 软删除 | `deleted_at` 时间戳，非物理删除 |
@@ -317,6 +317,8 @@ Docker Compose 启动 3 个容器（无 Nginx）：
 | 排序注入 | `sort_by` 白名单校验 |
 | 成本价保护 | 低于成本价阻止下单 |
 | 报表参数 | period 严格校验，无效值返回 400 |
+| API 文档保护 | 生产环境自动禁用 OpenAPI/Swagger/ReDoc |
+| Nginx 加固 | server_tokens off 隐藏版本号 |
 
 ## 可观测性
 
