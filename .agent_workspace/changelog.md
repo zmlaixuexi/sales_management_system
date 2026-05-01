@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百六十六轮）
+
+### 安全：报表 period 参数严格校验
+
+- reports.py _date_range 对无效 period 值抛出 400 替代静默回退 30d
+- 修改 test_07 预期 400，新增 4 个端点 invalid period 测试（trend/product/customer/salesperson）
+- 后端 465/465 通过（+4），ruff 0
+
 ## 2026-05-02（第二百六十五轮）
 
 ### 功能：前端添加客户排行和销售人员排行 API 函数

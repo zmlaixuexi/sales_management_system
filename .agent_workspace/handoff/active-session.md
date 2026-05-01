@@ -2,13 +2,14 @@
 
 最后更新时间：2026-05-02
 当前阶段：需求符合性验证 + 代码质量
-当前任务编号：ROUND-265
-当前任务名称：前端 — 客户/销售人员排行 API 函数
+当前任务编号：ROUND-266
+当前任务名称：安全 — 报表 period 参数严格校验
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 266：安全 — 报表 period 参数严格校验，无效值返回 400 替代静默回退，+4 测试，465/465 通过
 - Round 265：前端 — 添加客户排行和销售人员排行 API 函数（fetchCustomerRanking/fetchSalespersonRanking）+ 类型定义 + 测试，125/125 通过
 - Round 264：代码质量 — 序号生成函数统一为 deps.generate_sequential_code，消除 orders/products 重复
 - Round 262：安全加固 — 修复 3 个安全审查 MEDIUM 问题（payment_method 枚举 + PRODUCT_IN_USE 软删除 + 审计日志敏感字段），+3 测试，461/461 通过，覆盖率 99.78%
@@ -177,7 +178,7 @@
 
 ## 当前测试状态
 
-- 后端：461/461 通过
+- 后端：465/465 通过
 - 前端：125/125 通过
 - ruff：0 issues（含 RUF 规则）
 - ESLint：0 warnings
@@ -191,9 +192,9 @@
 
 ## 当前里程碑总结（Round 95-246）
 
-- 后端测试：214 → 443（+229）
-- 前端测试：97 → 123（+26）
-- 总计 566 测试，全部通过
+- 后端测试：214 → 465（+251）
+- 前端测试：97 → 125（+28）
+- 总计 590 测试，全部通过
 - 后端覆盖率：99.82%（443 测试，仅 deps.py get_db 4 行不可测，其余模块全部 100%）
 - 代码质量：ruff 0（含 B904/SIM/C4/PERF/RUF 扩展规则）+ ESLint 0 + build 零警告 + tsc 通过 + parse_uuid_or_400 统一到 deps.py + get_or_404 + resp() 响应函数 + useSubmit hook + ErrorBoundary 路由感知 + Pydantic schema 校验 + 死代码清除 + 延迟 import 清理 + __import__ 反模式消除 + __all__ 排序
 - 性能：10 个复合索引 + 3 个 N+1 查询修复（订单明细校验/库存扣减回滚/CSV 导入去重）+ 列表推导式优化
