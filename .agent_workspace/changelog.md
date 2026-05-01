@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第三百八十五轮）
+
+### 测试补强：前端详情页 loading 状态测试 + 代码质量扫描（+2 tests）
+
+- `frontend/src/__tests__/OrderDetail.test.tsx`：新增 loading 状态测试（pending promise 时显示"加载中..."）
+- `frontend/src/__tests__/CustomerDetail.test.tsx`：同上
+- 代码质量扫描结果：ruff F401/F841 = 0 issues，ESLint = 0 errors，tsc --noEmit = 0 errors
+- 后端 N+1 分析：所有列表端点已使用 joinedload/selectin，无 N+1 问题
+- 前端 282→284 tests，总计 882→884
+
 ## 2026-05-02（第三百八十四轮）
 
 ### 测试补强：前端列表页 loading 状态测试（+4 tests）
