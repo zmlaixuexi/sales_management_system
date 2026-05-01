@@ -134,12 +134,12 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（456 个）
+# 后端测试（465 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
 
-# 前端测试（123 个）
+# 前端测试（125 个）
 cd frontend
 npm test
 
@@ -162,7 +162,7 @@ npm run build
 | 异常路径 | 31 | 缺字段、负值、重复、404、状态转换、库存不足、伪造 Token、无效 UUID、收款导出数据范围 |
 | 验证补充 | 23 | refresh_token 异常、价格/库存/名称校验、CSV 边界、用户列表、密码强度 |
 | 边界测试 | 37 | 认证边界、订单状态机、收款边界、用户管理、库存调整、Token 刷新、流水类型筛选 |
-| 报表 | 18 | 销售汇总（6 种 period）、趋势、排行、客户排行（含数据范围）、销售人员排行（含数据范围）、库存预警、权限 |
+| 报表 | 22 | 销售汇总（6 种 period + 无效 period 返回 400）、趋势、排行、客户排行（含数据范围）、销售人员排行（含数据范围）、库存预警、权限、period 参数校验 ×4 端点 |
 | 审计查询 | 10 | 日志列表、筛选、分页、关键词、操作类型、权限 |
 | 商品导入 | 9 | CSV 成功/带 SKU/重复 SKU/空名称/非 CSV/认证/中文表头/大小限制 |
 | 客户导入 | 9 | CSV 成功/带详情/手机号重复/批量内重复/空名称/非 CSV/认证/大小限制 |
@@ -181,7 +181,7 @@ npm run build
 | 日志格式器 | 6 | _JsonFormatter JSON 输出/异常/extra_fields，log_action 容错 |
 | 导出辅助函数 | 13 | _dec/_str/_dt CSV 格式化 |
 | 文件服务 | 4 | 扩展名/MIME/大小/正常 |
-| **合计** | **456** | |
+| **合计** | **465** | |
 
 ### 前端测试覆盖
 
@@ -197,7 +197,7 @@ npm run build
 | 客户 API | 7 | fetchCustomers（含无参数）/fetchCustomer/create/update/delete/transfer |
 | 订单 API | 6 | fetchOrders/fetchOrder/create/update/confirm/cancel |
 | 收款 API | 5 | fetchPayments/筛选/createPayment/备注/reversePayment |
-| 报表 API | 6 | fetchSalesSummary（含无参数）/Trend/ProductRanking/InventoryWarning（含无阈值） |
+| 报表 API | 8 | fetchSalesSummary（含无参数）/Trend/ProductRanking/InventoryWarning（含无阈值）/CustomerRanking/SalespersonRanking |
 | 审计日志 API | 5 | fetchAuditLogs/筛选/日期范围/数据解析/fetchAuditActions |
 | auth API | 5 | login/refresh/logout/getMe/changePassword 路径验证 |
 | auth store | 11 | login/logout/fetchUser/hasPermission/loading 状态 |
@@ -207,7 +207,7 @@ npm run build
 | useSubmit | 5 | 成功调用/提交中状态/错误提示/Ant Design 校验静默/防重 |
 | NotFound | 3 | 404 渲染/返回首页按钮/按钮点击导航 |
 | ProtectedRoute | 5 | 无 token 重定向/加载中/已认证渲染/fetchUser 失败/异步重定向 |
-| **合计** | **123** | |
+| **合计** | **125** | |
 
 ## API 概览
 
