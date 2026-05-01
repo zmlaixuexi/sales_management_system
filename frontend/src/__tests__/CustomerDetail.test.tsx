@@ -189,4 +189,14 @@ describe('CustomerDetail', () => {
       expect(_messageError).toHaveBeenCalledWith('加载客户详情失败')
     })
   })
+
+  it('加载中显示加载提示', async () => {
+    let resolveFn: (v: any) => void
+    _customerMocks.fetchCustomer.mockReturnValue(new Promise((r) => { resolveFn = r }))
+    renderCustomerDetail()
+    await waitFor(() => {
+      expect(screen.getByText('加载中...')).toBeInTheDocument()
+    })
+    resolveFn!(mockCustomerData)
+  })
 })
