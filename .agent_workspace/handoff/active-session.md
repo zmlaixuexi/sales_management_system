@@ -2,15 +2,16 @@
 
 最后更新时间：2026-05-02
 当前阶段：需求符合性验证 + 代码质量
-当前任务编号：ROUND-271
-当前任务名称：安全 — 收款并发防护
+当前任务编号：ROUND-272
+当前任务名称：文档 — 测试数同步至 599
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 271：安全 — 收款登记/冲正添加 with_for_update 行锁防止并发超额，移除无用参数，474/474 通过
-- Round 270：测试补强 — 新增 validate_csv_upload 单元测试（+9），覆盖文件名/编码/大小/BOM/空文件，474/474 通过
+- Round 272：文档 — 测试数同步 testing.md 和 README 至 474+125=599，make ci 全量通过
+- Round 271：安全 — 收款登记/冲正添加 with_for_update 行锁防止并发超额，474/474 通过
+- Round 270：测试补强 — 新增 validate_csv_upload 单元测试（+9），474/474 通过
 - Round 269：重构 — 提取 validate_csv_upload 共享函数，消除 products.py + customers.py CSV 导入校验重复，465/465 通过
 - Round 267：文档 — 测试数同步 testing.md 和 README 至 465+125=590，覆盖率 99.78%，make ci 全量通过
 - Round 265：前端 — 添加客户排行和销售人员排行 API 函数（fetchCustomerRanking/fetchSalespersonRanking）+ 类型定义 + 测试，125/125 通过
