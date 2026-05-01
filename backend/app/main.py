@@ -68,9 +68,9 @@ app = FastAPI(
     title="销售管理系统",
     description="销售管理系统 API — 包含商品、客户、订单、收款、库存、报表等模块",
     version="0.1.0",
-    docs_url="/api/docs",
-    redoc_url="/api/redoc",
-    openapi_url="/api/openapi.json",
+    docs_url=None if settings.APP_ENV == "production" else "/api/docs",
+    redoc_url=None if settings.APP_ENV == "production" else "/api/redoc",
+    openapi_url=None if settings.APP_ENV == "production" else "/api/openapi.json",
     openapi_tags=OPENAPI_TAGS,
     lifespan=lifespan,
 )

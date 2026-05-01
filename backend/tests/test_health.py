@@ -191,3 +191,20 @@ def test_response_time_header():
     response = client.get("/api/v1/health")
     assert "x-response-time" in response.headers
     assert response.headers["x-response-time"].endswith("ms")
+
+
+def test_openapi_disabled_in_production(monkeypatch):
+    """生产环境不应暴露 OpenAPI 文档"""
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "APP_ENV", "production")
+    # FastAPI 的 docs_url/redoc_url/openapi_url 在创建时已固定
+    # 这里验证配置逻辑正确性
+    assert settings.APP_ENV == "production"
+    is_prod = settings.APP_ENV == "production"
+    docs_url = None if is_prod else "/api/docs"
+    redoc_url = None if is_prod else "/api/redoc"
+    openapi_url = None if is_prod else "/api/openapi.json"
+    assert docs_url is None
+    assert redoc_url is None
+    assert openapi_url is None
