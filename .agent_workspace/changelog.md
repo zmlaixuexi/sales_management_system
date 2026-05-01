@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第二百七十九轮）
+
+### 部署：前端 Dockerfile 固定 Node 版本
+
+- Dockerfile 从 node:24-alpine 改为 node:24.12-alpine，修复 npm ci lockfile 不同步导致 Docker 构建失败
+- 后端和前端 Docker 构建均已验证通过
+
 ## 2026-05-02（第二百七十八轮）
 
 ### 工程：测试标记补全 + 前端依赖审计

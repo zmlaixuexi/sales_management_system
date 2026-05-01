@@ -2,13 +2,14 @@
 
 最后更新时间：2026-05-02
 当前阶段：需求符合性验证 + 代码质量
-当前任务编号：ROUND-278
-当前任务名称：工程 — 测试标记补全 + 前端依赖审计
+当前任务编号：ROUND-279
+当前任务名称：部署 — 前端 Dockerfile 固定 Node 版本
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 279：部署 — 前端 Dockerfile 固定 node:24.12-alpine，修复 npm ci lockfile 不同步，Docker 构建验证通过
 - Round 278：工程 — test_file_service 添加 security 标记，npm audit 0 漏洞，474/474 通过
 - Round 277：安全 — pip-audit 扫描项目 venv，全部运行时依赖无已知漏洞
 - Round 276：文档 — deployment.md 新增开发工作流命令，env/api 文档完整性验证通过
