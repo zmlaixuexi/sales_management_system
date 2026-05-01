@@ -2,13 +2,14 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-363
-当前任务名称：客户和用户邮箱字段 XSS 消毒一致性修复
+当前任务编号：ROUND-364
+当前任务名称：文档同步测试计数至 819
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 364：docs/testing.md 同步至 819 tests（后端 561 + 前端 258）
 - Round 363：客户/用户邮箱 email 字段添加 strip_html 消毒，修复 CSV 导入与 API 路径不一致
 - Round 362：PRICE_BELOW_COST 订单创建集成测试 → 后端 561 tests
 - Round 361：getApiErrorMessage 增加 error.message 提取，前端 258 tests
