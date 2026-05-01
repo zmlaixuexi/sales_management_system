@@ -178,3 +178,33 @@ def test_09_import_file_too_large(monkeypatch):
     )
     assert resp.status_code == 400
     assert "CSV 文件不能超过" in resp.json()["detail"]["message"]
+
+
+def test_10_import_row_limit(monkeypatch):
+    """超过行数上限的 CSV 只导入前 N 行"""
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "MAX_CSV_IMPORT_ROWS", 2)
+    rows = "\n".join([f"客户{ i},138000{i:05d}" for i in range(4)])
+    csv_content = f"客户名称,电话\n{rows}"
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["created"] == 2
+    assert any("超过最大行数限制" in e["message"] for e in data["errors"])
+
+
+def test_11_import_strips_html():
+    """CSV 导入自动剥离 HTML 标签"""
+    csv_content = '客户名称,电话,联系人,邮箱\n<script>x</script>安全客户,13800007777,<b>张</b>,a@b.com'
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1

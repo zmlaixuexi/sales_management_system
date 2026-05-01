@@ -176,3 +176,33 @@ def test_09_import_file_too_large(monkeypatch):
     )
     assert resp.status_code == 400
     assert "CSV 文件不能超过" in resp.json()["detail"]["message"]
+
+
+def test_10_import_row_limit(monkeypatch):
+    """超过行数上限的 CSV 只导入前 N 行"""
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "MAX_CSV_IMPORT_ROWS", 3)
+    rows = "\n".join([f"商品{ i},100,50,10" for i in range(5)])
+    csv_content = f"商品名称,销售价,成本价,库存数量\n{rows}"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["created"] == 3
+    assert any("超过最大行数限制" in e["message"] for e in data["errors"])
+
+
+def test_11_import_strips_html():
+    """CSV 导入自动剥离 HTML 标签"""
+    csv_content = '商品名称,销售价\n<script>alert(1)</script>安全商品,99.00'
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1
