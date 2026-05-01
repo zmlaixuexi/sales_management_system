@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-05-02（第二百九十七轮）
+
+### 测试补强：CSV 导入 commit 失败 + 用户更新无效角色（+3）
+
+- test_product_import: db.commit 失败返回 500 IMPORT_FAILED
+- test_customer_import: db.commit 失败返回 500 IMPORT_FAILED
+- test_user_management: 编辑用户传入不存在的角色 ID 返回 400
+- 测试 482 → 485，485/485 通过
+
+## 2026-05-02（第二百九十六轮）
+
+### 记录：FEAT-20260502-96 客户 source/level 枚举值校验
+
+- implemented-features.md 新增 FEAT-20260502-96 记录
+
 ## 2026-05-02（第二百九十五轮）
 
 ### 部署：.env.example 新增 MAX_CSV_IMPORT_ROWS 配置项

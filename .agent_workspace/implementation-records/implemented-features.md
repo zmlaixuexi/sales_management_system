@@ -6,6 +6,17 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-97
+
+### 测试补强 — CSV 导入 commit 失败 + 用户更新无效角色（+3）
+
+- **文件**: `backend/tests/test_product_import.py`, `backend/tests/test_customer_import.py`, `backend/tests/test_user_management.py`
+- **内容**:
+  - 商品导入: db.commit 失败时返回 500 IMPORT_FAILED
+  - 客户导入: db.commit 失败时返回 500 IMPORT_FAILED
+  - 用户管理: 编辑用户传入不存在的 role_ids 返回 400 角色不存在
+- **测试**: +3（482→485），485/485 通过
+
 ## 功能编号：FEAT-20260502-96
 
 ### 安全 — 客户 source/level 枚举值校验

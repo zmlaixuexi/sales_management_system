@@ -234,3 +234,24 @@ def test_13_import_invalid_level():
     assert resp.status_code == 200
     assert resp.json()["data"]["created"] == 0
     assert any("等级值无效" in e["message"] for e in resp.json()["data"]["errors"])
+
+
+def test_14_import_commit_failure():
+    """db.commit 失败返回 500 IMPORT_FAILED"""
+    from unittest.mock import patch
+
+    from sqlalchemy.orm import Session
+
+    csv_content = "客户名称,电话\n失败客户,13800006666"
+
+    def _failing_commit(self):
+        raise RuntimeError("模拟数据库故障")
+
+    with patch.object(Session, "commit", _failing_commit):
+        resp = client.post(
+            "/api/v1/customers/import",
+            files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
+            headers=_auth(),
+        )
+    assert resp.status_code == 500
+    assert resp.json()["detail"]["code"] == "IMPORT_FAILED"

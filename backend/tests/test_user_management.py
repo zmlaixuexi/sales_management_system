@@ -228,3 +228,14 @@ def resp_id_from_list(username):
     resp = client.get("/api/v1/users", headers=_auth())
     users = resp.json()["data"]["items"]
     return next(u["id"] for u in users if u["username"] == username)
+
+
+def test_12_update_user_invalid_role_ids():
+    """编辑用户时传入不存在的角色 ID 返回 400"""
+    user_id = resp_id_from_list("newuser")
+    fake_role_id = str(uuid.uuid4())
+    resp = client.put(f"/api/v1/users/{user_id}", json={
+        "role_ids": [fake_role_id],
+    }, headers=_auth())
+    assert resp.status_code == 400
+    assert "角色不存在" in resp.json()["detail"]["message"]

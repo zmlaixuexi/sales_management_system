@@ -206,3 +206,24 @@ def test_11_import_strips_html():
     )
     assert resp.status_code == 200
     assert resp.json()["data"]["created"] == 1
+
+
+def test_12_import_commit_failure():
+    """db.commit 失败返回 500 IMPORT_FAILED"""
+    from unittest.mock import patch
+
+    from sqlalchemy.orm import Session
+
+    csv_content = "商品名称,销售价\n失败商品,100.00"
+
+    def _failing_commit(self):
+        raise RuntimeError("模拟数据库故障")
+
+    with patch.object(Session, "commit", _failing_commit):
+        resp = client.post(
+            "/api/v1/products/import",
+            files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+            headers=_auth(),
+        )
+    assert resp.status_code == 500
+    assert resp.json()["detail"]["code"] == "IMPORT_FAILED"
