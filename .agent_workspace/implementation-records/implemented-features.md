@@ -6,6 +6,20 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-122
+
+### 安全 — 商品库存变动审计流水
+
+- **文件**: `backend/app/api/v1/products.py`, `backend/tests/test_product_crud.py`, `backend/tests/test_integration.py`
+- **内容**:
+  - 创建商品有初始库存（>0）时自动生成 `product_create` 类型 InventoryMovement
+  - 编辑商品库存变更（delta ≠ 0）时自动生成 `product_update` 类型 InventoryMovement
+  - 库存不变时不生成多余流水
+  - 修复集成测试适配新的流水记录顺序
+  - 新增 3 个测试：创建生成流水、编辑生成流水、不变不生成
+- **验证**: 558+254=812 tests
+- **关联**: Round 355
+
 ## 功能编号：FEAT-20260502-121
 
 ### 安全 — 商品状态和客户跟进状态枚举约束
