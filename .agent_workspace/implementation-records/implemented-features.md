@@ -6,6 +6,19 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260501-76
+
+### 客户排行和销售人员排行报表 API
+
+- **文件**: `backend/app/api/v1/reports.py`, `backend/tests/test_reports_audit.py`
+- **内容**:
+  - GET /reports/customer-ranking：按客户销售额排行，支持 period/limit 参数
+  - GET /reports/salesperson-ranking：按销售人员业绩排行，支持 period/limit 参数
+  - 数据范围过滤：非 order:view_all 用户只看本人订单数据
+  - 利润可见性控制：无 report:profit 权限不返回 total_cost/gross_profit
+- **验证**: 451 后端通过（+6），ruff 0，make ci 全量通过
+- **效果**: 补全开发文档第 8.5 节要求的报表端点
+
 ## 功能编号：FEAT-20260501-75
 
 ### 需求符合性验证 + 安全/业务逻辑修复

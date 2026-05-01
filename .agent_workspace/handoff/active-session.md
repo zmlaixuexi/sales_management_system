@@ -1,16 +1,16 @@
 # 当前工作现场
 
 最后更新时间：2026-05-01
-当前阶段：安全加固
-当前任务编号：ROUND-252
-当前任务名称：验证工程实现符合需求
+当前阶段：需求符合性验证 + 功能补全
+当前任务编号：ROUND-253
+当前任务名称：需求缺口补全 — 报表 API
 当前 Agent：Claude
 任务状态：进行中
 
 ## 最近完成
 
+- Round 253：新增客户排行和销售人员排行报表 API — GET /reports/customer-ranking + GET /reports/salesperson-ranking，含数据范围过滤和利润可见性控制，+6 测试，451/451 通过，make ci 全量通过
 - Round 252：需求符合性验证 — 发现并修复 3 个安全/业务逻辑缺口（审计日志脱敏手机号/邮箱 + 商品删除订单引用检查 + 低于成本价阻止），新增 2 个测试，445/445 通过，make ci 全量通过
-- Round 252：修复 test_health_check 数据库连接测试 — 无 PostgreSQL 时 health 端点返回 degraded 导致断言失败，改用 monkeypatch 模拟数据库连接，443/443 + make ci 全量通过
 - Round 251：CI 工作流验证 — alembic check/pytest --cov 自动执行 99% 阈值，无需修改。后续改进需产品决策。
 - Round 250：最终 make ci 全量验证通过（ruff 0 + eslint 0 + tsc 0 + 443/443 + 123/123 + 覆盖率 99.82% 阈值 99% + build 零警告）
 - Round 249：环境完整性验证 — 无残留测试数据库、gitignore 正确排除 *.db、迁移同步
@@ -167,7 +167,7 @@
 
 ## 当前测试状态
 
-- 后端：445/445 通过
+- 后端：451/451 通过
 - 前端：123/123 通过
 - ruff：0 issues（含 RUF 规则）
 - ESLint：0 warnings
@@ -177,7 +177,7 @@
 
 ## 下一步第一动作
 
-继续验证工程实现是否符合需求。已修复 3 个安全/业务逻辑缺口（审计日志脱敏+商品删除引用检查+成本价校验），445/445 通过。待修复缺口：缺少 2 个报表 API、6 个前端页面、订单日志 API、派生销售字段等。需产品决策优先级。
+继续需求缺口补全。已完成报表 API（customer-ranking + salesperson-ranking）。待修复缺口：缺少订单日志 API、6 个前端页面、派生销售字段、响应体 request_id 等。
 
 ## 当前里程碑总结（Round 95-246）
 

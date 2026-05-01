@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-01（第二百五十三轮）
+
+### 功能：客户排行和销售人员排行报表 API
+
+- 新增 GET /reports/customer-ranking：按客户销售额排行，支持时间段筛选和 limit
+- 新增 GET /reports/salesperson-ranking：按销售人员业绩排行，支持时间段筛选和 limit
+- 两个端点均支持数据范围过滤（非 view_all 只看本人订单）和利润可见性控制（report:profit 权限）
+- 新增 6 个测试（排行基本功能/limit/利润可见/数据范围），后端 451/451 通过
+- make ci 全量通过：ruff 0 + eslint 0 + tsc 0 + 451/451 + 123/123 + 覆盖率 99.73% + build 零警告
+
 ## 2026-05-01（第二百五十二轮）
 
 ### 修复：test_health_check 数据库连接测试
