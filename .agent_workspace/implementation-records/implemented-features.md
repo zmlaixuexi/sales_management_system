@@ -6,6 +6,17 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-100
+
+### 工程 — Makefile 自动检测 backend venv python
+
+- **文件**: `Makefile`
+- **内容**:
+  - 新增 `PYTHON` 变量：优先 `.venv/bin/python`，回退系统 `python`
+  - `pytest`/`mypy`/`seed` 等后端命令统一使用 `$(PYTHON)`
+  - 修复本地 `make ci` 在 miniconda 环境下 mypy 找不到的问题
+- **验证**: make ci 全量通过
+
 ## 功能编号：FEAT-20260502-99
 
 ### 前端 — downloadCsv 迁移至 Axios 统一拦截器

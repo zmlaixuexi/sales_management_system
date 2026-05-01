@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百轮）
+
+### 工程：Makefile 自动检测 backend venv python + make ci 全量通过
+
+- Makefile 新增 PYTHON 变量：优先 .venv/bin/python，回退系统 python
+- pytest / mypy / seed 等后端命令统一使用 $(PYTHON)
+- make ci 全量通过：ruff 0 + mypy 0 + eslint 0 + 485/485 + 127/127 + build 零警告
+
 ## 2026-05-02（第二百九十九轮）
 
 ### 前端：downloadCsv 迁移至 Axios — 统一拦截器覆盖
