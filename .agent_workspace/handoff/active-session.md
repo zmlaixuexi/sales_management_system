@@ -2,17 +2,16 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-359
-当前任务名称：usePaginatedList error 状态测试
+当前任务编号：ROUND-360
+当前任务名称：安全审计 — SQL 注入和 XSS 防护一致性
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 359：usePaginatedList 新增 2 个 error 状态测试 → 前端 256 tests
+- Round 360：安全审计确认所有 LIKE 查询使用 escape_like、所有自由文本字段使用 strip_html，无漏洞
+- Round 359：usePaginatedList error 状态测试 → 前端 256 tests
 - Round 358：7 个列表页加载失败显示重试按钮
-- Round 357：请求日志补充用户 ID
-- Round 356：API 文档校验 37 端点、修正权限码
 
 ## 最终验证状态
 
@@ -30,8 +29,7 @@
 
 继续 keep-going 模式。可选方向：
 - 代码质量（重复代码检查、类型安全增强）
-- 安全加固
-- 部署体验
+- 部署体验（Docker Compose 验证）
 - 异常路径测试补强
 
 ## 阻塞问题

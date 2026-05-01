@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第三百六十轮）
+
+### 安全审计：SQL 注入和 XSS 防护一致性检查
+
+审计结果：
+- 所有 15 处 LIKE/ILIKE 查询均使用 `escape_like()` + `escape="\\"`，无 SQL 注入风险
+- 内部前缀匹配（SKU/订单号生成）不涉及用户输入，无需转义
+- 所有 schema 的自由文本字段（name/remark/display_name/contact_name）均使用 `strip_html()` 清理，无存储型 XSS 风险
+- 无代码修改，记录审计结果
+
 ## 2026-05-02（第三百五十九轮）
 
 ### 测试：usePaginatedList error 状态测试
