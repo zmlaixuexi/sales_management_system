@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-02（第三百一十二轮）
+
+### 可观测性：SQL 慢查询日志
+
+- 新增 `backend/app/core/slow_query.py`：SQLAlchemy before/after_cursor_execute 事件监听
+- 超过 `SLOW_SQL_THRESHOLD_MS`（默认 200ms）的 SQL 记录 WARNING 日志
+- 日志包含耗时、阈值、request_id、截断的 SQL 文本
+- session.py 自动注册监听器
+- 新增 3 个测试：注册逻辑、日志回调、禁用场景
+- make ci 全量通过：489+129=618 tests
+
 ## 2026-05-02（第三百一十一轮）
 
 ### 数据库索引优化：软删除索引 + 时间排序索引

@@ -6,6 +6,19 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-104
+
+### 可观测性 — SQL 慢查询日志
+
+- **文件**: `backend/app/core/slow_query.py`, `backend/app/db/session.py`, `backend/app/core/config.py`, `backend/tests/test_slow_query.py`
+- **内容**:
+  - SQLAlchemy before/after_cursor_execute 事件监听
+  - 超过 SLOW_SQL_THRESHOLD_MS（默认 200ms）的 SQL 记录 WARNING 日志
+  - 日志包含耗时、阈值、request_id、截断的 SQL 文本（200字符）
+  - 可通过环境变量 SLOW_SQL_THRESHOLD_MS 配置，设为负值禁用
+- **验证**: make ci 全量通过，489/489 后端 + 129/129 前端 = 618 tests
+- **测试**: +3（注册逻辑、日志回调、禁用场景）
+
 ## 功能编号：FEAT-20260502-103
 
 ### 性能 — 数据库索引优化：软删除索引 + 时间排序索引
