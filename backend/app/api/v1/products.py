@@ -17,7 +17,7 @@ from app.api.deps import (
     require_permission,
     resp,
 )
-from app.core.sanitize import escape_like
+from app.core.sanitize import escape_like, strip_html
 from app.models.product import Product, ProductCategory, ProductPriceHistory
 from app.models.user import User
 from app.schemas.product import (
@@ -557,7 +557,7 @@ async def import_products_csv(
             sku_seq = 1
 
     for row_num, row in enumerate(reader, start=2):
-        name = (row.get("商品名称") or row.get("name") or "").strip()
+        name = strip_html((row.get("商品名称") or row.get("name") or "").strip())
         if not name:
             errors.append({"row": row_num, "message": "商品名称不能为空"})
             continue
@@ -612,7 +612,14 @@ async def import_products_csv(
         db.add(product)
         created += 1
 
-    db.commit()
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail={"code": "IMPORT_FAILED", "message": "导入失败，请检查数据后重试"},
+        ) from None
 
     log_action(db, actor_id=current_user.id, actor_name=current_user.display_name,
                action="product_import", resource_type="product",

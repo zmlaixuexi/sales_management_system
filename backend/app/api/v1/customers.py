@@ -15,7 +15,7 @@ from app.api.deps import (
     require_permission,
     resp,
 )
-from app.core.sanitize import escape_like
+from app.core.sanitize import escape_like, strip_html
 from app.models.customer import Customer
 from app.models.user import User
 from app.schemas.customer import (
@@ -373,7 +373,7 @@ async def import_customers_csv(
     errors: list[dict] = []
 
     for row_num, row in enumerate(reader, start=2):
-        name = (row.get("客户名称") or row.get("name") or "").strip()
+        name = strip_html((row.get("客户名称") or row.get("name") or "").strip())
         if not name:
             errors.append({"row": row_num, "message": "客户名称不能为空"})
             continue
@@ -390,11 +390,11 @@ async def import_customers_csv(
                 continue
             used_phones.add(phone)
 
-        contact_name = (row.get("联系人") or row.get("contact_name") or "").strip() or None
-        email = (row.get("邮箱") or row.get("email") or "").strip() or None
-        source = (row.get("来源") or row.get("source") or "").strip() or None
-        level = (row.get("等级") or row.get("level") or "").strip() or "normal"
-        remark = (row.get("备注") or row.get("remark") or "").strip() or None
+        contact_name = strip_html((row.get("联系人") or row.get("contact_name") or "").strip()) or None
+        email = strip_html((row.get("邮箱") or row.get("email") or "").strip()) or None
+        source = strip_html((row.get("来源") or row.get("source") or "").strip()) or None
+        level = strip_html((row.get("等级") or row.get("level") or "").strip()) or "normal"
+        remark = strip_html((row.get("备注") or row.get("remark") or "").strip()) or None
 
         customer = Customer(
             id=uuid.uuid4(),
@@ -413,7 +413,14 @@ async def import_customers_csv(
         db.add(customer)
         created += 1
 
-    db.commit()
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail={"code": "IMPORT_FAILED", "message": "导入失败，请检查数据后重试"},
+        ) from None
 
     log_action(db, actor_id=current_user.id, actor_name=current_user.display_name,
                action="customer_import", resource_type="customer",
