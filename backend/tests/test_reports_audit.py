@@ -517,3 +517,22 @@ def test_29_salesperson_ranking_data_scope():
     items = resp.json()["data"]["items"]
     assert len(items) == 1
     assert items[0]["total_sales"] == "200.00"
+
+
+def test_30_customer_ranking_data_scope():
+    """非 view_all 用户的客户排行只包含本人订单数据"""
+    db = TestSession()
+    try:
+        scope_user = db.query(User).filter(User.username == "scope_tester").first()
+        token = create_access_token(subject=str(scope_user.id))
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/reports/customer-ranking?period=30d", headers={
+        "Authorization": f"Bearer {token}",
+    })
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    # 数据范围过滤：只能看到 scope_tester 自己的客户数据，不含超管的客户
+    for item in items:
+        assert item["customer_name"] != "报表测试客户"

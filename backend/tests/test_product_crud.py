@@ -234,8 +234,72 @@ def test_03e_price_history_with_cost():
     assert first["new_cost_price"] == "80.00"
 
 
+def test_03c_delete_product_with_order_ref():
+    """删除被订单引用的商品返回 409"""
+    from app.models.customer import Customer
+    from app.models.order import SalesOrder, SalesOrderItem
+
+    db = TestSession()
+    try:
+        admin = db.query(User).filter(User.username == "prod_admin").first()
+        product = db.query(Product).filter(Product.id == uuid.UUID(_product_id)).first()
+        # 创建客户
+        customer = Customer(
+            id=uuid.uuid4(),
+            name="引用测试客户",
+            phone="13900001111",
+            owner_user_id=admin.id,
+            created_by=admin.id,
+        )
+        db.add(customer)
+        db.flush()
+        # 创建订单引用该商品
+        order = SalesOrder(
+            id=uuid.uuid4(),
+            order_no="SO-REF-001",
+            customer_id=customer.id,
+            sales_user_id=admin.id,
+            status="confirmed",
+            total_amount="199.00",
+            created_by=admin.id,
+        )
+        db.add(order)
+        db.flush()
+        item = SalesOrderItem(
+            id=uuid.uuid4(),
+            order_id=order.id,
+            product_id=product.id,
+            product_name_snapshot=product.name,
+            product_sku_snapshot=product.sku,
+            quantity=1,
+            unit_price="199.00",
+            subtotal_amount="199.00",
+            subtotal_cost="80.00",
+            cost_price_snapshot="80.00",
+        )
+        db.add(item)
+        db.commit()
+    finally:
+        db.close()
+
+    resp = client.delete(f"/api/v1/products/{_product_id}", headers=_auth())
+    assert resp.status_code == 409
+    assert resp.json()["detail"]["code"] == "PRODUCT_IN_USE"
+
+
 def test_04_delete_product():
-    """软删除商品"""
+    """软删除商品（清除订单引用后）"""
+    from app.models.order import SalesOrderItem
+
+    db = TestSession()
+    try:
+        db.query(SalesOrderItem).filter(
+            SalesOrderItem.product_id == uuid.UUID(_product_id)
+        ).delete(synchronize_session=False)
+        db.commit()
+    finally:
+        db.close()
+
     resp = client.delete(f"/api/v1/products/{_product_id}", headers=_auth())
     assert resp.status_code == 200
     assert "删除成功" in resp.json()["message"]
