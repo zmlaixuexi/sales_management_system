@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第三百零八轮）
+
+### 代码质量审计：前端零 console.log、后端零 print/pdb、零硬编码密钥、.gitignore 完整
+
+- 前端 src/：零 console.log/debug/warn/info/error
+- 后端 app/：零 print()/breakpoint()/pdb
+- 硬编码密码/密钥：零
+- .gitignore：完整覆盖（.env、__pycache__、.venv、node_modules、dist、uploads、*.db）
+
 ## 2026-05-02（第三百零七轮）
 
 ### 文档：同步测试数 486+129=615 + make ci 全量通过
