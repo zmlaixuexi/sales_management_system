@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百七十一轮）
+
+### 安全：收款并发防护
+
+- register_payment 改用 with_for_update 行锁查询订单，防止并发收款导致超额
+- reverse_payment 同样添加 with_for_update 行锁
+- 移除 register_payment 未使用的 request_meta 参数
+- 474/474 通过，ruff 0
+
 ## 2026-05-02（第二百七十轮）
 
 ### 测试补强：validate_csv_upload 单元测试
