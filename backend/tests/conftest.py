@@ -43,6 +43,7 @@ def pytest_collection_modifyitems(items):
         "test_logging": "infra",
         "test_export_helpers": "export",
         "test_csv_import": "import",
+        "test_file_service": "security",
     }
     for item in items:
         for pattern, marker in file_markers.items():
