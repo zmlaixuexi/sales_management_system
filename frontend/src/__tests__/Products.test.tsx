@@ -210,4 +210,16 @@ describe('ProductsPage', () => {
     _paginatedListReturn.total = 2
     _paginatedListReturn.error = false
   })
+
+  it('加载中显示加载提示', () => {
+    Object.assign(_paginatedListReturn, { data: [], total: 0, loading: true })
+    renderProducts()
+    expect(screen.getByText('加载中...')).toBeInTheDocument()
+    _paginatedListReturn.data = [
+      { id: '1', name: '商品A', sku: 'SKU-001', category_name: '分类1', sale_price: '100', cost_price: '60', unit_profit: '40', gross_margin: '40', stock_quantity: 10, status: 'active', main_image_url: null },
+      { id: '2', name: '商品B', sku: 'SKU-002', category_name: '分类2', sale_price: '200', cost_price: '120', unit_profit: '80', gross_margin: '40', stock_quantity: 5, status: 'inactive', main_image_url: null },
+    ]
+    _paginatedListReturn.total = 2
+    _paginatedListReturn.loading = false
+  })
 })

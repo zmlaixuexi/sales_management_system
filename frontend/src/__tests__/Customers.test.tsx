@@ -204,4 +204,17 @@ describe('CustomersPage', () => {
     _paginatedListReturn.total = 3
     _paginatedListReturn.error = false
   })
+
+  it('加载中显示加载提示', () => {
+    Object.assign(_paginatedListReturn, { data: [], total: 0, loading: true })
+    renderCustomers()
+    expect(screen.getByText('加载中...')).toBeInTheDocument()
+    _paginatedListReturn.data = [
+      { id: 'c1', name: '客户甲', contact_name: '张三', phone: '13800001111', source: 'referral', level: 'vip', owner_name: '销售A', follow_status: '活跃' },
+      { id: 'c2', name: '客户乙', contact_name: '李四', phone: '13800002222', source: 'online', level: 'normal', owner_name: '销售B', follow_status: '待跟进' },
+      { id: 'c3', name: '客户丙', contact_name: null, phone: null, source: null, level: null, owner_name: null, follow_status: null },
+    ]
+    _paginatedListReturn.total = 3
+    _paginatedListReturn.loading = false
+  })
 })
