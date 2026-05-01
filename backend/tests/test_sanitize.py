@@ -65,3 +65,17 @@ def test_customer_schema_sanitizes_name():
     from app.schemas.customer import CustomerCreate
     c = CustomerCreate(name="<script>alert(1)</script>客户")
     assert c.name == "alert(1)客户"
+
+
+def test_customer_schema_sanitizes_email():
+    """CustomerCreate schema 净化邮箱中的 HTML"""
+    from app.schemas.customer import CustomerCreate
+    c = CustomerCreate(name="测试客户", email="<b>xss</b>@test.com")
+    assert c.email == "xss@test.com"
+
+
+def test_user_schema_sanitizes_email():
+    """UserCreate schema 净化邮箱中的 HTML"""
+    from app.schemas.auth import UserCreate
+    u = UserCreate(username="testuser", password="pass123", email="<script>x</script>@evil.com")
+    assert u.email == "x@evil.com"

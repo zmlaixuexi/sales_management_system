@@ -68,7 +68,7 @@ class UserCreate(BaseModel):
             raise ValueError("密码必须包含至少一个数字")
         return v
 
-    @field_validator("display_name")
+    @field_validator("display_name", "email")
     @classmethod
     def sanitize_text(cls, v: str | None) -> str | None:
         return strip_html(v) if v else v
@@ -81,7 +81,7 @@ class UserUpdate(BaseModel):
     is_active: bool | None = None
     role_ids: list[str] | None = None
 
-    @field_validator("display_name")
+    @field_validator("display_name", "email")
     @classmethod
     def sanitize_text(cls, v: str | None) -> str | None:
         return strip_html(v) if v else v

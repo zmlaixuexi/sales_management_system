@@ -20,7 +20,7 @@ class CustomerCreate(BaseModel):
     follow_status: FollowStatus = Field("new", description="跟进状态")
     remark: str | None = Field(None, description="备注")
 
-    @field_validator("name", "contact_name", "remark")
+    @field_validator("name", "contact_name", "email", "remark")
     @classmethod
     def sanitize_text(cls, v: str | None) -> str | None:
         return strip_html(v) if v else v
@@ -37,7 +37,7 @@ class CustomerUpdate(BaseModel):
     owner_user_id: str | None = None
     remark: str | None = None
 
-    @field_validator("name", "contact_name", "remark")
+    @field_validator("name", "contact_name", "email", "remark")
     @classmethod
     def sanitize_text(cls, v: str | None) -> str | None:
         return strip_html(v) if v else v
