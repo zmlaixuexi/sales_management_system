@@ -11,13 +11,6 @@ class ApiResponse(BaseModel, Generic[T]):
     message: str = "操作成功"
 
 
-class PaginatedData(BaseModel, Generic[T]):
-    items: list[T]
-    page: int
-    page_size: int
-    total: int
-
-
 # ── 通用错误响应文档（用于 OpenAPI responses 参数）──
 
 COMMON_ERRORS: dict[int, dict] = {
