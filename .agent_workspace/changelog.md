@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-05-02（第三百六十六轮）
+
+### 测试：报表和导出 API 异常路径补强（+18 tests）
+
+- `backend/tests/test_reports_audit.py`：新增 11 个异常路径测试
+  - 未认证访问 401（6 个报表端点 parametrize）
+  - 排行 limit 边界值 422（limit=0、limit=51）
+  - 库存预警负数阈值 422
+  - 无效 period 错误码验证
+- `backend/tests/test_export.py`：新增 7 个异常路径测试
+  - 未认证 401（客户/订单/收款导出）
+  - 无效 UUID 格式 422（category_id/customer_id/order_id）
+- 后端 562→580 tests，总计 820→838
+
 ## 2026-05-02（第三百六十五轮）
 
 ### 测试：修复 PRICE_BELOW_COST 订单更新路径集成测试

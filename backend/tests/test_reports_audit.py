@@ -3,6 +3,7 @@
 import uuid
 from decimal import Decimal
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -561,3 +562,63 @@ def test_34_invalid_period_salesperson_ranking():
     """无效 period 在销售人员排行接口返回 400"""
     resp = client.get("/api/v1/reports/salesperson-ranking?period=nope", headers=_auth())
     assert resp.status_code == 400
+
+
+# ─── 报表：未认证访问 ──────────────────────────────────────────
+
+_REPORT_ENDPOINTS = [
+    "/api/v1/reports/sales-summary",
+    "/api/v1/reports/sales-trend",
+    "/api/v1/reports/product-ranking",
+    "/api/v1/reports/customer-ranking",
+    "/api/v1/reports/salesperson-ranking",
+    "/api/v1/reports/inventory-warning",
+]
+
+
+@pytest.mark.parametrize("endpoint", _REPORT_ENDPOINTS)
+def test_35_report_requires_auth(endpoint):
+    """报表端点未认证返回 401"""
+    resp = client.get(endpoint)
+    assert resp.status_code == 401
+
+
+# ─── 报表：limit 边界值 ────────────────────────────────────────
+
+def test_36_product_ranking_limit_zero_422():
+    """商品排行 limit=0 返回 422"""
+    resp = client.get("/api/v1/reports/product-ranking?limit=0", headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_37_product_ranking_limit_over_max_422():
+    """商品排行 limit=51 超出上限返回 422"""
+    resp = client.get("/api/v1/reports/product-ranking?limit=51", headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_38_customer_ranking_limit_zero_422():
+    """客户排行 limit=0 返回 422"""
+    resp = client.get("/api/v1/reports/customer-ranking?limit=0", headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_39_salesperson_ranking_limit_over_max_422():
+    """销售人员排行 limit=51 超出上限返回 422"""
+    resp = client.get("/api/v1/reports/salesperson-ranking?limit=51", headers=_auth())
+    assert resp.status_code == 422
+
+
+# ─── 报表：空数据 ──────────────────────────────────────────────
+
+def test_40_sales_trend_invalid_period_400():
+    """趋势接口无效 period 返回 400 含 VALIDATION_FAILED 错误码"""
+    resp = client.get("/api/v1/reports/sales-trend?period=bad_period", headers=_auth())
+    assert resp.status_code == 400
+    assert resp.json()["error"]["code"] == "VALIDATION_FAILED"
+
+
+def test_41_inventory_warning_negative_threshold_422():
+    """库存预警负数阈值返回 422"""
+    resp = client.get("/api/v1/reports/inventory-warning?threshold=-1", headers=_auth())
+    assert resp.status_code == 422

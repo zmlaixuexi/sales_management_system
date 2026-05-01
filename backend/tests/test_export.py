@@ -532,3 +532,42 @@ def test_31_export_orders_data_scope_filtered():
     # BOM 行 + header = 1 或 2 行（BOM 可能在 header 行内）
     data_lines = [ln for ln in lines if "订单号" not in ln]
     assert len(data_lines) == 0
+
+
+# ── 导出异常路径测试 ──────────────────────────────────────────
+
+
+def test_32_export_customers_requires_auth():
+    """客户导出未认证返回 401"""
+    resp = client.get("/api/v1/exports/customers")
+    assert resp.status_code == 401
+
+
+def test_33_export_orders_requires_auth():
+    """订单导出未认证返回 401"""
+    resp = client.get("/api/v1/exports/orders")
+    assert resp.status_code == 401
+
+
+def test_34_export_payments_requires_auth():
+    """收款导出未认证返回 401"""
+    resp = client.get("/api/v1/exports/payments")
+    assert resp.status_code == 401
+
+
+def test_35_export_products_invalid_category_id_422():
+    """商品导出无效 category_id 格式返回 422"""
+    resp = client.get("/api/v1/exports/products?category_id=not-a-uuid", headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_36_export_orders_invalid_customer_id_422():
+    """订单导出无效 customer_id 格式返回 422"""
+    resp = client.get("/api/v1/exports/orders?customer_id=not-a-uuid", headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_37_export_payments_invalid_order_id_422():
+    """收款导出无效 order_id 格式返回 422"""
+    resp = client.get("/api/v1/exports/payments?order_id=not-a-uuid", headers=_auth())
+    assert resp.status_code == 422

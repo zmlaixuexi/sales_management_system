@@ -6,6 +6,29 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-130
+
+### 测试 — 报表和导出 API 异常路径补强
+
+- **文件**: `backend/tests/test_reports_audit.py`, `backend/tests/test_export.py`
+- **内容**:
+  - 报表：6 个端点未认证 401（parametrize）、4 个 limit 边界值 422、1 个负数阈值 422、1 个无效 period 错误码验证
+  - 导出：3 个端点未认证 401、3 个无效 UUID 格式 422
+  - 覆盖了此前缺失的认证、输入校验和错误码断言
+- **验证**: 580 后端测试全通过，make ci 全量通过
+- **关联**: Round 366
+
+## 功能编号：FEAT-20260502-129
+
+### 测试 — 修复 PRICE_BELOW_COST 订单更新路径集成测试
+
+- **文件**: `backend/tests/test_order_crud.py`
+- **内容**:
+  - 修复 test_29_update_order_price_below_cost_400 — 直接在 DB 创建草稿订单（唯一 order_no）
+  - 避免 generate_sequential_code 与 test_27 已有订单的 order_no UNIQUE 冲突
+- **验证**: 562 后端测试全通过，make ci 全量通过
+- **关联**: Round 365
+
 ## 功能编号：FEAT-20260502-128
 
 ### 安全 — 客户和用户邮箱字段 XSS 消毒一致性修复
