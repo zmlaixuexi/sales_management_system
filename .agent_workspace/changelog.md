@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-01（第二百五十四轮）
+
+### 功能：订单操作日志查询 API
+
+- 新增 GET /sales-orders/{id}/logs：查询指定订单的操作日志（分页）
+- 支持 order_create/order_confirm/order_cancel 等操作记录查看
+- 数据范围控制：非 view_all 用户只能查看本人订单的日志
+- 新增 3 个测试（日志列表含 create+confirm/分页/404），后端 454/454 通过
+- make ci 全量通过：ruff 0 + eslint 0 + tsc 0 + 454/454 + 123/123 + 覆盖率 99.73% + build 零警告
+
 ## 2026-05-01（第二百五十三轮）
 
 ### 功能：客户排行和销售人员排行报表 API

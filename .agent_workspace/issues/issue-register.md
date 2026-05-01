@@ -107,7 +107,7 @@ RBAC 模型和权限种子已建立，但缺少统一后端权限依赖、对象
 
 **待修复：**
 - ~~缺少报表 API：/reports/customer-ranking、/reports/salesperson-ranking~~ → Round 253 已修复
-- 缺少订单日志 API：/sales-orders/{id}/logs
+- ~~缺少订单日志 API：/sales-orders/{id}/logs~~ → Round 254 已修复
 - 支付 API 路径与文档不一致：/payments/orders/{id}/payments vs /sales-orders/{id}/payments
 - 缺少 6 个前端页面：客户详情、库存流水、支付列表、报表中心、用户管理、角色权限
 - 商品缺少派生销售字段（sales_quantity、sales_amount 等）

@@ -2,13 +2,14 @@
 
 最后更新时间：2026-05-01
 当前阶段：需求符合性验证 + 功能补全
-当前任务编号：ROUND-253
-当前任务名称：需求缺口补全 — 报表 API
+当前任务编号：ROUND-254
+当前任务名称：需求缺口补全 — 订单日志 API
 当前 Agent：Claude
 任务状态：进行中
 
 ## 最近完成
 
+- Round 254：新增订单操作日志查询 API — GET /sales-orders/{id}/logs，含数据范围控制和分页，+3 测试，454/454 通过，make ci 全量通过
 - Round 253：新增客户排行和销售人员排行报表 API — GET /reports/customer-ranking + GET /reports/salesperson-ranking，含数据范围过滤和利润可见性控制，+6 测试，451/451 通过，make ci 全量通过
 - Round 252：需求符合性验证 — 发现并修复 3 个安全/业务逻辑缺口（审计日志脱敏手机号/邮箱 + 商品删除订单引用检查 + 低于成本价阻止），新增 2 个测试，445/445 通过，make ci 全量通过
 - Round 251：CI 工作流验证 — alembic check/pytest --cov 自动执行 99% 阈值，无需修改。后续改进需产品决策。
@@ -167,7 +168,7 @@
 
 ## 当前测试状态
 
-- 后端：451/451 通过
+- 后端：454/454 通过
 - 前端：123/123 通过
 - ruff：0 issues（含 RUF 规则）
 - ESLint：0 warnings
@@ -177,7 +178,7 @@
 
 ## 下一步第一动作
 
-继续需求缺口补全。已完成报表 API（customer-ranking + salesperson-ranking）。待修复缺口：缺少订单日志 API、6 个前端页面、派生销售字段、响应体 request_id 等。
+继续需求缺口补全。已完成报表 API + 订单日志 API。待修复缺口：6 个前端页面、派生销售字段、响应体 request_id、支付路径对齐等。
 
 ## 当前里程碑总结（Round 95-246）
 

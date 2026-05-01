@@ -6,6 +6,19 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260501-77
+
+### 订单操作日志查询 API
+
+- **文件**: `backend/app/api/v1/orders.py`, `backend/tests/test_integration.py`
+- **内容**:
+  - GET /sales-orders/{id}/logs：查询指定订单的操作日志
+  - 支持分页（page/page_size）
+  - 数据范围控制：非 view_all 用户只能查看本人订单日志
+  - 返回 actor_name/action/before_data/after_data/ip_address/user_agent/request_id
+- **验证**: 454 后端通过（+3），ruff 0，make ci 全量通过
+- **效果**: 补全开发文档第 8.5 节要求的订单日志端点
+
 ## 功能编号：FEAT-20260501-76
 
 ### 客户排行和销售人员排行报表 API
