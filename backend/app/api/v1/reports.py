@@ -22,6 +22,8 @@ router = APIRouter(
     },
 )
 
+_VALID_ORDER_STATUSES = ["confirmed", "partially_paid", "completed"]
+
 
 def _date_range(period: str):
     """根据 period 参数计算起止日期"""
@@ -43,6 +45,30 @@ def _date_range(period: str):
     return start, today
 
 
+def _order_period_filter(query, period: str):
+    """为查询添加订单日期范围和状态过滤（不含数据范围）。"""
+    start, end = _date_range(period)
+    start_dt = datetime.combine(start, datetime.min.time())
+    end_dt = datetime.combine(end, datetime.max.time())
+    return (
+        query.filter(
+            SalesOrder.deleted_at.is_(None),
+            SalesOrder.status.in_(_VALID_ORDER_STATUSES),
+            SalesOrder.created_at >= start_dt,
+            SalesOrder.created_at <= end_dt,
+        ),
+        start,
+        end,
+    )
+
+
+def _apply_data_scope(query, current_user: User):
+    """非 view_all 用户只看本人订单。"""
+    if not has_permission(current_user, "order:view_all"):
+        return query.filter(SalesOrder.sales_user_id == current_user.id)
+    return query
+
+
 @router.get("/sales-summary")
 def sales_summary(
     period: str = Query("30d", description="时间段: today, 7d, 30d, this_month, last_month"),
@@ -50,10 +76,6 @@ def sales_summary(
     current_user: User = Depends(require_permission("report:sales")),
 ):
     """销售汇总：总销售额、总成本、毛利、订单数"""
-    start, end = _date_range(period)
-    start_dt = datetime.combine(start, datetime.min.time())
-    end_dt = datetime.combine(end, datetime.max.time())
-
     query = (
         db.query(
             func.coalesce(func.sum(SalesOrder.total_amount), 0),
@@ -61,17 +83,9 @@ def sales_summary(
             func.coalesce(func.sum(SalesOrder.gross_profit), 0),
             func.count(SalesOrder.id),
         )
-        .filter(
-            SalesOrder.deleted_at.is_(None),
-            SalesOrder.status.in_(["confirmed", "partially_paid", "completed"]),
-            SalesOrder.created_at >= start_dt,
-            SalesOrder.created_at <= end_dt,
-        )
     )
-
-    # 数据范围：非 view_all 用户只看本人订单
-    if not has_permission(current_user, "order:view_all"):
-        query = query.filter(SalesOrder.sales_user_id == current_user.id)
+    query, start, end = _order_period_filter(query, period)
+    query = _apply_data_scope(query, current_user)
 
     result = query.first()
 
@@ -103,26 +117,15 @@ def sales_trend(
     current_user: User = Depends(require_permission("report:sales")),
 ):
     """销售趋势：按日统计销售额和订单数"""
-    start, end = _date_range(period)
-    start_dt = datetime.combine(start, datetime.min.time())
-    end_dt = datetime.combine(end, datetime.max.time())
-
     query = (
         db.query(
             func.date(SalesOrder.created_at).label("d"),
             func.coalesce(func.sum(SalesOrder.total_amount), 0).label("amount"),
             func.count(SalesOrder.id).label("cnt"),
         )
-        .filter(
-            SalesOrder.deleted_at.is_(None),
-            SalesOrder.status.in_(["confirmed", "partially_paid", "completed"]),
-            SalesOrder.created_at >= start_dt,
-            SalesOrder.created_at <= end_dt,
-        )
     )
-
-    if not has_permission(current_user, "order:view_all"):
-        query = query.filter(SalesOrder.sales_user_id == current_user.id)
+    query, start, end = _order_period_filter(query, period)
+    query = _apply_data_scope(query, current_user)
 
     rows = (
         query
@@ -153,9 +156,6 @@ def product_ranking(
 ):
     """商品销售排行：按销售额排序"""
     can_view_profit = has_permission(current_user, "report:profit")
-    start, end = _date_range(period)
-    start_dt = datetime.combine(start, datetime.min.time())
-    end_dt = datetime.combine(end, datetime.max.time())
 
     query = (
         db.query(
@@ -167,16 +167,9 @@ def product_ranking(
             func.coalesce(func.sum(SalesOrderItem.quantity), 0).label("total_quantity"),
         )
         .join(SalesOrder, SalesOrderItem.order_id == SalesOrder.id)
-        .filter(
-            SalesOrder.deleted_at.is_(None),
-            SalesOrder.status.in_(["confirmed", "partially_paid", "completed"]),
-            SalesOrder.created_at >= start_dt,
-            SalesOrder.created_at <= end_dt,
-        )
     )
-
-    if not has_permission(current_user, "order:view_all"):
-        query = query.filter(SalesOrder.sales_user_id == current_user.id)
+    query, _, _ = _order_period_filter(query, period)
+    query = _apply_data_scope(query, current_user)
 
     rows = (
         query
@@ -216,9 +209,6 @@ def customer_ranking(
 ):
     """客户销售排行：按销售额排序"""
     can_view_profit = has_permission(current_user, "report:profit")
-    start, end = _date_range(period)
-    start_dt = datetime.combine(start, datetime.min.time())
-    end_dt = datetime.combine(end, datetime.max.time())
 
     query = (
         db.query(
@@ -230,17 +220,9 @@ def customer_ranking(
             func.count(SalesOrder.id).label("order_count"),
         )
         .join(Customer, SalesOrder.customer_id == Customer.id)
-        .filter(
-            SalesOrder.deleted_at.is_(None),
-            Customer.deleted_at.is_(None),
-            SalesOrder.status.in_(["confirmed", "partially_paid", "completed"]),
-            SalesOrder.created_at >= start_dt,
-            SalesOrder.created_at <= end_dt,
-        )
     )
-
-    if not has_permission(current_user, "order:view_all"):
-        query = query.filter(SalesOrder.sales_user_id == current_user.id)
+    query, _, _ = _order_period_filter(query, period)
+    query = _apply_data_scope(query, current_user)
 
     rows = (
         query
@@ -276,9 +258,6 @@ def salesperson_ranking(
 ):
     """销售人员业绩排行：按销售额排序"""
     can_view_profit = has_permission(current_user, "report:profit")
-    start, end = _date_range(period)
-    start_dt = datetime.combine(start, datetime.min.time())
-    end_dt = datetime.combine(end, datetime.max.time())
 
     query = (
         db.query(
@@ -291,16 +270,9 @@ def salesperson_ranking(
             func.count(SalesOrder.id).label("order_count"),
         )
         .join(User, SalesOrder.sales_user_id == User.id)
-        .filter(
-            SalesOrder.deleted_at.is_(None),
-            SalesOrder.status.in_(["confirmed", "partially_paid", "completed"]),
-            SalesOrder.created_at >= start_dt,
-            SalesOrder.created_at <= end_dt,
-        )
     )
-
-    if not has_permission(current_user, "order:view_all"):
-        query = query.filter(SalesOrder.sales_user_id == current_user.id)
+    query, _, _ = _order_period_filter(query, period)
+    query = _apply_data_scope(query, current_user)
 
     rows = (
         query
