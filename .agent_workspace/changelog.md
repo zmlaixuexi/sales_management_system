@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第三百七十二轮）
+
+### 测试：订单快照保留验收测试（验收标准 6.5）
+
+- `backend/tests/test_order_crud.py`：新增 `test_30_order_preserves_snapshot_after_product_update`
+  - 验证修改商品名称/售价/成本价后，历史订单明细快照值不变
+  - 覆盖开发文档 6.5 节验收标准：「修改商品价格后，历史订单金额不变化」
+- 后端 592→593 tests，总计 850→851
+
 ## 2026-05-02（第三百七十一轮）
 
 ### 工程：提取 log_user_action() 包装函数，消除 17 处重复审计日志代码

@@ -12,7 +12,7 @@ from app.core.security import create_access_token, hash_password
 from app.db.session import Base
 from app.main import app
 from app.models.customer import Customer
-from app.models.order import SalesOrder
+from app.models.order import SalesOrder, SalesOrderItem
 from app.models.product import Product, ProductCategory
 from app.models.user import User
 
@@ -555,6 +555,71 @@ class TestOrderFilterAndEdge:
         }, headers=_auth())
         assert resp.status_code == 400
         assert resp.json()["error"]["code"] == "PRICE_BELOW_COST"
+
+    def test_30_order_preserves_snapshot_after_product_update(self):
+        """修改商品价格/名称后，历史订单保留快照值"""
+        from jose import jwt as jose_jwt
+
+        from app.core.config import settings
+
+        db = TestSession()
+        prod = Product(
+            id=uuid.uuid4(), sku="ORD-SNAPSHOT-001",
+            name="快照原名称", sale_price=100, cost_price=60,
+            stock_quantity=20, status="active",
+        )
+        db.add(prod)
+        db.flush()
+        pid = str(prod.id)
+
+        # 直接在 DB 创建订单和明细，避免 order_no 冲突
+        payload = jose_jwt.decode(_tokens["access"], settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        user_id = uuid.UUID(payload["sub"])
+        order = SalesOrder(
+            id=uuid.uuid4(),
+            order_no=f"ORD-SNAP-{uuid.uuid4().hex[:8]}",
+            customer_id=uuid.UUID(_customer_id),
+            sales_user_id=user_id,
+            status="draft",
+            total_amount=190, total_cost=120, gross_profit=70,
+            gross_margin=0.3684, paid_amount=0,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=prod.id,
+            product_sku_snapshot="ORD-SNAPSHOT-001",
+            product_name_snapshot="快照原名称",
+            quantity=2, unit_price=95, cost_price_snapshot=60,
+            discount_amount=5, discount_rate=0.05,
+            subtotal_amount=190, subtotal_cost=120,
+        ))
+        db.commit()
+        order_id = str(order.id)
+        db.close()
+
+        # 验证快照值
+        resp = client.get(f"/api/v1/sales-orders/{order_id}", headers=_auth())
+        data = resp.json()["data"]
+        assert data["items"][0]["product_name_snapshot"] == "快照原名称"
+        assert data["items"][0]["unit_price"] == "95.00"
+        assert data["items"][0]["cost_price_snapshot"] == "60.00"
+        assert data["items"][0]["product_sku_snapshot"] == "ORD-SNAPSHOT-001"
+
+        # 修改商品价格和名称
+        client.put(f"/api/v1/products/{pid}", json={
+            "name": "快照新名称",
+            "sale_price": "120.00",
+            "cost_price": "70.00",
+        }, headers=_auth())
+
+        # 再次获取订单，快照值应保持不变
+        resp = client.get(f"/api/v1/sales-orders/{order_id}", headers=_auth())
+        data = resp.json()["data"]
+        assert data["items"][0]["product_name_snapshot"] == "快照原名称"
+        assert data["items"][0]["unit_price"] == "95.00"
+        assert data["items"][0]["cost_price_snapshot"] == "60.00"
+        assert data["total_amount"] == "190.00"
 
 
 class TestOrderAuthBoundary:
