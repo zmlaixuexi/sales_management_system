@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-02（第三百一十七轮）
+
+### 安全：错误响应格式统一为开发文档 API 规范
+
+- 错误响应从 `{"detail": {"code": "...", "message": "..."}}` 改为 `{"success": false, "error": {"code": "...", "message": "..."}, "request_id": "..."}`
+- main.py：新增 HTTPException handler 统一格式化所有 HTTP 异常
+- main.py：ValidationError 和未处理异常 handler 同步更新
+- ratelimit.py：429 响应统一为规范格式
+- reports.py：period 校验使用 VALIDATION_FAILED 错误码
+- 17 个测试文件 62 处断言从 `["detail"]` 改为 `["error"]`
+- make ci 全量通过：491+129=620 tests，99.79% 覆盖率
+
 ## 2026-05-02（第三百一十六轮）
 
 ### 测试：补强 slow_query 模块覆盖至 100%

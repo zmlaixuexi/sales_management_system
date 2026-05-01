@@ -1,17 +1,17 @@
 # 当前工作现场
 
 最后更新时间：2026-05-02
-当前阶段：测试补强 + 代码质量
-当前任务编号：ROUND-316
-当前任务名称：测试补强 — slow_query 模块覆盖至 100%
+当前阶段：需求符合性验证
+当前任务编号：ROUND-317
+当前任务名称：错误响应格式统一 — 符合开发文档 API 规范
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 317：错误响应格式统一 — 符合开发文档第 8.1 节 API 响应规范
 - Round 316：测试补强 — slow_query 模块覆盖至 100%
 - Round 315：文档同步 — deployment.md 环境变量表补全至 32 项
-- Round 314：部署配置完善 — Docker Compose 环境变量对齐
 
 ## 最终验证状态
 
@@ -26,6 +26,7 @@
 | 总计 | 620 tests |
 | build | 零警告 |
 | npm audit | 0 vulnerabilities |
+| 覆盖率 | 99.79% |
 
 ## CI 质量门禁（10 项）
 
@@ -36,9 +37,9 @@ ruff + mypy + alembic check + pytest + eslint + tsc + vitest + build + pip-audit
 继续 keep-going 模式。剩余有价值方向：
 - 安全：TLS/HTTPS（需用户决策证书方案）
 - 安全：token 撤销/refresh token rotation（需架构决策）
-- 测试补强：前端页面组件测试、后端异常路径
+- 测试补强：前端页面组件测试
 - 可观测性：请求链路追踪增强
-- 代码质量：API 响应一致性审计
+- 需求符合性：开发文档第 8 节其他规范验证（金额序列化、时间格式等）
 
 ## 阻塞问题
 
