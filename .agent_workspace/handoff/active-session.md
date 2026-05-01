@@ -2,38 +2,36 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-376
-当前任务名称：Docker Compose 验证 + nginx.conf 修复
+当前任务编号：ROUND-377
+当前任务名称：前端表单编辑模式测试补强
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 376：Docker Compose 验证 — 修复 nginx.conf 格式错误、验证前后端 Docker 构建、验证 dev compose 全栈启动（health/login 正常）
-- Round 375：用户管理 API（users.py）审计日志补全 — create_user / update_user 新增 log_user_action，测试 596→598
-- Round 374：客户归属转移审计日志验证（customer_transfer）
-- Round 373：客户订单关联删除保护 + 收款冲正/订单取消审计日志 → 后端 596 tests
+- Round 377：前端表单编辑模式测试补强 — CustomerForm（+4）、ProductForm（+4）、OrderForm（+3）新增编辑模式测试
+- Round 376：Docker Compose 验证 — 修复 nginx.conf 格式错误、验证全栈启动
+- Round 375：用户管理 API（users.py）审计日志补全 — 测试 596→598
 
 ## 最终验证状态
 
 | 门禁 | 结果 |
 |---|---|
 | 后端测试 | 598/598 |
-| 前端测试 | 258/258 |
+| 前端测试 | 269/269 |
 | ruff | 0 errors |
 | ESLint | 0 errors |
 | TypeScript | 0 errors |
 | 构建 | ✓ |
-| Docker 构建 | ✓（backend + frontend） |
-| Docker Compose dev | ✓（postgres + backend + frontend 全栈启动正常） |
-| 总计 | 856 tests |
+| Docker 构建 | ✓ |
+| 总计 | 867 tests |
 
 ## 下一步第一动作
 
 继续 keep-going 模式。可选方向：
+- 前端列表页空状态测试（Customers/Orders/Products 等页面未测试空数据场景）
+- 前端错误状态集成测试
 - 代码质量、安全加固
-- 前端错误边界和 loading 状态统一
-- 前端请求层 429 重试
 
 ## 阻塞问题
 

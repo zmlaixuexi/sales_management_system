@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第三百七十七轮）
+
+### 测试补强：前端表单编辑模式测试（+11 tests）
+
+- `frontend/src/__tests__/CustomerForm.test.tsx`：新增 4 个编辑模式测试（标题、fetchCustomer 调用、表单数据填充、保存修改按钮）
+- `frontend/src/__tests__/ProductForm.test.tsx`：新增 4 个编辑模式测试（标题、fetchProduct 调用、表单数据填充、保存修改按钮）
+- `frontend/src/__tests__/OrderForm.test.tsx`：新增 3 个编辑模式测试（标题、fetchOrder 调用、保存修改按钮）
+- 前端 258→269 tests，总计 856→867
+
 ## 2026-05-02（第三百七十六轮）
 
 ### 验证：Docker Compose 全栈验证 + nginx.conf 修复

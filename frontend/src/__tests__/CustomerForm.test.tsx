@@ -73,6 +73,19 @@ function renderNewCustomer() {
     <MemoryRouter initialEntries={['/customers/new']}>
       <Routes>
         <Route path="/customers/new" element={<CustomerForm />} />
+        <Route path="/customers/:id" element={<CustomerForm />} />
+        <Route path="/customers" element={<div>Customers List</div>} />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
+function renderEditCustomer(customerId = 'c-123') {
+  return render(
+    <MemoryRouter initialEntries={[`/customers/${customerId}`]}>
+      <Routes>
+        <Route path="/customers/new" element={<CustomerForm />} />
+        <Route path="/customers/:id" element={<CustomerForm />} />
         <Route path="/customers" element={<div>Customers List</div>} />
       </Routes>
     </MemoryRouter>,
@@ -132,5 +145,56 @@ describe('CustomerForm', () => {
   it('新增模式不调用 fetchCustomer', () => {
     renderNewCustomer()
     expect(_customerApi.fetchCustomer).not.toHaveBeenCalled()
+  })
+
+  describe('编辑模式', () => {
+    it('编辑模式渲染"编辑客户"标题', () => {
+      _customerApi.fetchCustomer.mockResolvedValue({ success: true, data: {} })
+      renderEditCustomer()
+      const card = screen.getByTestId('card')
+      expect(card.getAttribute('data-title')).toBe('编辑客户')
+    })
+
+    it('编辑模式调用 fetchCustomer 获取数据', () => {
+      _customerApi.fetchCustomer.mockResolvedValue({ success: true, data: {} })
+      renderEditCustomer('c-456')
+      expect(_customerApi.fetchCustomer).toHaveBeenCalledWith('c-456')
+    })
+
+    it('编辑模式用 fetchCustomer 数据填充表单', async () => {
+      _customerApi.fetchCustomer.mockResolvedValue({
+        success: true,
+        data: {
+          name: '测试客户',
+          contact_name: '张三',
+          phone: '13800001111',
+          email: 'test@example.com',
+          source: 'online',
+          level: 'vip',
+          follow_status: 'following',
+          remark: '重要客户',
+        },
+      })
+      renderEditCustomer()
+
+      // 等待 useEffect 中的 fetchCustomer 完成
+      await vi.waitFor(() => {
+        expect(_mockForm.setFieldsValue).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: '测试客户',
+            contact_name: '张三',
+            phone: '13800001111',
+            source: 'online',
+            level: 'vip',
+          }),
+        )
+      })
+    })
+
+    it('编辑模式渲染"保存修改"按钮', () => {
+      _customerApi.fetchCustomer.mockResolvedValue({ success: true, data: {} })
+      renderEditCustomer()
+      expect(screen.getByText('保存修改')).toBeInTheDocument()
+    })
   })
 })

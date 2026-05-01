@@ -6,6 +6,18 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-133
+
+### 测试补强 — 前端表单编辑模式测试
+
+- **文件**: `frontend/src/__tests__/CustomerForm.test.tsx`, `ProductForm.test.tsx`, `OrderForm.test.tsx`
+- **内容**:
+  - CustomerForm：4 个编辑模式测试（标题、数据加载、表单填充、按钮文本）
+  - ProductForm：4 个编辑模式测试（标题、数据加载、表单填充含 parseFloat、按钮文本）
+  - OrderForm：3 个编辑模式测试（标题、数据加载、按钮文本）
+- **验证**: 269 前端测试全通过，ESLint/TypeScript 全通过
+- **关联**: Round 377
+
 ## 功能编号：FEAT-20260502-132
 
 ### 验证 — Docker Compose 全栈验证 + nginx.conf 修复

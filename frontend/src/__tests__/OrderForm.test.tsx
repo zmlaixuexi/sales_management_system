@@ -110,6 +110,19 @@ function renderNewOrder() {
     <MemoryRouter initialEntries={['/orders/new']}>
       <Routes>
         <Route path="/orders/new" element={<OrderForm />} />
+        <Route path="/orders/:id" element={<OrderForm />} />
+        <Route path="/orders" element={<div>Orders List</div>} />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
+function renderEditOrder(orderId = 'o-123') {
+  return render(
+    <MemoryRouter initialEntries={[`/orders/${orderId}`]}>
+      <Routes>
+        <Route path="/orders/new" element={<OrderForm />} />
+        <Route path="/orders/:id" element={<OrderForm />} />
         <Route path="/orders" element={<div>Orders List</div>} />
       </Routes>
     </MemoryRouter>,
@@ -166,5 +179,26 @@ describe('OrderForm', () => {
   it('新建模式不调用 fetchOrder', () => {
     renderNewOrder()
     expect(_orderApi.fetchOrder).not.toHaveBeenCalled()
+  })
+
+  describe('编辑模式', () => {
+    it('编辑模式渲染"编辑订单"标题', () => {
+      _orderApi.fetchOrder.mockResolvedValue({ success: true, data: { items: [] } })
+      renderEditOrder()
+      const cards = screen.getAllByTestId('card')
+      expect(cards[0].getAttribute('data-title')).toBe('编辑订单')
+    })
+
+    it('编辑模式调用 fetchOrder 获取数据', () => {
+      _orderApi.fetchOrder.mockResolvedValue({ success: true, data: { items: [] } })
+      renderEditOrder('o-456')
+      expect(_orderApi.fetchOrder).toHaveBeenCalledWith('o-456')
+    })
+
+    it('编辑模式渲染"保存修改"按钮', () => {
+      _orderApi.fetchOrder.mockResolvedValue({ success: true, data: { items: [] } })
+      renderEditOrder()
+      expect(screen.getByText('保存修改')).toBeInTheDocument()
+    })
   })
 })

@@ -81,6 +81,19 @@ function renderNewProduct() {
     <MemoryRouter initialEntries={['/products/new']}>
       <Routes>
         <Route path="/products/new" element={<ProductForm />} />
+        <Route path="/products/:id" element={<ProductForm />} />
+        <Route path="/products" element={<div>Products List</div>} />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
+function renderEditProduct(productId = 'p-123') {
+  return render(
+    <MemoryRouter initialEntries={[`/products/${productId}`]}>
+      <Routes>
+        <Route path="/products/new" element={<ProductForm />} />
+        <Route path="/products/:id" element={<ProductForm />} />
         <Route path="/products" element={<div>Products List</div>} />
       </Routes>
     </MemoryRouter>,
@@ -138,5 +151,51 @@ describe('ProductForm', () => {
   it('新增模式不调用 fetchProduct', () => {
     renderNewProduct()
     expect(_productApi.fetchProduct).not.toHaveBeenCalled()
+  })
+
+  describe('编辑模式', () => {
+    it('编辑模式渲染"编辑商品"标题', () => {
+      _productApi.fetchProduct.mockResolvedValue({ success: true, data: {} })
+      renderEditProduct()
+      const card = screen.getByTestId('card')
+      expect(card.getAttribute('data-title')).toBe('编辑商品')
+    })
+
+    it('编辑模式调用 fetchProduct 获取数据', () => {
+      _productApi.fetchProduct.mockResolvedValue({ success: true, data: {} })
+      renderEditProduct('p-456')
+      expect(_productApi.fetchProduct).toHaveBeenCalledWith('p-456')
+    })
+
+    it('编辑模式用 fetchProduct 数据填充表单', async () => {
+      _productApi.fetchProduct.mockResolvedValue({
+        success: true,
+        data: {
+          name: '测试商品',
+          cost_price: '10.00',
+          sale_price: '20.00',
+          status: 'active',
+          stock_quantity: 50,
+          sku: 'SKU-001',
+        },
+      })
+      renderEditProduct()
+
+      await vi.waitFor(() => {
+        expect(_mockForm.setFieldsValue).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: '测试商品',
+            sale_price: 20,
+            stock_quantity: 50,
+          }),
+        )
+      })
+    })
+
+    it('编辑模式渲染"保存修改"按钮', () => {
+      _productApi.fetchProduct.mockResolvedValue({ success: true, data: {} })
+      renderEditProduct()
+      expect(screen.getByText('保存修改')).toBeInTheDocument()
+    })
   })
 })
