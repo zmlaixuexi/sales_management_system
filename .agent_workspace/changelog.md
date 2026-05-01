@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百零二轮）
+
+### 文档：同步测试数 486+127=613 + 安全加固记录
+
+- testing.md: 482→486, 125→127, 607→613, 更新 health/product import/customer import/user management/interceptor 详细条目
+- README.md: 同步所有测试计数和模块描述
+- architecture.md: 新增 API 文档保护 + Nginx 加固两条安全措施
+
 ## 2026-05-02（第三百零一轮）
 
 ### 安全：生产环境禁用 OpenAPI 文档 + Nginx 隐藏版本号 + 统一 X-Frame-Options
