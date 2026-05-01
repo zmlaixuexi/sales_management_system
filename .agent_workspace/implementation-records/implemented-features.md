@@ -6,6 +6,15 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260501-78
+
+### API 响应体添加 request_id 字段
+
+- **文件**: `backend/app/api/deps.py`, `backend/tests/test_health.py`
+- **内容**: resp() 函数从 request_id_ctx contextvars 提取 request_id，写入所有 API 响应体
+- **验证**: 456 后端通过（+2），ruff 0，make ci 全量通过
+- **效果**: 客户端可从响应体直接获取 request_id，便于追踪和关联日志
+
 ## 功能编号：FEAT-20260501-77
 
 ### 订单操作日志查询 API

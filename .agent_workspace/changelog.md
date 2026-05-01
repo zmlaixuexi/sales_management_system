@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-01（第二百五十五轮）
+
+### 功能：API 响应体添加 request_id 字段
+
+- resp() 函数自动从 request_id_ctx contextvars 提取 request_id 写入响应体
+- 所有 API 响应现在包含 request_id 字段，与响应头 X-Request-ID 保持一致
+- 新增 2 个测试（自动生成 ID 一致性/自定义 ID 透传），后端 456/456 通过
+- make ci 全量通过：ruff 0 + eslint 0 + tsc 0 + 456/456 + 123/123 + 覆盖率 99.73% + build 零警告
+
 ## 2026-05-01（第二百五十四轮）
 
 ### 功能：订单操作日志查询 API
