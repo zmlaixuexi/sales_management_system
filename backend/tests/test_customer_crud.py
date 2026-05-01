@@ -341,3 +341,25 @@ def test_20_get_customer_invalid_uuid():
     """无效 UUID 获取客户详情返回 422"""
     resp = client.get("/api/v1/customers/not-a-uuid", headers=_auth())
     assert resp.status_code == 422
+
+
+def test_21_create_customer_invalid_follow_status():
+    """创建客户无效跟进状态返回 422"""
+    resp = client.post("/api/v1/customers", json={
+        "name": "状态测试客户", "phone": "13800006001",
+        "follow_status": "invalid_status",
+    }, headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_22_update_customer_invalid_follow_status():
+    """编辑客户无效跟进状态返回 422"""
+    resp = client.post("/api/v1/customers", json={
+        "name": "状态编辑客户", "phone": "13800006002",
+    }, headers=_auth())
+    cid = resp.json()["data"]["id"]
+
+    resp = client.put(f"/api/v1/customers/{cid}", json={
+        "follow_status": "bad_status",
+    }, headers=_auth())
+    assert resp.status_code == 422

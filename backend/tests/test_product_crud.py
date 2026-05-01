@@ -538,3 +538,26 @@ def test_19_list_products_requires_auth():
     """未认证商品列表返回 401"""
     resp = client.get("/api/v1/products")
     assert resp.status_code == 401
+
+
+def test_20_create_product_invalid_status():
+    """创建商品无效状态返回 422"""
+    resp = client.post("/api/v1/products", json={
+        "name": "状态测试", "sale_price": "10", "cost_price": "5",
+        "stock_quantity": 1, "status": "invalid_status",
+    }, headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_21_update_product_invalid_status():
+    """编辑商品无效状态返回 422"""
+    resp = client.post("/api/v1/products", json={
+        "name": "状态测试商品", "sale_price": "10", "cost_price": "5",
+        "stock_quantity": 1, "sku": "SPU-STATUS-TEST",
+    }, headers=_auth())
+    cid = resp.json()["data"]["id"]
+
+    resp = client.put(f"/api/v1/products/{cid}", json={
+        "status": "bad_status",
+    }, headers=_auth())
+    assert resp.status_code == 422

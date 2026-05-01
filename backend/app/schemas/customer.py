@@ -6,6 +6,7 @@ from app.core.sanitize import strip_html
 
 CustomerSource = Literal["referral", "online", "offline", "ad", "other"]
 CustomerLevel = Literal["vip", "important", "normal", "potential"]
+FollowStatus = Literal["new", "following", "closed", "lost"]
 
 
 class CustomerCreate(BaseModel):
@@ -16,7 +17,7 @@ class CustomerCreate(BaseModel):
     source: CustomerSource | None = Field(None, description="来源：referral/online/offline/ad/other")
     level: CustomerLevel = Field("normal", description="等级：vip/important/normal/potential")
     owner_user_id: str | None = Field(None, description="归属销售 ID")
-    follow_status: str = Field("new", description="跟进状态")
+    follow_status: FollowStatus = Field("new", description="跟进状态")
     remark: str | None = Field(None, description="备注")
 
     @field_validator("name", "contact_name", "remark")
@@ -32,7 +33,7 @@ class CustomerUpdate(BaseModel):
     email: str | None = None
     source: CustomerSource | None = None
     level: CustomerLevel | None = None
-    follow_status: str | None = None
+    follow_status: FollowStatus | None = None
     owner_user_id: str | None = None
     remark: str | None = None
 
