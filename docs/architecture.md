@@ -85,6 +85,11 @@ backend/
     models/              # SQLAlchemy 模型
     schemas/             # Pydantic 请求/响应模型
     services/            # 业务逻辑服务
+      audit_service.py   # 审计日志记录
+      export_service.py  # CSV 导出生成
+      file_service.py    # 文件上传校验
+      payment_service.py # 收款登记（含行锁防并发）
+      csv_import.py      # CSV 导入文件校验
   alembic/               # 数据库迁移
   tests/                 # 测试
 ```
@@ -95,8 +100,9 @@ backend/
 
 1. **CORSMiddleware** — 跨域请求处理
 2. **SecurityHeadersMiddleware** — 添加 X-Content-Type-Options、X-Frame-Options、CSP 等安全头
-3. **RequestLogMiddleware** — 记录 /api/ 请求的方法、路径、状态码、耗时
-4. **RateLimitMiddleware** — 基于 IP 的滑动窗口速率限制
+3. **RequestIDMiddleware** — 生成/透传 X-Request-ID，关联日志和审计
+4. **RequestLogMiddleware** — 记录 /api/ 请求的方法、路径、状态码、耗时、X-Response-Time
+5. **RateLimitMiddleware** — 基于 IP 的滑动窗口速率限制
 
 ### API 路由
 
@@ -240,8 +246,13 @@ draft ──确认──▶ confirmed ──部分收款──▶ partially_paid
 ### 库存联动
 
 - 确认订单时原子扣减库存（行级锁 `with_for_update()`），并创建库存变动记录
-- 取消已确认订单时自动回补库存
+- 取消已确认/部分收款订单时自动回补库存
 - 手动库存调整同样创建变动记录
+
+### 收款并发保护
+
+- 收款登记使用 `with_for_update()` 行锁查询订单，防止并发收款导致超额
+- 收款冲正同样使用行锁，确保状态回退原子性
 
 ### 订单快照
 
@@ -291,18 +302,28 @@ Docker Compose 启动 3 个容器（无 Nginx）：
 |---|---|
 | 认证 | JWT Bearer Token |
 | 授权 | RBAC 权限模型 + 数据范围隔离 |
-| 密码存储 | bcrypt 哈希 |
+| 密码存储 | bcrypt 哈希 + 强度校验（必须含字母和数字） |
 | SQL 注入防护 | SQLAlchemy ORM + `escape_like()` |
-| XSS 防护 | 安全响应头（CSP、X-XSS-Protection） |
+| XSS 防护 | 安全响应头（CSP、X-XSS-Protection）+ 输入消毒 strip_html |
 | 点击劫持防护 | X-Frame-Options: DENY |
 | 速率限制 | 基于 IP 的滑动窗口 |
-| 敏感数据 | 审计日志密码/令牌字段掩码 |
+| 敏感数据 | 审计日志密码/令牌字段掩码 + 成本价按权限过滤 |
 | 软删除 | `deleted_at` 时间戳，非物理删除 |
-| 输入验证 | Pydantic Schema 约束 |
+| 输入验证 | Pydantic Schema 约束 + Literal 枚举 |
+| 并发防护 | 收款登记/冲正 `with_for_update()` 行锁 |
+| 文件上传 | 扩展名 + MIME + 魔数字节 + 大小限制 |
+| CSV 导入 | 大小限制 + UTF-8 编码校验 + 逐行错误收集 |
+| CORS | 白名单（非通配符） |
+| 排序注入 | `sort_by` 白名单校验 |
+| 成本价保护 | 低于成本价阻止下单 |
+| 报表参数 | period 严格校验，无效值返回 400 |
 
 ## 可观测性
 
 - **健康检查**：`GET /api/v1/health` 探测数据库连接，返回 `ok` 或 `degraded`
+- **请求 ID**：`X-Request-ID` 自动生成/透传，关联请求日志和审计日志
 - **请求日志**：记录所有 `/api/` 请求的方法、路径、状态码、耗时、客户端 IP
-- **结构化日志**：生产环境支持 JSON 格式日志输出
-- **审计日志**：完整记录所有数据变更操作
+- **响应耗时**：`X-Response-Time` 响应头
+- **结构化日志**：生产环境 JSON 格式，支持慢请求警告（可配置阈值）
+- **审计日志**：完整记录所有数据变更操作，含请求元数据
+- **全局异常处理**：未处理异常返回一致 JSON，防泄露内部详情
