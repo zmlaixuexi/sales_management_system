@@ -1,6 +1,11 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field, field_validator
 
 from app.core.sanitize import strip_html
+
+CustomerSource = Literal["referral", "online", "offline", "ad", "other"]
+CustomerLevel = Literal["vip", "important", "normal", "potential"]
 
 
 class CustomerCreate(BaseModel):
@@ -8,8 +13,8 @@ class CustomerCreate(BaseModel):
     contact_name: str | None = Field(None, description="联系人")
     phone: str | None = Field(None, max_length=20, description="电话")
     email: str | None = Field(None, description="邮箱")
-    source: str | None = Field(None, description="来源：referral/online/offline/ad/other")
-    level: str = Field("normal", description="等级：vip/important/normal/potential")
+    source: CustomerSource | None = Field(None, description="来源：referral/online/offline/ad/other")
+    level: CustomerLevel = Field("normal", description="等级：vip/important/normal/potential")
     owner_user_id: str | None = Field(None, description="归属销售 ID")
     follow_status: str = Field("new", description="跟进状态")
     remark: str | None = Field(None, description="备注")
@@ -25,8 +30,8 @@ class CustomerUpdate(BaseModel):
     contact_name: str | None = None
     phone: str | None = Field(None, max_length=20)
     email: str | None = None
-    source: str | None = None
-    level: str | None = None
+    source: CustomerSource | None = None
+    level: CustomerLevel | None = None
     follow_status: str | None = None
     owner_user_id: str | None = None
     remark: str | None = None

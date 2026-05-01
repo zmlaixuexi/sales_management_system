@@ -400,6 +400,16 @@ async def import_customers_csv(
         level = strip_html((row.get("等级") or row.get("level") or "").strip()) or "normal"
         remark = strip_html((row.get("备注") or row.get("remark") or "").strip()) or None
 
+        # 枚举值校验
+        valid_sources = {"referral", "online", "offline", "ad", "other"}
+        if source and source not in valid_sources:
+            errors.append({"row": row_num, "message": f"来源值无效: {source}"})
+            continue
+        valid_levels = {"vip", "important", "normal", "potential"}
+        if level not in valid_levels:
+            errors.append({"row": row_num, "message": f"等级值无效: {level}"})
+            continue
+
         customer = Customer(
             id=uuid.uuid4(),
             name=name,
