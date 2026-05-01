@@ -6,6 +6,18 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-96
+
+### 安全 — 客户 source/level 枚举值校验
+
+- **文件**: `backend/app/schemas/customer.py`, `backend/app/api/v1/customers.py`
+- **内容**:
+  - schema CustomerCreate/CustomerUpdate 的 source 和 level 改为 Literal 类型
+  - source 限定: referral/online/offline/ad/other
+  - level 限定: vip/important/normal/potential
+  - CSV 导入路径同步添加枚举校验，无效值跳过并返回行级错误
+- **测试**: +4（schema 422 + 导入跳过），482/482 通过
+
 ## 功能编号：FEAT-20260502-95
 
 ### 安全 — CSV 导入行数上限保护
