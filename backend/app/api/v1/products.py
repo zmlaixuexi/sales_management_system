@@ -10,7 +10,15 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFil
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
-from app.api.deps import get_db, get_or_404, has_permission, parse_uuid_or_400, require_permission, resp
+from app.api.deps import (
+    generate_sequential_code,
+    get_db,
+    get_or_404,
+    has_permission,
+    parse_uuid_or_400,
+    require_permission,
+    resp,
+)
 from app.core.config import settings
 from app.core.sanitize import escape_like
 from app.models.product import Product, ProductCategory, ProductPriceHistory
@@ -67,26 +75,8 @@ def _batch_sales_stats(db: Session, product_ids: list) -> dict:
 
 
 def _generate_sku(db: Session) -> str:
-    """生成 SKU: SPU-YYYYMMDD-四位序号"""
-    today = datetime.now().strftime("%Y%m%d")
-    prefix = f"SPU-{today}-"
-
-    last_product = (
-        db.query(Product)
-        .filter(Product.sku.like(f"{prefix}%"))
-        .order_by(Product.sku.desc())
-        .first()
-    )
-
-    if last_product and last_product.sku.startswith(prefix):
-        try:
-            seq = int(last_product.sku[len(prefix):]) + 1
-        except ValueError:
-            seq = 1
-    else:
-        seq = 1
-
-    return f"{prefix}{seq:04d}"
+    """生成 SKU: SPU-YYYYMMDD-NNNN"""
+    return generate_sequential_code(db, Product, Product.sku, "SPU-")
 
 
 def _validate_category_id(db: Session, category_id: uuid.UUID) -> uuid.UUID:

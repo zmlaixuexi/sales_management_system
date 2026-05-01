@@ -1,8 +1,10 @@
 import uuid
+from datetime import datetime
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
+from sqlalchemy import Column
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -128,3 +130,27 @@ def resp(data=None, message: str = "操作成功") -> dict:
     if rid:
         result["request_id"] = rid
     return result
+
+
+def generate_sequential_code(db: Session, model: type, column: Column, prefix: str) -> str:
+    """生成带日期前缀的序号编码，格式: {prefix}YYYYMMDD-NNNN。
+
+    查询当天最大序号并递增，用于订单号和 SKU 自动生成。
+    """
+    today = datetime.now().strftime("%Y%m%d")
+    full_prefix = f"{prefix}{today}-"
+    last = (
+        db.query(model)
+        .filter(column.like(f"{full_prefix}%"))
+        .order_by(column.desc())
+        .first()
+    )
+    last_value = getattr(last, column.key, None) if last else None
+    if last_value and str(last_value).startswith(full_prefix):
+        try:
+            seq = int(str(last_value)[len(full_prefix):]) + 1
+        except ValueError:
+            seq = 1
+    else:
+        seq = 1
+    return f"{full_prefix}{seq:04d}"

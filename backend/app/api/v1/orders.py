@@ -2,7 +2,6 @@
 
 import json
 import uuid
-from datetime import datetime
 from decimal import ROUND_HALF_UP, Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
@@ -10,6 +9,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.api.deps import (
     check_owner_or_forbid,
+    generate_sequential_code,
     get_db,
     get_or_404,
     has_permission,
@@ -57,22 +57,7 @@ STATUS_LABELS = {
 
 
 def _generate_order_no(db: Session) -> str:
-    today = datetime.now().strftime("%Y%m%d")
-    prefix = f"ORD-{today}-"
-    last = (
-        db.query(SalesOrder)
-        .filter(SalesOrder.order_no.like(f"{prefix}%"))
-        .order_by(SalesOrder.order_no.desc())
-        .first()
-    )
-    if last and last.order_no.startswith(prefix):
-        try:
-            seq = int(last.order_no[len(prefix):]) + 1
-        except ValueError:
-            seq = 1
-    else:
-        seq = 1
-    return f"{prefix}{seq:04d}"
+    return generate_sequential_code(db, SalesOrder, SalesOrder.order_no, "ORD-")
 
 
 def _calc_order_totals(items: list[dict]) -> dict:
