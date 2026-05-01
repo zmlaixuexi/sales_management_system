@@ -1,5 +1,8 @@
 
+import time
 import uuid
+from collections import defaultdict
+from threading import Lock
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from jose import JWTError, jwt
@@ -20,13 +23,42 @@ router = APIRouter(
     },
 )
 
+# 登录失败速率限制：每 IP 最多 10 次失败 / 15 分钟
+_login_fail_lock = Lock()
+_login_fail_counts: dict[str, list[float]] = defaultdict(list)
+_LOGIN_FAIL_MAX = 10
+_LOGIN_FAIL_WINDOW = 900  # 15 分钟
+
+
+def _check_login_rate_limit(ip: str) -> None:
+    now = time.monotonic()
+    with _login_fail_lock:
+        cutoff = now - _LOGIN_FAIL_WINDOW
+        timestamps = _login_fail_counts[ip]
+        while timestamps and timestamps[0] < cutoff:
+            timestamps.pop(0)
+        if len(timestamps) >= _LOGIN_FAIL_MAX:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail={"code": "RATE_LIMIT_EXCEEDED", "message": "登录失败次数过多，请 15 分钟后再试"},
+            )
+
+
+def _record_login_fail(ip: str) -> None:
+    with _login_fail_lock:
+        _login_fail_counts[ip].append(time.monotonic())
+
 
 @router.post("/login")
 def login(request: Request, req: LoginRequest, db: Session = Depends(get_db)):
     """用户名密码登录"""
+    client_ip = request.client.host if request.client else "unknown"
+    _check_login_rate_limit(client_ip)
+
     meta = get_request_meta(request)
     user = db.query(User).filter(User.username == req.username, User.deleted_at.is_(None)).first()
     if not user or not verify_password(req.password, user.hashed_password):
+        _record_login_fail(client_ip)
         log_action(db, action="login_failed", resource_type="user", actor_name=req.username, **meta)
         db.commit()
         raise HTTPException(

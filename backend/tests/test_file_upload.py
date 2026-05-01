@@ -384,8 +384,8 @@ def test_21_upload_no_file_field_422():
     assert resp.status_code == 422
 
 
-def test_22_get_other_user_file_allowed():
-    """超级用户可查看其他用户的文件信息"""
+def test_22_get_other_user_file_forbidden():
+    """非所有者、非超级管理员查看他人文件返回 403"""
     # 先上传一个文件
     png_bytes = _make_png_bytes()
     resp = client.post(
@@ -415,10 +415,9 @@ def test_22_get_other_user_file_allowed():
     })
     other_token = resp.json()["data"]["access_token"]
 
-    # 其他用户应能查看文件信息
+    # 非所有者应被拒绝
     resp = client.get(
         f"/api/v1/files/images/{file_id}",
         headers={"Authorization": f"Bearer {other_token}"},
     )
-    assert resp.status_code == 200
-    assert resp.json()["data"]["original_name"] == "viewable.png"
+    assert resp.status_code == 403

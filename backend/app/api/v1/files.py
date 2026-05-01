@@ -65,6 +65,12 @@ def get_image(
             detail={"code": "FILE_NOT_FOUND", "message": "文件不存在"},
         )
 
+    if not current_user.is_superuser and file_record.created_by != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "AUTH_FORBIDDEN", "message": "无权限访问该文件"},
+        )
+
     return resp({
         "id": str(file_record.id),
         "url": file_record.public_url,

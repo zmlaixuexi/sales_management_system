@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第三百七十九轮）
+
+### 安全加固：登录速率限制 + 文件访问控制（+2 tests）
+
+- `backend/app/api/v1/auth.py`：新增登录失败速率限制（每 IP 最多 10 次失败 / 15 分钟，超限返回 429）
+- `backend/app/api/v1/files.py`：GET /images/{file_id} 新增所有权检查（非所有者、非超级管理员返回 403）
+- `backend/tests/test_auth.py`：新增 2 个测试（连续失败触发 429、正确登录不受影响）
+- `backend/tests/test_file_upload.py`：更新 test_22（非所有者查看他人文件应返回 403）
+- 后端 598→600 tests，总计 872→874
+
 ## 2026-05-02（第三百七十八轮）
 
 ### 测试补强：前端列表页空状态测试（+5 tests）

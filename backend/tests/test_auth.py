@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.api.deps import get_db
+from app.api.v1.auth import _login_fail_counts
 from app.core.security import hash_password
 from app.db.session import Base
 from app.main import app
@@ -210,3 +211,22 @@ def test_change_password_no_digits():
     }, headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 422
     assert "数字" in str(resp.json())
+
+
+def test_login_rate_limit_after_failures():
+    """连续登录失败 10 次后触发速率限制"""
+    _login_fail_counts.clear()
+    for _ in range(10):
+        client.post("/api/v1/auth/login", json={"username": "testuser", "password": "wrongpass1"})
+    resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "wrongpass1"})
+    assert resp.status_code == 429
+    assert "次数过多" in resp.json()["error"]["message"]
+    _login_fail_counts.clear()
+
+
+def test_login_rate_limit_does_not_affect_success():
+    """正确密码不受速率限制影响"""
+    _login_fail_counts.clear()
+    resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    assert resp.status_code == 200
+    _login_fail_counts.clear()

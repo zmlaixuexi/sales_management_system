@@ -2,34 +2,44 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-378
-当前任务名称：前端列表页空状态测试补强
+当前任务编号：ROUND-379
+当前任务名称：安全加固（登录速率限制 + 文件访问控制）
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 378：前端列表页空状态测试 — Customers/Orders/Products/Users/AuditLogs 各 +1 test
-- Round 377：前端表单编辑模式测试补强 — CustomerForm/ProductForm/OrderForm +11 tests
-- Round 376：Docker Compose 验证 + nginx.conf 修复
+- Round 379：安全加固 — 登录失败速率限制（每 IP 10 次/15 分钟）+ 文件 GET 所有权检查
+- Round 378：前端列表页空状态测试 +5
+- Round 377：前端表单编辑模式测试 +11
 
 ## 最终验证状态
 
 | 门禁 | 结果 |
 |---|---|
-| 后端测试 | 598/598 |
+| 后端测试 | 600/600 |
 | 前端测试 | 274/274 |
 | ruff | 0 errors |
 | ESLint | 0 errors |
 | TypeScript | 0 errors |
 | 构建 | ✓ |
-| 总计 | 872 tests |
+| 总计 | 874 tests |
+
+## 安全审计已知问题
+
+| 问题 | 严重性 | 状态 |
+|---|---|---|
+| 登录无专用速率限制 | 中 | 已修复（Round 379） |
+| 文件 GET 无所有权检查 | 中 | 已修复（Round 379） |
+| Refresh token 未撤销 | 中 | 需基础设施（Redis/黑名单） |
+| Logout 无效（JWT 无状态） | 低 | 已知限制 |
+| Health 泄露 DB 状态 | 低 | 可接受（常规做法） |
 
 ## 下一步第一动作
 
 继续 keep-going 模式。可选方向：
-- 前端错误状态集成测试（列表页 error + 重试）
-- 代码质量、安全加固
+- 代码质量优化
+- 前端错误状态集成测试
 - API 文档完善
 
 ## 阻塞问题
