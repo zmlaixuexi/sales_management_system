@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第一百五十四轮·自动循环）
+
+### 代码质量：全量扫描零问题
+
+- ruff F401（未使用导入）/ F841（未使用变量）/ SIM（简化建议）：全部通过
+- TypeScript tsc --noEmit：零错误
+- 前端生产代码无 console.log 残留（仅测试文件有 mock）
+- 后端无 print()/breakpoint() 残留
+- Pydantic schema 架构合理（请求验证用 schema，响应手动构建 dict）
+
 ## 2026-05-02（第一百五十三轮·自动循环）
 
 ### 文档：更新 README 测试覆盖表（前端 301→307）
