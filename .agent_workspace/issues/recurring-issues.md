@@ -6,8 +6,8 @@
 
 问题主题：软删除模型遗漏 deleted_at 过滤
 关联 issue：Round 232-234
-复发次数：3（payments list, payments reverse, payments export, orders create）
-最后复发时间：2026-04-30
+复发次数：4（payments list, payments reverse, payments export, orders create, orders deduct/restore inventory, reports customer_ranking, products CSV SKU sequence）
+最后复发时间：2026-05-02
 高风险模块：所有包含 deleted_at 字段的模型（Customer, Product, SalesOrder, User）
 
 ### 固定根因
