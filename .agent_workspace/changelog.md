@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百八十五轮）
+
+### 安全：CSV 导入添加 XSS 消毒和 commit 失败回滚
+
+- 商品/客户 CSV 导入添加 strip_html() 消毒：name、contact_name、email、source、level、remark
+- 修复导入路径绕过 Pydantic strip_html 验证器的 XSS 漏洞
+- db.commit() 添加 try/except/rollback，防止 DB 约束冲突导致所有有效行丢失
+- 474/474 通过，ruff 0
+
 ## 2026-05-02（第二百八十四轮）
 
 ### 代码质量：移除未使用的 PaginatedData 死代码

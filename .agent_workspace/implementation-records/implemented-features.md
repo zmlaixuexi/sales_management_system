@@ -6,6 +6,18 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-94
+
+### 安全 — CSV 导入 XSS 消毒 + commit 回滚保护
+
+- **文件**: `backend/app/api/v1/products.py`, `backend/app/api/v1/customers.py`
+- **内容**:
+  - CSV 导入路径添加 strip_html() 消毒（修复绕过 Pydantic 验证器的问题）
+  - 商品导入：name 字段消毒
+  - 客户导入：name、contact_name、email、source、level、remark 字段消毒
+  - 两个导入端点的 db.commit() 添加 try/except/rollback，防止 DB 约束冲突丢失所有数据
+- **验证**: 474/474 通过，ruff 0
+
 ## 功能编号：FEAT-20260502-93
 
 ### 代码质量 — GitHub Actions CI 集成 mypy 类型检查
