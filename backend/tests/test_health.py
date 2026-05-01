@@ -25,6 +25,17 @@ def test_health_check(monkeypatch):
     assert data["data"]["status"] == "ok"
 
 
+def test_health_check_pool_info():
+    """健康检查返回连接池状态"""
+    response = client.get("/api/v1/health")
+    assert response.status_code == 200
+    pool = response.json()["data"]["pool"]
+    assert "size" in pool
+    assert "checked_in" in pool
+    assert "checked_out" in pool
+    assert "overflow" in pool
+
+
 def test_health_check_degraded(monkeypatch):
     """数据库不可用时返回 degraded"""
     from app.api.v1 import health as health_mod
