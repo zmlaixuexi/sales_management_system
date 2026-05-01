@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百七十六轮）
+
+### 文档：deployment.md 新增开发工作流命令
+
+- 新增"开发工作流常用命令"段落（test-unit/test-integration/test/quality/ci）
+- env 文件已确认与 config.py 完全同步
+- API 文档已确认覆盖全部 42 个端点
+
 ## 2026-05-02（第二百七十五轮）
 
 ### 工程：新增 make test-unit/test-integration 快速反馈目标
