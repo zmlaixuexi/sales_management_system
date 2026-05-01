@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第三百八十九轮）
+
+### 安全加固：修复 4 处遗漏的 deleted_at 过滤
+
+- `backend/app/api/v1/orders.py`：`_deduct_inventory()` 和 `_restore_inventory()` 添加 `Product.deleted_at.is_(None)` 过滤，防止已删除商品的库存被错误扣减/回滚
+- `backend/app/api/v1/reports.py`：`customer_ranking()` 添加 `Customer.deleted_at.is_(None)` 过滤，排除已删除客户
+- `backend/app/api/v1/products.py`：CSV 导入 SKU 序号查询添加 `Product.deleted_at.is_(None)` 过滤
+- 全量后端 606 tests 通过
+
 ## 2026-05-02（第三百八十八轮）
 
 ### 功能：实现登录页面组件 + 测试（+5 tests）
