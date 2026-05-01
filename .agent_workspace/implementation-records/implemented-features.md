@@ -6,6 +6,20 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-114
+
+### 测试 — 后端用户管理测试补强（角色列表 + 权限边界）
+
+- **文件**: `backend/tests/test_user_management.py`
+- **内容**:
+  - GET /users/roles 正常返回角色列表（验证 name/display_name/id）
+  - GET /users/roles 非管理员 403
+  - GET /users/roles 未认证 401
+  - PUT /users/{id} 管理员不能停用自身账号 400
+  - GET /users 非管理员 403
+- **验证**: 522+244=766 tests，后端全量通过
+- **关联**: Round 347
+
 ## 功能编号：FEAT-20260502-113
 
 ### 前端 — 库存流水页面（ISSUE-003 缺失页面最后一个）

@@ -279,3 +279,65 @@ def test_16_create_user_invalid_role_ids_400():
     }, headers=_auth())
     assert resp.status_code == 400
     assert "角色不存在" in resp.json()["error"]["message"]
+
+
+def test_17_list_roles():
+    """角色列表返回已创建角色"""
+    resp = client.get("/api/v1/users/roles", headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]
+    assert isinstance(items, list)
+    assert any(r["name"] == "test_role" for r in items)
+    role = next(r for r in items if r["name"] == "test_role")
+    assert role["display_name"] == "测试角色"
+    assert "id" in role
+
+
+def test_18_list_roles_requires_admin():
+    """非管理员不能查看角色列表"""
+    db = TestSession()
+    user = db.query(User).filter(User.username == "newuser").first()
+    user.is_active = True
+    db.commit()
+    db.close()
+
+    login = client.post("/api/v1/auth/login", json={
+        "username": "newuser", "password": "password123",
+    })
+    token = login.json()["data"]["access_token"]
+
+    resp = client.get("/api/v1/users/roles", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
+
+
+def test_19_list_roles_requires_auth():
+    """角色列表需要认证"""
+    resp = client.get("/api/v1/users/roles")
+    assert resp.status_code == 401
+
+
+def test_20_cannot_deactivate_self():
+    """管理员不能停用自己的账号"""
+    resp = client.put(f"/api/v1/users/{_admin_id}", json={
+        "is_active": False,
+    }, headers=_auth())
+    assert resp.status_code == 400
+    assert "不能停用" in resp.json()["error"]["message"]
+
+
+def test_21_list_users_non_admin_forbidden():
+    """非管理员查看用户列表返回 403"""
+    db = TestSession()
+    user = db.query(User).filter(User.username == "newuser").first()
+    user.is_active = True
+    user.is_superuser = False
+    db.commit()
+    db.close()
+
+    login = client.post("/api/v1/auth/login", json={
+        "username": "newuser", "password": "password123",
+    })
+    token = login.json()["data"]["access_token"]
+
+    resp = client.get("/api/v1/users", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
