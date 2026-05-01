@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第三百七十六轮）
+
+### 验证：Docker Compose 全栈验证 + nginx.conf 修复
+
+- `deploy/nginx.conf`：修复静态资源缓存区块中两行 `add_header` 被错误合并为同一行的问题
+- 验证 nginx 配置语法通过（nginx -t）
+- 验证 Docker 构建：backend 镜像和 frontend 镜像均构建成功
+- 验证 dev compose 全栈启动：postgres（healthy）+ backend（/health 返回 ok）+ frontend
+- 验证 prod compose 配置结构有效（需设置 JWT_SECRET_KEY / POSTGRES_PASSWORD 环境变量）
+
 ## 2026-05-02（第三百七十五轮）
 
 ### 功能补全：用户管理 API 审计日志（+2 tests）

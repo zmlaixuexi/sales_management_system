@@ -2,18 +2,17 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-375
-当前任务名称：用户管理 API 审计日志补全
+当前任务编号：ROUND-376
+当前任务名称：Docker Compose 验证 + nginx.conf 修复
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 376：Docker Compose 验证 — 修复 nginx.conf 格式错误、验证前后端 Docker 构建、验证 dev compose 全栈启动（health/login 正常）
 - Round 375：用户管理 API（users.py）审计日志补全 — create_user / update_user 新增 log_user_action，测试 596→598
 - Round 374：客户归属转移审计日志验证（customer_transfer）
 - Round 373：客户订单关联删除保护 + 收款冲正/订单取消审计日志 → 后端 596 tests
-- Round 372：订单快照保留验收测试
-- Round 371：提取 log_user_action() 包装函数
 
 ## 最终验证状态
 
@@ -25,14 +24,16 @@
 | ESLint | 0 errors |
 | TypeScript | 0 errors |
 | 构建 | ✓ |
+| Docker 构建 | ✓（backend + frontend） |
+| Docker Compose dev | ✓（postgres + backend + frontend 全栈启动正常） |
 | 总计 | 856 tests |
 
 ## 下一步第一动作
 
 继续 keep-going 模式。可选方向：
 - 代码质量、安全加固
-- Docker Compose 验证
-- 审计日志筛选支持 user action 类型
+- 前端错误边界和 loading 状态统一
+- 前端请求层 429 重试
 
 ## 阻塞问题
 
