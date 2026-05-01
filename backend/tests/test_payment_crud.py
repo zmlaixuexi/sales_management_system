@@ -279,9 +279,11 @@ def _create_user_with_perms(db, username, perm_codes):
     db.add(UserRole(user_id=user.id, role_id=role.id))
 
     for code in perm_codes:
-        perm = Permission(id=uuid.uuid4(), code=code, name=code, module=code.split(":")[0])
-        db.add(perm)
-        db.flush()
+        perm = db.query(Permission).filter(Permission.code == code).first()
+        if not perm:
+            perm = Permission(id=uuid.uuid4(), code=code, name=code, module=code.split(":")[0])
+            db.add(perm)
+            db.flush()
         db.add(RolePermission(role_id=role.id, permission_id=perm.id))
 
     return user
@@ -419,6 +421,164 @@ def test_14_invalid_payment_method():
         "amount": "50", "payment_method": "bitcoin",
     }, headers=_auth())
     assert resp.status_code == 422
+
+
+def test_15_payment_cancelled_order_400():
+    """已取消订单不允许收款"""
+    db = TestSession()
+    try:
+        admin = db.query(User).filter(User.id == uuid.UUID(_admin_id)).first()
+        customer = Customer(
+            id=uuid.uuid4(),
+            name="取消订单收款测试客户",
+            phone="13900990015",
+            owner_user_id=admin.id,
+            created_by=admin.id,
+        )
+        db.add(customer)
+        db.flush()
+        product = Product(
+            id=uuid.uuid4(),
+            name="取消订单收款测试商品",
+            sku="PAY-CANCEL-001",
+            sale_price=100,
+            cost_price=50,
+            stock_quantity=10,
+            status="active",
+            created_by=admin.id,
+            updated_by=admin.id,
+        )
+        db.add(product)
+        db.flush()
+        order = SalesOrder(
+            id=uuid.uuid4(),
+            order_no="SO-PAY-CANCEL",
+            customer_id=customer.id,
+            sales_user_id=admin.id,
+            status="cancelled",
+            total_amount=100,
+            paid_amount=0,
+            created_by=admin.id,
+            updated_by=admin.id,
+        )
+        db.add(order)
+        db.commit()
+        oid = str(order.id)
+    finally:
+        db.close()
+
+    resp = client.post(f"/api/v1/sales-orders/{oid}/payments", json={
+        "amount": "50", "payment_method": "cash",
+    }, headers=_auth())
+    assert resp.status_code == 400
+    assert resp.json()["error"]["code"] == "ORDER_INVALID_STATUS"
+
+
+def test_16_payment_completed_order_invalid_status():
+    """已完成订单不允许收款（状态检查先于金额检查）"""
+    db = TestSession()
+    try:
+        admin = db.query(User).filter(User.id == uuid.UUID(_admin_id)).first()
+        customer = Customer(
+            id=uuid.uuid4(),
+            name="已付清测试客户",
+            phone="13900990016",
+            owner_user_id=admin.id,
+            created_by=admin.id,
+        )
+        db.add(customer)
+        db.flush()
+        product = Product(
+            id=uuid.uuid4(),
+            name="已付清测试商品",
+            sku="PAY-DONE-001",
+            sale_price=100,
+            cost_price=50,
+            stock_quantity=10,
+            status="active",
+            created_by=admin.id,
+            updated_by=admin.id,
+        )
+        db.add(product)
+        db.flush()
+        order = SalesOrder(
+            id=uuid.uuid4(),
+            order_no="SO-PAY-DONE",
+            customer_id=customer.id,
+            sales_user_id=admin.id,
+            status="completed",
+            total_amount=100,
+            paid_amount=100,
+            created_by=admin.id,
+            updated_by=admin.id,
+        )
+        db.add(order)
+        db.commit()
+        oid = str(order.id)
+    finally:
+        db.close()
+
+    resp = client.post(f"/api/v1/sales-orders/{oid}/payments", json={
+        "amount": "1", "payment_method": "cash",
+    }, headers=_auth())
+    assert resp.status_code == 400
+    assert resp.json()["error"]["code"] == "ORDER_INVALID_STATUS"
+
+
+def test_17_payment_negative_amount_422():
+    """负数金额被 Pydantic 拒绝"""
+    resp = client.post(f"/api/v1/sales-orders/{_confirmed_order_id}/payments", json={
+        "amount": "-50", "payment_method": "cash",
+    }, headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_18_payment_no_permission_403():
+    """无收款权限用户返回 403"""
+    db = TestSession()
+    try:
+        nop = User(
+            id=uuid.uuid4(), username="no_pay_perm",
+            hashed_password=hash_password("testpass123"),
+            display_name="无收款权限", is_active=True, is_superuser=False,
+        )
+        db.add(nop)
+        db.commit()
+        token = create_access_token(str(nop.id))
+    finally:
+        db.close()
+
+    resp = client.post(f"/api/v1/sales-orders/{_confirmed_order_id}/payments", json={
+        "amount": "10", "payment_method": "cash",
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
+
+
+def test_19_reverse_no_permission_403():
+    """无冲正权限用户返回 403"""
+    db = TestSession()
+    try:
+        # 创建只有 payment:list 权限的用户
+        nop = _create_user_with_perms(db, "no_reverse_perm", ["payment:list"])
+        db.commit()
+        token = create_access_token(str(nop.id))
+    finally:
+        db.close()
+
+    resp = client.post(f"/api/v1/payments/{uuid.uuid4()}/reverse", headers={
+        "Authorization": f"Bearer {token}",
+    })
+    assert resp.status_code == 403
+
+
+def test_20_payment_list_pagination():
+    """收款列表分页参数"""
+    resp = client.get("/api/v1/payments?page=1&page_size=1", headers=_auth())
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert len(data["items"]) <= 1
+    assert data["page"] == 1
+    assert data["page_size"] == 1
 
 
 app.dependency_overrides[get_db] = override_get_db
