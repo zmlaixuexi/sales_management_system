@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第三百八十四轮）
+
+### 测试补强：前端列表页 loading 状态测试（+4 tests）
+
+- `frontend/src/__tests__/Products.test.tsx`：新增 loading 状态测试（加载中显示"加载中..."）
+- `frontend/src/__tests__/Customers.test.tsx`：同上
+- `frontend/src/__tests__/Orders.test.tsx`：同上
+- `frontend/src/__tests__/AuditLogs.test.tsx`：同上
+- 前端 278→282 tests，总计 878→882
+
 ## 2026-05-02（第三百八十三轮）
 
 ### 文档：更新 README 测试覆盖表
