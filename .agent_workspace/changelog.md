@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-01（第二百五十八轮）
+
+### 功能：商品列表和详情添加派生销售字段
+
+- 商品列表和详情 API 新增 sales_quantity（累计销售数量）和 sales_amount（累计销售额）
+- 使用 _batch_sales_stats 批量子查询聚合 SalesOrderItem，避免 N+1
+- SORTABLE_COLUMNS 新增 sales_quantity/sales_amount 支持排序
+- 后端 456/456 通过，覆盖率 99.74%，make ci 全量通过
+
 ## 2026-05-01（第二百五十七轮）
 
 ### 功能：支付 API 路径对齐规范文档

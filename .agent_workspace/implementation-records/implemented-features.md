@@ -6,6 +6,18 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260501-81
+
+### 商品派生销售字段
+
+- **文件**: `backend/app/api/v1/products.py`
+- **内容**:
+  - 商品列表和详情 API 新增 sales_quantity/sales_amount 派生字段
+  - _batch_sales_stats 批量子查询从 SalesOrderItem 聚合
+  - SORTABLE_COLUMNS 支持按 sales_quantity/sales_amount 排序
+- **验证**: 456 后端通过，ruff 0，覆盖率 99.74%，make ci 全量通过
+- **效果**: 商品数据包含实际销售统计，符合开发文档要求
+
 ## 功能编号：FEAT-20260501-80
 
 ### 支付 API 路径对齐规范文档

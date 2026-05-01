@@ -2,14 +2,15 @@
 
 最后更新时间：2026-05-01
 当前阶段：需求符合性验证 + 功能补全
-当前任务编号：ROUND-257
-当前任务名称：需求缺口补全 — 支付路径对齐
+当前任务编号：ROUND-258
+当前任务名称：需求缺口补全 — 派生销售字段
 当前 Agent：Claude
 任务状态：进行中
 
 ## 最近完成
 
-- Round 257：支付 API 路径对齐规范文档 — 新增 POST /sales-orders/{id}/payments 规范路径，旧路径保留向后兼容，前端和测试更新，456/456 + 123/123 通过，make ci 全量通过
+- Round 258：商品列表和详情添加派生销售字段（sales_quantity + sales_amount）— 批量子查询聚合，支持排序，456/456 通过，覆盖率 99.74%
+- Round 257：支付 API 路径对齐规范文档 — 新增 POST /sales-orders/{id}/payments 规范路径，旧路径保留向后兼容，前端和测试更新，456/456 + 123/123 通过
 - Round 256：修复备份保留策略（30d→7d每日+4周每周）+ 新增 Windows PowerShell 备份/恢复脚本（backup.ps1 + restore.ps1）
 - Round 254：新增订单操作日志查询 API — GET /sales-orders/{id}/logs，含数据范围控制和分页，+3 测试，454/454 通过，make ci 全量通过
 - Round 253：新增客户排行和销售人员排行报表 API — GET /reports/customer-ranking + GET /reports/salesperson-ranking，含数据范围过滤和利润可见性控制，+6 测试，451/451 通过，make ci 全量通过
@@ -180,7 +181,7 @@
 
 ## 下一步第一动作
 
-继续需求缺口补全。已完成报表+订单日志+request_id+部署脚本+支付路径。待修复：6 个前端页面、派生销售字段、商品排序规范。
+继续需求缺口补全。已完成报表+订单日志+request_id+部署脚本+支付路径+派生销售字段。待修复：6 个前端页面。前端页面为大型任务，需产品决策优先级。
 
 ## 当前里程碑总结（Round 95-246）
 

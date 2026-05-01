@@ -110,9 +110,9 @@ RBAC 模型和权限种子已建立，但缺少统一后端权限依赖、对象
 - ~~缺少订单日志 API：/sales-orders/{id}/logs~~ → Round 254 已修复
 - ~~支付 API 路径与文档不一致：/payments/orders/{id}/payments vs /sales-orders/{id}/payments~~ → Round 257 已修复
 - 缺少 6 个前端页面：客户详情、库存流水、支付列表、报表中心、用户管理、角色权限
-- 商品缺少派生销售字段（sales_quantity、sales_amount 等）
+- ~~商品缺少派生销售字段（sales_quantity、sales_amount 等）~~ → Round 258 已修复
 - ~~响应体缺少 request_id 字段~~ → Round 255 已修复
-- 商品默认排序未按规范（缺 sales_quantity 排序）
+- ~~商品默认排序未按规范（缺 sales_quantity 排序）~~ → Round 258 已修复
 - ~~缺少 Windows PowerShell 备份/恢复脚本~~ → Round 256 已修复
 - ~~备份清理保留期与文档不符（30 天 vs 7 天+4 周）~~ → Round 256 已修复
 
