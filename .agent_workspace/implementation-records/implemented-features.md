@@ -6,6 +6,22 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-118
+
+### 测试 — 后端客户 CRUD 认证边界 + 文档同步 785
+
+- **文件**: `backend/tests/test_customer_crud.py`, `docs/testing.md`
+- **内容**:
+  - 未认证获取客户详情 401
+  - 未认证编辑客户 401
+  - 未认证删除客户 401
+  - 无效 UUID 获取客户详情 422
+  - 同步 testing.md 至 785 tests（531+254）
+  - 更新 test_customer_crud.py 19→23、test_inventory_crud.py 15→20
+  - 安全审计：GET /users/roles 和 POST /inventory/adjustments 均有认证+权限+速率限制
+- **验证**: 531+254=785 tests，全 CI 门禁通过
+- **关联**: Round 351
+
 ## 功能编号：FEAT-20260502-117
 
 ### 测试 — 后端库存边界路径测试补强

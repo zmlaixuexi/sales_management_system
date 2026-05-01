@@ -315,3 +315,29 @@ def test_16_csv_import_empty_header():
     )
     assert resp.status_code == 400
     assert "表头" in resp.json()["error"]["message"]
+
+
+def test_17_get_customer_requires_auth():
+    """未认证获取客户详情返回 401"""
+    resp = client.get(f"/api/v1/customers/{_customer_id}")
+    assert resp.status_code == 401
+
+
+def test_18_update_customer_requires_auth():
+    """未认证编辑客户返回 401"""
+    resp = client.put(f"/api/v1/customers/{_customer_id}", json={
+        "name": "未认证修改",
+    })
+    assert resp.status_code == 401
+
+
+def test_19_delete_customer_requires_auth():
+    """未认证删除客户返回 401"""
+    resp = client.delete(f"/api/v1/customers/{_customer_id}")
+    assert resp.status_code == 401
+
+
+def test_20_get_customer_invalid_uuid():
+    """无效 UUID 获取客户详情返回 422"""
+    resp = client.get("/api/v1/customers/not-a-uuid", headers=_auth())
+    assert resp.status_code == 422
