@@ -73,13 +73,6 @@ vi.mock('@ant-design/icons', () => ({
 // Import after mocks are set up
 import Dashboard from '@/pages/Dashboard'
 
-vi.mock('@ant-design/icons', () => ({
-  DollarOutlined: () => <span>$</span>,
-  ShoppingCartOutlined: () => <span>🛒</span>,
-  RiseOutlined: () => <span>📈</span>,
-  AlertOutlined: () => <span>⚠️</span>,
-}))
-
 function renderDashboard() {
   return render(
     <MemoryRouter initialEntries={['/']}>
@@ -228,5 +221,31 @@ describe('Dashboard', () => {
     await waitFor(() => {
       expect(_reportMocks.fetchSalesSummary).toHaveBeenCalledWith('today')
     })
+  })
+
+  it('趋势汇总显示期间总额和峰值日', async () => {
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('spin')).toHaveAttribute('data-spinning', 'false')
+    })
+    expect(screen.getByText(/期间总额/)).toBeInTheDocument()
+    expect(screen.getByText(/峰值日/)).toBeInTheDocument()
+  })
+
+  it('库存预警渲染预警商品数据', async () => {
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('spin')).toHaveAttribute('data-spinning', 'false')
+    })
+    // 预警商品 SKU 在表格中渲染
+    expect(screen.getByText('SKU-LOW')).toBeInTheDocument()
+    expect(screen.getByText('低库存商品')).toBeInTheDocument()
+  })
+
+  it('期间选择器包含 5 个选项', () => {
+    renderDashboard()
+    const select = screen.getByTestId('period-select')
+    const options = select.querySelectorAll('option')
+    expect(options.length).toBe(5)
   })
 })
