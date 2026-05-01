@@ -8,6 +8,13 @@
 
 ## 功能编号：FEAT-20260502-144
 
+## 功能编号：FEAT-20260502-147
+
+- 名称：收款记录页面测试补强
+- 轮次：Round 143（自动循环）
+- 描述：Payments.test.tsx 新增 4 个测试（loading/error/ID 截断/空备注），Table mock 添加 loading 支持，usePaginatedList mock 改用可变对象模式
+- 验证：前端 298 tests 全部通过，ESLint/tsc 无错误
+
 ## 功能编号：FEAT-20260502-146
 
 - 名称：用户管理页面测试补强

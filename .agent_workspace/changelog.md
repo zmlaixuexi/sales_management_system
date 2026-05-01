@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-05-02（第一百四十三轮·自动循环）
+
+### 测试：收款记录页面补强 4 个测试用例（294→298）
+
+- `frontend/src/__tests__/Payments.test.tsx`：新增 4 个测试
+  - loading 状态显示加载提示
+  - error 状态显示重试链接
+  - 收款 ID 截断显示前 8 位
+  - 空备注显示为 `--`
+- Table mock 添加 loading 状态渲染，emptyText 处理优化
+- usePaginatedList mock 改用 `_paginatedListReturn` 可变对象模式
+- 前端 294→298 tests
+
 ## 2026-05-02（第一百四十二轮·自动循环）
 
 ### 测试：用户管理页面测试补强（+5 tests，289→294）
