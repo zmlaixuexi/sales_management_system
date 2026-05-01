@@ -6,6 +6,21 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-111
+
+### 前端 — 收款记录页面（ISSUE-003 缺失页面之一）
+
+- **文件**: `frontend/src/pages/Payments.tsx`, `frontend/src/routes/index.tsx`, `frontend/src/routes/AppLayout.tsx`, `frontend/src/__tests__/Payments.test.tsx`, `frontend/src/__tests__/AppLayout.test.tsx`
+- **内容**:
+  - 新增 Payments 页面：收款列表表格（金额/收款方式/状态标签/收款时间/备注/创建时间）
+  - 订单 ID 可点击跳转到订单详情
+  - 收款方式中文映射（cash→现金、wechat→微信等）
+  - 状态标签（normal→正常/green、reversed→已冲正/red）
+  - 侧边栏添加"收款记录"菜单项（WalletOutlined 图标）
+  - 新增 8 个组件测试 + 修复 AppLayout 图标 mock
+- **验证**: 517+228=745 tests，tsc/ESLint/build 全通过
+- **关联**: Round 344, ISSUE-003
+
 ## 功能编号：FEAT-20260502-110
 
 ### 前端 — 报表中心页面（ISSUE-003 缺失页面之一）

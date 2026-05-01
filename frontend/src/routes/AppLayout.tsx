@@ -9,6 +9,7 @@ import {
   LogoutOutlined,
   UserOutlined,
   BarChartOutlined,
+  WalletOutlined,
 } from '@ant-design/icons'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { authApi, type CurrentUser } from '@/api/auth'
@@ -22,6 +23,7 @@ const menuItems = [
   { key: '/products', icon: <ShopOutlined />, label: '商品管理' },
   { key: '/customers', icon: <TeamOutlined />, label: '客户管理' },
   { key: '/orders', icon: <ShoppingCartOutlined />, label: '销售订单' },
+  { key: '/payments', icon: <WalletOutlined />, label: '收款记录' },
   { key: '/reports', icon: <BarChartOutlined />, label: '报表中心' },
   { key: '/audit-logs', icon: <FileTextOutlined />, label: '操作日志' },
 ]
