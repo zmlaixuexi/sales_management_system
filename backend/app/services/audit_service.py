@@ -14,7 +14,7 @@ from app.models.audit import AuditLog
 logger = logging.getLogger(__name__)
 
 # 敏感字段列表，记录日志时自动脱敏
-SENSITIVE_FIELDS = {"password", "hashed_password", "token", "secret", "credit_card"}
+SENSITIVE_FIELDS = {"password", "hashed_password", "token", "secret", "credit_card", "phone", "email"}
 
 
 def get_request_meta(request: Request) -> dict:

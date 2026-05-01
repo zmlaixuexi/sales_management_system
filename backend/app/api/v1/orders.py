@@ -96,6 +96,15 @@ def _prepare_item(
 ) -> dict:
     """准备订单明细行，含快照"""
     price = unit_price if unit_price is not None else product.sale_price
+    # MVP：成交单价低于成本价时阻止提交
+    if price < product.cost_price:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "PRICE_BELOW_COST",
+                "message": f"商品「{product.name}」成交单价 {price} 低于成本价 {product.cost_price}",
+            },
+        )
     sale_price = product.sale_price
     discount_amount = sale_price - price
     discount_rate = (discount_amount / sale_price * Decimal("100") / Decimal("100")).quantize(

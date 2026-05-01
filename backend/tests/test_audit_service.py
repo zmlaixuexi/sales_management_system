@@ -39,8 +39,16 @@ def test_mask_sensitive_token():
 
 def test_mask_sensitive_no_match():
     """无敏感字段时原样返回"""
-    data = {"name": "test", "email": "a@b.com"}
+    data = {"name": "test", "address": "beijing"}
     assert _mask_sensitive(data) == data
+
+
+def test_mask_sensitive_phone_email():
+    """手机号和邮箱脱敏"""
+    result = _mask_sensitive({"phone": "13800138000", "email": "a@b.com", "name": "test"})
+    assert result["phone"] == "***"
+    assert result["email"] == "***"
+    assert result["name"] == "test"
 
 
 # ─── model_to_dict ──────────────────────────────────────────

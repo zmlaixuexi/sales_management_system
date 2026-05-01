@@ -413,7 +413,17 @@ def delete_product(
     """删除或软删除商品"""
     product = get_or_404(db, Product, product_id, "商品")
 
-    # MVP：直接软删除，后续检查是否有订单引用
+    # 检查是否有订单引用
+    from app.models.order import SalesOrderItem
+    order_ref = db.query(SalesOrderItem).filter(
+        SalesOrderItem.product_id == product_id,
+    ).first()
+    if order_ref:
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "PRODUCT_IN_USE", "message": "该商品已被订单引用，无法删除"},
+        )
+
     product.deleted_at = datetime.now()
     product.updated_by = current_user.id
     log_action(
