@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百八十四轮）
+
+### 代码质量：移除未使用的 PaginatedData 死代码
+
+- response.py 中 PaginatedData 从未被导入或引用（所有 8 个分页端点手动构建响应字典）
+- 同时完成分页审计：确认全部 8 个分页端点均有 ge=1/le=100 校验，3 个排行端点 le=50
+- 474/474 通过，ruff 0，mypy 0
+
 ## 2026-05-02（第二百八十三轮）
 
 ### 工程：GitHub Actions CI 添加 mypy 类型检查步骤
