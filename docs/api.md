@@ -220,6 +220,12 @@ JSON 日志格式示例：
 
 编辑用户信息。
 
+### GET /users/roles
+
+获取角色列表（用于用户编辑页角色选择器）。
+
+**响应字段**：每项含 `id`、`name`、`display_name`。
+
 ---
 
 ## 文件上传
@@ -463,7 +469,7 @@ JSON 日志格式示例：
 
 **查询参数**：`page`, `page_size`
 
-**权限**：`order:list`。非 `order:view_all` 用户只能查看本人订单的日志。
+**权限**：`order:view`。非 `order:view_all` 用户只能查看本人订单的日志。
 
 ### POST /sales-orders/{order_id}/payments
 
@@ -676,6 +682,7 @@ JSON 日志格式示例：
 | customer:delete | 删除客户 |
 | customer:view_all | 查看所有客户（否则只看本人） |
 | order:list | 订单列表和详情 |
+| order:view | 查看订单操作日志 |
 | order:create | 创建订单 |
 | order:update | 编辑订单 |
 | order:confirm | 确认订单 |
