@@ -119,6 +119,7 @@ make docker-down
 | INVENTORY_WARNING_THRESHOLD | 10 | 库存预警阈值 |
 | MAX_IMAGE_SIZE_MB | 5 | 图片上传大小限制（MB） |
 | MAX_CSV_IMPORT_SIZE_MB | 10 | CSV 导入文件大小限制（MB） |
+| MAX_CSV_IMPORT_ROWS | 1000 | CSV 导入行数上限 |
 
 ## Nginx 配置
 

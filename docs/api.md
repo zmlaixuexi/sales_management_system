@@ -708,6 +708,7 @@ JSON 日志格式示例：
 | `UPLOAD_DIR` | `uploads` | 上传文件目录 |
 | `MAX_IMAGE_SIZE_MB` | `5` | 图片上传大小限制 |
 | `MAX_CSV_IMPORT_SIZE_MB` | `10` | CSV 导入文件大小限制 |
+| `MAX_CSV_IMPORT_ROWS` | `1000` | CSV 导入行数上限 |
 | `SLOW_REQUEST_THRESHOLD_MS` | `1000` | 慢请求阈值（毫秒） |
 | `INVENTORY_WARNING_THRESHOLD` | `10` | 库存预警默认阈值 |
 | `RATE_LIMIT_MAX` | `1000` | API 速率限制（每窗口请求数） |
