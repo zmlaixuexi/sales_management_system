@@ -21,7 +21,7 @@ class OrderItemInput(BaseModel):
 class OrderCreate(BaseModel):
     customer_id: str = Field(..., description="客户 ID")
     items: list[OrderItemInput] = Field(..., min_length=1, description="订单明细")
-    remark: str | None = Field(None, description="备注")
+    remark: str | None = Field(None, max_length=500, description="备注")
 
     @field_validator("remark")
     @classmethod
@@ -32,7 +32,7 @@ class OrderCreate(BaseModel):
 class OrderUpdate(BaseModel):
     customer_id: str | None = None
     items: list[OrderItemInput] | None = Field(None, min_length=1)
-    remark: str | None = None
+    remark: str | None = Field(None, max_length=500)
 
     @field_validator("remark")
     @classmethod

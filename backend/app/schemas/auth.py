@@ -54,9 +54,9 @@ class RoleBrief(BaseModel):
 class UserCreate(BaseModel):
     username: str = Field(..., min_length=2, max_length=50)
     password: str = Field(..., min_length=6, max_length=100)
-    display_name: str | None = None
-    phone: str | None = None
-    email: str | None = None
+    display_name: str | None = Field(None, max_length=100)
+    phone: str | None = Field(None, max_length=20)
+    email: str | None = Field(None, max_length=200)
     role_ids: list[str] = []
 
     @field_validator("password")
@@ -75,9 +75,9 @@ class UserCreate(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    display_name: str | None = None
-    phone: str | None = None
-    email: str | None = None
+    display_name: str | None = Field(None, max_length=100)
+    phone: str | None = Field(None, max_length=20)
+    email: str | None = Field(None, max_length=200)
     is_active: bool | None = None
     role_ids: list[str] | None = None
 

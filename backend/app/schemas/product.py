@@ -14,10 +14,10 @@ class ProductCreate(BaseModel):
     cost_price: str = Field("0", description="成本价")
     stock_quantity: int = Field(0, ge=0, description="库存数量")
     category_id: str | None = Field(None, description="分类 ID")
-    main_image_url: str | None = Field(None, description="主图 URL")
+    main_image_url: str | None = Field(None, max_length=500, description="主图 URL")
     status: ProductStatus = Field("active", description="状态：active/inactive/disabled")
     sort_weight: int = Field(0, description="排序权重")
-    remark: str | None = Field(None, description="备注")
+    remark: str | None = Field(None, max_length=500, description="备注")
 
     @field_validator("name", "remark")
     @classmethod
@@ -32,10 +32,10 @@ class ProductUpdate(BaseModel):
     cost_price: str | None = None
     stock_quantity: int | None = Field(None, ge=0)
     category_id: str | None = None
-    main_image_url: str | None = None
+    main_image_url: str | None = Field(None, max_length=500)
     status: ProductStatus | None = None
     sort_weight: int | None = None
-    remark: str | None = None
+    remark: str | None = Field(None, max_length=500)
 
     @field_validator("name", "remark")
     @classmethod

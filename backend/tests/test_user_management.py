@@ -379,3 +379,23 @@ def test_23_update_user_audit_log():
     log = items[0]
     assert log["resource_type"] == "user"
     assert log["after_data"]["display_name"] == "审计后改名"
+
+
+def test_24_create_user_display_name_too_long_422():
+    """display_name 超过 max_length 返回 422"""
+    resp = client.post("/api/v1/users", json={
+        "username": "longnameuser",
+        "password": "password123",
+        "display_name": "A" * 101,
+    }, headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_25_create_user_phone_too_long_422():
+    """phone 超过 max_length 返回 422"""
+    resp = client.post("/api/v1/users", json={
+        "username": "longphoneuser",
+        "password": "password123",
+        "phone": "1" * 21,
+    }, headers=_auth())
+    assert resp.status_code == 422
