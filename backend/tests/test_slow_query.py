@@ -62,34 +62,44 @@ def test_slow_query_logs_with_simulated_slow_execution(caplog):
             conn.execute(text("SELECT 1"))
 
     assert "SLOW SQL" in caplog.text
-    assert "5.00ms" in caplog.text
+    assert "5.0ms" in caplog.text
     assert "threshold=1ms" in caplog.text
 
 
-def test_slow_query_truncates_long_sql(caplog):
-    """验证超过 200 字符的 SQL 语句被截断"""
+def test_slow_query_truncates_long_sql():
+    """验证超过 500 字符的 SQL 语句被截断"""
+    import logging
+
     from app.core.slow_query import _after_cursor_execute
 
+    captured_records: list[logging.LogRecord] = []
     logger = logging.getLogger("app.slow_query")
+
+    original_handle = logger.handle
+
+    def capture_handle(record: logging.LogRecord) -> None:
+        captured_records.append(record)
+        original_handle(record)
+
     with (
         patch("app.core.slow_query.settings") as mock_settings,
         patch("app.core.slow_query._query_start_ctx") as mock_ctx,
         patch("app.core.slow_query.time") as mock_time,
-        patch.object(logger, "warning") as mock_warn,
+        patch.object(logger, "handle", capture_handle),
     ):
         mock_settings.SLOW_SQL_THRESHOLD_MS = 100
         mock_ctx.get.return_value = 1000.0
         mock_time.monotonic.return_value = 1100.0
 
-        long_sql = "SELECT * FROM " + "a" * 250
+        long_sql = "SELECT * FROM " + "a" * 600
         _after_cursor_execute(None, None, long_sql, None, None, None)
 
-    mock_warn.assert_called_once()
-    call_args = mock_warn.call_args[0]
-    # 截断后的 SQL 出现在格式化参数中
-    sql_arg = call_args[4]  # sql_short 是第 5 个参数
-    assert len(sql_arg) <= 203  # 200 + "..."
-    assert sql_arg.endswith("...")
+    assert len(captured_records) == 1
+    record = captured_records[0]
+    assert hasattr(record, "extra_fields")
+    sql_val = record.extra_fields["sql"]
+    assert len(sql_val) <= 503  # 500 + "..."
+    assert sql_val.endswith("...")
 
 
 def test_slow_query_disabled_when_threshold_zero(caplog):

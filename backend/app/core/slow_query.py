@@ -23,14 +23,20 @@ def _after_cursor_execute(conn, cursor, statement, parameters, context, executem
     if elapsed_ms >= threshold:
         from app.core.request_id import request_id_ctx
 
-        sql_short = statement[:200] + "..." if len(statement) > 200 else statement
-        logger.warning(
-            "SLOW SQL %.2fms (threshold=%dms) request_id=%s: %s",
-            elapsed_ms,
-            threshold,
-            request_id_ctx.get(""),
-            sql_short,
+        record = logging.LogRecord(
+            name="app.slow_query", level=logging.WARNING,
+            pathname="", lineno=0, msg="", args=None, exc_info=None,
         )
+        sql_display = statement[:500] + "..." if len(statement) > 500 else statement
+        record.extra_fields = {  # type: ignore[attr-defined]
+            "sql": sql_display,
+            "parameters": str(parameters)[:200] if parameters else None,
+            "duration_ms": elapsed_ms,
+            "threshold_ms": threshold,
+            "request_id": request_id_ctx.get(""),
+        }
+        record.msg = f"SLOW SQL {elapsed_ms}ms (threshold={threshold}ms): {sql_display}"
+        logger.handle(record)
 
 
 def register_slow_query_listener(engine):  # type: ignore[no-untyped-def]
