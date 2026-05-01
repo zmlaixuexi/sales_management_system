@@ -98,6 +98,23 @@ def test_request_id_in_log(caplog):
     assert record.extra_fields["request_id"] == "log-test-id"
 
 
+def test_request_id_in_response_body():
+    """响应体应包含 request_id 字段"""
+    response = client.get("/api/v1/health")
+    assert response.status_code == 200
+    data = response.json()
+    assert "request_id" in data
+    assert data["request_id"] == response.headers["x-request-id"]
+
+
+def test_request_id_in_response_body_passthrough():
+    """自定义 request_id 应同时出现在响应头和响应体"""
+    custom_id = "body-test-req-id-9999"
+    response = client.get("/api/v1/health", headers={"X-Request-ID": custom_id})
+    assert response.status_code == 200
+    assert response.json()["request_id"] == custom_id
+
+
 def test_production_env_rejects_default_secret(monkeypatch):
     """生产环境使用默认 JWT_SECRET_KEY 应拒绝启动"""
     from app.core.config import settings
