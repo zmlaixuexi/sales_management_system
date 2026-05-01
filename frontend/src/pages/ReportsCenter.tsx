@@ -224,6 +224,7 @@ export default function ReportsCenter() {
                     size="small"
                     loading={loading === 'trend'}
                     pagination={{ pageSize: 10 }}
+                    locale={{ emptyText: '暂无趋势数据' }}
                   />
                 </Card>
               </div>
@@ -241,6 +242,7 @@ export default function ReportsCenter() {
                   size="small"
                   loading={loading === 'products'}
                   pagination={{ pageSize: 10 }}
+                  locale={{ emptyText: '暂无商品排行数据' }}
                 />
               </Card>
             ),
@@ -257,6 +259,7 @@ export default function ReportsCenter() {
                   size="small"
                   loading={loading === 'customers'}
                   pagination={{ pageSize: 10 }}
+                  locale={{ emptyText: '暂无客户排行数据' }}
                 />
               </Card>
             ),
@@ -273,6 +276,7 @@ export default function ReportsCenter() {
                   size="small"
                   loading={loading === 'salespersons'}
                   pagination={{ pageSize: 10 }}
+                  locale={{ emptyText: '暂无销售排行数据' }}
                 />
               </Card>
             ),

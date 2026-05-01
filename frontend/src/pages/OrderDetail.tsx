@@ -257,6 +257,7 @@ export default function OrderDetail() {
           rowKey="id"
           size="small"
           pagination={false}
+          locale={{ emptyText: '暂无订单明细' }}
           footer={() => (
             <div style={{ textAlign: 'right', fontWeight: 600 }}>
               共 {order.items.length} 项，合计：¥{formatAmount(order.total_amount)}

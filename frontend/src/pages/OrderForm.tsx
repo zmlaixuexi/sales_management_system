@@ -253,6 +253,7 @@ export default function OrderForm() {
             rowKey="key"
             size="small"
             pagination={false}
+            locale={{ emptyText: '请点击"添加商品"选择商品' }}
             footer={() => (
               <div style={{ textAlign: 'right', fontWeight: 600 }}>
                 合计：¥{formatAmount(totalAmount)}
@@ -323,6 +324,7 @@ export default function OrderForm() {
             size="small"
             loading={productLoading}
             pagination={false}
+            locale={{ emptyText: '暂无匹配商品' }}
           />
         </Card>
       )}

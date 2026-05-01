@@ -196,6 +196,7 @@ export default function UsersPage() {
           showTotal: (t) => `共 ${t} 条`,
           onChange: onPageChange,
         }}
+        locale={{ emptyText: '暂无用户数据' }}
       />
 
       <Modal
