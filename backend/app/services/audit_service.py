@@ -77,7 +77,7 @@ def log_action(
         return entry
     except Exception:
         logger.exception("写入操作日志失败: action=%s resource_type=%s", action, resource_type)
-        return None
+        return None  # type: ignore[return-value]
 
 
 def model_to_dict(obj: Any) -> dict:

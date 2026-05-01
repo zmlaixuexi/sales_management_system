@@ -25,6 +25,7 @@ dev = [
     "pytest-cov>=6.0.0",
     "httpx>=0.28.0",
     "ruff>=0.9.0",
+    "mypy>=1.14.0",
 ]
 
 [build-system]
@@ -69,3 +70,24 @@ omit = ["app/db/seed.py", "app/main.py"]
 show_missing = true
 skip_covered = false
 fail_under = 99
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+exclude = ["tests/", "alembic/"]
+plugins = ["sqlalchemy.ext.mypy.plugin"]
+
+[[tool.mypy.overrides]]
+module = "app.main"
+disable_error_code = ["no-redef", "assignment", "attr-defined", "arg-type"]
+
+[[tool.mypy.overrides]]
+module = "app.api.deps"
+disable_error_code = ["attr-defined"]
+
+[[tool.mypy.overrides]]
+module = "app.core.ratelimit"
+disable_error_code = ["arg-type"]

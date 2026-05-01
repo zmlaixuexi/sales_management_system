@@ -106,7 +106,7 @@ def _customer_row(c: Customer) -> list[str]:
         c.email or "",
         c.source or "",
         c.level or "",
-        owner_name,
+        owner_name or "",
         c.follow_status or "",
         c.remark or "",
         _dt(c.created_at),

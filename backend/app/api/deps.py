@@ -5,10 +5,10 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy import Column
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import InstrumentedAttribute, Session
 
 from app.core.config import settings
-from app.db.session import SessionLocal
+from app.db.session import Base, SessionLocal
 from app.models.user import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
@@ -101,7 +101,7 @@ def parse_uuid_or_400(value: str, label: str) -> uuid.UUID:
         ) from None
 
 
-def get_or_404(db: Session, model: type, entity_id: uuid.UUID | str, label: str = "资源"):
+def get_or_404(db: Session, model: type[Base], entity_id: uuid.UUID | str, label: str = "资源"):
     """按 ID 查询实体，不存在或 ID 格式无效则抛 404。自动过滤软删除。"""
     try:
         uid = uuid.UUID(str(entity_id))
@@ -132,7 +132,7 @@ def resp(data=None, message: str = "操作成功") -> dict:
     return result
 
 
-def generate_sequential_code(db: Session, model: type, column: Column, prefix: str) -> str:
+def generate_sequential_code(db: Session, model: type[Base], column: InstrumentedAttribute[str], prefix: str) -> str:
     """生成带日期前缀的序号编码，格式: {prefix}YYYYMMDD-NNNN。
 
     查询当天最大序号并递增，用于订单号和 SKU 自动生成。
