@@ -42,6 +42,7 @@ const routes: RouteObject[] = [
       { path: 'payments', element: lazyPage(() => import('@/pages/Payments')) },
       { path: 'audit-logs', element: lazyPage(() => import('@/pages/AuditLogs')) },
       { path: 'reports', element: lazyPage(() => import('@/pages/ReportsCenter')) },
+      { path: 'users', element: lazyPage(() => import('@/pages/Users')) },
     ],
   },
   {

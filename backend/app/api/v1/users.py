@@ -149,3 +149,20 @@ def update_user(
     db.commit()
 
     return resp(message="更新成功")
+
+
+@router.get("/roles")
+def list_roles(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """角色列表（需要管理员权限）"""
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "AUTH_FORBIDDEN", "message": "无权限访问角色列表"},
+        )
+
+    roles = db.query(Role).order_by(Role.name).all()
+    items = [{"id": str(r.id), "name": r.name, "display_name": r.display_name} for r in roles]
+    return resp(items)

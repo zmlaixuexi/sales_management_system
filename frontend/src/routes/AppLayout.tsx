@@ -10,6 +10,7 @@ import {
   UserOutlined,
   BarChartOutlined,
   WalletOutlined,
+  UserSwitchOutlined,
 } from '@ant-design/icons'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { authApi, type CurrentUser } from '@/api/auth'
@@ -26,6 +27,7 @@ const menuItems = [
   { key: '/payments', icon: <WalletOutlined />, label: '收款记录' },
   { key: '/reports', icon: <BarChartOutlined />, label: '报表中心' },
   { key: '/audit-logs', icon: <FileTextOutlined />, label: '操作日志' },
+  { key: '/users', icon: <UserSwitchOutlined />, label: '用户管理' },
 ]
 
 export default function AppLayout() {
