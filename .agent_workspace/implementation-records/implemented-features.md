@@ -6,6 +6,19 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-124
+
+### 可观测性 — 请求日志补充用户 ID
+
+- **文件**: `backend/app/core/user_context.py`（新增）, `backend/app/api/deps.py`, `backend/app/core/request_log.py`
+- **内容**:
+  - 新增 `user_id_ctx` ContextVar（独立模块避免循环导入）
+  - `get_current_user` 认证成功后设置 user_id 上下文
+  - 请求日志 extra_fields 补充 `user_id` 字段
+  - 对照开发文档第 13 节逐项验证：JSON 日志 ✓、stdout ✓、请求元数据 ✓、request_id ✓、敏感字段脱敏 ✓、user_id ✓（新增）
+- **验证**: 558 后端测试全通过，ruff 0 errors
+- **关联**: Round 357
+
 ## 功能编号：FEAT-20260502-123
 
 ### 文档 — API 文档完整性校验与修正

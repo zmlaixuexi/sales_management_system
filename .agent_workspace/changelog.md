@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-05-02（第三百五十七轮）
+
+### 可观测性：请求日志补充用户 ID
+
+对照开发文档第 13 节结构化日志要求验证：
+- ✅ 后端输出结构化 JSON 日志（_JsonFormatter）
+- ✅ Docker 环境输出到 stdout（StreamHandler(sys.stdout)）
+- ✅ 记录请求方法、路径、状态码、耗时（RequestLogMiddleware）
+- ✅ request_id 贯穿日志和响应（RequestIDMiddleware）
+- ✅ 敏感字段日志脱敏（audit_service SENSITIVE_FIELDS）
+- ➕ 新增 user_id 到请求日志 extra_fields（通过 user_id_ctx ContextVar）
+
+新增 `app/core/user_context.py` 避免循环导入。
+
 ## 2026-05-02（第三百五十六轮）
 
 ### 文档：API 文档完整性校验与修正
