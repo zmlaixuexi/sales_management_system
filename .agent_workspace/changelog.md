@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百七十七轮）
+
+### 安全：依赖漏洞审计
+
+- pip-audit 扫描项目 venv：仅 pip 自身 2 个低危 CVE，全部运行时依赖无已知漏洞
+- cryptography 47.0.0、SQLAlchemy 2.0.49、fastapi 0.136.1、bcrypt 5.0.0 等均为最新安全版本
+- 474/474 通过
+
 ## 2026-05-02（第二百七十六轮）
 
 ### 文档：deployment.md 新增开发工作流命令
