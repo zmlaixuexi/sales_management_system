@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-05-02（第三百一十九轮）
+
+### 需求符合性：分页格式验证
+
+7 个分页列表端点（products/customers/orders/payments/audit_logs/users/inventory）全部返回 {items, page, page_size, total}，符合开发文档第 8.1 节分页响应规范。reports 和 price_history 为非分页特殊端点，格式正确。
+
 ## 2026-05-02（第三百一十八轮）
 
 ### 需求符合性：金额序列化和时间格式验证
