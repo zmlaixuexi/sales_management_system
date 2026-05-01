@@ -2,38 +2,37 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-385
-当前任务名称：前端详情页 loading 状态测试
+当前任务编号：ROUND-386
+当前任务名称：输入长度验证加固 + 类型命名冲突修复
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 385：前端详情页 loading 状态测试 +2（OrderDetail/CustomerDetail，282→284）+ 代码质量扫描（ruff/ESLint/tsc 均通过，无死代码或未使用导入）
-- Round 384：前端列表页 loading 状态测试 +4（278→282）
+- Round 386：Pydantic 模型字符串字段 max_length 约束（用户/客户/商品/订单 schema）+ OrderDetail 类型重命名 + 输入长度溢出测试 +2
+- Round 385：前端详情页 loading 状态测试 +2 + 代码质量扫描
+- Round 384：前端列表页 loading 状态测试 +4
 - Round 383：README 测试覆盖表更新
-- Round 382：全量 CI 验证通过
-- Round 381：提取 paginated_resp 辅助函数
 
 ## 最终验证状态
 
 | 门禁 | 结果 |
 |---|---|
-| 后端测试 | 600/600 |
+| 后端测试 | 602/602 |
 | 前端测试 | 284/284 |
 | ruff | 0 errors |
 | ESLint | 0 errors |
 | TypeScript | 0 errors |
 | 构建 | ✓ |
-| 总计 | 884 tests |
+| 总计 | 886 tests |
 
 ## 下一步第一动作
 
 继续 keep-going 模式。可选方向：
 - 可观测性（结构化日志增强）
 - 前端组件测试补强（Dashboard/ReportsCenter 更细粒度）
-- 安全加固（更多输入验证）
-- 代码质量：OrderDetail.tsx 中 OrderDetail 类型名与组件名冲突（可重命名类型导入）
+- 安全加固（CSP headers 已有、CORS 配置细化）
+- 部署体验（健康检查增强、docker-compose 优化）
 
 ## 阻塞问题
 

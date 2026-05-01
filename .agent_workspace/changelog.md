@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-02（第三百八十六轮）
+
+### 安全加固：Pydantic 模型字符串字段添加 max_length 约束 + OrderDetail 类型重命名
+
+- `backend/app/schemas/auth.py`：UserCreate/UserUpdate 添加 display_name(100)、phone(20)、email(200) 长度约束
+- `backend/app/schemas/customer.py`：CustomerCreate/CustomerUpdate 添加 contact_name(100)、email(200)、remark(500)
+- `backend/app/schemas/product.py`：ProductCreate/ProductUpdate 添加 main_image_url(500)、remark(500)
+- `backend/app/schemas/order.py`：OrderCreate/OrderUpdate 添加 remark(500)
+- `frontend/src/pages/OrderDetail.tsx`：类型导入 OrderDetail 重命名为 OrderDetailData 避免组件名冲突
+- `backend/tests/test_user_management.py`：新增 2 个长度溢出测试（display_name 101字符、phone 21字符返回 422）
+- 后端 600→602 tests，总计 884→886
+
 ## 2026-05-02（第三百八十五轮）
 
 ### 测试补强：前端详情页 loading 状态测试 + 代码质量扫描（+2 tests）
