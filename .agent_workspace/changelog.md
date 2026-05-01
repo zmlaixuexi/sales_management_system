@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-01（第二百五十七轮）
+
+### 功能：支付 API 路径对齐规范文档
+
+- 新增 POST /sales-orders/{id}/payments 规范路径（与开发文档第 8.5 节一致）
+- 旧路径 POST /payments/orders/{id}/payments 保留向后兼容
+- 前端 payments.ts 和测试更新使用新路径
+- 后端 456/456 + 前端 123/123 通过，覆盖率 99.74%，make ci 全量通过
+
 ## 2026-05-01（第二百五十六轮）
 
 ### 部署：修复备份保留策略 + 新增 Windows PowerShell 脚本
