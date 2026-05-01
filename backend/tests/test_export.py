@@ -433,3 +433,105 @@ def test_28_export_orders_customer_filter():
     resp = client.get(f"/api/v1/exports/orders?customer_id={_customer_id}", headers=_auth())
     assert resp.status_code == 200
     assert "ORD-" in resp.text
+
+
+def test_29_export_requires_permission():
+    """导出需要对应权限，无权限用户返回 403"""
+    from app.core.security import create_access_token
+    from app.models.user import Permission, Role, RolePermission, UserRole
+
+    db = TestSession()
+    try:
+        nop = User(
+            id=uuid.uuid4(), username="no_export_perm",
+            hashed_password=hash_password("testpass123"),
+            display_name="无导出权限", is_active=True, is_superuser=False,
+        )
+        db.add(nop)
+        db.commit()
+        token = create_access_token(str(nop.id))
+    finally:
+        db.close()
+
+    for path in ["/api/v1/exports/products", "/api/v1/exports/customers",
+                 "/api/v1/exports/orders", "/api/v1/exports/payments"]:
+        resp = client.get(path, headers={"Authorization": f"Bearer {token}"})
+        assert resp.status_code == 403, f"{path} should return 403"
+
+
+def test_30_export_products_cost_hidden_without_permission():
+    """无 product:view_cost 权限用户导出商品不含成本价"""
+    from app.core.security import create_access_token
+    from app.models.user import Permission, Role, RolePermission, UserRole
+
+    db = TestSession()
+    try:
+        perm_list = db.query(Permission).filter(Permission.code == "product:list").first()
+        if not perm_list:
+            perm_list = Permission(id=uuid.uuid4(), code="product:list", name="商品列表", module="product")
+            db.add(perm_list)
+            db.flush()
+        role = Role(id=uuid.uuid4(), name="export_cost_check", display_name="成本检查")
+        db.add(role)
+        db.flush()
+        db.add(RolePermission(role_id=role.id, permission_id=perm_list.id))
+        user = User(
+            id=uuid.uuid4(), username="cost_checker",
+            hashed_password=hash_password("testpass123"),
+            display_name="成本检查员", is_active=True, is_superuser=False,
+        )
+        db.add(user)
+        db.flush()
+        db.add(UserRole(user_id=user.id, role_id=role.id))
+        db.commit()
+        token = create_access_token(str(user.id))
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/exports/products", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    content = resp.text
+    assert "成本价" not in content
+
+
+def test_31_export_orders_data_scope_filtered():
+    """非 order:view_all 用户导出订单只包含本人数据"""
+    from app.core.security import create_access_token
+    from app.models.customer import Customer
+    from app.models.order import SalesOrder
+    from app.models.user import Permission, Role, RolePermission, UserRole
+
+    db = TestSession()
+    try:
+        admin = db.query(User).filter(User.username == "export_tester").first()
+
+        # 创建只有 order:list 权限的用户
+        perm = db.query(Permission).filter(Permission.code == "order:list").first()
+        if not perm:
+            perm = Permission(id=uuid.uuid4(), code="order:list", name="订单列表", module="order")
+            db.add(perm)
+            db.flush()
+        role = Role(id=uuid.uuid4(), name="export_scope", display_name="范围测试")
+        db.add(role)
+        db.flush()
+        db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+        scope_user = User(
+            id=uuid.uuid4(), username="scope_exporter",
+            hashed_password=hash_password("testpass123"),
+            display_name="范围导出员", is_active=True, is_superuser=False,
+        )
+        db.add(scope_user)
+        db.flush()
+        db.add(UserRole(user_id=scope_user.id, role_id=role.id))
+        db.commit()
+        token = create_access_token(str(scope_user.id))
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/exports/orders", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    # scope_user 没有订单，应只有表头行
+    lines = [line for line in resp.text.strip().split("\n") if line.strip()]
+    # BOM 行 + header = 1 或 2 行（BOM 可能在 header 行内）
+    data_lines = [l for l in lines if "订单号" not in l]
+    assert len(data_lines) == 0
