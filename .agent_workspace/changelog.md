@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百零七轮）
+
+### 文档：同步测试数 486+129=615 + make ci 全量通过
+
+- testing.md: 前端 127→129，总计 613→615，更新 useSubmit/usePaginatedList 条目
+- README.md: 同步前端测试数和模块描述
+- make ci 全量通过：ruff 0 + mypy 0 + eslint 0 + 486/486 + 129/129 + build 零警告
+
 ## 2026-05-02（第三百零六轮）
 
 ### 测试补强：useSubmit/usePaginatedList _toastDisplayed 跳过逻辑（+2）
