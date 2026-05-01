@@ -1,5 +1,6 @@
 """订单 CRUD API — 含库存扣减/回滚、金额快照、状态机"""
 
+import json
 import uuid
 from datetime import datetime
 from decimal import ROUND_HALF_UP, Decimal
@@ -17,6 +18,7 @@ from app.api.deps import (
     resp,
 )
 from app.core.sanitize import escape_like
+from app.models.audit import AuditLog
 from app.models.customer import Customer
 from app.models.order import InventoryMovement, SalesOrder, SalesOrderItem
 from app.models.product import Product
@@ -535,3 +537,50 @@ def cancel_order(
     db.commit()
 
     return resp(data={"id": str(order.id), "status": order.status}, message="取消成功")
+
+
+@router.get("/{order_id}/logs")
+def order_logs(
+    order_id: uuid.UUID,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("order:view")),
+):
+    """查询指定订单的操作日志"""
+    order = get_or_404(db, SalesOrder, order_id, "订单")
+    check_owner_or_forbid(current_user, order.sales_user_id, "order:view_all", "订单")
+
+    query = db.query(AuditLog).filter(
+        AuditLog.resource_type == "order",
+        AuditLog.resource_id == str(order_id),
+    )
+
+    total = query.count()
+    items = (
+        query.order_by(AuditLog.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+        .all()
+    )
+
+    result_items = [
+        {
+            "id": str(item.id),
+            "actor_id": str(item.actor_id) if item.actor_id else None,
+            "actor_name": item.actor_name,
+            "action": item.action,
+            "before_data": json.loads(item.before_data) if item.before_data else None,
+            "after_data": json.loads(item.after_data) if item.after_data else None,
+            "ip_address": item.ip_address,
+            "user_agent": item.user_agent,
+            "request_id": item.request_id,
+            "created_at": item.created_at.isoformat() if item.created_at else None,
+        }
+        for item in items
+    ]
+
+    return resp(
+        data={"items": result_items, "page": page, "page_size": page_size, "total": total},
+        message="查询成功",
+    )

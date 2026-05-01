@@ -351,6 +351,35 @@ class TestReport:
         assert "测试商品B" in names
 
 
+# ========== 订单日志 ==========
+
+class TestOrderLogs:
+    """订单操作日志查询"""
+
+    def test_01_order_logs(self):
+        """查询订单操作日志"""
+        resp = client.get(f"/api/v1/sales-orders/{_order_id}/logs", headers=_auth_header())
+        assert resp.status_code == 200
+        data = resp.json()["data"]
+        assert data["total"] >= 2  # 至少有 create + confirm
+        actions = [item["action"] for item in data["items"]]
+        assert "order_create" in actions
+        assert "order_confirm" in actions
+
+    def test_02_order_logs_pagination(self):
+        """订单日志分页"""
+        resp = client.get(f"/api/v1/sales-orders/{_order_id}/logs?page_size=1", headers=_auth_header())
+        assert resp.status_code == 200
+        data = resp.json()["data"]
+        assert len(data["items"]) == 1
+        assert data["total"] >= 2
+
+    def test_03_order_logs_not_found(self):
+        """不存在的订单返回 404"""
+        resp = client.get(f"/api/v1/sales-orders/{uuid.uuid4()}/logs", headers=_auth_header())
+        assert resp.status_code == 404
+
+
 # ========== 辅助函数 ==========
 
 def _auth_header():
