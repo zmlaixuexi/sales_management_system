@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     UPLOAD_PUBLIC_BASE_URL: str = "/uploads"
     MAX_IMAGE_SIZE_MB: int = 5
     MAX_CSV_IMPORT_SIZE_MB: int = 10
+    MAX_CSV_IMPORT_ROWS: int = 1000
     INVENTORY_WARNING_THRESHOLD: int = 10
     RATE_LIMIT_MAX: int = 1000
     RATE_LIMIT_WINDOW: int = 60

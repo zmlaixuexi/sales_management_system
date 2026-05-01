@@ -17,6 +17,7 @@ from app.api.deps import (
     require_permission,
     resp,
 )
+from app.core.config import settings
 from app.core.sanitize import escape_like, strip_html
 from app.models.product import Product, ProductCategory, ProductPriceHistory
 from app.models.user import User
@@ -557,6 +558,9 @@ async def import_products_csv(
             sku_seq = 1
 
     for row_num, row in enumerate(reader, start=2):
+        if row_num - 1 > settings.MAX_CSV_IMPORT_ROWS:
+            errors.append({"row": row_num, "message": f"超过最大行数限制 {settings.MAX_CSV_IMPORT_ROWS}"})
+            break
         name = strip_html((row.get("商品名称") or row.get("name") or "").strip())
         if not name:
             errors.append({"row": row_num, "message": "商品名称不能为空"})

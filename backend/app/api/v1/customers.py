@@ -15,6 +15,7 @@ from app.api.deps import (
     require_permission,
     resp,
 )
+from app.core.config import settings
 from app.core.sanitize import escape_like, strip_html
 from app.models.customer import Customer
 from app.models.user import User
@@ -373,6 +374,9 @@ async def import_customers_csv(
     errors: list[dict] = []
 
     for row_num, row in enumerate(reader, start=2):
+        if row_num - 1 > settings.MAX_CSV_IMPORT_ROWS:
+            errors.append({"row": row_num, "message": f"超过最大行数限制 {settings.MAX_CSV_IMPORT_ROWS}"})
+            break
         name = strip_html((row.get("客户名称") or row.get("name") or "").strip())
         if not name:
             errors.append({"row": row_num, "message": "客户名称不能为空"})
