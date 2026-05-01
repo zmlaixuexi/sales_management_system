@@ -45,11 +45,11 @@ vi.mock('antd', () => {
     return <div data-testid="form-item" data-label={label}>{children}</div>
   }
   return {
-    Table: ({ dataSource, columns, rowKey }: any) => (
+    Table: ({ dataSource, columns, rowKey, locale }: any) => (
       <div>
         <table data-testid="table">
           <tbody>
-            {dataSource?.map((row: any) => (
+            {dataSource?.length ? dataSource.map((row: any) => (
               <tr key={row[rowKey]} data-testid={`row-${row[rowKey]}`}>
                 {columns?.map((col: any) => (
                   <td key={col.dataIndex} data-col={col.dataIndex}>
@@ -57,7 +57,9 @@ vi.mock('antd', () => {
                   </td>
                 ))}
               </tr>
-            ))}
+            )) : (
+              <tr><td colSpan={99}>{typeof locale?.emptyText === 'string' ? locale.emptyText : locale?.emptyText}</td></tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -206,5 +208,11 @@ describe('UsersPage', () => {
       expect(screen.getByTestId('modal')).toBeInTheDocument()
       expect(screen.getByTestId('modal').getAttribute('data-title')).toBe('新建用户')
     })
+  })
+
+  it('无数据时显示空状态提示', () => {
+    _userMocks.fetchUsers.mockReturnValue({ data: { items: [], total: 0 } })
+    renderUsers()
+    expect(screen.getByText('暂无用户数据')).toBeInTheDocument()
   })
 })

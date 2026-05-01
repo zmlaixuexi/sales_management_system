@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-02（第三百七十八轮）
+
+### 测试补强：前端列表页空状态测试（+5 tests）
+
+- `frontend/src/__tests__/Customers.test.tsx`：更新 Table mock 支持 emptyText 渲染，新增空状态测试（"暂无客户，点击新增客户添加"）
+- `frontend/src/__tests__/Orders.test.tsx`：同上，空状态（"暂无订单，点击新建订单添加"）
+- `frontend/src/__tests__/Products.test.tsx`：同上，空状态（"暂无商品，点击新增商品添加"）
+- `frontend/src/__tests__/Users.test.tsx`：同上，空状态（"暂无用户数据"）
+- `frontend/src/__tests__/AuditLogs.test.tsx`：同上，空状态（"暂无操作日志"）
+- 重构 usePaginatedList mock 为可变对象（_paginatedListReturn），便于测试中动态修改返回值
+- 前端 269→274 tests，总计 867→872
+
 ## 2026-05-02（第三百七十七轮）
 
 ### 测试补强：前端表单编辑模式测试（+11 tests）

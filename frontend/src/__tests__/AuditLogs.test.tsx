@@ -12,33 +12,36 @@ vi.mock('@/api/auditLogs', () => ({
   fetchAuditActions: (...args: any[]) => _auditMocks.fetchAuditActions(...args),
 }))
 
+const _paginatedListReturn = {
+  data: [
+    { id: 'al1', created_at: '2026-05-01T10:00:00Z', actor_name: '管理员', action: 'product_create', resource_type: 'product', resource_id: 'abc-def012345', after_data: { name: '新商品', status: 'active' }, ip_address: '192.168.1.1', request_id: 'req-001', user_agent: 'Mozilla/5.0' },
+    { id: 'al2', created_at: '2026-05-01T11:00:00Z', actor_name: '销售A', action: 'order_confirm', resource_type: 'order', resource_id: null, after_data: null, ip_address: null, request_id: null, user_agent: null },
+    { id: 'al3', created_at: null, actor_name: null, action: 'login_success', resource_type: 'user', resource_id: 'xyz-123', after_data: null, ip_address: '10.0.0.1', request_id: null, user_agent: null },
+  ],
+  total: 3,
+  loading: false,
+  error: false,
+  page: 1,
+  pageSize: 10,
+  keyword: '',
+  setPage: vi.fn(),
+  setKeyword: vi.fn(),
+  onPageChange: vi.fn(),
+  refresh: vi.fn(),
+}
+
 vi.mock('@/hooks/usePaginatedList', () => ({
-  usePaginatedList: () => ({
-    data: [
-      { id: 'al1', created_at: '2026-05-01T10:00:00Z', actor_name: '管理员', action: 'product_create', resource_type: 'product', resource_id: 'abc-def012345', after_data: { name: '新商品', status: 'active' }, ip_address: '192.168.1.1', request_id: 'req-001', user_agent: 'Mozilla/5.0' },
-      { id: 'al2', created_at: '2026-05-01T11:00:00Z', actor_name: '销售A', action: 'order_confirm', resource_type: 'order', resource_id: null, after_data: null, ip_address: null, request_id: null, user_agent: null },
-      { id: 'al3', created_at: null, actor_name: null, action: 'login_success', resource_type: 'user', resource_id: 'xyz-123', after_data: null, ip_address: '10.0.0.1', request_id: null, user_agent: null },
-    ],
-    total: 3,
-    loading: false,
-    page: 1,
-    pageSize: 10,
-    keyword: '',
-    setPage: vi.fn(),
-    setKeyword: vi.fn(),
-    onPageChange: vi.fn(),
-    refresh: vi.fn(),
-  }),
+  usePaginatedList: () => _paginatedListReturn,
 }))
 
 vi.mock('antd', () => ({
-  Table: ({ dataSource, columns, rowKey }: any) => (
+  Table: ({ dataSource, columns, rowKey, locale }: any) => (
     <table data-testid="audit-table">
       <thead>
         <tr>{columns?.map((col: any) => <th key={col.dataIndex || col.title}>{col.title}</th>)}</tr>
       </thead>
       <tbody>
-        {dataSource?.map((row: any) => (
+        {dataSource?.length ? dataSource.map((row: any) => (
           <tr key={row[rowKey]} data-testid={`row-${row[rowKey]}`}>
             {columns?.map((col: any) => (
               <td key={col.dataIndex} data-col={col.dataIndex}>
@@ -46,7 +49,9 @@ vi.mock('antd', () => ({
               </td>
             ))}
           </tr>
-        ))}
+        )) : (
+          <tr><td colSpan={99}>{typeof locale?.emptyText === 'string' ? locale.emptyText : locale?.emptyText}</td></tr>
+        )}
       </tbody>
     </table>
   ),
@@ -169,5 +174,17 @@ describe('AuditLogs', () => {
     await waitFor(() => {
       expect(_auditMocks.fetchAuditActions).toHaveBeenCalled()
     })
+  })
+
+  it('无数据时显示空状态提示', () => {
+    Object.assign(_paginatedListReturn, { data: [], total: 0 })
+    renderAuditLogs()
+    expect(screen.getByText('暂无操作日志')).toBeInTheDocument()
+    _paginatedListReturn.data = [
+      { id: 'al1', created_at: '2026-05-01T10:00:00Z', actor_name: '管理员', action: 'product_create', resource_type: 'product', resource_id: 'abc-def012345', after_data: { name: '新商品', status: 'active' }, ip_address: '192.168.1.1', request_id: 'req-001', user_agent: 'Mozilla/5.0' },
+      { id: 'al2', created_at: '2026-05-01T11:00:00Z', actor_name: '销售A', action: 'order_confirm', resource_type: 'order', resource_id: null, after_data: null, ip_address: null, request_id: null, user_agent: null },
+      { id: 'al3', created_at: null, actor_name: null, action: 'login_success', resource_type: 'user', resource_id: 'xyz-123', after_data: null, ip_address: '10.0.0.1', request_id: null, user_agent: null },
+    ]
+    _paginatedListReturn.total = 3
   })
 })

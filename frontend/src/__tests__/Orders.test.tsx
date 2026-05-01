@@ -16,33 +16,36 @@ vi.mock('@/api/request', () => ({
   downloadCsv: vi.fn(),
 }))
 
+const _paginatedListReturn = {
+  data: [
+    { id: 'o1', order_no: 'ORD-20260501-001', status: 'draft', item_count: 3, total_amount: '1000', paid_amount: '0', gross_profit: '400', gross_margin: '40', created_at: '2026-05-01T10:00:00Z' },
+    { id: 'o2', order_no: 'ORD-20260501-002', status: 'completed', item_count: 1, total_amount: '500', paid_amount: '500', gross_profit: '200', gross_margin: '40', created_at: '2026-05-01T12:00:00Z' },
+    { id: 'o3', order_no: 'ORD-20260501-003', status: 'cancelled', item_count: 2, total_amount: '300', paid_amount: '0', gross_profit: '0', gross_margin: '0', created_at: null },
+  ],
+  total: 3,
+  loading: false,
+  error: false,
+  page: 1,
+  pageSize: 10,
+  keyword: '',
+  setPage: vi.fn(),
+  setKeyword: vi.fn(),
+  onPageChange: vi.fn(),
+  refresh: vi.fn(),
+}
+
 vi.mock('@/hooks/usePaginatedList', () => ({
-  usePaginatedList: () => ({
-    data: [
-      { id: 'o1', order_no: 'ORD-20260501-001', status: 'draft', item_count: 3, total_amount: '1000', paid_amount: '0', gross_profit: '400', gross_margin: '40', created_at: '2026-05-01T10:00:00Z' },
-      { id: 'o2', order_no: 'ORD-20260501-002', status: 'completed', item_count: 1, total_amount: '500', paid_amount: '500', gross_profit: '200', gross_margin: '40', created_at: '2026-05-01T12:00:00Z' },
-      { id: 'o3', order_no: 'ORD-20260501-003', status: 'cancelled', item_count: 2, total_amount: '300', paid_amount: '0', gross_profit: '0', gross_margin: '0', created_at: null },
-    ],
-    total: 3,
-    loading: false,
-    page: 1,
-    pageSize: 10,
-    keyword: '',
-    setPage: vi.fn(),
-    setKeyword: vi.fn(),
-    onPageChange: vi.fn(),
-    refresh: vi.fn(),
-  }),
+  usePaginatedList: () => _paginatedListReturn,
 }))
 
 vi.mock('antd', () => ({
-  Table: ({ dataSource, columns, rowKey }: any) => (
+  Table: ({ dataSource, columns, rowKey, locale }: any) => (
     <table data-testid="orders-table">
       <thead>
         <tr>{columns?.map((col: any) => <th key={col.dataIndex || col.title}>{col.title}</th>)}</tr>
       </thead>
       <tbody>
-        {dataSource?.map((row: any) => (
+        {dataSource?.length ? dataSource.map((row: any) => (
           <tr key={row[rowKey]} data-testid={`row-${row[rowKey]}`}>
             {columns?.map((col: any) => (
               <td key={col.dataIndex} data-col={col.dataIndex}>
@@ -50,7 +53,9 @@ vi.mock('antd', () => ({
               </td>
             ))}
           </tr>
-        ))}
+        )) : (
+          <tr><td colSpan={99}>{typeof locale?.emptyText === 'string' ? locale.emptyText : locale?.emptyText}</td></tr>
+        )}
       </tbody>
     </table>
   ),
@@ -156,5 +161,17 @@ describe('OrdersPage', () => {
     expect(headerTexts).toContain('订单金额')
     expect(headerTexts).toContain('已收金额')
     expect(headerTexts).toContain('操作')
+  })
+
+  it('无数据时显示空状态提示', () => {
+    Object.assign(_paginatedListReturn, { data: [], total: 0 })
+    renderOrders()
+    expect(screen.getByText('暂无订单，点击"新建订单"添加')).toBeInTheDocument()
+    _paginatedListReturn.data = [
+      { id: 'o1', order_no: 'ORD-20260501-001', status: 'draft', item_count: 3, total_amount: '1000', paid_amount: '0', gross_profit: '400', gross_margin: '40', created_at: '2026-05-01T10:00:00Z' },
+      { id: 'o2', order_no: 'ORD-20260501-002', status: 'completed', item_count: 1, total_amount: '500', paid_amount: '500', gross_profit: '200', gross_margin: '40', created_at: '2026-05-01T12:00:00Z' },
+      { id: 'o3', order_no: 'ORD-20260501-003', status: 'cancelled', item_count: 2, total_amount: '300', paid_amount: '0', gross_profit: '0', gross_margin: '0', created_at: null },
+    ]
+    _paginatedListReturn.total = 3
   })
 })

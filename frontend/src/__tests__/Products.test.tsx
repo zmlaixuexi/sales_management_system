@@ -30,33 +30,36 @@ vi.mock('@/api/client', () => ({
   default: { post: (...args: any[]) => _apiClientPost(...args) },
 }))
 
+const _paginatedListReturn = {
+  data: [
+    { id: '1', name: '商品A', sku: 'SKU-001', category_name: '分类1', sale_price: '100', cost_price: '60', unit_profit: '40', gross_margin: '40', stock_quantity: 10, status: 'active', main_image_url: null },
+    { id: '2', name: '商品B', sku: 'SKU-002', category_name: '分类2', sale_price: '200', cost_price: '120', unit_profit: '80', gross_margin: '40', stock_quantity: 5, status: 'inactive', main_image_url: null },
+  ],
+  total: 2,
+  loading: false,
+  error: false,
+  page: 1,
+  pageSize: 10,
+  keyword: '',
+  setPage: vi.fn(),
+  setKeyword: vi.fn(),
+  onPageChange: vi.fn(),
+  refresh: vi.fn(),
+}
+
 vi.mock('@/hooks/usePaginatedList', () => ({
-  usePaginatedList: (_fetcher: any, _extraFilters: any, _errorMsg: string) => ({
-    data: [
-      { id: '1', name: '商品A', sku: 'SKU-001', category_name: '分类1', sale_price: '100', cost_price: '60', unit_profit: '40', gross_margin: '40', stock_quantity: 10, status: 'active', main_image_url: null },
-      { id: '2', name: '商品B', sku: 'SKU-002', category_name: '分类2', sale_price: '200', cost_price: '120', unit_profit: '80', gross_margin: '40', stock_quantity: 5, status: 'inactive', main_image_url: null },
-    ],
-    total: 2,
-    loading: false,
-    page: 1,
-    pageSize: 10,
-    keyword: '',
-    setPage: vi.fn(),
-    setKeyword: vi.fn(),
-    onPageChange: vi.fn(),
-    refresh: vi.fn(),
-  }),
+  usePaginatedList: (_fetcher: any, _extraFilters: any, _errorMsg: string) => _paginatedListReturn,
 }))
 
 vi.mock('antd', () => {
   return {
-    Table: ({ dataSource, columns, rowKey }: any) => (
+    Table: ({ dataSource, columns, rowKey, locale }: any) => (
       <table data-testid="products-table">
         <thead>
           <tr>{columns?.map((col: any) => <th key={col.dataIndex}>{col.title}</th>)}</tr>
         </thead>
         <tbody>
-          {dataSource?.map((row: any) => (
+          {dataSource?.length ? dataSource.map((row: any) => (
             <tr key={row[rowKey]} data-testid={`row-${row[rowKey]}`}>
               {columns?.map((col: any) => (
                 <td key={col.dataIndex} data-col={col.dataIndex}>
@@ -64,7 +67,9 @@ vi.mock('antd', () => {
                 </td>
               ))}
             </tr>
-          ))}
+          )) : (
+            <tr><td colSpan={99}>{typeof locale?.emptyText === 'string' ? locale.emptyText : locale?.emptyText}</td></tr>
+          )}
         </tbody>
       </table>
     ),
@@ -180,5 +185,16 @@ describe('ProductsPage', () => {
     expect(headerTexts).toContain('库存')
     expect(headerTexts).toContain('状态')
     expect(headerTexts).toContain('操作')
+  })
+
+  it('无数据时显示空状态提示', () => {
+    Object.assign(_paginatedListReturn, { data: [], total: 0 })
+    renderProducts()
+    expect(screen.getByText('暂无商品，点击"新增商品"添加')).toBeInTheDocument()
+    _paginatedListReturn.data = [
+      { id: '1', name: '商品A', sku: 'SKU-001', category_name: '分类1', sale_price: '100', cost_price: '60', unit_profit: '40', gross_margin: '40', stock_quantity: 10, status: 'active', main_image_url: null },
+      { id: '2', name: '商品B', sku: 'SKU-002', category_name: '分类2', sale_price: '200', cost_price: '120', unit_profit: '80', gross_margin: '40', stock_quantity: 5, status: 'inactive', main_image_url: null },
+    ]
+    _paginatedListReturn.total = 2
   })
 })

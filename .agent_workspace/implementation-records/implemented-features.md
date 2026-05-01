@@ -6,6 +6,18 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-134
+
+### 测试补强 — 前端列表页空状态测试
+
+- **文件**: `frontend/src/__tests__/` 下 Customers/Orders/Products/Users/AuditLogs 测试文件
+- **内容**:
+  - 更新 5 个列表页 Table mock 支持 locale.emptyText 渲染
+  - 重构 usePaginatedList mock 为可变对象（_paginatedListReturn）
+  - 各页面新增 1 个空状态测试，验证空数据时显示正确的提示文案
+- **验证**: 274 前端测试全通过，ESLint/TypeScript 全通过
+- **关联**: Round 378
+
 ## 功能编号：FEAT-20260502-133
 
 ### 测试补强 — 前端表单编辑模式测试

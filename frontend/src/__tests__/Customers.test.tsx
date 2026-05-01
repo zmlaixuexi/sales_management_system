@@ -25,33 +25,36 @@ vi.mock('@/api/client', () => ({
   default: { post: vi.fn() },
 }))
 
+const _paginatedListReturn = {
+  data: [
+    { id: 'c1', name: '客户甲', contact_name: '张三', phone: '13800001111', source: 'referral', level: 'vip', owner_name: '销售A', follow_status: '活跃' },
+    { id: 'c2', name: '客户乙', contact_name: '李四', phone: '13800002222', source: 'online', level: 'normal', owner_name: '销售B', follow_status: '待跟进' },
+    { id: 'c3', name: '客户丙', contact_name: null, phone: null, source: null, level: null, owner_name: null, follow_status: null },
+  ],
+  total: 3,
+  loading: false,
+  error: false,
+  page: 1,
+  pageSize: 10,
+  keyword: '',
+  setPage: vi.fn(),
+  setKeyword: vi.fn(),
+  onPageChange: vi.fn(),
+  refresh: vi.fn(),
+}
+
 vi.mock('@/hooks/usePaginatedList', () => ({
-  usePaginatedList: () => ({
-    data: [
-      { id: 'c1', name: '客户甲', contact_name: '张三', phone: '13800001111', source: 'referral', level: 'vip', owner_name: '销售A', follow_status: '活跃' },
-      { id: 'c2', name: '客户乙', contact_name: '李四', phone: '13800002222', source: 'online', level: 'normal', owner_name: '销售B', follow_status: '待跟进' },
-      { id: 'c3', name: '客户丙', contact_name: null, phone: null, source: null, level: null, owner_name: null, follow_status: null },
-    ],
-    total: 3,
-    loading: false,
-    page: 1,
-    pageSize: 10,
-    keyword: '',
-    setPage: vi.fn(),
-    setKeyword: vi.fn(),
-    onPageChange: vi.fn(),
-    refresh: vi.fn(),
-  }),
+  usePaginatedList: () => _paginatedListReturn,
 }))
 
 vi.mock('antd', () => ({
-  Table: ({ dataSource, columns, rowKey }: any) => (
+  Table: ({ dataSource, columns, rowKey, locale }: any) => (
     <table data-testid="customers-table">
       <thead>
         <tr>{columns?.map((col: any) => <th key={col.dataIndex || col.title}>{col.title}</th>)}</tr>
       </thead>
       <tbody>
-        {dataSource?.map((row: any) => (
+        {dataSource?.length ? dataSource.map((row: any) => (
           <tr key={row[rowKey]} data-testid={`row-${row[rowKey]}`}>
             {columns?.map((col: any) => (
               <td key={col.dataIndex} data-col={col.dataIndex}>
@@ -59,7 +62,9 @@ vi.mock('antd', () => ({
               </td>
             ))}
           </tr>
-        ))}
+        )) : (
+          <tr><td colSpan={99}>{typeof locale?.emptyText === 'string' ? locale.emptyText : locale?.emptyText}</td></tr>
+        )}
       </tbody>
     </table>
   ),
@@ -171,5 +176,18 @@ describe('CustomersPage', () => {
     expect(headerTexts).toContain('来源')
     expect(headerTexts).toContain('等级')
     expect(headerTexts).toContain('操作')
+  })
+
+  it('无数据时显示空状态提示', () => {
+    Object.assign(_paginatedListReturn, { data: [], total: 0 })
+    renderCustomers()
+    expect(screen.getByText('暂无客户，点击"新增客户"添加')).toBeInTheDocument()
+    // 恢复
+    _paginatedListReturn.data = [
+      { id: 'c1', name: '客户甲', contact_name: '张三', phone: '13800001111', source: 'referral', level: 'vip', owner_name: '销售A', follow_status: '活跃' },
+      { id: 'c2', name: '客户乙', contact_name: '李四', phone: '13800002222', source: 'online', level: 'normal', owner_name: '销售B', follow_status: '待跟进' },
+      { id: 'c3', name: '客户丙', contact_name: null, phone: null, source: null, level: null, owner_name: null, follow_status: null },
+    ]
+    _paginatedListReturn.total = 3
   })
 })
