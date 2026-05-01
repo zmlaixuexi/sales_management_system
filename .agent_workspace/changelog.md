@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百七十五轮）
+
+### 工程：新增 make test-unit/test-integration 快速反馈目标
+
+- Makefile 新增 test-unit（排除集成测试，431 测试 15s）和 test-integration（仅集成测试，43 测试 1.7s）
+- conftest.py 为 test_csv_import 添加 import 标记分类
+- ruff 0，474/474 全量通过
+
 ## 2026-05-02（第二百七十四轮）
 
 ### 文档：实现记录同步 Round 264-273
