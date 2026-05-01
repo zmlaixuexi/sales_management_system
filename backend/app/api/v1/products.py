@@ -20,6 +20,7 @@ from app.api.deps import (
 from app.core.config import settings
 from app.core.sanitize import escape_like, strip_html
 from app.models.product import Product, ProductCategory, ProductPriceHistory
+from app.models.order import InventoryMovement
 from app.models.user import User
 from app.schemas.product import (
     ProductBrief,
@@ -233,6 +234,17 @@ def create_product(
     db.add(product)
     db.flush()
 
+    if data.stock_quantity and data.stock_quantity > 0:
+        db.add(InventoryMovement(
+            product_id=product.id,
+            movement_type="product_create",
+            quantity_before=0,
+            quantity_change=data.stock_quantity,
+            quantity_after=data.stock_quantity,
+            operator_id=current_user.id,
+            remark="新建商品初始库存",
+        ))
+
     unit_profit, gross_margin = _calc_profit(sale_price, cost_price)
 
     log_action(
@@ -362,7 +374,19 @@ def update_product(
         product.category_id = _validate_category_id(db, parse_uuid_or_400(data.category_id, "分类 ID"))
 
     if data.stock_quantity is not None:
-        product.stock_quantity = data.stock_quantity
+        old_qty = product.stock_quantity
+        new_qty = data.stock_quantity
+        if old_qty != new_qty:
+            product.stock_quantity = new_qty
+            db.add(InventoryMovement(
+                product_id=product.id,
+                movement_type="product_update",
+                quantity_before=old_qty,
+                quantity_change=new_qty - old_qty,
+                quantity_after=new_qty,
+                operator_id=current_user.id,
+                remark="编辑商品库存",
+            ))
 
     if data.status is not None:
         product.status = data.status

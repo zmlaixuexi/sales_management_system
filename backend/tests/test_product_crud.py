@@ -561,3 +561,71 @@ def test_21_update_product_invalid_status():
         "status": "bad_status",
     }, headers=_auth())
     assert resp.status_code == 422
+
+
+def test_22_create_product_stock_creates_movement():
+    """创建商品有初始库存时生成库存流水"""
+    resp = client.post("/api/v1/products", json={
+        "name": "库存流水测试", "sale_price": "10", "cost_price": "5",
+        "stock_quantity": 100, "sku": "SPU-MOV-TEST",
+    }, headers=_auth())
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    resp = client.get("/api/v1/inventory/movements", params={"product_id": pid}, headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    m = items[0]
+    assert m["movement_type"] == "product_create"
+    assert m["quantity_before"] == 0
+    assert m["quantity_change"] == 100
+    assert m["quantity_after"] == 100
+
+
+def test_23_update_product_stock_creates_movement():
+    """编辑商品库存时生成库存流水"""
+    resp = client.post("/api/v1/products", json={
+        "name": "编辑库存测试", "sale_price": "10", "cost_price": "5",
+        "stock_quantity": 50, "sku": "SPU-MOV-UPD",
+    }, headers=_auth())
+    pid = resp.json()["data"]["id"]
+
+    resp = client.put(f"/api/v1/products/{pid}", json={
+        "stock_quantity": 80,
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/inventory/movements", params={"product_id": pid}, headers=_auth())
+    items = resp.json()["data"]["items"]
+    # 应有两条：product_create (0→50) 和 product_update (50→80)
+    types = [m["movement_type"] for m in items]
+    assert "product_update" in types
+    update_mov = next(m for m in items if m["movement_type"] == "product_update")
+    assert update_mov["quantity_before"] == 50
+    assert update_mov["quantity_change"] == 30
+    assert update_mov["quantity_after"] == 80
+
+
+def test_24_update_product_stock_no_change_no_movement():
+    """编辑商品库存不变时不生成库存流水"""
+    resp = client.post("/api/v1/products", json={
+        "name": "不变库存测试", "sale_price": "10", "cost_price": "5",
+        "stock_quantity": 20, "sku": "SPU-MOV-NOCHG",
+    }, headers=_auth())
+    pid = resp.json()["data"]["id"]
+
+    # 获取当前流水数量
+    resp = client.get("/api/v1/inventory/movements", params={"product_id": pid}, headers=_auth())
+    count_before = len(resp.json()["data"]["items"])
+
+    # 更新但不改库存
+    resp = client.put(f"/api/v1/products/{pid}", json={
+        "name": "不变库存测试改名",
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    # 流水数量不变
+    resp = client.get("/api/v1/inventory/movements", params={"product_id": pid}, headers=_auth())
+    count_after = len(resp.json()["data"]["items"])
+    assert count_after == count_before

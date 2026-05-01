@@ -245,9 +245,10 @@ class TestInventory:
         assert resp.status_code == 200
         items = resp.json()["data"]["items"]
         assert len(items) >= 1
-        movement = items[0]
-        assert movement["movement_type"] == "order_confirm"
-        assert movement["quantity_change"] == -3
+        # 找到订单确认的库存扣减流水
+        order_mov = next((m for m in items if m["movement_type"] == "order_confirm"), None)
+        assert order_mov is not None
+        assert order_mov["quantity_change"] == -3
 
     def test_02_manual_adjustment(self):
         """手工库存调整"""
