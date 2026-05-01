@@ -2,6 +2,7 @@
 
 import os
 import uuid
+from datetime import datetime
 
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -436,6 +437,77 @@ class TestOrderFilterAndEdge:
         db.close()
 
         # 取消订单应成功（跳过已删除商品的库存回滚）
+        resp = client.post(f"/api/v1/sales-orders/{oid}/cancel", headers=_auth())
+        assert resp.status_code == 200
+
+    def test_26b_confirm_order_product_soft_deleted(self):
+        """确认订单时商品已被软删除 → 404（deleted_at 过滤）"""
+        from app.models.product import Product as ProdModel
+        # 创建独立商品避免被其他测试干扰
+        db = TestSession()
+        soft_del_prod = ProdModel(
+            id=uuid.uuid4(),
+            sku="ORD-SOFT-CONFIRM",
+            name="软删除确认测试商品",
+            sale_price=100,
+            cost_price=50,
+            stock_quantity=10,
+            status="active",
+        )
+        db.add(soft_del_prod)
+        db.commit()
+        pid = str(soft_del_prod.id)
+        db.close()
+
+        resp = client.post("/api/v1/sales-orders", json={
+            "customer_id": _customer_id,
+            "items": [{"product_id": pid, "quantity": 1}],
+        }, headers=_auth())
+        draft_id = resp.json()["data"]["id"]
+
+        # 软删除商品
+        db = TestSession()
+        prod = db.query(ProdModel).filter(ProdModel.id == uuid.UUID(pid)).first()
+        prod.deleted_at = datetime.now()
+        db.commit()
+        db.close()
+
+        resp = client.post(f"/api/v1/sales-orders/{draft_id}/confirm", headers=_auth())
+        assert resp.status_code == 404
+
+    def test_26c_cancel_order_product_soft_deleted(self):
+        """取消已确认订单时商品已被软删除 → 跳过库存回滚仍成功"""
+        from app.models.product import Product as ProdModel
+        db = TestSession()
+        new_prod = ProdModel(
+            id=uuid.uuid4(),
+            sku="ORD-SOFT-DEL",
+            name="软删除测试商品",
+            sale_price=100,
+            cost_price=50,
+            stock_quantity=10,
+            status="active",
+        )
+        db.add(new_prod)
+        db.commit()
+        pid = str(new_prod.id)
+        db.close()
+
+        resp = client.post("/api/v1/sales-orders", json={
+            "customer_id": _customer_id,
+            "items": [{"product_id": pid, "quantity": 2}],
+        }, headers=_auth())
+        oid = resp.json()["data"]["id"]
+        client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
+
+        # 软删除商品
+        db = TestSession()
+        prod = db.query(ProdModel).filter(ProdModel.id == uuid.UUID(pid)).first()
+        prod.deleted_at = datetime.now()
+        db.commit()
+        db.close()
+
+        # 取消订单应成功（软删除商品的库存不回滚）
         resp = client.post(f"/api/v1/sales-orders/{oid}/cancel", headers=_auth())
         assert resp.status_code == 200
 
