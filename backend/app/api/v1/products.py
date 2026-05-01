@@ -1,7 +1,5 @@
 """商品 CRUD API"""
 
-import csv
-import io
 import uuid
 from datetime import datetime
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
@@ -19,7 +17,6 @@ from app.api.deps import (
     require_permission,
     resp,
 )
-from app.core.config import settings
 from app.core.sanitize import escape_like
 from app.models.product import Product, ProductCategory, ProductPriceHistory
 from app.models.user import User
@@ -31,6 +28,7 @@ from app.schemas.product import (
 )
 from app.schemas.response import ApiResponse
 from app.services.audit_service import get_request_meta, log_action
+from app.services.csv_import import validate_csv_upload
 
 router = APIRouter(
     prefix="/products", tags=["商品管理"],
@@ -527,31 +525,7 @@ async def import_products_csv(
     current_user: User = Depends(require_permission("product:create")),
 ):
     """批量导入商品（CSV 格式）"""
-    if not file.filename or not file.filename.endswith(".csv"):
-        raise HTTPException(status_code=400, detail={
-            "code": "VALIDATION_FAILED", "message": "请上传 CSV 文件",
-        })
-
-    content = await file.read()
-    max_size = settings.MAX_CSV_IMPORT_SIZE_MB * 1024 * 1024
-    if len(content) > max_size:
-        raise HTTPException(status_code=400, detail={
-            "code": "VALIDATION_FAILED",
-            "message": f"CSV 文件不能超过 {settings.MAX_CSV_IMPORT_SIZE_MB}MB",
-        })
-
-    try:
-        text = content.decode("utf-8-sig")
-    except UnicodeDecodeError:
-        raise HTTPException(status_code=400, detail={
-            "code": "VALIDATION_FAILED", "message": "文件编码错误，请使用 UTF-8",
-        }) from None
-
-    reader = csv.DictReader(io.StringIO(text))
-    if not reader.fieldnames:
-        raise HTTPException(status_code=400, detail={
-            "code": "VALIDATION_FAILED", "message": "CSV 文件为空或缺少表头",
-        })
+    reader = await validate_csv_upload(file)
 
     # 获取默认分类
     default_cat = db.query(ProductCategory).filter(
