@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第一百五十轮·自动循环）
+
+### 全量 DoD 验证 + deleted_at 审计：零遗漏
+
+- 逐条对照开发文档第 18 节 Definition of Done：功能/测试/Docker/异常路径/中文文案/文档/workspace 记录均满足
+- 验证关键验收标准：取消订单不计入报表（`_VALID_ORDER_STATUSES` 排除 cancelled/draft）、收款冲正需权限+审计日志、库存不能为负
+- 全量 deleted_at 过滤审计：所有查询 Customer/Product/SalesOrder/User 的路径均正确过滤，零遗漏
+- 收款方式差异（微信/支付宝 vs 文档的银行卡）属于合理的现代化调整
+
 ## 2026-05-02（第一百四十九轮·自动循环）
 
 ### 部署：Nginx 添加 Gzip 压缩和 API 响应 Cache-Control
