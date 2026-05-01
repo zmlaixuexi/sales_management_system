@@ -19,8 +19,8 @@ from app.api.deps import (
 )
 from app.core.config import settings
 from app.core.sanitize import escape_like, strip_html
-from app.models.product import Product, ProductCategory, ProductPriceHistory
 from app.models.order import InventoryMovement
+from app.models.product import Product, ProductCategory, ProductPriceHistory
 from app.models.user import User
 from app.schemas.product import (
     ProductBrief,

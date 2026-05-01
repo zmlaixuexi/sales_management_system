@@ -7,6 +7,7 @@ from jose import JWTError, jwt
 from sqlalchemy.orm import InstrumentedAttribute, Session
 
 from app.core.config import settings
+from app.core.user_context import user_id_ctx
 from app.db.session import Base, SessionLocal
 from app.models.user import User
 
@@ -40,6 +41,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     user = db.query(User).filter(User.id == uuid.UUID(user_id), User.deleted_at.is_(None)).first()
     if user is None or not user.is_active:
         raise credentials_exception
+    user_id_ctx.set(user_id)
     return user
 
 
