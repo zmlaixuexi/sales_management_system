@@ -4,13 +4,13 @@
 
 | 指标 | 值 |
 |---|---|
-| 后端测试总数 | 426 |
+| 后端测试总数 | 456 |
 | 后端测试文件 | 28 |
 | 前端测试总数 | 123 |
 | 前端测试文件 | 20 |
-| 测试总计 | 544 |
-| 后端覆盖率 | 99.81% |
-| 覆盖模块 | 认证、商品、客户、订单、库存、收款、报表、审计日志、数据导出、批量导入、权限校验、速率限制、SQL 注入防护、XSS 防护、请求 ID 中间件、CORS 验证、日志格式器、金额计算、文件服务、密码强度 |
+| 测试总计 | 579 |
+| 后端覆盖率 | 99.74% |
+| 覆盖模块 | 认证、商品、客户、订单、库存、收款、报表（含客户/销售人员排行）、审计日志（含手机号/邮箱脱敏）、数据导出、批量导入、权限校验、速率限制、SQL 注入防护、XSS 防护、请求 ID 中间件、CORS 验证、日志格式器、金额计算、文件服务、密码强度、订单操作日志、支付路径、派生销售字段、响应体 request_id |
 
 ## 运行测试
 
@@ -56,7 +56,7 @@ cd frontend && npx eslint src/
 | test_customer_import.py | test_customer_import.db | 超级用户，客户导入 |
 | test_ratelimit.py | test_ratelimit.db | 速率限制 |
 | test_sanitize.py | （无） | 纯函数测试，无需数据库 |
-| test_health.py | （无） | 健康检查无需数据库 |
+| test_health.py | （无） | 健康检查无需数据库，mock 数据库连接 |
 | test_user_management.py | test_user_mgmt.db | 管理员，用户 CRUD |
 | test_customer_crud.py | test_customer_crud.db | 管理员，客户详情/编辑/转移/删除 |
 | test_product_crud.py | test_product_crud.db | 管理员，商品详情/删除 |
@@ -94,20 +94,20 @@ pytest -m "not slow"  # 排除慢速测试
 
 | 标记 | 说明 | 测试数 |
 |---|---|---|
-| crud | CRUD 操作测试 | 127 |
-| boundary | 边界值和异常路径 | 87 |
-| security | 认证/权限/速率限制 | 45 |
+| crud | CRUD 操作测试 | 136 |
+| boundary | 边界值和异常路径 | 88 |
+| security | 认证/权限/速率限制 | 46 |
 | export | 导出功能 | 41 |
 | import | 导入功能 | 18 |
-| report | 报表和审计日志 | 43 |
-| integration | 集成测试 | 33 |
-| infra | 基础设施（健康检查/中间件/日志） | 20 |
+| report | 报表和审计日志 | 49 |
+| integration | 集成测试 | 36 |
+| infra | 基础设施（健康检查/中间件/日志） | 22 |
 
 ---
 
 ## 后端测试文件详解
 
-### test_health.py（14 个测试）
+### test_health.py（16 个测试）
 
 健康检查、版本接口、中间件验证、异常处理、CORS 和生产环境安全检查，无需认证。
 
@@ -125,6 +125,8 @@ pytest -m "not slow"  # 排除慢速测试
 | test_unhandled_exception_returns_json | 未处理异常返回一致 JSON 格式 |
 | test_cors_allowed_origin | 允许的 Origin 返回 CORS 响应头 |
 | test_cors_disallowed_origin | 不允许的 Origin 不返回 CORS 响应头 |
+| test_request_id_in_response_body | 响应体包含 request_id 字段 |
+| test_request_id_in_response_body_passthrough | 响应体透传请求中的 request_id |
 
 ### test_auth.py（13 个测试）
 
@@ -141,7 +143,7 @@ pytest -m "not slow"  # 排除慢速测试
 | test_login_nonexistent_user | 不存在用户返回 401 |
 | test_refresh_rejected_for_inactive_user | 禁用用户刷新 Token 被拒绝 |
 
-### test_integration.py（24 个测试，7 个类）
+### test_integration.py（27 个测试，8 个类）
 
 完整业务流程端到端测试。
 
@@ -154,6 +156,7 @@ pytest -m "not slow"  # 排除慢速测试
 | TestInventory | 2 | 库存流水查询、手工调整 |
 | TestPayment | 4 | 登记收款、部分收款、超额收款、冲正 |
 | TestReport | 4 | 销售汇总、趋势、商品排行、库存预警 |
+| TestOrderLogs | 3 | 订单日志查询、分页、404 |
 
 ### test_audit_log.py（9 个测试）
 
@@ -183,9 +186,9 @@ refresh_token 异常、价格/库存/名称校验、CSV 边界、用户列表、
 
 认证边界、订单状态机、收款边界（草稿收款、超额、冲正回退）、用户管理、库存调整、流水类型筛选。
 
-### test_reports_audit.py（22 个测试）
+### test_reports_audit.py（28 个测试）
 
-销售汇总（6 种 period）、趋势、排行、预警、审计日志查询/筛选/权限。
+销售汇总（6 种 period）、趋势、排行、预警、审计日志查询/筛选/权限、客户排行（含数据范围过滤和利润可见性）、销售人员排行（含数据范围过滤和利润可见性）。
 
 ### test_product_import.py（9 个测试）
 
@@ -221,7 +224,7 @@ refresh_token 异常、价格/库存/名称校验、CSV 边界、用户列表、
 
 ### test_payment_crud.py（13 个测试）
 
-收款登记 + 冲正：创建（部分收款→partially_paid、全额→completed）、超额收款、零金额、草稿不可收款、订单不存在、列表全量/按 order_id 筛选/非管理员数据范围过滤、冲正/重复冲正/不存在/关联订单已删除。
+收款登记 + 冲正：创建（部分收款→partially_paid、全额→completed）、超额收款、零金额、草稿不可收款、订单不存在、列表全量/按 order_id 筛选/非管理员数据范围过滤、冲正/重复冲正/不存在/关联订单已删除。路径已对齐规范文档 POST /sales-orders/{id}/payments。
 
 ### test_inventory_crud.py（10 个测试）
 
@@ -239,17 +242,17 @@ CSV 导出辅助函数单元测试：`_dec` Decimal/None/零/负数，`_str` 字
 
 文件上传校验单元测试：扩展名白名单、MIME 类型、文件大小、正常通过。
 
-### test_order_calc.py（9 个测试）
+### test_order_calc.py（10 个测试）
 
-订单金额计算纯函数测试：`_calc_order_totals` 基本金额/零金额/空明细/毛利率精度/缺失字段，`_prepare_item` 默认价格/自定义价格/除零保护/快照字段。
+订单金额计算纯函数测试：`_calc_order_totals` 基本金额/零金额/空明细/毛利率精度/缺失字段，`_prepare_item` 默认价格/自定义价格/除零保护/快照字段/低于成本价阻止。
 
 ### test_product_calc.py（6 个测试）
 
 商品利润计算纯函数测试：`_calc_profit` 基本利润/零售价除零保护/亏损/零利润/精度/高毛利率。
 
-### test_audit_service.py（7 个测试）
+### test_audit_service.py（8 个测试）
 
-审计服务内部函数测试：`_mask_sensitive` None/空字典/密码脱敏/token 脱敏/无匹配，`model_to_dict` UUID 转字符串/None 跳过。
+审计服务内部函数测试：`_mask_sensitive` None/空字典/密码脱敏/token 脱敏/手机号脱敏/邮箱脱敏/无匹配，`model_to_dict` UUID 转字符串/None 跳过。
 
 ### test_logging.py（5 个测试）
 
