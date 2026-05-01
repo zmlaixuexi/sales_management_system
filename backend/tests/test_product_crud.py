@@ -629,3 +629,20 @@ def test_24_update_product_stock_no_change_no_movement():
     resp = client.get("/api/v1/inventory/movements", params={"product_id": pid}, headers=_auth())
     count_after = len(resp.json()["data"]["items"])
     assert count_after == count_before
+
+
+def test_25_create_product_name_too_long_422():
+    """商品名称超过 max_length 返回 422"""
+    resp = client.post("/api/v1/products", json={
+        "name": "A" * 201, "sale_price": "10", "cost_price": "5",
+    }, headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_26_create_product_remark_too_long_422():
+    """备注超过 max_length 返回 422"""
+    resp = client.post("/api/v1/products", json={
+        "name": "备注超长测试", "sale_price": "10", "cost_price": "5",
+        "remark": "R" * 501,
+    }, headers=_auth())
+    assert resp.status_code == 422

@@ -398,3 +398,19 @@ def test_23_delete_customer_with_order_ref_blocked():
     free_cid = resp.json()["data"]["id"]
     resp = client.delete(f"/api/v1/customers/{free_cid}", headers=_auth())
     assert resp.status_code == 200
+
+
+def test_24_create_customer_name_too_long_422():
+    """客户名称超过 max_length 返回 422"""
+    resp = client.post("/api/v1/customers", json={
+        "name": "N" * 201,
+    }, headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_25_create_customer_email_too_long_422():
+    """邮箱超过 max_length 返回 422"""
+    resp = client.post("/api/v1/customers", json={
+        "name": "邮箱超长客户", "email": "a" * 201,
+    }, headers=_auth())
+    assert resp.status_code == 422
