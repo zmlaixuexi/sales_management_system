@@ -104,22 +104,65 @@ make docker-down
 
 ## 环境变量说明
 
+### 基础配置
+
 | 变量 | 默认值 | 说明 |
 |---|---|---|
-| APP_ENV | development | 应用环境 |
-| DATABASE_URL | — | PostgreSQL 连接字符串 |
-| JWT_SECRET_KEY | change-me | JWT 签名密钥（生产必须修改） |
-| JWT_ACCESS_TOKEN_EXPIRE_MINUTES | 30 | Access Token 有效期 |
-| CORS_ORIGINS | http://localhost:5173 | 允许的前端地址 |
+| APP_ENV | development | 应用环境（development / production） |
+| BACKEND_PORT | 8000 | 后端服务端口 |
+
+### 数据库
+
+| 变量 | 默认值 | 说明 |
+|---|---|---|
+| DATABASE_URL | — | PostgreSQL 连接字符串（同步驱动） |
+| DATABASE_ASYNC_URL | — | PostgreSQL 连接字符串（异步驱动） |
+| DB_POOL_SIZE | 5 | 连接池大小（生产建议 10） |
+| DB_MAX_OVERFLOW | 10 | 连接池最大溢出（生产建议 20） |
+| DB_POOL_RECYCLE_SECONDS | 1800 | 连接回收时间（秒） |
+
+### JWT 认证
+
+| 变量 | 默认值 | 说明 |
+|---|---|---|
+| JWT_SECRET_KEY | change-me | JWT 签名密钥（**生产必须修改**） |
+| JWT_ALGORITHM | HS256 | JWT 签名算法 |
+| JWT_ACCESS_TOKEN_EXPIRE_MINUTES | 30 | Access Token 有效期（分钟） |
+| JWT_REFRESH_TOKEN_EXPIRE_DAYS | 7 | Refresh Token 有效期（天） |
+
+### CORS 与日志
+
+| 变量 | 默认值 | 说明 |
+|---|---|---|
+| CORS_ORIGINS | http://localhost:5173 | 允许的前端地址（多个用逗号分隔） |
 | LOG_LEVEL | INFO | 日志级别（生产建议 WARNING） |
 | LOG_FORMAT | text | 日志格式（生产建议 json） |
-| RATE_LIMIT_MAX | 1000 | API 速率限制（每窗口请求数） |
-| RATE_LIMIT_WINDOW | 60 | 速率限制窗口（秒） |
-| SLOW_REQUEST_THRESHOLD_MS | 1000 | 慢请求阈值（毫秒，超过后日志升级为 WARNING） |
-| INVENTORY_WARNING_THRESHOLD | 10 | 库存预警阈值 |
+
+### 文件上传
+
+| 变量 | 默认值 | 说明 |
+|---|---|---|
+| UPLOAD_STORAGE_TYPE | local | 存储类型 |
+| UPLOAD_DIR | uploads | 上传目录 |
+| UPLOAD_PUBLIC_BASE_URL | /uploads | 上传文件访问路径 |
 | MAX_IMAGE_SIZE_MB | 5 | 图片上传大小限制（MB） |
 | MAX_CSV_IMPORT_SIZE_MB | 10 | CSV 导入文件大小限制（MB） |
 | MAX_CSV_IMPORT_ROWS | 1000 | CSV 导入行数上限 |
+
+### 业务与安全
+
+| 变量 | 默认值 | 说明 |
+|---|---|---|
+| INVENTORY_WARNING_THRESHOLD | 10 | 库存预警阈值 |
+| RATE_LIMIT_MAX | 1000 | API 速率限制（每窗口请求数） |
+| RATE_LIMIT_WINDOW | 60 | 速率限制窗口（秒） |
+
+### 可观测性
+
+| 变量 | 默认值 | 说明 |
+|---|---|---|
+| SLOW_REQUEST_THRESHOLD_MS | 1000 | 慢请求阈值（毫秒） |
+| SLOW_SQL_THRESHOLD_MS | 200 | 慢 SQL 阈值（毫秒，负值禁用） |
 
 ## Nginx 配置
 
@@ -140,7 +183,7 @@ bash deploy/backup.sh
 bash deploy/restore.sh backup_file.sql.gz
 ```
 
-备份脚本支持 Docker 和本地两种环境，自动压缩，保留 30 天。
+备份脚本支持 Docker 和本地两种环境，自动压缩，保留 7 天每日备份 + 4 周每周备份。
 
 ## 常用运维命令
 
