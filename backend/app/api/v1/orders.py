@@ -600,7 +600,7 @@ def create_order_payment(
     current_user: User = Depends(require_permission("payment:create")),
 ):
     """登记订单收款（规范路径）"""
-    result = register_payment(db, str(order_id), data, current_user, get_request_meta(request))
+    result = register_payment(db, str(order_id), data, current_user)
 
     log_action(
         db, action="payment_create", resource_type="payment",

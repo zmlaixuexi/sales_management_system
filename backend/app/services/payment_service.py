@@ -1,11 +1,12 @@
 """收款登记共享逻辑 — payments.py 和 orders.py 的规范路径共用"""
 
+import uuid
 from decimal import Decimal
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.api.deps import check_owner_or_forbid, get_or_404
+from app.api.deps import check_owner_or_forbid
 from app.models.order import Payment, SalesOrder
 from app.models.user import User
 from app.schemas.payment import PaymentCreate
@@ -16,10 +17,18 @@ def register_payment(
     order_id: str,
     data: PaymentCreate,
     current_user: User,
-    request_meta: dict,
 ) -> dict:
     """登记订单收款，返回响应数据 dict。"""
-    order = get_or_404(db, SalesOrder, order_id, "订单")
+    # 加行锁防止并发收款导致超额
+    order = (
+        db.query(SalesOrder)
+        .filter(SalesOrder.id == uuid.UUID(order_id), SalesOrder.deleted_at.is_(None))
+        .with_for_update()
+        .first()
+    )
+    if not order:
+        raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "订单不存在"})
+
     check_owner_or_forbid(current_user, order.sales_user_id, "order:view_all", "订单")
 
     if order.status not in ("confirmed", "partially_paid"):

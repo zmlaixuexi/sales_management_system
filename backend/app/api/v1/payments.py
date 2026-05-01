@@ -84,7 +84,7 @@ def create_payment(
     current_user: User = Depends(require_permission("payment:create")),
 ):
     """登记订单收款"""
-    result = register_payment(db, str(order_id), data, current_user, get_request_meta(request))
+    result = register_payment(db, str(order_id), data, current_user)
 
     log_action(
         db, action="payment_create", resource_type="payment",
@@ -125,7 +125,7 @@ def reverse_payment(
 
     order = db.query(SalesOrder).filter(
         SalesOrder.id == payment.order_id, SalesOrder.deleted_at.is_(None),
-    ).first()
+    ).with_for_update().first()
     if not order:
         raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "关联订单不存在"})
 
