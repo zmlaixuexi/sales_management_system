@@ -3,7 +3,7 @@
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -41,7 +41,11 @@ def _date_range(period: str):
         end_last = first_this - timedelta(days=1)
         start = end_last.replace(day=1)
     else:
-        start = today - timedelta(days=29)
+        valid = "today, 7d, 30d, this_month, last_month"
+        raise HTTPException(
+            status_code=400,
+            detail=f"不支持的 period 参数: {period}，可选值: {valid}",
+        )
     return start, today
 
 

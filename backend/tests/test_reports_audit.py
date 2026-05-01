@@ -184,11 +184,10 @@ def test_06_sales_summary_last_month():
 
 
 def test_07_sales_summary_invalid_period():
-    """无效 period 回退到 30d"""
+    """无效 period 返回 400"""
     resp = client.get("/api/v1/reports/sales-summary?period=invalid", headers=_auth())
-    assert resp.status_code == 200
-    data = resp.json()["data"]
-    assert data["period"] == "invalid"
+    assert resp.status_code == 400
+    assert "period" in resp.json()["detail"]
 
 
 # ─── 报表：销售趋势 ─────────────────────────────────────────
@@ -536,3 +535,29 @@ def test_30_customer_ranking_data_scope():
     # 数据范围过滤：只能看到 scope_tester 自己的客户数据，不含超管的客户
     for item in items:
         assert item["customer_name"] != "报表测试客户"
+
+
+# ─── 无效 period 参数拒绝 ──────────────────────────────────────
+
+def test_31_invalid_period_sales_trend():
+    """无效 period 在趋势接口返回 400"""
+    resp = client.get("/api/v1/reports/sales-trend?period=foobar", headers=_auth())
+    assert resp.status_code == 400
+
+
+def test_32_invalid_period_product_ranking():
+    """无效 period 在商品排行接口返回 400"""
+    resp = client.get("/api/v1/reports/product-ranking?period=xyz", headers=_auth())
+    assert resp.status_code == 400
+
+
+def test_33_invalid_period_customer_ranking():
+    """无效 period 在客户排行接口返回 400"""
+    resp = client.get("/api/v1/reports/customer-ranking?period=bogus", headers=_auth())
+    assert resp.status_code == 400
+
+
+def test_34_invalid_period_salesperson_ranking():
+    """无效 period 在销售人员排行接口返回 400"""
+    resp = client.get("/api/v1/reports/salesperson-ranking?period=nope", headers=_auth())
+    assert resp.status_code == 400
