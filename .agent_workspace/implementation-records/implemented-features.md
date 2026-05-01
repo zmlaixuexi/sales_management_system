@@ -6,6 +6,21 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-91
+
+### 代码质量 — mypy 静态类型检查配置 + 15 处类型错误修复
+
+- **文件**: `backend/pyproject.toml`, `backend/app/api/deps.py`, `backend/app/core/security.py`, `backend/app/models/customer.py`, `backend/app/services/audit_service.py`, `backend/app/services/export_service.py`, `backend/app/services/file_service.py`
+- **内容**:
+  - pyproject.toml 新增 mypy 配置：SQLAlchemy plugin、overrides（main.py/ratelimit.py 已知误报）
+  - deps.py: get_or_404 参数 model: type → type[Base]，generate_sequential_code column: Column → InstrumentedAttribute[str]
+  - security.py: create_access_token/create_refresh_token jwt.encode 返回值 str() 包装
+  - customer.py: TYPE_CHECKING 导入 User 解决 forward ref name-defined 错误
+  - audit_service.py: log_action 异常返回 None 添加 type: ignore[return-value]
+  - export_service.py: _customer_row owner_name 添加 or "" 消除 str|None
+  - file_service.py: aiofiles 添加 import-untyped type ignore
+- **验证**: mypy 51 文件 0 错误，474+125=599 测试全绿
+
 ## 功能编号：FEAT-20260502-90
 
 ### 代码质量 — 收款登记逻辑去重 + 并发防护

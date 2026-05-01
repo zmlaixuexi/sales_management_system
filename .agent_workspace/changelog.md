@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-05-02（第二百八十一轮）
+
+### 工程：添加 mypy 静态类型检查，修复 15 处类型错误
+
+- pyproject.toml 新增 mypy 配置（SQLAlchemy plugin + overrides）
+- deps.py: get_or_404/generate_sequential_code 添加精确类型注解（type[Base], InstrumentedAttribute[str]）
+- security.py: jwt.encode 返回值 str() 包装消除 Any 返回类型
+- customer.py: 添加 TYPE_CHECKING 的 User forward ref 解决 name-defined
+- audit_service.py: log_action 异常返回 None 添加 type: ignore
+- export_service.py: owner_name 添加 or "" 消除 str|None 类型不匹配
+- file_service.py: aiofiles 添加 import-untyped ignore
+- main.py/ratelimit.py: mypy overrides 禁用已知误报（Module vs FastAPI、middleware factory 签名）
+- mypy 结果：51 文件 0 错误通过
+- 测试验证：474+125=599 全绿
+
 ## 2026-05-02（第二百八十轮）
 
 ### 验证：make ci 全量通过 + 里程碑总结更新
