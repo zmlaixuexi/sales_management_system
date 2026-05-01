@@ -2,15 +2,16 @@
 
 最后更新时间：2026-05-02
 当前阶段：需求符合性验证 + 代码质量
-当前任务编号：ROUND-279
-当前任务名称：部署 — 前端 Dockerfile 固定 Node 版本
+当前任务编号：ROUND-280
+当前任务名称：验证 — make ci 全量通过 + 里程碑总结更新
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 279：部署 — 前端 Dockerfile 固定 node:24.12-alpine，修复 npm ci lockfile 不同步，Docker 构建验证通过
-- Round 278：工程 — test_file_service 添加 security 标记，npm audit 0 漏洞，474/474 通过
+- Round 280：验证 — make ci 全量通过，里程碑总结更新至 Round 95-279
+- Round 279：部署 — 前端 Dockerfile 固定 node:24.12-alpine，Docker 构建验证通过
+- Round 278：工程 — test_file_service 添加 security 标记，npm audit 0 漏洞
 - Round 277：安全 — pip-audit 扫描项目 venv，全部运行时依赖无已知漏洞
 - Round 276：文档 — deployment.md 新增开发工作流命令，env/api 文档完整性验证通过
 - Round 274：文档 — implemented-features.md 新增 FEAT-86 至 FEAT-90（5 条），make ci 全量通过
@@ -200,19 +201,19 @@
 
 继续 keep-going 模式。可继续方向：测试补强、异常路径、安全加固、可观测性、部署体验。
 
-## 当前里程碑总结（Round 95-246）
+## 当前里程碑总结（Round 95-279）
 
 - 后端测试：214 → 474（+260）
 - 前端测试：97 → 125（+28）
 - 总计 599 测试，全部通过
-- 后端覆盖率：99.82%（443 测试，仅 deps.py get_db 4 行不可测，其余模块全部 100%）
-- 代码质量：ruff 0（含 B904/SIM/C4/PERF/RUF 扩展规则）+ ESLint 0 + build 零警告 + tsc 通过 + parse_uuid_or_400 统一到 deps.py + get_or_404 + resp() 响应函数 + useSubmit hook + ErrorBoundary 路由感知 + Pydantic schema 校验 + 死代码清除 + 延迟 import 清理 + __import__ 反模式消除 + __all__ 排序
-- 性能：10 个复合索引 + 3 个 N+1 查询修复（订单明细校验/库存扣减回滚/CSV 导入去重）+ 列表推导式优化
-- 安全：权限码全量审计 + RBAC + 数据范围 + 速率限制 + 敏感字段 + LIKE 转义 + 安全响应头（含静态资源补全）+ Token 刷新校验 + JWT 密钥启动检查 + CSV 导入大小限制 + CORS 白名单 + XSS 输入消毒 + 密码强度校验 + 密码修改接口 + UUID 安全转换全量覆盖 + sort_by 白名单 + 收款导出数据范围过滤 + deleted_at 过滤全量覆盖 + 外键存在性校验全量覆盖（role_ids/owner_user_id/customer_id/category_id）+ 对象级权限补全（文件删除/客户归属）+ 超级管理员自停用防护 + 订单状态机修复（partially_paid 取消/冲正状态回退）+ 文件上传魔数字节校验
-- 可观测性：健康检查 + degraded + 请求日志 + 慢请求警告 + 请求 ID 全链路追踪 + 启动配置摘要日志 + 全局未处理异常处理器 + X-Response-Time
-- 部署：Docker Compose + Nginx + 备份恢复 + Makefile（ci/quality/typecheck/coverage/db-backup/restore）+ 环境变量完整同步 + 多阶段 Docker 构建 + 非 root 用户 + DB 连接池可配置 + GitHub Actions CI（含覆盖率）+ Dockerfile/nginx 版本固定
-- 测试工程：pytest 8 类标记自动分类 + .env.example 前后端对称 + CONTRIBUTING.md + pytest-cov 覆盖率报告 99.82% + 前端 vitest 覆盖率 + CI 前后端覆盖率对称 + 重复问题台账（3 类模式）
-- 文档：README + testing.md + database.md + architecture.md + api.md + deployment.md 全部完成
+- 后端覆盖率：99.78%（仅 deps.py get_db 4 行不可测）
+- 代码质量：ruff 0（含 B904/SIM/C4/PERF/RUF 扩展规则）+ ESLint 0 + build 零警告 + tsc 通过 + 共享函数提取（register_payment / validate_csv_upload / generate_sequential_code / resp / get_or_404 / parse_uuid_or_400）
+- 性能：10 个复合索引 + 3 个 N+1 查询修复 + 收款并发行锁防护
+- 安全：17 项措施（RBAC + 数据范围 + 速率限制 + 敏感字段 + LIKE 转义 + 安全响应头 + Token 校验 + CSV 限制 + CORS 白名单 + XSS 消毒 + 密码强度 + UUID 转换 + sort_by 白名单 + 成本价保护 + 文件上传魔数字节 + period 校验 + 收款行锁）
+- 可观测性：7 项（健康检查 + 请求 ID + 请求日志 + X-Response-Time + 结构化日志 + 审计日志 + 全局异常处理）
+- 部署：Docker Compose + Nginx + 备份恢复 + Makefile（ci/quality/typecheck/coverage/test-unit/test-integration）+ 版本固定（Dockerfile + nginx）+ 依赖审计通过（pip-audit 0 + npm audit 0）
+- 测试工程：8 类标记自动分类 + 29 个测试文件 + make test-unit（431 测试 15s）+ make test-integration（43 测试 1.7s）
+- 文档：README + testing.md + database.md + architecture.md + api.md + deployment.md 全部同步
 
 ## 阻塞问题
 
