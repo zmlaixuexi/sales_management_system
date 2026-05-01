@@ -32,12 +32,12 @@ vi.mock('@/utils', () => ({
 
 const _messageError = vi.fn()
 vi.mock('antd', () => ({
-  Card: ({ title, children, loading }: any) => (
-    <div data-testid="card" data-title={title} data-loading={loading ? 'true' : 'false'}>{children}</div>
+  Card: ({ title, children }: any) => (
+    <div data-testid="card" data-title={title}>{children}</div>
   ),
   Descriptions: Object.assign(
     ({ children }: any) => <div data-testid="descriptions">{children}</div>,
-    { Item: ({ children, label, span }: any) => <div data-testid="desc-item" data-label={label}>{children}</div> },
+    { Item: ({ children, label }: any) => <div data-testid="desc-item" data-label={label}>{children}</div> },
   ),
   Table: ({ dataSource, columns, rowKey, footer }: any) => (
     <div>
@@ -57,15 +57,15 @@ vi.mock('antd', () => ({
       {footer && <div data-testid="table-footer">{footer()}</div>}
     </div>
   ),
-  Button: ({ children, onClick, icon, type, danger, disabled, loading }: any) => (
+  Button: ({ children, onClick, icon, type, danger, disabled }: any) => (
     <button data-testid="button" data-type={type} data-danger={danger ? 'true' : undefined} disabled={disabled} onClick={onClick}>{icon}{children}</button>
   ),
   Space: ({ children }: any) => <span>{children}</span>,
   Tag: ({ children, color }: any) => <span data-testid="tag" data-color={color}>{children}</span>,
-  Popconfirm: ({ title, children, onConfirm }: any) => (
+  Popconfirm: ({ title, children }: any) => (
     <span data-testid="popconfirm" data-title={title}>{children}</span>
   ),
-  InputNumber: ({ value, onChange, prefix, min, max }: any) => (
+  InputNumber: ({ value, onChange }: any) => (
     <input data-testid="input-number" value={value} onChange={(e: any) => onChange?.(parseFloat(e.target.value))} />
   ),
   Select: ({ value, onChange, options }: any) => (

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 
 const _productMocks = {
@@ -71,10 +71,10 @@ vi.mock('antd', () => {
     Button: ({ children, onClick, icon, type, danger }: any) => (
       <button data-testid="button" data-type={type} data-danger={danger ? 'true' : undefined} onClick={onClick}>{icon}{children}</button>
     ),
-    Input: ({ value, onChange, placeholder, prefix, allowClear }: any) => (
+    Input: ({ value, onChange, placeholder }: any) => (
       <input data-testid="search-input" placeholder={placeholder} value={value || ''} onChange={(e) => onChange?.(e)} />
     ),
-    Select: ({ value, onChange, options, allowClear, placeholder }: any) => (
+    Select: ({ value, onChange, options, placeholder }: any) => (
       <select data-testid="status-select" value={value || ''} onChange={(e) => onChange?.(e.target.value)}>
         <option value="">{placeholder || '全部'}</option>
         {options?.map((o: any) => <option key={o.value} value={o.value}>{o.label}</option>)}

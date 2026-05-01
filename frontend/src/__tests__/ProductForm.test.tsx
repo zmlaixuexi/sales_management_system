@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 
 const _productApi = {
@@ -39,7 +39,7 @@ vi.mock('antd', () => ({
       </form>
     ),
     {
-      Item: ({ children, label, name, rules }: any) => (
+      Item: ({ children, label, name }: any) => (
         <div data-testid="form-item" data-label={label} data-name={name}>
           {children}
         </div>
@@ -59,7 +59,7 @@ vi.mock('antd', () => ({
     <div data-testid="card" data-title={title} data-loading={loading ? 'true' : 'false'}>{children}</div>
   ),
   Space: ({ children }: any) => <span>{children}</span>,
-  Upload: ({ children, beforeUpload }: any) => <div data-testid="upload">{children}</div>,
+  Upload: ({ children }: any) => <div data-testid="upload">{children}</div>,
   Image: ({ src }: any) => <img data-testid="image" src={src} />,
   Select: ({ options, value, onChange }: any) => (
     <select data-testid="select" value={value} onChange={(e: any) => onChange?.(e.target.value)}>

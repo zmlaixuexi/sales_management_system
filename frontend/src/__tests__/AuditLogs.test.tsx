@@ -50,7 +50,7 @@ vi.mock('antd', () => ({
       </tbody>
     </table>
   ),
-  Select: ({ value, onChange, options, placeholder, allowClear }: any) => (
+  Select: ({ value, onChange, options, placeholder }: any) => (
     <select data-testid="action-select" value={value || ''} onChange={(e: any) => onChange?.(e.target.value)}>
       <option value="">{placeholder || '全部'}</option>
       {options?.map((o: any) => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -61,7 +61,7 @@ vi.mock('antd', () => ({
       <input data-testid="search-input" placeholder={placeholder} value={value || ''} onChange={(e: any) => onChange?.(e)} />
     ),
     {
-      Search: ({ placeholder, onSearch, allowClear }: any) => (
+      Search: ({ placeholder }: any) => (
         <input data-testid="search-input" placeholder={placeholder} />
       ),
     },
@@ -73,7 +73,7 @@ vi.mock('antd', () => ({
     Text: ({ children }: any) => <span>{children}</span>,
   },
   Tooltip: ({ children }: any) => <span>{children}</span>,
-  DatePicker: { RangePicker: ({ value, onChange }: any) => <input data-testid="date-range" /> },
+  DatePicker: { RangePicker: () => <input data-testid="date-range" /> },
   message: { error: vi.fn(), success: vi.fn() },
 }))
 
