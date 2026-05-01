@@ -583,3 +583,37 @@ def test_20_payment_list_pagination():
 
 app.dependency_overrides[get_db] = override_get_db
 client = TestClient(app)
+
+
+def test_21_list_payments_requires_auth():
+    """未认证收款列表返回 401"""
+    resp = client.get("/api/v1/payments")
+    assert resp.status_code == 401
+
+
+def test_22_create_payment_requires_auth():
+    """未认证登记收款返回 401"""
+    resp = client.post(f"/api/v1/sales-orders/{_confirmed_order_id}/payments", json={
+        "amount": "10.00", "payment_method": "cash",
+    })
+    assert resp.status_code == 401
+
+
+def test_23_reverse_payment_requires_auth():
+    """未认证冲正收款返回 401"""
+    resp = client.post(f"/api/v1/payments/{_payment_id}/reverse")
+    assert resp.status_code == 401
+
+
+def test_24_create_payment_invalid_order_uuid():
+    """无效 UUID 订单收款返回 422"""
+    resp = client.post("/api/v1/sales-orders/not-a-uuid/payments", json={
+        "amount": "10.00", "payment_method": "cash",
+    }, headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_25_reverse_payment_invalid_uuid():
+    """无效 UUID 冲正收款返回 422"""
+    resp = client.post("/api/v1/payments/not-a-uuid/reverse", headers=_auth())
+    assert resp.status_code == 422

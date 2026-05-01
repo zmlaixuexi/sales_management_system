@@ -6,6 +6,20 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-119
+
+### 测试 — 后端商品/订单/收款认证边界测试 → 805
+
+- **文件**: `backend/tests/test_product_crud.py`, `backend/tests/test_order_crud.py`, `backend/tests/test_payment_crud.py`, `docs/testing.md`
+- **内容**:
+  - 商品 CRUD +6：未认证列表/详情/创建/编辑/删除 401、无效 UUID 422
+  - 订单 CRUD +9：未认证列表/详情/创建/编辑/确认/取消 401、无效 UUID 422（get/update/confirm）
+  - 收款 +5：未认证列表/创建/冲正 401、无效订单 UUID 422、无效收款 UUID 422
+  - 同步 testing.md 至 805 tests（551+254）
+  - test_product_crud.py 31→37、test_order_crud.py 29→38、test_payment_crud.py 20→25
+- **验证**: 551+254=805 tests，全 CI 门禁通过
+- **关联**: Round 352
+
 ## 功能编号：FEAT-20260502-118
 
 ### 测试 — 后端客户 CRUD 认证边界 + 文档同步 785

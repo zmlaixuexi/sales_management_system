@@ -498,3 +498,43 @@ def test_13_csv_import_not_csv():
     )
     assert resp.status_code == 400
     assert "CSV" in resp.json()["error"]["message"]
+
+
+def test_14_get_product_requires_auth():
+    """未认证获取商品详情返回 401"""
+    resp = client.get(f"/api/v1/products/{_product_id}")
+    assert resp.status_code == 401
+
+
+def test_15_update_product_requires_auth():
+    """未认证编辑商品返回 401"""
+    resp = client.put(f"/api/v1/products/{_product_id}", json={
+        "name": "未认证修改",
+    })
+    assert resp.status_code == 401
+
+
+def test_16_delete_product_requires_auth():
+    """未认证删除商品返回 401"""
+    resp = client.delete(f"/api/v1/products/{_product_id}")
+    assert resp.status_code == 401
+
+
+def test_17_get_product_invalid_uuid():
+    """无效 UUID 获取商品详情返回 422"""
+    resp = client.get("/api/v1/products/not-a-uuid", headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_18_create_product_requires_auth():
+    """未认证创建商品返回 401"""
+    resp = client.post("/api/v1/products", json={
+        "name": "未认证商品", "sale_price": "10", "cost_price": "5", "stock_quantity": 1,
+    })
+    assert resp.status_code == 401
+
+
+def test_19_list_products_requires_auth():
+    """未认证商品列表返回 401"""
+    resp = client.get("/api/v1/products")
+    assert resp.status_code == 401

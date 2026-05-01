@@ -489,3 +489,59 @@ class TestOrderFilterAndEdge:
         }, headers=_auth())
         assert resp.status_code == 200
         assert resp.json()["data"]["order_no"] == f"{prefix}0001"
+
+
+class TestOrderAuthBoundary:
+    """订单认证边界测试"""
+
+    def test_28_list_orders_requires_auth(self):
+        """未认证订单列表返回 401"""
+        resp = client.get("/api/v1/sales-orders")
+        assert resp.status_code == 401
+
+    def test_29_get_order_requires_auth(self):
+        """未认证获取订单详情返回 401"""
+        resp = client.get(f"/api/v1/sales-orders/{_order_id}")
+        assert resp.status_code == 401
+
+    def test_30_create_order_requires_auth(self):
+        """未认证创建订单返回 401"""
+        resp = client.post("/api/v1/sales-orders", json={
+            "customer_id": _customer_id,
+            "items": [{"product_id": _product_id, "quantity": 1}],
+        })
+        assert resp.status_code == 401
+
+    def test_31_update_order_requires_auth(self):
+        """未认证编辑订单返回 401"""
+        resp = client.put(f"/api/v1/sales-orders/{_order_id}", json={
+            "remark": "未认证修改",
+        })
+        assert resp.status_code == 401
+
+    def test_32_confirm_order_requires_auth(self):
+        """未认证确认订单返回 401"""
+        resp = client.post(f"/api/v1/sales-orders/{_order_id}/confirm")
+        assert resp.status_code == 401
+
+    def test_33_cancel_order_requires_auth(self):
+        """未认证取消订单返回 401"""
+        resp = client.post(f"/api/v1/sales-orders/{_order_id}/cancel")
+        assert resp.status_code == 401
+
+    def test_34_get_order_invalid_uuid(self):
+        """无效 UUID 获取订单详情返回 422"""
+        resp = client.get("/api/v1/sales-orders/not-a-uuid", headers=_auth())
+        assert resp.status_code == 422
+
+    def test_35_update_order_invalid_uuid(self):
+        """无效 UUID 编辑订单返回 422"""
+        resp = client.put("/api/v1/sales-orders/not-a-uuid", json={
+            "remark": "test",
+        }, headers=_auth())
+        assert resp.status_code == 422
+
+    def test_36_confirm_order_invalid_uuid(self):
+        """无效 UUID 确认订单返回 422"""
+        resp = client.post("/api/v1/sales-orders/not-a-uuid/confirm", headers=_auth())
+        assert resp.status_code == 422
