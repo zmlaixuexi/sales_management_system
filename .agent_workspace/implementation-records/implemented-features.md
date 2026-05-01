@@ -6,6 +6,53 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-90
+
+### 代码质量 — 收款登记逻辑去重 + 并发防护
+
+- **文件**: `backend/app/services/payment_service.py`（新增）, `backend/app/api/v1/payments.py`, `backend/app/api/v1/orders.py`
+- **内容**:
+  - 提取 `register_payment` 共享函数，消除 payments.py 和 orders.py 89 行重复代码
+  - 改用 `with_for_update()` 行锁查询订单，防止并发收款导致超额
+  - reverse_payment 同样添加行锁
+  - 移除未使用的 request_meta 参数
+- **测试**: 474/474 通过，ruff 0，覆盖率 99.78%
+
+## 功能编号：FEAT-20260502-89
+
+### 代码质量 — CSV 导入文件校验去重 + 单元测试
+
+- **文件**: `backend/app/services/csv_import.py`（新增）, `backend/app/api/v1/products.py`, `backend/app/api/v1/customers.py`, `backend/tests/test_csv_import.py`（新增）
+- **内容**:
+  - 提取 `validate_csv_upload` 共享函数（扩展名/大小/编码/表头校验）
+  - products.py 和 customers.py CSV 导入改为调用共享函数，净减 10 行重复
+  - 新增 9 个单元测试覆盖文件名/扩展名/BOM/编码/大小限制/空文件/仅有表头
+- **测试**: +9 测试（474/474），ruff 0
+
+## 功能编号：FEAT-20260502-88
+
+### 代码质量 — 序号生成函数统一
+
+- **文件**: `backend/app/api/deps.py`, `backend/app/api/v1/orders.py`, `backend/app/api/v1/products.py`
+- **内容**: 新增 `generate_sequential_code(db, model, column, prefix)` 通用函数，orders/products 各自的序号生成改为调用共享函数
+- **测试**: 461/461 通过，ruff 0
+
+## 功能编号：FEAT-20260502-87
+
+### 前端 — 客户/销售人员排行 API 函数
+
+- **文件**: `frontend/src/api/reports.ts`, `frontend/src/__tests__/reports-api.test.ts`
+- **内容**: 新增 `fetchCustomerRanking` 和 `fetchSalespersonRanking` 函数及类型定义，新增 2 个前端测试
+- **测试**: 前端 125/125 通过
+
+## 功能编号：FEAT-20260502-86
+
+### 安全 — 报表 period 参数严格校验
+
+- **文件**: `backend/app/api/v1/reports.py`, `backend/tests/test_reports_audit.py`
+- **内容**: `_date_range` 函数对无效 period 值抛出 400 替代静默回退 30d，新增 4 个端点 invalid period 测试
+- **测试**: +4 测试（465/465），ruff 0
+
 ## 功能编号：FEAT-20260502-85
 
 ### 安全加固 — 安全审查问题修复
