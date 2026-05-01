@@ -7,7 +7,7 @@ import { ArrowLeftOutlined, EditOutlined, DollarOutlined } from '@ant-design/ico
 import { useNavigate, useParams } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
 import { fetchOrder, confirmOrder, cancelOrder } from '@/api/orders'
-import type { OrderDetail, OrderItem, OrderPayment } from '@/api/orders'
+import type { OrderDetail as OrderDetailData, OrderItem, OrderPayment } from '@/api/orders'
 import { createPayment, reversePayment } from '@/api/payments'
 import { formatAmount, formatPercent, getApiErrorMessage } from '@/utils'
 
@@ -30,7 +30,7 @@ const paymentMethodLabels: Record<string, string> = {
 export default function OrderDetail() {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
-  const [order, setOrder] = useState<OrderDetail | null>(null)
+  const [order, setOrder] = useState<OrderDetailData | null>(null)
   const [loading, setLoading] = useState(false)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 
