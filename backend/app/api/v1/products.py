@@ -7,6 +7,7 @@ from datetime import datetime
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
 from app.api.deps import get_db, get_or_404, has_permission, parse_uuid_or_400, require_permission, resp
@@ -40,7 +41,29 @@ DEFAULT_CATEGORY_NAME = "未分类"
 SORTABLE_COLUMNS = {
     "name", "sku", "sale_price", "cost_price", "stock_quantity",
     "status", "sort_weight", "created_at", "updated_at",
+    "sales_quantity", "sales_amount",
 }
+
+
+def _batch_sales_stats(db: Session, product_ids: list) -> dict:
+    """批量查询商品的销售数量和销售额"""
+    from app.models.order import SalesOrder, SalesOrderItem
+    rows = (
+        db.query(
+            SalesOrderItem.product_id,
+            func.coalesce(func.sum(SalesOrderItem.quantity), 0).label("qty"),
+            func.coalesce(func.sum(SalesOrderItem.subtotal_amount), 0).label("amt"),
+        )
+        .join(SalesOrder, SalesOrderItem.order_id == SalesOrder.id)
+        .filter(
+            SalesOrderItem.product_id.in_(product_ids),
+            SalesOrder.deleted_at.is_(None),
+            SalesOrder.status.in_(["confirmed", "partially_paid", "completed"]),
+        )
+        .group_by(SalesOrderItem.product_id)
+        .all()
+    )
+    return {r.product_id: {"sales_quantity": int(r.qty), "sales_amount": str(r.amt)} for r in rows}
 
 
 def _generate_sku(db: Session) -> str:
@@ -127,9 +150,14 @@ def list_products(
     total = query.count()
     items = query.options(joinedload(Product.category)).offset((page - 1) * page_size).limit(page_size).all()
 
+    # 批量查询销售统计
+    product_ids = [p.id for p in items]
+    sales_stats = _batch_sales_stats(db, product_ids) if product_ids else {}
+
     result_items = []
     for p in items:
         unit_profit, gross_margin = _calc_profit(p.sale_price, p.cost_price)
+        stats = sales_stats.get(p.id, {"sales_quantity": 0, "sales_amount": "0"})
         row: dict = {
             "id": str(p.id),
             "sku": p.sku,
@@ -139,6 +167,8 @@ def list_products(
             "category_name": p.category.name if p.category else None,
             "sale_price": str(p.sale_price),
             "stock_quantity": p.stock_quantity,
+            "sales_quantity": stats["sales_quantity"],
+            "sales_amount": stats["sales_amount"],
             "status": p.status,
             "sort_weight": p.sort_weight,
             "remark": p.remark,
@@ -256,6 +286,7 @@ def get_product(
 
     unit_profit, gross_margin = _calc_profit(product.sale_price, product.cost_price)
     can_view_cost = has_permission(current_user, "product:view_cost")
+    stats = _batch_sales_stats(db, [product.id]).get(product.id, {"sales_quantity": 0, "sales_amount": "0"})
 
     data: dict = {
         "id": str(product.id),
@@ -266,6 +297,8 @@ def get_product(
         "category_name": product.category.name if product.category else None,
         "sale_price": str(product.sale_price),
         "stock_quantity": product.stock_quantity,
+        "sales_quantity": stats["sales_quantity"],
+        "sales_amount": stats["sales_amount"],
         "status": product.status,
         "sort_weight": product.sort_weight,
         "remark": product.remark,
