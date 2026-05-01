@@ -255,3 +255,27 @@ def test_14_import_commit_failure():
         )
     assert resp.status_code == 500
     assert resp.json()["error"]["code"] == "IMPORT_FAILED"
+
+
+def test_15_import_english_headers():
+    """英文表头 name/phone/contact_name/email 导入"""
+    csv_content = "name,phone,contact_name,email\nEngCustomer,13700001234,Bob,bob@test.com"
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1
+
+
+def test_16_import_no_phone():
+    """无电话号码可以导入（电话为可选字段）"""
+    csv_content = "客户名称\n无电话客户"
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1

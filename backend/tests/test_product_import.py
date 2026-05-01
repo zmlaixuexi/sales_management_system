@@ -227,3 +227,67 @@ def test_12_import_commit_failure():
         )
     assert resp.status_code == 500
     assert resp.json()["error"]["code"] == "IMPORT_FAILED"
+
+
+def test_13_import_negative_price():
+    """负价格跳过"""
+    csv_content = "商品名称,销售价,成本价\n负价商品,-10,5"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 0
+    assert any("价格不能为负" in e["message"] for e in resp.json()["data"]["errors"])
+
+
+def test_14_import_invalid_price_format():
+    """非法价格格式跳过"""
+    csv_content = "商品名称,销售价\n格式错误商品,abc"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 0
+    assert any("销售价格式错误" in e["message"] for e in resp.json()["data"]["errors"])
+
+
+def test_15_import_english_headers():
+    """英文表头 name/sale_price/cost_price 导入"""
+    csv_content = "name,sale_price,cost_price,stock_quantity\nEngProduct,50.00,30.00,8"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1
+
+
+def test_16_import_batch_internal_sku_duplicate():
+    """批量内两行相同自定义 SKU，第二行跳过"""
+    csv_content = "商品名称,SKU,销售价\n商品A,BATCH-DUP,100\n商品B,BATCH-DUP,200"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1
+    assert any("SKU BATCH-DUP 已存在" in e["message"] for e in resp.json()["data"]["errors"])
+
+
+def test_17_import_invalid_cost_price_format():
+    """非法成本价格式跳过"""
+    csv_content = "商品名称,销售价,成本价\n成本异常商品,100,xyz"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 0
+    assert any("成本价格式错误" in e["message"] for e in resp.json()["data"]["errors"])
