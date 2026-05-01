@@ -1,17 +1,17 @@
 # 当前工作现场
 
 最后更新时间：2026-05-02
-当前阶段：测试补强
-当前任务编号：ROUND-327
-当前任务名称：库存操作边界路径测试补强
+当前阶段：文档同步
+当前任务编号：ROUND-328
+当前任务名称：同步 implemented-features.md
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 328：同步 implemented-features.md 至 Round 327（+3 功能记录）
 - Round 327：库存操作边界路径测试补强（+5 tests）
 - Round 326：同步 testing.md 至 640 tests
-- Round 325：导出服务权限和数据范围测试补强（+3 tests）
 
 ## 最终验证状态
 
