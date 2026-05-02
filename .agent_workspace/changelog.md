@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百四十六轮·自动循环）
+
+### 测试补强：商品 status 无效枚举值及无效 UUID 路径参数验证
+
+- `test_boundary.py`：新增 test_113（商品创建无效 status 422）、test_114（商品编辑无效 status 422）、test_115-118（商品/客户/订单/用户无效 UUID 路径参数 422/400）
+- `docs/testing.md`：更新后端测试总数 1162→1168、总计 1544→1550、test_boundary.py 112→118
+- 后端测试：1168/1168 全绿，ruff clean
+
 ## 2026-05-03（第四百四十五轮·自动循环）
 
 ### 测试补强：客户 source/level/follow_status 无效枚举值 422 验证
