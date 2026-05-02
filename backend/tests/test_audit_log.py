@@ -800,3 +800,36 @@ def test_36_password_change_audit_log_fields():
         "old_password": "auditpass123",
         "new_password": "testpass123",
     }, headers={"Authorization": f"Bearer {token2}"})
+
+
+def test_37_export_products_audit_log_fields():
+    """商品导出审计日志 after_data 含 keyword 和 status"""
+    headers = _admin_auth()
+    resp = client.get("/api/v1/exports/products?keyword=测试&status=active", headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=export_products", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    log = items[0]
+    assert log["action"] == "export_products"
+    assert log["resource_type"] == "product"
+    assert log["after_data"]["keyword"] == "测试"
+    assert log["after_data"]["status"] == "active"
+
+
+def test_38_export_customers_audit_log_fields():
+    """客户导出审计日志 after_data 含 keyword"""
+    headers = _admin_auth()
+    resp = client.get("/api/v1/exports/customers?keyword=审计", headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=export_customers", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    log = items[0]
+    assert log["action"] == "export_customers"
+    assert log["resource_type"] == "customer"
+    assert log["after_data"]["keyword"] == "审计"

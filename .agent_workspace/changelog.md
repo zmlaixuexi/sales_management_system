@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第三百五十三轮·自动循环）
+
+### 测试：导出操作审计日志字段验证
+
+- `test_audit_log.py`：新增 test_37（export_products after_data 含 keyword/status）、test_38（export_customers after_data 含 keyword）
+- 后端测试：1004/1004 全绿
+
 ## 2026-05-02（第三百五十二轮·自动循环）
 
 ### 测试 + 基础设施：修改密码审计日志字段验证 + 修复全量测试速率限制干扰
