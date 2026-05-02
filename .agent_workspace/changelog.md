@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第一百七十轮·自动循环）
+
+### 测试：补强 useSubmit + deps 辅助函数边界用例
+
+- `useSubmit.test.ts`：+5 测试（默认 fallback、非 Error 异常、错误恢复、error.message/detail.message 提取）
+- `test_deps.py`：+6 测试（parse_uuid_or_400 有效/无效、resp 默认/自定义、paginated_resp 结构/自定义消息）
+- 后端 629→635，前端 310→315，总计 950 tests
+
 ## 2026-05-02（第一百六十九轮·自动循环）
 
 ### 验证：全量 CI 通过 + README 计数对齐

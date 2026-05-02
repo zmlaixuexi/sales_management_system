@@ -134,12 +134,12 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（629 个）
+# 后端测试（635 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
 
-# 前端测试（307 个）
+# 前端测试（315 个）
 cd frontend
 npm test
 
@@ -159,7 +159,7 @@ npm run build
 | 数据导出 | 37 | 四模块 CSV 导出、多维度筛选、空数据、认证、审计日志、BOM/表头/字段数/状态映射验证 |
 | 文件上传 | 24 | 上传成功、类型/大小校验、获取/删除、认证、文件所有权检查、伪装扩展名/魔数字节、审计日志 |
 | 权限校验 | 10 | 数据范围、敏感字段过滤、权限码拦截、导出过滤 |
-| 权限辅助函数 | 10 | _get_user_permissions 多角色收集/去重，has_permission，check_owner_or_forbid，parse_uuid_or_400 |
+| 权限辅助函数 | 16 | _get_user_permissions 多角色收集/去重，has_permission，check_owner_or_forbid，parse_uuid_or_400，resp，paginated_resp |
 | 异常路径 | 31 | 缺字段、负值、重复、404、状态转换、库存不足、伪造 Token、无效 UUID、收款导出数据范围 |
 | 验证补充 | 25 | refresh_token 异常、价格/库存/名称校验、CSV 边界、用户列表、密码强度、客户 source/level 枚举 |
 | 边界测试 | 47 | 认证边界、订单状态机、收款边界、用户管理、库存调整、Token 刷新、流水类型筛选 |
@@ -182,7 +182,7 @@ npm run build
 | 文件服务 | 13 | 扩展名/MIME/大小/正常/webp/大写扩展名/扩展名与 MIME 独立校验/边界大小/魔数字节校验 |
 | CSV 导入校验 | 9 | 文件名/扩展名/BOM/编码/大小限制/空文件/仅有表头 |
 | 慢查询 | 5 | 慢查询结构化日志记录、SQL 截断、阈值验证 |
-| **合计** | **629** | |
+| **合计** | **635** | |
 
 ### 前端测试覆盖
 
@@ -212,7 +212,7 @@ npm run build
 | 状态映射 | 6 | 商品/客户/订单状态映射完整性 |
 | 订单 API | 6 | fetchOrders/fetchOrder/create/update/confirm/cancel |
 | downloadCsv | 6 | 成功下载、查询参数、过滤、错误、文件名提取 |
-| useSubmit | 6 | 成功调用/提交中状态/错误提示/Ant Design 校验静默/防重/_toastDisplayed 跳过 |
+| useSubmit | 11 | 成功调用/提交中状态/错误提示/Ant Design 校验静默/防重/_toastDisplayed 跳过/默认 fallback/非 Error 异常/错误恢复/response.data.error.message/detail.message 提取 |
 | AppLayout | 8 | 用户加载/菜单导航/退出/失败/回退/系统标题/菜单项数/路径高亮 |
 | auth API | 5 | login/refresh/logout/getMe/changePassword 路径验证 |
 | 用户 API | 5 | fetchUsers/fetchUser/create/update/roles |
@@ -225,7 +225,7 @@ npm run build
 | 登录页 | 5 | 渲染标题/输入框/登录按钮/提交调用 login/登录失败错误提示 |
 | API client | 3 | baseURL、token 附加、无 token |
 | NotFound | 3 | 404 渲染/返回首页按钮/按钮点击导航 |
-| **合计** | **310** | |
+| **合计** | **315** | |
 
 ## API 概览
 
