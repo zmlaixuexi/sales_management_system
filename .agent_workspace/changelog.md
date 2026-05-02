@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第三百九十一轮·自动循环）
+
+### 测试补强：审计日志 actor_id 非空验证
+
+- `test_audit_log.py`：新增 test_76（非 login_failed 操作的审计日志 actor_id 必须非空，遍历所有非登录失败日志逐一断言）
+- 后端测试：1074/1074 全绿，ruff clean
+
 ## 2026-05-02（第三百九十轮·自动循环）
 
 ### 代码质量 + 测试补强：docs/testing.md 同步 + 商品创建审计日志 after_data 含 stock_quantity

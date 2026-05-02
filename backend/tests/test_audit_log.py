@@ -1999,3 +1999,21 @@ def test_75_product_create_audit_log_after_data_has_stock_and_price():
     assert log["after_data"]["sale_price"] == "99.90"
     assert log["after_data"]["name"] == "审计商品-库存价格"
     assert log["resource_type"] == "product"
+
+
+def test_76_audit_log_actor_id_non_null_for_non_login_failed():
+    """非 login_failed 操作的审计日志 actor_id 必须非空"""
+    headers = _admin_auth()
+    # 触发多种业务操作产生审计日志
+    client.post("/api/v1/products", json={
+        "name": "actor验证商品", "sale_price": "10.00", "cost_price": "5.00",
+    }, headers=headers)
+
+    resp = client.get("/api/v1/audit-logs", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    non_login_failed = [i for i in items if i["action"] != "login_failed"]
+    assert len(non_login_failed) > 0
+    for log in non_login_failed:
+        assert log["actor_id"] is not None, f"action={log['action']} 缺少 actor_id"
+        assert log["actor_id"] != "", f"action={log['action']} actor_id 为空字符串"
