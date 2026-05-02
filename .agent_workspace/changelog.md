@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第三百四十六轮·自动循环）
+
+### 工程：提取测试公共 helper（make_user_with_perms / admin_auth_header）
+
+- 新建 `backend/tests/helpers.py`：`make_user_with_perms` 和 `admin_auth_header` 两个公共函数
+- 重构 `test_customer_crud.py`、`test_product_crud.py`、`test_order_crud.py`、`test_payment_crud.py` 使用公共 helper
+- `pyproject.toml`：添加 `pythonpath = ["tests"]` 以支持 helper 导入
+- 净减 118 行重复代码，963/963 测试全绿
+
 ## 2026-05-02（第三百四十五轮·自动循环）
 
 ### 测试：客户详情/订单详情/日志非归属用户 403 验证
