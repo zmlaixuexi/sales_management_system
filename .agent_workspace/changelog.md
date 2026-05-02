@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-05-02（第二百三十九轮·自动循环）
+
+### 重构：提取 PaginationParams 依赖类，8 处分页参数统一
+
+- deps.py 新增 `PaginationParams` dataclass，封装 page/page_size 参数
+- 6 个 router（orders×2、customers、products、payments、inventory、audit_logs、users）的 8 个接口统一使用 `Depends(PaginationParams)`
+- audit_logs.py 移除多余的 Query import
+- 797 测试全绿，零回归
+
+## 2026-05-02（第二百三十八轮·自动循环）
+
+### 文档：测试计数同步 793→797，补充外键验证行
+
+- README.md 后端测试计数 793→797，添加外键验证测试行（4 项）
+- docs/testing.md 覆盖模块补充外键验证边界描述
+- 总计 1177 测试
+
 ## 2026-05-02（第二百三十六轮·自动循环）
 
 ### 文档：数据库文档订单状态机补充 partially_paid 状态
