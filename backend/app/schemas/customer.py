@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, field_validator
 from app.core.sanitize import sanitize_text as _sanitize
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+_PHONE_RE = re.compile(r"^1[3-9]\d{9}$")
 
 CustomerSource = Literal["referral", "online", "offline", "ad", "other"]
 CustomerLevel = Literal["vip", "important", "normal", "potential"]
@@ -35,6 +36,13 @@ class CustomerCreate(BaseModel):
             raise ValueError("邮箱格式不正确")
         return v
 
+    @field_validator("phone")
+    @classmethod
+    def validate_phone(cls, v: str | None) -> str | None:
+        if v and not _PHONE_RE.match(v):
+            raise ValueError("手机号格式不正确")
+        return v
+
 
 class CustomerUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=200)
@@ -57,6 +65,13 @@ class CustomerUpdate(BaseModel):
     def validate_email(cls, v: str | None) -> str | None:
         if v and not _EMAIL_RE.match(v):
             raise ValueError("邮箱格式不正确")
+        return v
+
+    @field_validator("phone")
+    @classmethod
+    def validate_phone(cls, v: str | None) -> str | None:
+        if v and not _PHONE_RE.match(v):
+            raise ValueError("手机号格式不正确")
         return v
 
 

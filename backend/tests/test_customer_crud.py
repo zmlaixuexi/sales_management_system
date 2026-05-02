@@ -735,3 +735,44 @@ def test_40_update_customer_no_permission_403():
         "name": "尝试编辑",
     }, headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 403
+
+
+def test_41_create_customer_invalid_phone_422():
+    """创建客户手机号格式不正确返回 422"""
+    from app.core.security import create_access_token
+
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "crud_admin").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+    for bad_phone in ["12345", "abc12345678", "10012345678", "12345678901"]:
+        resp = client.post("/api/v1/customers", json={
+            "name": "手机格式客户", "phone": bad_phone,
+        }, headers=headers)
+        assert resp.status_code == 422, f"{bad_phone} should be rejected"
+
+
+def test_42_update_customer_invalid_phone_422():
+    """更新客户手机号格式不正确返回 422"""
+    from app.core.security import create_access_token
+
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "crud_admin").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+    resp = client.post("/api/v1/customers", json={
+        "name": "手机编辑客户", "phone": "13900001111",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    resp = client.put(f"/api/v1/customers/{cid}", json={
+        "phone": "not-a-phone",
+    }, headers=headers)
+    assert resp.status_code == 422
