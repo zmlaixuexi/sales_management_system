@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第一百八十九轮·自动循环）
+
+### 测试：重写 statusMaps 测试导入共享常量，补全订单 5 状态和收款状态（6→10 项）
+
+- 重写 `statusMaps.test.ts`：从 `@/constants/statusMaps` 导入而非硬编码
+- 补全订单状态映射：3→5（新增 partially_paid/completed）
+- 新增收款状态映射测试（normal/已冲正）
+- 客户来源/等级增加具体值断言
+- 前端 329→333，总计 1044 tests
+
 ## 2026-05-02（第一百八十八轮·自动循环）
 
 ### 工程：提取重复 statusMap 为共享常量模块 constants/statusMaps.ts

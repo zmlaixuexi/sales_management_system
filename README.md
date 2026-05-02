@@ -139,7 +139,7 @@ cd backend
 source .venv/bin/activate
 pytest tests/ -v
 
-# 前端测试（329 个）
+# 前端测试（333 个）
 cd frontend
 npm test
 
@@ -213,7 +213,7 @@ npm run build
 | 订单详情 | 9 | 加载显示订单号/返回按钮/loading 状态 |
 | Dashboard | 11 | 渲染看板标题/期间选择器/数据卡片/趋势汇总/库存预警数据/期间选项数/切换重载 |
 | 客户 API | 7 | fetchCustomers（含无参数）/fetchCustomer/create/update/delete/transfer |
-| 状态映射 | 6 | 商品/客户/订单状态映射完整性 |
+| 状态映射 | 10 | 商品/客户来源/客户等级/订单（含 partially_paid/completed）/收款状态映射完整性（导入共享常量） |
 | 订单 API | 6 | fetchOrders/fetchOrder/create/update/confirm/cancel |
 | downloadCsv | 6 | 成功下载、查询参数、过滤、错误、文件名提取 |
 | useSubmit | 11 | 成功调用/提交中状态/错误提示/Ant Design 校验静默/防重/_toastDisplayed 跳过/默认 fallback/非 Error 异常/错误恢复/response.data.error.message/detail.message 提取 |
@@ -229,7 +229,7 @@ npm run build
 | 登录页 | 7 | 渲染标题/输入框/登录按钮/提交调用 login/登录失败错误提示/成功跳转首页/redirect 参数跳转 |
 | API client | 5 | baseURL、token 附加、无 token、timeout 15s、Content-Type |
 | NotFound | 3 | 404 渲染/返回首页按钮/按钮点击导航 |
-| **合计** | **329** | |
+| **合计** | **333** | |
 
 ## API 概览
 
