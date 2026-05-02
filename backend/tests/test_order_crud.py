@@ -1111,3 +1111,94 @@ def test_46_list_orders_desc_ordering():
     nos = [i["order_no"] for i in items]
     if "ORD-ORDER-OLD" in nos and "ORD-ORDER-NEW" in nos:
         assert nos.index("ORD-ORDER-NEW") < nos.index("ORD-ORDER-OLD")
+
+
+def test_47_order_logs_strip_cost_fields_for_non_privileged():
+    """非特权用户查看订单日志时，成本字段应被移除"""
+    from app.core.security import create_access_token as create_token
+    from app.models.user import Permission, Role, RolePermission, UserRole
+
+    db = TestSession()
+    try:
+        user = db.query(User).first()
+        cat = db.query(ProductCategory).first()
+
+        # 创建商品和客户
+        prod = Product(
+            id=uuid.uuid4(), name="日志成本过滤商品", sku="ORD-LOG-COST",
+            sale_price=100, cost_price=60, stock_quantity=10,
+            status="active", category_id=cat.id,
+        )
+        db.add(prod)
+        cust = Customer(
+            id=uuid.uuid4(), name="日志成本过滤客户", phone="13800000200",
+            owner_user_id=user.id, created_by=user.id,
+        )
+        db.add(cust)
+        db.flush()
+
+        # 创建订单
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no="ORD-LOG-COST-TEST",
+            customer_id=cust.id, sales_user_id=user.id,
+            status="draft", total_amount=100, total_cost=60,
+            gross_profit=40, gross_margin=0.4, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=prod.id,
+            product_sku_snapshot=prod.sku, product_name_snapshot=prod.name,
+            quantity=1, unit_price=100, discount_amount=0, discount_rate=0,
+            cost_price_snapshot=60, subtotal_amount=100, subtotal_cost=60,
+        ))
+        db.commit()
+        oid = str(order.id)
+
+        # 创建非特权用户（有 order:view + order:view_all，无 product:view_cost）
+        sale_user = User(
+            id=uuid.uuid4(), username="log_cost_viewer",
+            hashed_password=hash_password("testpass123"),
+            display_name="日志成本查看者",
+            is_active=True, is_superuser=False,
+        )
+        db.add(sale_user)
+        db.flush()
+
+        role = Role(id=uuid.uuid4(), name="log_viewer_role", display_name="日志查看角色")
+        db.add(role)
+        db.flush()
+        db.add(UserRole(user_id=sale_user.id, role_id=role.id))
+
+        for code in ("order:view", "order:view_all"):
+            perm = Permission(id=uuid.uuid4(), code=code, name=code, module=code.split(":")[0])
+            db.add(perm)
+            db.flush()
+            db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+
+        db.commit()
+        sale_token = create_token(str(sale_user.id))
+    finally:
+        db.close()
+
+    sale_headers = {"Authorization": f"Bearer {sale_token}"}
+
+    # 用超级用户确认订单（产生审计日志）
+    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
+
+    # 用非特权用户查看日志
+    resp = client.get(f"/api/v1/sales-orders/{oid}/logs", headers=sale_headers)
+    assert resp.status_code == 200
+
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+
+    # 成本字段应被移除
+    cost_fields = {"cost_price", "unit_profit", "gross_margin", "total_cost", "subtotal_cost"}
+    for item in items:
+        for field in ("before_data", "after_data"):
+            data = item.get(field)
+            if data and isinstance(data, dict):
+                for cf in cost_fields:
+                    assert cf not in data, f"成本字段 {cf} 不应出现在 {field} 中"
