@@ -2925,3 +2925,28 @@ def test_107_audit_log_action_resource_type_cross_constraint():
             assert rtype == expected, (
                 f"action={action} 期望 resource_type={expected}，实际={rtype}"
             )
+
+
+def test_108_product_disable_audit_log_after_data_has_status_disabled():
+    """商品停用审计日志 after_data 含 status=disabled"""
+    headers = _admin_auth()
+    # 创建商品
+    resp = client.post("/api/v1/products", json={
+        "name": "停用审计商品108", "sale_price": "77.00", "cost_price": "30.00", "stock_quantity": 10,
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    # 停用
+    resp = client.post(f"/api/v1/products/{pid}/disable", headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=product_disable", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == pid)
+    assert log["after_data"] is not None
+    assert log["after_data"]["status"] == "disabled", (
+        f"after_data.status 不是 disabled: {log['after_data']['status']}"
+    )
+    assert log["before_data"]["status"] == "active"

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百二十二轮·自动循环）
+
+### 测试补强：商品停用审计日志 after_data 含 status=disabled 验证
+
+- `test_audit_log.py`：新增 test_108（商品停用 after_data status=disabled，before_data status=active 验证）
+- `docs/testing.md`：更新后端测试总数 1105→1106、总计 1487→1488、test_audit_log.py 109→110
+- 后端测试：1106/1106 全绿，ruff clean
+
 ## 2026-05-03（第四百二十一轮·自动循环）
 
 ### 测试补强：审计日志 action 与 resource_type 交叉约束验证
