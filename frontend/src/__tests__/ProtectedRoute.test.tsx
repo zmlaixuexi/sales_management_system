@@ -85,4 +85,16 @@ describe('ProtectedRoute', () => {
       expect(screen.getByText('login-page')).toBeInTheDocument();
     });
   });
+
+  it('加载中 Spin 使用 large 尺寸', () => {
+    mockFetchUser.mockReturnValue(new Promise(() => {})); // 永不 resolve，保持 loading
+    mockedUseAuthStore.mockReturnValue({
+      token: 'test-token',
+      user: null,
+      fetchUser: mockFetchUser,
+    } as ReturnType<typeof useAuthStore>);
+
+    renderWithRouter();
+    expect(screen.getByTestId('spin')).toHaveTextContent('loading-large');
+  });
 });
