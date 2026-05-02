@@ -2411,3 +2411,19 @@ def test_91_user_create_audit_log_after_data_has_is_active():
     assert log["after_data"]["is_active"] is True
     assert log["before_data"] is None
     assert log["resource_type"] == "user"
+
+
+def test_92_audit_log_request_id_non_null():
+    """审计日志 request_id 非空验证（所有日志）"""
+    headers = _admin_auth()
+    # 确保有数据
+    client.post("/api/v1/products", json={
+        "name": "request_id验证商品", "sale_price": "10.00", "cost_price": "5.00",
+    }, headers=headers)
+    resp = client.get("/api/v1/audit-logs", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) > 0
+    for log in items:
+        assert log["request_id"] is not None, f"request_id 为 None: action={log['action']}"
+        assert log["request_id"] != "", f"request_id 为空: action={log['action']}"

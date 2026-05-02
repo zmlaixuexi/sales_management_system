@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百零七轮·自动循环）
+
+### 代码质量 + 测试补强：docs/testing.md 同步 + 审计日志 request_id 非空验证
+
+- `docs/testing.md`：更新后端测试总数 1087→1089、总计 1469→1471、test_audit_log.py 89→91
+- `test_audit_log.py`：新增 test_92（审计日志 request_id 非空验证，遍历所有日志逐一断言）
+- 后端测试：1090/1090 全绿，ruff clean
+
 ## 2026-05-03（第四百零六轮·自动循环）
 
 ### 测试补强：用户创建审计日志 after_data 含 is_active 字段
