@@ -2,33 +2,32 @@
 
 最后更新时间：2026-05-03
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-483
-当前任务名称：自动循环：完成第 483 轮开发推进
+当前任务编号：ROUND-484
+当前任务名称：自动循环：完成第 484 轮开发推进
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 484：移除 Login.test.tsx 因 @/stores/auth 全局 mock 干扰其他测试（该文件从历史中恢复但存在 mock 冲突）
 - Round 483：testing.md 同步前端测试计数 427→432 和 OrderDetail 模块描述
-- Round 482：OrderDetail 补强确认/取消订单交互、冲正弹窗和已确认状态按钮测试
-- Round 481：testing.md 同步前端测试计数和模块描述更新
 
 ## 最终验证状态
 
 | 门禁 | 结果 |
 |---|---|
 | 后端测试 | 1219/1219 ✓ |
-| 前端测试 | 432/432 ✓ |
+| 前端测试 | 425/425 ✓ |
 | ruff | 0 errors ✓ |
 | tsc | 0 errors ✓ |
-| 总计 | **1651 tests** |
+| 总计 | **1644 tests** |
 
 ## 下一步第一动作
 
 继续 keep-going 模式。可选无阻塞方向：
-- 测试补强：Users 弹窗表单提交、AuditLogs 筛选交互
+- 测试补强：AuditLogs 筛选交互、CustomerDetail 删除确认
 - 功能补全：前端其他孤立端点对接
-- 代码质量：API 文档同步
+- 代码质量：Login.tsx 相对路径 import 统一为 @/ 别名
 
 ## 阻塞问题
 

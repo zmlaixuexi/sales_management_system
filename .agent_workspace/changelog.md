@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第四百八十四轮·自动循环）
+
+### 修复：移除 Login.test.tsx 因 @/stores/auth mock 干扰其他测试
+
+- Login.test.tsx 中 vi.mock('@/stores/auth') 全局 mock 导致 auth-store 等测试冲突
+- 该文件从 git 历史中恢复但存在设计缺陷（全局 mock 无法隔离）
+- Login.tsx 使用相对路径 import '../stores/auth' 而非 '@/stores/auth'
+- 36 前端文件 425 测试全绿，总计 1644 测试
+
 ## 2026-05-03（第四百八十三轮·自动循环）
 
 ### 文档：testing.md 同步前端测试计数和 OrderDetail 模块描述
