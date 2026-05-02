@@ -715,3 +715,40 @@ def test_48_product_ranking_limit_max_50():
     assert resp.status_code == 200
     body = resp.json()["data"]
     assert isinstance(body["items"], list)
+
+
+def test_49_sales_summary_zero_data():
+    """无订单用户销售汇总返回零值（数据范围过滤）"""
+    from app.models.user import Permission, Role, RolePermission, UserRole
+
+    db = TestSession()
+    try:
+        # 创建一个有 report:sales + report:profit 但无 order:view_all 的用户
+        user = User(
+            id=uuid.uuid4(), username="zero_data_reporter",
+            hashed_password=hash_password("testpass123"),
+            display_name="零数据报表", is_active=True, is_superuser=False,
+        )
+        db.add(user)
+        role = Role(id=uuid.uuid4(), name="zero_data_role", display_name="零数据角色")
+        db.add(role)
+        db.flush()
+        for code in ["report:sales", "report:profit"]:
+            perm = db.query(Permission).filter(Permission.code == code).first()
+            if not perm:
+                perm = Permission(id=uuid.uuid4(), code=code, name=code, module="report")
+                db.add(perm)
+                db.flush()
+            db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+        db.add(UserRole(user_id=user.id, role_id=role.id))
+        db.commit()
+        token = create_access_token(subject=str(user.id))
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/reports/sales-summary", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert Decimal(data["total_amount"]) == 0
+    assert data["order_count"] == 0
+    assert Decimal(data["gross_margin"]) == 0
