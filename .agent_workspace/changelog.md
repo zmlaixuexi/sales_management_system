@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-03（第四百六十六轮·自动循环）
+
+### 部署体验：Makefile 增强
+
+- 新增 `docker-dev`：启动开发 Docker 环境（detached）
+- 新增 `docker-dev-down`：停止开发 Docker 环境（含 volume 清理）
+- 新增 `docker-logs`：查看容器日志（支持 SERVICE 参数过滤）
+- 新增 `audit`：依赖安全审计（pip-audit + npm audit）
+- Makefile 总计 37 个目标
+
 ## 2026-05-03（第四百六十五轮·自动循环）
 
 ### 可观测性：审计日志前端 resource_id 筛选 UI
