@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第四百一十一轮·自动循环）
+
+### 测试补强：订单创建审计日志 after_data 含 items 明细
+
+- `backend/app/api/v1/orders.py`：订单创建审计日志 after_data 新增 items 数组（含 product_id/quantity/unit_price）
+- `test_audit_log.py`：新增 test_97（订单创建 after_data 含 items 明细，验证多商品明细字段完整性）
+- `docs/testing.md`：更新后端测试总数 1094→1095、总计 1476→1477、test_audit_log.py 98→99
+- 后端测试：1095/1095 全绿，ruff clean
+
 ## 2026-05-03（第四百一十轮·自动循环）
 
 ### 代码质量 + 测试补强：docs/testing.md 同步 + 审计日志 ip_address 非空 + 商品删除 deleted=True

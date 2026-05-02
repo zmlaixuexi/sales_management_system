@@ -323,6 +323,10 @@ def create_order(
             "status": order.status,
             "customer_id": str(order.customer_id),
             "total_amount": str(order.total_amount),
+            "items": [
+                {"product_id": str(pi["product_id"]), "quantity": pi["quantity"], "unit_price": str(pi["unit_price"])}
+                for pi in prepared_items
+            ],
         },
     )
     db.commit()
