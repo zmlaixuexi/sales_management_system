@@ -2091,3 +2091,29 @@ def test_78_product_update_audit_log_before_after_data_completeness():
     assert log["after_data"]["sku"] == "AUDIT-UPD-001"
     assert log["after_data"]["stock_quantity"] == 50
     assert log["resource_type"] == "product"
+
+
+def test_79_customer_delete_audit_log_before_data_completeness():
+    """客户删除审计日志 before_data 含完整客户信息（name/phone/level/contact_name/owner_user_id）"""
+    headers = _admin_auth()
+    resp = client.post("/api/v1/customers", json={
+        "name": "待删除客户del79", "phone": "13800797979",
+        "contact_name": "联系人张三", "level": "vip",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    resp = client.delete(f"/api/v1/customers/{cid}", headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=customer_delete", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == cid)
+    assert log["before_data"]["name"] == "待删除客户del79"
+    assert "phone" in log["before_data"]
+    assert log["before_data"]["level"] == "vip"
+    assert log["before_data"]["contact_name"] == "联系人张三"
+    assert "owner_user_id" in log["before_data"]
+    assert log["after_data"]["deleted"] is True
+    assert log["resource_type"] == "customer"

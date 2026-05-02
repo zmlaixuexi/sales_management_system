@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第三百九十四轮·自动循环）
+
+### 测试补强：客户删除审计日志 before_data 含完整客户信息
+
+- `backend/app/api/v1/customers.py`：客户删除审计日志 before_snapshot 新增 level/contact_name/owner_user_id 字段
+- `test_audit_log.py`：新增 test_79（客户删除后验证 before_data 含 name/phone/level/contact_name/owner_user_id，after_data 含 deleted=True）
+- 后端测试：1077/1077 全绿，ruff clean
+
 ## 2026-05-03（第三百九十三轮·自动循环）
 
 ### 测试补强：商品更新审计日志 before_data/after_data 字段完整性

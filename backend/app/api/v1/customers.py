@@ -308,7 +308,11 @@ def delete_customer(
             detail={"code": "CUSTOMER_HAS_ORDERS", "message": "该客户有未删除的订单，无法删除"},
         )
 
-    before_snapshot = {"name": customer.name, "phone": customer.phone}
+    before_snapshot = {
+        "name": customer.name, "phone": customer.phone,
+        "level": customer.level, "contact_name": customer.contact_name,
+        "owner_user_id": str(customer.owner_user_id) if customer.owner_user_id else None,
+    }
     customer.deleted_at = datetime.now()
     customer.updated_by = current_user.id
     log_user_action(
