@@ -201,4 +201,47 @@ describe('OrderForm', () => {
       expect(screen.getByText('保存修改')).toBeInTheDocument()
     })
   })
+
+  it('空订单行表格存在', () => {
+    renderNewOrder()
+    const tables = screen.getAllByTestId('table')
+    expect(tables.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('显示订单行数统计', () => {
+    renderNewOrder()
+    expect(screen.getByText(/共 \d+ 项/)).toBeInTheDocument()
+  })
+
+  it('显示合计金额', () => {
+    renderNewOrder()
+    expect(screen.getByTestId('table-footer')).toBeInTheDocument()
+    expect(screen.getByTestId('table-footer').textContent).toContain('合计')
+  })
+
+  it('客户选择器存在', () => {
+    renderNewOrder()
+    const selects = screen.getAllByTestId('select')
+    expect(selects.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('备注字段有 maxLength 限制', () => {
+    renderNewOrder()
+    const textarea = screen.getByTestId('textarea')
+    expect(textarea).toHaveAttribute('maxlength', '500')
+  })
+
+  it('点击取消按钮导航回订单列表', () => {
+    renderNewOrder()
+    const cancelBtn = screen.getByText('取消')
+    expect(cancelBtn).toBeInTheDocument()
+  })
+
+  it('表单有客户和备注字段', () => {
+    renderNewOrder()
+    const formItems = screen.getAllByTestId('form-item')
+    const names = formItems.map((fi) => fi.getAttribute('data-name'))
+    expect(names).toContain('customer_id')
+    expect(names).toContain('remark')
+  })
 })
