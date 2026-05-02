@@ -1089,3 +1089,97 @@ def test_56_order_update_nonexistent_product_in_items_404():
     }, headers=_auth())
     assert resp.status_code == 404
     assert resp.json()["error"]["code"] == "RESOURCE_NOT_FOUND"
+
+
+# --- 订单状态机完整性断言 ---
+
+
+def test_57_confirm_confirmed_order_rejected():
+    """重复确认已确认订单返回 400"""
+    _ensure_login()
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+
+    resp = client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
+    assert resp.status_code == 200
+
+    resp = client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
+    assert resp.status_code == 400
+    assert "草稿" in resp.json()["error"]["message"]
+
+
+def test_58_confirm_cancelled_order_rejected():
+    """确认已取消订单返回 400"""
+    _ensure_login()
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+
+    resp = client.post(f"/api/v1/sales-orders/{oid}/cancel", headers=_auth())
+    assert resp.status_code == 200
+
+    resp = client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
+    assert resp.status_code == 400
+
+
+def test_59_cancel_already_cancelled_rejected():
+    """重复取消已取消订单返回 400"""
+    _ensure_login()
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+
+    resp = client.post(f"/api/v1/sales-orders/{oid}/cancel", headers=_auth())
+    assert resp.status_code == 200
+
+    resp = client.post(f"/api/v1/sales-orders/{oid}/cancel", headers=_auth())
+    assert resp.status_code == 400
+
+
+def test_60_update_confirmed_order_rejected():
+    """编辑已确认订单返回 400"""
+    _ensure_login()
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+
+    resp = client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
+    assert resp.status_code == 200
+
+    resp = client.put(f"/api/v1/sales-orders/{oid}", json={
+        "remark": "已确认不可编辑",
+    }, headers=_auth())
+    assert resp.status_code == 400
+    assert "草稿" in resp.json()["error"]["message"]
+
+
+def test_61_update_cancelled_order_rejected():
+    """编辑已取消订单返回 400"""
+    _ensure_login()
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+
+    resp = client.post(f"/api/v1/sales-orders/{oid}/cancel", headers=_auth())
+    assert resp.status_code == 200
+
+    resp = client.put(f"/api/v1/sales-orders/{oid}", json={
+        "remark": "已取消不可编辑",
+    }, headers=_auth())
+    assert resp.status_code == 400
