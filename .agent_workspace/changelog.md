@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-03（第四百八十五轮·自动循环）
+
+### 工程：Login.tsx 统一 import 路径为 @/ 别名
+
+- Login.tsx 将 `../stores/auth` 改为 `@/stores/auth`，与项目其他文件保持一致
+- tsc 0 errors，425 前端测试全绿
+
 ## 2026-05-03（第四百八十四轮·自动循环）
 
 ### 修复：移除 Login.test.tsx 因 @/stores/auth mock 干扰其他测试
