@@ -2108,3 +2108,49 @@ def test_123_customer_update_invalid_email():
 
     resp = client.put(f"/api/v1/customers/{cid}", json={"email": "not-an-email"}, headers=headers)
     assert resp.status_code == 422, f"无效邮箱应返回 422: {resp.status_code}"
+
+
+def test_124_customer_create_invalid_phone():
+    """客户创建无效手机号格式返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    # 非 1 开头
+    resp = client.post("/api/v1/customers", json={
+        "name": "无效手机客户124a", "phone": "23456789012",
+    }, headers=headers)
+    assert resp.status_code == 422, f"非 1 开头手机号应返回 422: {resp.status_code}"
+
+    # 少于 11 位
+    resp = client.post("/api/v1/customers", json={
+        "name": "无效手机客户124b", "phone": "1381234",
+    }, headers=headers)
+    assert resp.status_code == 422, f"短手机号应返回 422: {resp.status_code}"
+
+    # 含字母
+    resp = client.post("/api/v1/customers", json={
+        "name": "无效手机客户124c", "phone": "1381234abcd",
+    }, headers=headers)
+    assert resp.status_code == 422, f"含字母手机号应返回 422: {resp.status_code}"
+
+
+def test_125_customer_update_invalid_phone():
+    """客户编辑无效手机号格式返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/customers", json={
+        "name": "手机编辑客户125", "phone": "13901250001",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    resp = client.put(f"/api/v1/customers/{cid}", json={"phone": "abc"}, headers=headers)
+    assert resp.status_code == 422, f"无效手机号应返回 422: {resp.status_code}"
+
+
+def test_126_payment_exceeds_unpaid():
+    """收款金额超过订单未付金额返回 400"""
+    headers = _auth_for_user(_user_id)
+    # _confirmed_order_id 的 total_amount=200, paid_amount=0
+    resp = client.post(f"/api/v1/sales-orders/{_confirmed_order_id}/payments", json={
+        "amount": "201", "payment_method": "cash",
+    }, headers=headers)
+    assert resp.status_code == 400, f"超额收款应返回 400: {resp.status_code} {resp.json()}"
