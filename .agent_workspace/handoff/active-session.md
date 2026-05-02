@@ -2,17 +2,17 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-231
-当前任务名称：文档完善 — 部署指南补充
+当前任务编号：ROUND-232
+当前任务名称：文档同步 + 代码质量审查
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 231：部署指南补充（部署前检查、更新部署、回滚、HTTPS 配置）
-- Round 230：确认 Backlog P1/P2 全部已实现
-- Round 229：Pydantic schema remark 字段 max_length 补全
-- Round 228：软删除过滤测试
+- Round 232：测试计数同步 774→793（testing.md + README.md），代码质量审查
+- Round 231：部署指南补充
+- Round 230：Backlog P1/P2 状态确认
+- Round 229：Pydantic schema max_length 补全
 
 ## 最终验证状态
 
