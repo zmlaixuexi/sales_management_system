@@ -58,9 +58,9 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
-    # 运行数据库迁移后启动服务
+    # 运行数据库迁移、初始化种子数据后启动服务
     command: >
-      sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers ${UVICORN_WORKERS:-2}"
+      sh -c "alembic upgrade head && python -m app.db.seed && uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers ${UVICORN_WORKERS:-2}"
 
   frontend-build:
     build:
