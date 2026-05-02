@@ -1461,3 +1461,55 @@ def test_75_customer_update_name_max_length_boundary():
     # 201 字符
     resp = client.put(f"/api/v1/customers/{cid}", json={"name": "名" * 201}, headers=headers)
     assert resp.status_code == 422, f"201 字符名称应被拒绝: {resp.status_code}"
+
+
+def test_76_user_create_username_max_length_boundary():
+    """用户创建 username 恰好 50 字符通过，51 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    # 恰好 50 字符
+    resp = client.post("/api/v1/users", json={
+        "username": "u" * 50, "password": "pass123456", "display_name": "用户名边界76",
+    }, headers=headers)
+    assert resp.status_code == 200, f"50 字符用户名应通过: {resp.json()}"
+
+    # 51 字符
+    resp = client.post("/api/v1/users", json={
+        "username": "u" * 51, "password": "pass123456", "display_name": "用户名边界76b",
+    }, headers=headers)
+    assert resp.status_code == 422, f"51 字符用户名应被拒绝: {resp.status_code}"
+
+
+def test_77_user_create_display_name_max_length_boundary():
+    """用户创建 display_name 恰好 100 字符通过，101 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    # 恰好 100 字符
+    resp = client.post("/api/v1/users", json={
+        "username": "display_bnd_77", "password": "pass123456", "display_name": "显" * 100,
+    }, headers=headers)
+    assert resp.status_code == 200, f"100 字符显示名称应通过: {resp.json()}"
+
+    # 101 字符
+    resp = client.post("/api/v1/users", json={
+        "username": "display_bnd_77b", "password": "pass123456", "display_name": "显" * 101,
+    }, headers=headers)
+    assert resp.status_code == 422, f"101 字符显示名称应被拒绝: {resp.status_code}"
+
+
+def test_78_user_update_display_name_max_length_boundary():
+    """用户编辑 display_name 恰好 100 字符通过，101 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/users", json={
+        "username": "upd_disp_bnd_78", "password": "pass123456",
+    }, headers=headers)
+    assert resp.status_code == 200
+    uid = resp.json()["data"]["id"]
+
+    # 恰好 100 字符
+    resp = client.put(f"/api/v1/users/{uid}", json={"display_name": "编" * 100}, headers=headers)
+    assert resp.status_code == 200, f"100 字符显示名称应通过: {resp.json()}"
+
+    # 101 字符
+    resp = client.put(f"/api/v1/users/{uid}", json={"display_name": "编" * 101}, headers=headers)
+    assert resp.status_code == 422, f"101 字符显示名称应被拒绝: {resp.status_code}"
