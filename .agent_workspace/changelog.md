@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第二百三十五轮·自动循环）
+
+### 测试：外键验证边界条件测试（4 项新增）
+
+- 客户创建无效 owner_user_id 格式 → 400
+- 客户创建不存在 owner_user_id → 400
+- 订单更新不存在 customer_id → 404
+- 订单更新不存在 product_id → 404
+- 后端 797 测试全绿（+4），总计 1177
+
 ## 2026-05-02（第二百三十三轮·自动循环）
 
 ### 工程：Makefile 新增 deploy-check 和 deploy-rollback 命令
