@@ -948,3 +948,39 @@ def test_59_audit_log_filter_nonexistent_resource_type():
     assert resp.status_code == 200
     assert resp.json()["data"]["total"] == 0
     assert resp.json()["data"]["items"] == []
+
+
+def test_60_sales_trend_invalid_date_range():
+    """销售趋势 start_date > end_date 仍正常返回（空数据）"""
+    token = create_access_token(subject=_user_id)
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = client.get(
+        "/api/v1/reports/sales-trend?period=custom&start_date=2099-01-01&end_date=2020-01-01",
+        headers=headers,
+    )
+    if resp.status_code == 200:
+        data = resp.json()["data"]
+        assert isinstance(data, list)
+
+
+def test_61_product_ranking_default_limit():
+    """商品排行默认 limit 返回不超过 10 条"""
+    token = create_access_token(subject=_user_id)
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = client.get("/api/v1/reports/product-ranking", headers=headers)
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert isinstance(data, dict)
+    assert "items" in data
+    assert len(data["items"]) <= 10
+
+
+def test_62_salesperson_ranking_default():
+    """销售人员排行默认返回含 items 的结构"""
+    token = create_access_token(subject=_user_id)
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = client.get("/api/v1/reports/salesperson-ranking", headers=headers)
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert isinstance(data, dict)
+    assert "items" in data

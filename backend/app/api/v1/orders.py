@@ -318,7 +318,12 @@ def create_order(
         db, request, current_user,
         action="order_create", resource_type="order",
         resource_id=str(order.id),
-        after_data={"order_no": order_no, "total_amount": str(order.total_amount)},
+        after_data={
+            "order_no": order_no,
+            "status": order.status,
+            "customer_id": str(order.customer_id),
+            "total_amount": str(order.total_amount),
+        },
     )
     db.commit()
 

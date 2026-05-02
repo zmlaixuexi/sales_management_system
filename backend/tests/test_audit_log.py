@@ -1321,7 +1321,7 @@ def test_56_create_operations_have_no_before_data():
 
 
 def test_57_order_create_audit_log_after_data():
-    """订单创建审计日志 after_data 含 order_no 和 total_amount"""
+    """订单创建审计日志 after_data 含 order_no/status/customer_id/total_amount"""
     headers = _admin_auth()
     # 创建商品
     resp = client.post("/api/v1/products", json={
@@ -1358,6 +1358,8 @@ def test_57_order_create_audit_log_after_data():
     log = next(i for i in items if i["resource_id"] == oid)
     assert log["before_data"] is None
     assert log["after_data"]["order_no"] == order_no
+    assert log["after_data"]["status"] == "draft"
+    assert log["after_data"]["customer_id"] == cust_id
     assert log["after_data"]["total_amount"] == "75.00"
     assert log["resource_type"] == "order"
 

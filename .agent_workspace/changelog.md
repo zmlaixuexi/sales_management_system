@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第三百八十三轮·自动循环）
+
+### 测试补强：订单创建审计日志增强 + 报表 API 边界测试
+
+- `orders.py`：订单创建审计日志 after_data 增加 status 和 customer_id
+- `test_audit_log.py`：test_57 更新验证 after_data 含 status=draft/customer_id
+- `test_reports_audit.py`：新增 test_60-62（趋势日期范围验证、商品排行默认 limit 不超 10、销售人员排行默认结构）
+- 后端测试：1062/1062 全绿
+
 ## 2026-05-02（第三百八十二轮·自动循环）
 
 ### 测试补强：密码修改审计日志 after_data 完整性验证
