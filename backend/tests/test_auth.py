@@ -536,3 +536,73 @@ def test_34_refresh_token_missing_type_rejected():
 
     resp = client.post("/api/v1/auth/refresh", json={"refresh_token": token})
     assert resp.status_code == 401
+
+
+# ─── 用户禁用后 token 立即失效 ───
+
+
+def test_35_disabled_user_access_token_immediately_invalid():
+    """用户禁用后，已发放的 access token 立即返回 401"""
+    # 用正常用户登录获取 token
+    login_resp = client.post("/api/v1/auth/login", json={
+        "username": "testuser", "password": "testpass123",
+    })
+    assert login_resp.status_code == 200
+    token = login_resp.json()["data"]["access_token"]
+
+    # 先验证 token 正常工作
+    resp = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+
+    # 禁用用户
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "testuser").first()
+        user.is_active = False
+        db.commit()
+    finally:
+        db.close()
+
+    # 同一个 token 现在应该返回 401
+    resp = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 401
+
+    # 恢复用户状态
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "testuser").first()
+        user.is_active = True
+        db.commit()
+    finally:
+        db.close()
+
+
+def test_36_disabled_user_refresh_token_immediately_invalid():
+    """用户禁用后，已发放的 refresh token 立即返回 401"""
+    login_resp = client.post("/api/v1/auth/login", json={
+        "username": "testuser", "password": "testpass123",
+    })
+    assert login_resp.status_code == 200
+    refresh = login_resp.json()["data"]["refresh_token"]
+
+    # 禁用用户
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "testuser").first()
+        user.is_active = False
+        db.commit()
+    finally:
+        db.close()
+
+    # refresh token 应被拒绝
+    resp = client.post("/api/v1/auth/refresh", json={"refresh_token": refresh})
+    assert resp.status_code == 401
+
+    # 恢复用户状态
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "testuser").first()
+        user.is_active = True
+        db.commit()
+    finally:
+        db.close()
