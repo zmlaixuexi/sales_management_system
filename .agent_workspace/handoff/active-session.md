@@ -2,33 +2,33 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-179
-当前任务名称：代码质量 — 移除死代码 + 死代码审计
+当前任务编号：ROUND-180
+当前任务名称：测试补强 — 安全模块单元测试
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 180：新增 test_security.py（14 项）— hash_password/verify_password/create_access_token/create_refresh_token 单元测试
 - Round 179：全量死代码审计，移除未使用的 PaginationParams 类型导出
 - Round 178：全量 CI 验证 + ruff lint 修复
-- Round 177：Login +2 测试
 
 ## 最终验证状态
 
 | 门禁 | 结果 |
 |---|---|
-| 后端测试 | 677/677 ✓ |
+| 后端测试 | 691/691 ✓ |
 | 前端测试 | 318/318 ✓ |
 | ruff | 0 errors ✓ |
 | ESLint | 0 errors ✓ |
 | TypeScript | 0 errors ✓ |
 | 构建 | ✓ |
-| 总计 | 995 tests |
+| 总计 | 1009 tests |
 
 ## 下一步第一动作
 
 继续 keep-going 模式。可选方向：
-- 继续测试补强
+- 继续测试补强（reports.py helpers、audit_service log_user_action、request_log/security_headers middleware）
 - 部署体验
 - 可观测性
 

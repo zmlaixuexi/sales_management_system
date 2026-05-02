@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-02（第一百八十轮·自动循环）
+
+### 测试：新增安全模块单元测试（hash/verify/token 14 项）
+
+- 新建 `test_security.py`，14 个测试覆盖全部 security.py 公开函数
+- hash_password：bcrypt 格式、不同盐值
+- verify_password：正确/错误/空密码、与 hash_password 联动
+- create_access_token：解码验证、type="access" claim、exp 存在、自定义过期
+- create_refresh_token：解码验证、type="refresh" claim、exp 存在、过期时间晚于 access
+- 后端 677→691，总计 1009 tests
+
 ## 2026-05-02（第一百七十九轮·自动循环）
 
 ### 工程：移除未使用的 PaginationParams 类型导出
