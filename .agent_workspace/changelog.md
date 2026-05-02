@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百三十七轮·自动循环）
+
+### 代码：补全缺失权限 order:view（seed 对齐实际代码）
+
+- 订单操作日志端点使用 require_permission("order:view") 但 seed 中缺少此权限定义
+- seed.py 添加 order:view 权限定义和 sales_manager/finance 角色分配
+- 934 后端测试全绿
+
 ## 2026-05-02（第三百三十六轮·自动循环）
 
 ### 文档+代码：移除幽灵权限 report:ranking

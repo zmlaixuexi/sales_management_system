@@ -41,6 +41,7 @@ PERMISSIONS = [
     ("order:update", "编辑订单", "订单管理"),
     ("order:confirm", "确认订单", "订单管理"),
     ("order:cancel", "取消订单", "订单管理"),
+    ("order:view", "查看订单操作日志", "订单管理"),
     ("order:view_all", "查看全部订单（含其他销售订单）", "订单管理"),
     # 库存管理
     ("inventory:list", "查看库存", "库存管理"),
@@ -62,7 +63,7 @@ ROLE_PERMISSIONS = {
     "sales_manager": [
         "product:list", "product:view_cost",
         "customer:list", "customer:create", "customer:update", "customer:view_all",
-        "order:list", "order:create", "order:update", "order:confirm", "order:cancel", "order:view_all",
+        "order:list", "order:create", "order:update", "order:confirm", "order:cancel", "order:view", "order:view_all",
         "payment:list",
         "report:sales", "report:profit",
         "inventory:list",
@@ -80,7 +81,7 @@ ROLE_PERMISSIONS = {
     ],
     "finance": [
         "product:list", "product:view_cost",
-        "order:list", "order:view_all",
+        "order:list", "order:view", "order:view_all",
         "payment:list", "payment:create", "payment:reverse",
         "report:sales", "report:profit",
     ],
