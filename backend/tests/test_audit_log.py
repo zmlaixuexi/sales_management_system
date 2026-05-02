@@ -1010,3 +1010,31 @@ def test_44_customer_update_audit_log_before_data():
     assert "phone" in log["before_data"]
     assert log["after_data"]["name"] == "编辑后名称"
     assert log["resource_type"] == "customer"
+
+
+def test_45_user_update_audit_log_before_data():
+    """用户编辑审计日志 before_data 含编辑前的 display_name，after_data 含更新后的值"""
+    headers = _admin_auth()
+    # 创建用户
+    resp = client.post("/api/v1/users", json={
+        "username": "before_data_user",
+        "password": "password123",
+        "display_name": "编辑前名称",
+    }, headers=headers)
+    assert resp.status_code == 200
+    uid = resp.json()["data"]["id"]
+
+    # 编辑用户
+    resp = client.put(f"/api/v1/users/{uid}", json={
+        "display_name": "编辑后名称",
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=user_update", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == uid)
+    assert log["before_data"]["display_name"] == "编辑前名称"
+    assert log["before_data"]["username"] == "before_data_user"
+    assert log["after_data"]["display_name"] == "编辑后名称"
+    assert log["resource_type"] == "user"

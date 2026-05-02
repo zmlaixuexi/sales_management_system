@@ -145,6 +145,8 @@ def update_user(
             detail={"code": "RESOURCE_NOT_FOUND", "message": "用户不存在"},
         )
 
+    before: dict = {"username": user.username, "display_name": user.display_name, "is_active": user.is_active}
+
     if req.is_active is False and user.id == current_user.id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -174,6 +176,7 @@ def update_user(
     log_user_action(
         db, request, current_user,
         action="user_update", resource_type="user", resource_id=str(user.id),
+        before_data=before,
         after_data=after,
     )
     db.commit()

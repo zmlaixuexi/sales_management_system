@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百六十五轮·自动循环）
+
+### 测试补强：用户编辑审计日志 before_data 字段验证
+
+- `users.py`：补充用户更新审计日志的 `before_data`（含编辑前的 username/display_name/is_active）
+- `test_audit_log.py`：新增 test_45（用户编辑 before_data 含原始 display_name，after_data 含新值）
+- 后端测试：1032/1032 全绿
+
 ## 2026-05-02（第三百六十四轮·自动循环）
 
 ### 安全加固：密码修改后 token 行为验证
