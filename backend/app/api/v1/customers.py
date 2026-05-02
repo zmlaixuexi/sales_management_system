@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFil
 from sqlalchemy.orm import Session
 
 from app.api.deps import (
+    PaginationParams,
     check_owner_or_forbid,
     get_db,
     get_or_404,
@@ -58,8 +59,7 @@ def _validate_owner_user(db: Session, owner_uid: uuid.UUID) -> None:
 
 @router.get("")
 def list_customers(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    pagination: PaginationParams = Depends(),
     keyword: str | None = None,
     source: str | None = None,
     owner_user_id: uuid.UUID | None = None,
@@ -87,7 +87,7 @@ def list_customers(
 
     query = query.order_by(Customer.created_at.desc())
 
-    items, total = paginate(query, page, page_size)
+    items, total = paginate(query, pagination.page, pagination.page_size)
 
     result_items = [{
         "id": str(c.id),
@@ -105,7 +105,7 @@ def list_customers(
         "updated_at": c.updated_at.isoformat() if c.updated_at else None,
     } for c in items]
 
-    return paginated_resp(result_items, page, page_size, total)
+    return paginated_resp(result_items, pagination.page, pagination.page_size, total)
 
 
 @router.post("", response_model=ApiResponse[CustomerBrief])

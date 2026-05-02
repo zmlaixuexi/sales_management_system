@@ -9,6 +9,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.api.deps import (
+    PaginationParams,
     generate_sequential_code,
     get_db,
     get_or_404,
@@ -109,8 +110,7 @@ def _calc_profit(sale_price: Decimal, cost_price: Decimal) -> tuple[Decimal, Dec
 
 @router.get("")
 def list_products(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    pagination: PaginationParams = Depends(),
     keyword: str | None = None,
     status: str | None = None,
     category_id: uuid.UUID | None = None,
@@ -147,7 +147,7 @@ def list_products(
         else:
             query = query.order_by(sort_col.desc(), Product.created_at.desc())
 
-    items, total = paginate(query, page, page_size)
+    items, total = paginate(query, pagination.page, pagination.page_size)
 
     # 批量查询销售统计
     product_ids = [p.id for p in items]
@@ -180,7 +180,7 @@ def list_products(
             row["gross_margin"] = str(gross_margin)
         result_items.append(row)
 
-    return paginated_resp(result_items, page, page_size, total)
+    return paginated_resp(result_items, pagination.page, pagination.page_size, total)
 
 
 @router.post("", response_model=ApiResponse[ProductBrief])

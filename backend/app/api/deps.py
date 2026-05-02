@@ -1,7 +1,8 @@
 import uuid
+from dataclasses import dataclass
 from datetime import datetime
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Query, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import InstrumentedAttribute, Session
@@ -12,6 +13,13 @@ from app.db.session import Base, SessionLocal
 from app.models.user import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+
+
+@dataclass
+class PaginationParams:
+    """通用分页参数，作为 Depends 注入。"""
+    page: int = Query(1, ge=1)
+    page_size: int = Query(20, ge=1, le=100)
 
 
 def get_db():

@@ -3,10 +3,10 @@
 import json
 import uuid
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, paginate, paginated_resp, require_permission, resp
+from app.api.deps import PaginationParams, get_db, paginate, paginated_resp, require_permission, resp
 from app.core.sanitize import escape_like
 from app.models.audit import AuditLog
 from app.models.user import User
@@ -22,8 +22,7 @@ router = APIRouter(
 
 @router.get("")
 def list_audit_logs(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    pagination: PaginationParams = Depends(),
     action: str | None = None,
     resource_type: str | None = None,
     actor_id: uuid.UUID | None = None,
@@ -54,7 +53,7 @@ def list_audit_logs(
         )
 
     items, total = paginate(
-        query.order_by(AuditLog.created_at.desc()), page, page_size,
+        query.order_by(AuditLog.created_at.desc()), pagination.page, pagination.page_size,
     )
 
     result_items = []
@@ -75,7 +74,7 @@ def list_audit_logs(
         }
         result_items.append(row)
 
-    return paginated_resp(result_items, page, page_size, total)
+    return paginated_resp(result_items, pagination.page, pagination.page_size, total)
 
 
 @router.get("/actions")

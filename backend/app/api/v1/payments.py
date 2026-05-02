@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api.deps import (
+    PaginationParams,
     check_owner_or_forbid,
     get_db,
     has_permission,
@@ -35,8 +36,7 @@ router = APIRouter(
 
 @router.get("")
 def list_payments(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    pagination: PaginationParams = Depends(),
     order_id: uuid.UUID | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("payment:list")),
@@ -57,7 +57,7 @@ def list_payments(
         query = query.filter(Payment.order_id == order_id)
     query = query.order_by(Payment.created_at.desc())
 
-    items, total = paginate(query, page, page_size)
+    items, total = paginate(query, pagination.page, pagination.page_size)
 
     return paginated_resp(
         [
@@ -73,8 +73,8 @@ def list_payments(
             }
             for p in items
         ],
-        page,
-        page_size,
+        pagination.page,
+        pagination.page_size,
         total,
     )
 

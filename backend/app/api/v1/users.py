@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db, paginate, paginated_resp, parse_uuid_or_400, resp
+from app.api.deps import PaginationParams, get_current_user, get_db, paginate, paginated_resp, parse_uuid_or_400, resp
 from app.core.sanitize import escape_like
 from app.core.security import hash_password
 from app.models.user import Role, User, UserRole
@@ -32,8 +32,7 @@ def _validate_roles_exist(db: Session, role_ids: list) -> None:
 
 @router.get("")
 def list_users(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    pagination: PaginationParams = Depends(),
     keyword: str | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -49,7 +48,7 @@ def list_users(
     if keyword:
         query = query.filter(User.username.ilike(f"%{escape_like(keyword)}%", escape="\\"))
 
-    users, total = paginate(query.order_by(User.created_at.desc()), page, page_size)
+    users, total = paginate(query.order_by(User.created_at.desc()), pagination.page, pagination.page_size)
 
     items = [{
         "id": str(u.id),
@@ -64,7 +63,7 @@ def list_users(
         "updated_at": u.updated_at.isoformat() if u.updated_at else None,
     } for u in users]
 
-    return paginated_resp(items, page, page_size, total)
+    return paginated_resp(items, pagination.page, pagination.page_size, total)
 
 
 @router.post("")

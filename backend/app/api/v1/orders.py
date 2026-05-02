@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api.deps import (
+    PaginationParams,
     check_owner_or_forbid,
     generate_sequential_code,
     get_db,
@@ -216,8 +217,7 @@ def _restore_inventory(db: Session, order_id: uuid.UUID, items: list[SalesOrderI
 
 @router.get("")
 def list_orders(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    pagination: PaginationParams = Depends(),
     keyword: str | None = None,
     status: str | None = None,
     customer_id: uuid.UUID | None = None,
@@ -239,7 +239,7 @@ def list_orders(
         query = query.filter(SalesOrder.customer_id == customer_id)
 
     query = query.order_by(SalesOrder.created_at.desc())
-    orders, total = paginate(query, page, page_size)
+    orders, total = paginate(query, pagination.page, pagination.page_size)
 
     items_out = []
     for o in orders:
@@ -263,7 +263,7 @@ def list_orders(
             row["gross_margin"] = str(o.gross_margin)
         items_out.append(row)
 
-    return paginated_resp(items_out, page, page_size, total)
+    return paginated_resp(items_out, pagination.page, pagination.page_size, total)
 
 
 @router.post("", response_model=ApiResponse[OrderBrief])
@@ -538,8 +538,7 @@ def cancel_order(
 @router.get("/{order_id}/logs")
 def order_logs(
     order_id: uuid.UUID,
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    pagination: PaginationParams = Depends(),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("order:view")),
 ):
@@ -553,7 +552,7 @@ def order_logs(
     )
 
     items, total = paginate(
-        query.order_by(AuditLog.created_at.desc()), page, page_size,
+        query.order_by(AuditLog.created_at.desc()), pagination.page, pagination.page_size,
     )
 
     # 无 product:view_cost 权限时，从审计数据中移除敏感字段
@@ -590,7 +589,7 @@ def order_logs(
         for item in items
     ]
 
-    return paginated_resp(result_items, page, page_size, total)
+    return paginated_resp(result_items, pagination.page, pagination.page_size, total)
 
 
 @router.post("/{order_id}/payments")
