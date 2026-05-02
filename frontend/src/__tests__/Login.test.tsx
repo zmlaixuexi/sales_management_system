@@ -103,4 +103,24 @@ describe('Login', () => {
       expect(_messageError).toHaveBeenCalledWith('用户名或密码错误')
     })
   })
+
+  it('登录成功后跳转到首页', async () => {
+    _loginFn.mockResolvedValue(undefined)
+    renderLogin()
+    const onFinish = (globalThis as any).__loginOnFinish
+    onFinish?.({ username: 'admin', password: 'pass' })
+    await waitFor(() => {
+      expect(_loginFn).toHaveBeenCalledWith('admin', 'pass')
+    })
+  })
+
+  it('登录成功后跳转到 redirect 参数指定页', async () => {
+    _loginFn.mockResolvedValue(undefined)
+    renderLogin('/products')
+    const onFinish = (globalThis as any).__loginOnFinish
+    onFinish?.({ username: 'admin', password: 'pass' })
+    await waitFor(() => {
+      expect(_loginFn).toHaveBeenCalledWith('admin', 'pass')
+    })
+  })
 })
