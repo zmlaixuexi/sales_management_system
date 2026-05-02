@@ -490,3 +490,21 @@ def test_28_update_customer_email_duplicate():
         pass
     else:
         assert resp.status_code == 409
+
+
+def test_29_list_customers_keyword_like_injection():
+    """关键字搜索含 LIKE 特殊字符（%）不应匹配全部"""
+    resp = client.get("/api/v1/customers", params={"keyword": "%"}, headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    # % 在 SQL LIKE 中匹配所有，但 escape_like 应转义
+    assert all("%" not in c.get("name", "") for c in items)
+
+
+def test_30_list_customers_keyword_like_underscore():
+    """关键字搜索含下划线（_）不应匹配任意单字符"""
+    resp = client.get("/api/v1/customers", params={"keyword": "_"}, headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    # 客户名不含字面量下划线，应返回空或极少
+    assert all("_" not in c.get("name", "") for c in items)
