@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百一十一轮·自动循环）
+
+### 可观测性：前端 API 请求自动生成 X-Request-ID 头
+
+- 前端 apiClient 请求拦截器使用 crypto.randomUUID() 为每个请求生成唯一 X-Request-ID
+- 与后端 RequestIDMiddleware 的透传机制对接，实现前后端日志关联
+- 新增 2 个测试：验证 UUID v4 格式、验证每次请求 ID 不同
+- client.test.ts：5→7，前端 378→380
+
 ## 2026-05-02（第二百一十轮·自动循环）
 
 ### 文档：更新 README 和 testing.md 反映最新前端测试状态
