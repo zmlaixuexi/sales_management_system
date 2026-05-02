@@ -6,6 +6,14 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-175
+
+- 名称：API 文档错误响应格式修正和错误码补全
+- 轮次：Round 226（自动循环）
+- 描述：修正 docs/api.md 错误响应格式（detail → success:false+error），补全 ORDER_HAS_PAYMENTS/CUSTOMER_HAS_ORDERS/IMPORT_FAILED/SYSTEM_INTERNAL_ERROR 错误码
+- 涉及文件：docs/api.md
+- 验证：774 后端测试全绿
+
 ## 功能编号：FEAT-20260502-174
 
 - 名称：部署前检查脚本

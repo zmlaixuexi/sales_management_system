@@ -2,18 +2,18 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-225
-当前任务名称：部署体验 — 部署前检查脚本
+当前任务编号：ROUND-226
+当前任务名称：文档完善 — API 文档错误格式修正和错误码补全
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 225：
-  - 新增 deploy/pre-deploy-check.sh 部署前检查脚本
-  - 8 项自动化检查：文件完整性、环境变量、Docker、代码质量、前端构建、迁移一致性、端口、磁盘
-  - 支持 --skip-tests / --skip-build 选项
-  - 实际运行验证 19 通过/0 失败
+- Round 226：
+  - 修正 API 文档错误响应格式（detail → success:false + error）
+  - 补全遗漏错误码：ORDER_HAS_PAYMENTS、CUSTOMER_HAS_ORDERS、IMPORT_FAILED、SYSTEM_INTERNAL_ERROR
+  - 新增 422 VALIDATION_FAILED 说明
+- Round 225：部署前检查脚本 pre-deploy-check.sh（8 项自动化检查）
 - Round 224：基础设施全面验证（迁移链、模型一致性、健康检查、代码质量）
 
 ## 最终验证状态
@@ -27,15 +27,16 @@
 | 前端构建 | 263ms ✓ |
 | 迁移链 | 6 迁移，16 表，完整 ✓ |
 | 部署检查 | 19/19 通过 ✓ |
+| API 文档 | 错误格式和错误码已对齐 ✓ |
 | 总计 | 1154 tests |
 
 ## 下一步第一动作
 
 继续 keep-going 模式。可选方向：
-- 安全加固（CSRF token）
+- 安全加固（CSRF token / 输入长度限制强化）
 - 可观测性（慢查询告警通知）
-- 文档完善（API 文档补充）
 - 性能优化（API 响应缓存）
+- 测试补强（边界条件和异常路径覆盖）
 
 ## 阻塞问题
 

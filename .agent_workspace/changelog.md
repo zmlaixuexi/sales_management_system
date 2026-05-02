@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百二十六轮·自动循环）
+
+### 文档：修正 API 文档错误响应格式 + 补全遗漏错误码
+
+- 错误响应格式从 `detail` 改为 `success: false + error` 对象（与实际实现一致）
+- 新增 ORDER_HAS_PAYMENTS、CUSTOMER_HAS_ORDERS、IMPORT_FAILED、SYSTEM_INTERNAL_ERROR 错误码
+- 新增 422 VALIDATION_FAILED（FastAPI 自动校验）说明
+- 774 后端测试全绿
+
 ## 2026-05-02（第二百二十五轮·自动循环）
 
 ### 部署体验：新增部署前检查脚本 pre-deploy-check.sh
