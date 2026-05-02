@@ -49,8 +49,8 @@ router = APIRouter(
 
 def _validate_owner_user(db: Session, owner_uid: uuid.UUID) -> None:
     """校验归属用户存在且活跃"""
-    target = db.query(User).filter(
-        User.id == owner_uid, User.is_active.is_(True), User.deleted_at.is_(None),
+    target = active_query(db, User).filter(
+        User.id == owner_uid, User.is_active.is_(True),
     ).first()
     if not target:
         raise HTTPException(
@@ -125,8 +125,8 @@ def create_customer(
     # 重复手机号提醒
     phone = data.phone
     if phone:
-        existing = db.query(Customer).filter(
-            Customer.phone == phone, Customer.deleted_at.is_(None)
+        existing = active_query(db, Customer).filter(
+            Customer.phone == phone
         ).first()
         if existing:
             raise HTTPException(
@@ -237,10 +237,9 @@ def update_customer(
     if data.phone is not None:
         phone = data.phone
         if phone:
-            existing = db.query(Customer).filter(
+            existing = active_query(db, Customer).filter(
                 Customer.phone == phone,
                 Customer.id != customer_id,
-                Customer.deleted_at.is_(None),
             ).first()
             if existing:
                 raise HTTPException(
@@ -297,8 +296,8 @@ def delete_customer(
 
     # 有订单关联的客户不可删除
     from app.models.order import SalesOrder
-    has_orders = db.query(SalesOrder).filter(
-        SalesOrder.customer_id == customer_id, SalesOrder.deleted_at.is_(None),
+    has_orders = active_query(db, SalesOrder).filter(
+        SalesOrder.customer_id == customer_id,
     ).first()
     if has_orders:
         raise HTTPException(

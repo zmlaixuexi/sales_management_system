@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import (
     PaginationParams,
+    active_query,
     check_owner_or_forbid,
     fmt_dt,
     get_db,
@@ -127,8 +128,8 @@ def reverse_payment(
     if not payment:
         raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "收款记录不存在或已冲正"})
 
-    order = db.query(SalesOrder).filter(
-        SalesOrder.id == payment.order_id, SalesOrder.deleted_at.is_(None),
+    order = active_query(db, SalesOrder).filter(
+        SalesOrder.id == payment.order_id,
     ).with_for_update().first()
     if not order:
         raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "关联订单不存在"})

@@ -6,7 +6,7 @@ from decimal import Decimal
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.api.deps import check_owner_or_forbid
+from app.api.deps import active_query, check_owner_or_forbid
 from app.models.order import Payment, SalesOrder
 from app.models.user import User
 from app.schemas.payment import PaymentCreate
@@ -21,8 +21,8 @@ def register_payment(
     """登记订单收款，返回响应数据 dict。"""
     # 加行锁防止并发收款导致超额
     order = (
-        db.query(SalesOrder)
-        .filter(SalesOrder.id == uuid.UUID(order_id), SalesOrder.deleted_at.is_(None))
+        active_query(db, SalesOrder)
+        .filter(SalesOrder.id == uuid.UUID(order_id))
         .with_for_update()
         .first()
     )

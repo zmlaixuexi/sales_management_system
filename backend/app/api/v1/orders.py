@@ -125,8 +125,8 @@ def _validate_and_prepare_items(db: Session, raw_items: list) -> list[dict]:
     """校验订单明细行并返回准备好的数据"""
     # 批量查询所有商品，将 N 次查询减少为 1 次
     product_ids = [parse_uuid_or_400(ri.product_id, "商品 ID") for ri in raw_items]
-    products = db.query(Product).filter(
-        Product.id.in_(product_ids), Product.deleted_at.is_(None),
+    products = active_query(db, Product).filter(
+        Product.id.in_(product_ids),
     ).all()
     product_map = {p.id: p for p in products}
 
@@ -151,8 +151,8 @@ def _validate_and_prepare_items(db: Session, raw_items: list) -> list[dict]:
 def _deduct_inventory(db: Session, order_id: uuid.UUID, items: list[SalesOrderItem], operator_id: uuid.UUID) -> None:
     """确认订单时扣减库存，并记录流水"""
     product_ids = [item.product_id for item in items]
-    products = db.query(Product).filter(
-        Product.id.in_(product_ids), Product.deleted_at.is_(None),
+    products = active_query(db, Product).filter(
+        Product.id.in_(product_ids),
     ).with_for_update().all()
     product_map = {p.id: p for p in products}
 
@@ -194,8 +194,8 @@ def _deduct_inventory(db: Session, order_id: uuid.UUID, items: list[SalesOrderIt
 def _restore_inventory(db: Session, order_id: uuid.UUID, items: list[SalesOrderItem], operator_id: uuid.UUID) -> None:
     """取消订单时回滚库存"""
     product_ids = [item.product_id for item in items]
-    products = db.query(Product).filter(
-        Product.id.in_(product_ids), Product.deleted_at.is_(None),
+    products = active_query(db, Product).filter(
+        Product.id.in_(product_ids),
     ).with_for_update().all()
     product_map = {p.id: p for p in products}
 
