@@ -251,3 +251,22 @@ def test_change_password_empty_old_password_422():
         "new_password": "newpass123",
     }, headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 422
+
+
+def test_refresh_invalid_token_401():
+    """无效 refresh token 返回 401"""
+    resp = client.post("/api/v1/auth/refresh", json={
+        "refresh_token": "invalid-token-value",
+    })
+    assert resp.status_code == 401
+
+
+def test_refresh_access_token_rejected_401():
+    """使用 access token 作为 refresh token 被拒绝"""
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    access_token = login_resp.json()["data"]["access_token"]
+
+    resp = client.post("/api/v1/auth/refresh", json={
+        "refresh_token": access_token,
+    })
+    assert resp.status_code == 401
