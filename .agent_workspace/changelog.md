@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-03（第四百五十一轮·自动循环）
+
+### 代码质量：前端表单校验与后端 Schema 约束对齐
+
+修复 7 处前端表单校验与后端 Pydantic Schema 不一致：
+- ProductForm: SKU maxLength 64→50（与后端 max_length=50 对齐）
+- CustomerForm: phone 添加中国手机号格式校验（/^1[3-9]\d{9}$/），email 添加邮箱格式校验
+- Users: username 添加 minLength=2/maxLength=50，password 添加 minLength=6/字母+数字/maxLength=100，phone 添加手机号格式校验+maxLength=30，email 添加邮箱格式校验+maxLength=100
+- 前端 382/382 测试全通过，tsc 0 错误
+
 ## 2026-05-03（第四百五十轮·自动循环）
 
 ### 文档：testing.md 更新测试总数和覆盖描述
