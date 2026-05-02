@@ -2154,3 +2154,40 @@ def test_126_payment_exceeds_unpaid():
         "amount": "201", "payment_method": "cash",
     }, headers=headers)
     assert resp.status_code == 400, f"超额收款应返回 400: {resp.status_code} {resp.json()}"
+
+
+def test_127_product_create_main_image_url_max_length():
+    """商品创建 main_image_url 恰好 500 字符通过，501 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    url_500 = "https://a.com/" + "x" * 485  # https://a.com/ = 14, + 485 = 499... let me count
+    # 需要恰好 500 字符
+    url_500 = "https://example.com/" + "x" * (500 - len("https://example.com/"))
+    resp = client.post("/api/v1/products", json={
+        "name": "URL边界商品127", "sale_price": "10", "main_image_url": url_500,
+    }, headers=headers)
+    assert resp.status_code == 200, f"500 字符 URL 应通过: {resp.json()}"
+
+    url_501 = url_500 + "y"
+    resp = client.post("/api/v1/products", json={
+        "name": "URL边界商品127b", "sale_price": "10", "main_image_url": url_501,
+    }, headers=headers)
+    assert resp.status_code == 422, f"501 字符 URL 应被拒绝: {resp.status_code}"
+
+
+def test_128_product_update_main_image_url_max_length():
+    """商品编辑 main_image_url 恰好 500 字符通过，501 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/products", json={
+        "name": "URL编辑边界128", "sale_price": "10",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    url_500 = "https://example.com/" + "x" * (500 - len("https://example.com/"))
+    resp = client.put(f"/api/v1/products/{pid}", json={"main_image_url": url_500}, headers=headers)
+    assert resp.status_code == 200, f"500 字符 URL 应通过: {resp.json()}"
+
+    url_501 = url_500 + "y"
+    resp = client.put(f"/api/v1/products/{pid}", json={"main_image_url": url_501}, headers=headers)
+    assert resp.status_code == 422, f"501 字符 URL 应被拒绝: {resp.status_code}"
