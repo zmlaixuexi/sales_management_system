@@ -2017,3 +2017,43 @@ def test_76_audit_log_actor_id_non_null_for_non_login_failed():
     for log in non_login_failed:
         assert log["actor_id"] is not None, f"action={log['action']} 缺少 actor_id"
         assert log["actor_id"] != "", f"action={log['action']} actor_id 为空字符串"
+
+
+def test_77_order_update_audit_log_customer_id_change():
+    """订单编辑审计日志 before_data/after_data 含 customer_id 变更"""
+    headers = _admin_auth()
+    # 创建两个客户
+    resp = client.post("/api/v1/customers", json={"name": "客户A-订单CID", "phone": "13800001001"}, headers=headers)
+    assert resp.status_code == 200
+    cid_a = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/customers", json={"name": "客户B-订单CID", "phone": "13800001002"}, headers=headers)
+    assert resp.status_code == 200
+    cid_b = resp.json()["data"]["id"]
+
+    # 创建商品 + 订单（客户A）
+    resp = client.post("/api/v1/products", json={
+        "name": "订单CID商品", "sale_price": "50.00", "cost_price": "30.00", "stock_quantity": 100,
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cid_a,
+        "items": [{"product_id": pid, "quantity": 2, "unit_price": "50.00"}],
+    }, headers=headers)
+    assert resp.status_code == 200
+    order_id = resp.json()["data"]["id"]
+
+    # 编辑订单：变更客户为客户B
+    resp = client.put(f"/api/v1/sales-orders/{order_id}", json={
+        "customer_id": cid_b,
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=order_update", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == order_id)
+    assert log["before_data"]["customer_id"] == cid_a
+    assert log["after_data"]["customer_id"] == cid_b
+    assert log["resource_type"] == "order"

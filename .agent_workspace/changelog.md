@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第三百九十二轮·自动循环）
+
+### 测试补强：订单编辑审计日志 before_data/after_data 含 customer_id 变更
+
+- `backend/app/api/v1/orders.py`：订单编辑审计日志 before_snapshot 新增 customer_id，after_data 新增 customer_id
+- `test_audit_log.py`：新增 test_77（创建两客户→创建订单→变更客户→审计日志 before_data.customer_id=原客户，after_data.customer_id=新客户）
+- 后端测试：1075/1075 全绿，ruff clean
+
 ## 2026-05-02（第三百九十一轮·自动循环）
 
 ### 测试补强：审计日志 actor_id 非空验证

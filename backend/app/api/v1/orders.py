@@ -429,6 +429,7 @@ def update_order(
         "status": order.status,
         "total_amount": str(order.total_amount),
         "remark": order.remark,
+        "customer_id": str(order.customer_id),
     }
     if raw_items is not None:
 
@@ -459,7 +460,10 @@ def update_order(
         action="order_update", resource_type="order",
         resource_id=str(order.id),
         before_data=before_snapshot,
-        after_data={"order_no": order.order_no, "status": order.status, "total_amount": str(order.total_amount)},
+        after_data={
+            "order_no": order.order_no, "status": order.status,
+            "total_amount": str(order.total_amount), "customer_id": str(order.customer_id),
+        },
     )
     db.commit()
 
