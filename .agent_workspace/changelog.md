@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百五十六轮·自动循环）
+
+### 重构：4 处手动 deleted_at 过滤替换为 active_query
+
+- products.py：create_product SKU 唯一性检查、update_product SKU 唯一性检查（2 处）
+- users.py：create_user 用户名唯一性检查、update_user 单条查询（2 处）
+- 809 后端测试全绿，ruff 0 errors，mypy 0 errors
+- 至此 active_query 直接替换已完成，剩余 9 处均为 JOIN 过滤或列查询，不适合 active_query 直接替换
+
 ## 2026-05-02（第二百五十五轮·自动循环）
 
 ### 重构：9 处手动 deleted_at 过滤替换为 active_query
