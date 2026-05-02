@@ -156,6 +156,7 @@ make docker-down
 | INVENTORY_WARNING_THRESHOLD | 10 | 库存预警阈值 |
 | RATE_LIMIT_MAX | 1000 | API 速率限制（每窗口请求数） |
 | RATE_LIMIT_WINDOW | 60 | 速率限制窗口（秒） |
+| MAX_JSON_BODY_MB | 1 | JSON 请求体大小上限（MB，文件上传有独立限制） |
 
 ### 可观测性
 

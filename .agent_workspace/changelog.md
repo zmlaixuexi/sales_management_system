@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百五十九轮·自动循环）
+
+### 文档完善：部署文档和 .env.example 补全
+
+- deployment.md：补充 MAX_JSON_BODY_MB 环境变量说明
+- backend/.env.example：补充 MAX_JSON_BODY_MB 配置项
+- 验证部署文档已覆盖：开发/生产环境、环境变量、备份恢复、健康检查、HTTPS、回滚、部署前检查
+
 ## 2026-05-03（第四百五十八轮·自动循环）
 
 ### 文档完善：testing.md 更新测试总数和覆盖率 100%
