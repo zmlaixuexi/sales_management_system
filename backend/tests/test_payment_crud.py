@@ -916,3 +916,41 @@ def test_35_payment_list_page_size_over_max_422():
     """收款列表 page_size=101 超出上限返回 422"""
     resp = client.get("/api/v1/payments", params={"page_size": 101}, headers=_auth())
     assert resp.status_code == 422
+
+
+def test_36_reverse_payment_audit_log():
+    """冲正收款产生审计日志"""
+    from app.models.audit import AuditLog
+
+    # 创建并确认订单 + 收款
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
+    pay_resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
+        "amount": "10", "payment_method": "cash",
+    }, headers=_auth())
+    assert pay_resp.status_code == 200
+    pay_id = pay_resp.json()["data"]["id"]
+
+    # 冲正
+    resp = client.post(f"/api/v1/payments/{pay_id}/reverse", headers=_auth())
+    assert resp.status_code == 200
+
+    # 直接查询数据库验证审计日志（避免跨模块 HTTP 调用依赖）
+    db = TestSession()
+    try:
+        log = db.query(AuditLog).filter(
+            AuditLog.action == "payment_reverse",
+            AuditLog.resource_id == pay_id,
+        ).first()
+        assert log is not None
+        assert log.resource_type == "payment"
+        import json
+        after = json.loads(log.after_data) if isinstance(log.after_data, str) else log.after_data
+        assert after["status"] == "reversed"
+    finally:
+        db.close()
