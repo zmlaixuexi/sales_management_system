@@ -756,3 +756,24 @@ def test_43_customer_detail_non_owner_403():
 
     resp = client.get(f"/api/v1/customers/{cid}", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 403
+
+
+def test_44_transfer_customer_non_owner_403():
+    """非归属用户转移客户返回 403（无 customer:view_all）"""
+    from helpers import admin_auth_header, make_user_with_perms
+
+    admin_headers = admin_auth_header(TestSession, "crud_admin")
+
+    # 创建新客户（归属于 admin）
+    resp = client.post("/api/v1/customers", json={
+        "name": "转移403客户", "phone": "13900006677",
+    }, headers=admin_headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    # 非归属用户有 customer:update 但无 customer:view_all
+    token = make_user_with_perms(TestSession, "non_owner_transfer", ["customer:update"])
+    resp = client.post(f"/api/v1/customers/{cid}/transfer", json={
+        "owner_user_id": str(uuid.uuid4()),
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403

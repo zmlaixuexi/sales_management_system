@@ -1499,3 +1499,16 @@ def test_59_order_logs_non_owner_403():
     token = _make_non_owner_with_perms("non_owner_logs", ["order:view"])
     resp = client.get(f"/api/v1/sales-orders/{oid}/logs", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 403
+
+
+def test_60_order_list_data_scope_non_owner():
+    """无 order:view_all 用户订单列表只返回本人订单（数据范围过滤）"""
+    # 先用 admin（order_tester）创建一个订单
+    _fresh_order_ids()
+
+    # 非 view_all 用户只能看到自己的订单（应为空列表）
+    token = _make_non_owner_with_perms("non_owner_scope", ["order:list"])
+    resp = client.get("/api/v1/sales-orders", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) == 0, "非归属用户不应看到其他人的订单"
