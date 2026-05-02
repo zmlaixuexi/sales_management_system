@@ -397,3 +397,35 @@ def test_31_export_payments_sales_user_filter():
     # 返回 BOM + header + 至少 BOM 开头
     assert rows  # 至少有 header 行
     db.close()
+
+
+def test_32_product_search_like_injection():
+    """商品搜索 % 和 _ 不作为通配符"""
+    from app.core.security import create_access_token
+    from app.models.user import User as UserModel
+    db = TestSession()
+    user = db.query(UserModel).filter_by(username="edge_tester").first()
+    token = create_access_token(subject=str(user.id))
+    db.close()
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = client.get("/api/v1/products?keyword=%", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    for item in items:
+        assert "%" in item["name"]
+
+
+def test_33_customer_search_like_injection():
+    """客户搜索 _ 不作为单字符通配符"""
+    from app.core.security import create_access_token
+    from app.models.user import User as UserModel
+    db = TestSession()
+    user = db.query(UserModel).filter_by(username="edge_tester").first()
+    token = create_access_token(subject=str(user.id))
+    db.close()
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = client.get("/api/v1/customers?keyword=_", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    for item in items:
+        assert "_" in item["name"] or "_" in (item.get("phone") or "") or "_" in (item.get("contact_name") or "")
