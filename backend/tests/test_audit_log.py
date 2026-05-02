@@ -511,3 +511,56 @@ def test_26_customer_update_audit_log_fields():
     assert log["after_data"]["name"] == "编辑审计客户"
     assert "phone" in log["after_data"]  # phone 字段存在（可能被脱敏为 ***）
     assert log["resource_type"] == "customer"
+
+
+def test_27_product_create_audit_log_fields():
+    """商品创建审计日志 after_data 含 name、sku、sale_price"""
+    headers = _admin_auth()
+    resp = client.post("/api/v1/products", json={
+        "name": "审计字段商品",
+        "cost_price": "50.00",
+        "sale_price": "100.00",
+        "stock_quantity": 10,
+        "status": "active",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    resp = client.get("/api/v1/audit-logs?action=product_create", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == pid)
+    assert log["after_data"]["name"] == "审计字段商品"
+    assert "sku" in log["after_data"]
+    assert log["after_data"]["sale_price"] == "100.00"
+    assert log["resource_type"] == "product"
+
+
+def test_28_product_update_audit_log_fields():
+    """商品编辑审计日志 before_data/after_data 含 sale_price 变化"""
+    headers = _admin_auth()
+    # 创建商品
+    resp = client.post("/api/v1/products", json={
+        "name": "编辑审计商品",
+        "cost_price": "30.00",
+        "sale_price": "60.00",
+        "stock_quantity": 5,
+        "status": "active",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    # 编辑售价
+    resp = client.put(f"/api/v1/products/{pid}", json={
+        "sale_price": "80.00",
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=product_update", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == pid)
+    assert log["before_data"]["sale_price"] == "60.00"
+    assert log["after_data"]["sale_price"] == "80.00"
+    assert log["after_data"]["name"] == "编辑审计商品"
+    assert log["resource_type"] == "product"

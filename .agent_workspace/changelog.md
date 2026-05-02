@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第三百四十五轮·自动循环）
+
+### 测试：商品创建/编辑审计日志字段验证
+
+- `test_audit_log.py`：新增 test_27（product_create after_data 含 name/sku/sale_price）、test_28（product_update before_data/after_data 含 sale_price 变化）
+- 后端测试：994/994 全绿
+
 ## 2026-05-02（第三百四十四轮·自动循环）
 
 ### 测试：客户创建/编辑审计日志字段验证
