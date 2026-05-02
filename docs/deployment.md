@@ -201,6 +201,64 @@ docker compose -f deploy/docker-compose.prod.yml up --build -d
 docker compose -f deploy/docker-compose.prod.yml exec backend alembic upgrade head
 ```
 
+## 部署前检查
+
+部署前运行自动化检查脚本，验证文件完整性、环境变量、Docker 状态、代码质量和前端构建：
+
+```bash
+bash deploy/pre-deploy-check.sh
+
+# 跳过测试和构建（加速检查）
+bash deploy/pre-deploy-check.sh --skip-tests --skip-build
+```
+
+检查项目包括：文件完整性、环境变量配置、Docker 可用性、ruff/mypy 代码检查、后端测试、前端构建、数据库迁移一致性、端口可用性、磁盘空间。
+
+## 更新部署
+
+```bash
+# 1. 拉取最新代码
+git pull origin main
+
+# 2. 运行部署前检查
+bash deploy/pre-deploy-check.sh
+
+# 3. 重建并重启容器
+docker compose -f deploy/docker-compose.prod.yml up --build -d
+```
+
+## 回滚
+
+```bash
+# 回滚到指定 Git 版本（自动备份数据库 + 重建容器）
+bash deploy/rollback.sh <git-commit-or-tag>
+
+# 示例
+bash deploy/rollback.sh v1.0.0
+bash deploy/rollback.sh abc1234
+```
+
+回滚流程：
+1. 自动备份当前数据库
+2. 回退代码到指定版本
+3. 重建并重启 Docker 容器
+4. 等待后端健康检查就绪
+
+数据库需手动回滚（如需要）：
+
+```bash
+bash deploy/restore.sh backups/sales_mgmt_*.sql.gz
+```
+
+## HTTPS 配置
+
+`deploy/nginx.conf` 包含注释掉的 HTTPS 配置模板。启用步骤：
+
+1. 获取 TLS 证书（推荐 Let's Encrypt）
+2. 取消 `deploy/nginx.conf` 中 HTTPS server 块的注释
+3. 填入证书路径
+4. 重启 Nginx 容器
+
 ## 健康检查
 
 - `GET /api/v1/health`：返回服务健康状态
