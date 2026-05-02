@@ -2342,7 +2342,7 @@ def test_144_newline_in_product_name():
     assert resp.status_code == 200
     name = resp.json()["data"]["name"]
     # strip_html 只去 HTML 标签，换行符会保留
-    assert "line1" in name, f"名称应包含 line1: {repr(name)}"
+    assert "line1" in name, f"名称应包含 line1: {name!r}"
 
 
 def test_145_page_zero_products():
