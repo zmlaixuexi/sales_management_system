@@ -87,3 +87,20 @@ export async function confirmOrder(id: string) {
 export async function cancelOrder(id: string) {
   return post<{ id: string; status: string }>(`/sales-orders/${id}/cancel`)
 }
+
+export interface OrderLog {
+  id: string
+  actor_id: string | null
+  actor_name: string
+  action: string
+  before_data: Record<string, unknown> | null
+  after_data: Record<string, unknown> | null
+  ip_address: string | null
+  user_agent: string | null
+  request_id: string | null
+  created_at: string | null
+}
+
+export async function fetchOrderLogs(id: string, params?: { page?: number; page_size?: number }) {
+  return get<PaginatedData<OrderLog>>(`/sales-orders/${id}/logs`, params as Record<string, unknown>)
+}

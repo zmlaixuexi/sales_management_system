@@ -7,6 +7,7 @@ const _orderMocks = {
   fetchOrder: vi.fn(),
   confirmOrder: vi.fn(),
   cancelOrder: vi.fn(),
+  fetchOrderLogs: vi.fn(),
 }
 const _paymentMocks = {
   createPayment: vi.fn(),
@@ -17,6 +18,7 @@ vi.mock('@/api/orders', () => ({
   fetchOrder: (...args: any[]) => _orderMocks.fetchOrder(...args),
   confirmOrder: (...args: any[]) => _orderMocks.confirmOrder(...args),
   cancelOrder: (...args: any[]) => _orderMocks.cancelOrder(...args),
+  fetchOrderLogs: (...args: any[]) => _orderMocks.fetchOrderLogs(...args),
 }))
 
 vi.mock('@/api/payments', () => ({
@@ -109,6 +111,19 @@ const mockOrderData = {
   },
 }
 
+const mockLogsData = {
+  success: true,
+  data: {
+    items: [
+      { id: 'log-1', actor_name: '管理员', action: 'order_confirmed', after_data: { status: 'confirmed' }, created_at: '2026-05-01T11:00:00Z' },
+      { id: 'log-2', actor_name: '销售员', action: 'order_created', after_data: { status: 'draft', total_amount: '1000' }, created_at: '2026-05-01T10:00:00Z' },
+    ],
+    page: 1,
+    page_size: 10,
+    total: 2,
+  },
+}
+
 import OrderDetail from '@/pages/OrderDetail'
 
 function renderOrderDetail() {
@@ -126,6 +141,7 @@ describe('OrderDetail', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     _orderMocks.fetchOrder.mockResolvedValue(mockOrderData)
+    _orderMocks.fetchOrderLogs.mockResolvedValue(mockLogsData)
   })
 
   it('加载并显示订单号', async () => {
@@ -199,5 +215,48 @@ describe('OrderDetail', () => {
       expect(screen.getByText('加载中...')).toBeInTheDocument()
     })
     resolveFn!(mockOrderData)
+  })
+
+  it('渲染操作日志卡片', async () => {
+    renderOrderDetail()
+    await waitFor(() => {
+      const cards = screen.getAllByTestId('card')
+      const titles = cards.map((c) => c.getAttribute('data-title'))
+      expect(titles).toContain('操作日志')
+    })
+  })
+
+  it('显示操作日志数据', async () => {
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByTestId('row-log-1')).toBeInTheDocument()
+      expect(screen.getByTestId('row-log-2')).toBeInTheDocument()
+      expect(screen.getByText('管理员')).toBeInTheDocument()
+      expect(screen.getByText('销售员')).toBeInTheDocument()
+    })
+  })
+
+  it('显示日志操作类型', async () => {
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('order_confirmed')).toBeInTheDocument()
+      expect(screen.getByText('order_created')).toBeInTheDocument()
+    })
+  })
+
+  it('日志加载失败不阻塞页面', async () => {
+    _orderMocks.fetchOrderLogs.mockRejectedValue(new Error('network'))
+    renderOrderDetail()
+    await waitFor(() => {
+      // 页面仍正常渲染
+      expect(screen.getByText(/ORD-20260501-001/)).toBeInTheDocument()
+    })
+  })
+
+  it('fetchOrderLogs 使用正确 ID 调用', async () => {
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(_orderMocks.fetchOrderLogs).toHaveBeenCalledWith('order-1', { page: 1, page_size: 10 })
+    })
   })
 })

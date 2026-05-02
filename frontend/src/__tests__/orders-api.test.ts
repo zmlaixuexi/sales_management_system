@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import {
   fetchOrders, fetchOrder, createOrder,
-  updateOrder, confirmOrder, cancelOrder,
+  updateOrder, confirmOrder, cancelOrder, fetchOrderLogs,
 } from '@/api/orders'
 
 vi.mock('@/api/request', () => ({
@@ -136,5 +136,18 @@ describe('订单 API', () => {
     const res = await cancelOrder('o1')
     expect(mockPost).toHaveBeenCalledWith('/sales-orders/o1/cancel')
     expect(res.data.status).toBe('cancelled')
+  })
+
+  it('fetchOrderLogs 调用 GET /sales-orders/:id/logs', async () => {
+    mockGet.mockResolvedValueOnce(ok({ items: [], page: 1, page_size: 10, total: 0 }))
+    await fetchOrderLogs('o1')
+    expect(mockGet).toHaveBeenCalledWith('/sales-orders/o1/logs', undefined)
+  })
+
+  it('fetchOrderLogs 支持分页参数', async () => {
+    mockGet.mockResolvedValueOnce(ok({ items: [], page: 2, page_size: 5, total: 12 }))
+    const res = await fetchOrderLogs('o1', { page: 2, page_size: 5 })
+    expect(mockGet).toHaveBeenCalledWith('/sales-orders/o1/logs', { page: 2, page_size: 5 })
+    expect(res.data.total).toBe(12)
   })
 })

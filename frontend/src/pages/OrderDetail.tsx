@@ -6,8 +6,8 @@ import {
 import { ArrowLeftOutlined, EditOutlined, DollarOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
-import { fetchOrder, confirmOrder, cancelOrder } from '@/api/orders'
-import type { OrderDetail as OrderDetailData, OrderItem, OrderPayment } from '@/api/orders'
+import { fetchOrder, confirmOrder, cancelOrder, fetchOrderLogs } from '@/api/orders'
+import type { OrderDetail as OrderDetailData, OrderItem, OrderPayment, OrderLog } from '@/api/orders'
 import { createPayment, reversePayment } from '@/api/payments'
 import { formatAmount, formatPercent, getApiErrorMessage } from '@/utils'
 import { orderStatusMap as statusMap, paymentMethodMap as paymentMethodLabels } from '@/constants/statusMaps'
@@ -27,6 +27,10 @@ export default function OrderDetail() {
   const [payMethod, setPayMethod] = useState('cash')
   const [payRemark, setPayRemark] = useState('')
 
+  const [logs, setLogs] = useState<OrderLog[]>([])
+  const [logsTotal, setLogsTotal] = useState(0)
+  const [logsLoading, setLogsLoading] = useState(false)
+
   const loadOrder = useCallback(async () => {
     if (!id) return
     setLoading(true)
@@ -39,6 +43,25 @@ export default function OrderDetail() {
       setLoading(false)
     }
   }, [id])
+
+  const loadLogs = useCallback(async (page = 1) => {
+    if (!id) return
+    setLogsLoading(true)
+    try {
+      const res = await fetchOrderLogs(id, { page, page_size: 10 })
+      if (res.success) {
+        setLogs(res.data.items)
+        setLogsTotal(res.data.total)
+      }
+    } catch {
+      // 日志加载失败不阻塞页面
+    } finally {
+      setLogsLoading(false)
+    }
+  }, [id])
+
+  useEffect(() => { loadOrder() }, [loadOrder])
+  useEffect(() => { if (id) loadLogs() }, [id, loadLogs])
 
   useEffect(() => { loadOrder() }, [loadOrder])
 
@@ -264,6 +287,37 @@ export default function OrderDetail() {
           />
         </Card>
       )}
+
+      <Card title="操作日志" style={{ marginTop: 16 }} size="small">
+        <Table
+          columns={[
+            { title: '操作人', dataIndex: 'actor_name', width: 100 },
+            { title: '操作', dataIndex: 'action', width: 120 },
+            {
+              title: '变更内容',
+              dataIndex: 'after_data',
+              render: (v: Record<string, unknown> | null) => v ? Object.keys(v).join(', ') : '--',
+            },
+            {
+              title: '时间',
+              dataIndex: 'created_at',
+              width: 170,
+              render: (v: string | null) => v ? new Date(v).toLocaleString('zh-CN') : '--',
+            },
+          ]}
+          dataSource={logs}
+          rowKey="id"
+          size="small"
+          loading={logsLoading}
+          locale={{ emptyText: '暂无操作日志' }}
+          pagination={logsTotal > 10 ? {
+            total: logsTotal,
+            pageSize: 10,
+            showTotal: (t: number) => `共 ${t} 条`,
+            onChange: (p: number) => loadLogs(p),
+          } : false}
+        />
+      </Card>
 
       {/* 收款弹窗 */}
       <Modal
