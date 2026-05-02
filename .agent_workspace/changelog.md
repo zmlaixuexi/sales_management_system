@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第一百八十五轮·自动循环）
+
+### 测试：新增导出 API _csv_filename 单元测试（3 项）
+
+- 新建 `test_exports_api.py`，3 个测试覆盖 `_csv_filename`
+- 验证文件名格式（前缀_时间戳.csv）、不同前缀、始终以 .csv 结尾
+- 后端 708→711，总计 1038 tests
+
 ## 2026-05-02（第一百八十四轮·自动循环）
 
 ### 测试：补强 formatAmount/formatPercent 边界测试（负数/大数/零/空字符串 6 项）
