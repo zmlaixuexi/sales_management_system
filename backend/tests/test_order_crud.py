@@ -749,6 +749,11 @@ class TestOrderAuthBoundary:
         resp = client.post("/api/v1/sales-orders/not-a-uuid/confirm", headers=_auth())
         assert resp.status_code == 422
 
+    def test_37_cancel_order_invalid_uuid(self):
+        """无效 UUID 取消订单返回 422"""
+        resp = client.post("/api/v1/sales-orders/not-a-uuid/cancel", headers=_auth())
+        assert resp.status_code == 422
+
 
 def test_37_unit_price_equals_cost_price_zero_margin():
     """成交单价等于成本价应成功，毛利率为 0"""
@@ -905,3 +910,116 @@ def test_39_draft_cancel_no_inventory_movement():
         assert after_count == before_count, "取消草稿订单不应产生库存变动"
     finally:
         db.close()
+
+
+def test_40_cancel_completed_order_400():
+    """取消已完成订单返回 400 ORDER_INVALID_STATUS"""
+    db = TestSession()
+    try:
+        user = db.query(User).first()
+        cat = db.query(ProductCategory).first()
+        prod = Product(
+            id=uuid.uuid4(), name="已完成订单测试商品", sku="ORD-COMPLETE-01",
+            sale_price=100, cost_price=60, stock_quantity=10,
+            status="active", category_id=cat.id,
+        )
+        db.add(prod)
+        cust = Customer(
+            id=uuid.uuid4(), name="已完成订单测试客户", phone="13800000100",
+            owner_user_id=user.id, created_by=user.id,
+        )
+        db.add(cust)
+        db.flush()
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no="ORD-COMPLETED-TEST",
+            customer_id=cust.id, sales_user_id=user.id,
+            status="completed", total_amount=100, total_cost=60,
+            gross_profit=40, gross_margin=0.4, paid_amount=100,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=prod.id,
+            product_sku_snapshot=prod.sku, product_name_snapshot=prod.name,
+            quantity=1, unit_price=100, discount_amount=0, discount_rate=0,
+            cost_price_snapshot=60, subtotal_amount=100, subtotal_cost=60,
+        ))
+        db.commit()
+        oid = str(order.id)
+    finally:
+        db.close()
+
+    resp = client.post(f"/api/v1/sales-orders/{oid}/cancel", headers=_auth())
+    assert resp.status_code == 400
+    assert resp.json()["error"]["code"] == "ORDER_INVALID_STATUS"
+
+
+def test_41_update_draft_order_remark_only():
+    """编辑草稿订单仅更新备注（不发送 items）应成功"""
+    db = TestSession()
+    try:
+        user = db.query(User).first()
+        cat = db.query(ProductCategory).first()
+        prod = Product(
+            id=uuid.uuid4(), name="备注更新测试商品", sku="ORD-REMARK-01",
+            sale_price=100, cost_price=60, stock_quantity=10,
+            status="active", category_id=cat.id,
+        )
+        db.add(prod)
+        cust = Customer(
+            id=uuid.uuid4(), name="备注更新测试客户", phone="13800000101",
+            owner_user_id=user.id, created_by=user.id,
+        )
+        db.add(cust)
+        db.flush()
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no="ORD-REMARK-TEST",
+            customer_id=cust.id, sales_user_id=user.id,
+            status="draft", total_amount=100, total_cost=60,
+            gross_profit=40, gross_margin=0.4, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=prod.id,
+            product_sku_snapshot=prod.sku, product_name_snapshot=prod.name,
+            quantity=1, unit_price=100, discount_amount=0, discount_rate=0,
+            cost_price_snapshot=60, subtotal_amount=100, subtotal_cost=60,
+        ))
+        db.commit()
+        oid = str(order.id)
+    finally:
+        db.close()
+
+    resp = client.put(f"/api/v1/sales-orders/{oid}", json={
+        "remark": "仅更新备注",
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    resp = client.get(f"/api/v1/sales-orders/{oid}", headers=_auth())
+    assert resp.json()["data"]["remark"] == "仅更新备注"
+
+
+def test_42_create_order_zero_price_above_cost_400():
+    """成交单价为 0 但成本价 > 0 应阻止下单"""
+    db = TestSession()
+    try:
+        prod = Product(
+            id=uuid.uuid4(), name="零价测试商品", sku="ORD-ZERO-PRICE",
+            sale_price=100, cost_price=60, stock_quantity=10,
+            status="active",
+        )
+        db.add(prod)
+        db.commit()
+        pid = str(prod.id)
+    finally:
+        db.close()
+
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": pid, "quantity": 1, "unit_price": "0"}],
+    }, headers=_auth())
+    assert resp.status_code == 400
+    assert resp.json()["error"]["code"] == "PRICE_BELOW_COST"
