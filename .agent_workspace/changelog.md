@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-05-02（第二百六十轮·自动循环）
+
+### 修复：13 处前端组件防止重复错误提示（_toastDisplayed 检查）
+
+- OrderDetail：加载/确认/取消/收款/冲正 5 处
+- ProductForm：加载/图片上传 2 处
+- CustomerDetail：加载/删除 2 处
+- Products：删除/停用 2 处
+- Customers：删除 1 处
+- Users：启用/停用切换 1 处
+- 382 前端测试全绿，构建 263ms
+- 至此全前端 20 处 _toastDisplayed 防重复检查已完成（Round 259: 7 + Round 260: 13）
+
 ## 2026-05-02（第二百五十九轮·自动循环）
 
 ### 修复：Dashboard + ReportsCenter 防止重复错误提示
