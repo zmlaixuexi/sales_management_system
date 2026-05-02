@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百一十五轮·自动循环）
+
+### 质量：类型安全改进
+
+- `audit_service.py`：`log_action` 和 `log_user_action` 返回类型从 `AuditLog` 修正为 `AuditLog | None`，匹配异常路径实际行为
+- `slow_query.py`：为 `_before_cursor_execute`、`_after_cursor_execute`、`register_slow_query_listener` 添加完整类型注解，消除 3 处 `# type: ignore[no-untyped-def]`
+- mypy 0 errors、ruff 0 errors、767/767 后端测试通过
+
 ## 2026-05-02（第二百一十四轮·自动循环）
 
 ### 工程：.gitignore 补充 + 前端构建验证
