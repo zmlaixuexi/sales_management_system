@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第四百一十五轮·自动循环）
+
+### 测试补强：订单确认审计日志 before_data/after_data 含 customer_id
+
+- `backend/app/api/v1/orders.py`：订单确认审计日志 before_data/after_data 新增 customer_id 字段
+- `test_audit_log.py`：新增 test_101（订单确认 before_data 含 customer_id 验证）
+- `docs/testing.md`：更新后端测试总数 1098→1099、总计 1480→1481、test_audit_log.py 102→103
+- 后端测试：1099/1099 全绿，ruff clean
+
 ## 2026-05-03（第四百一十四轮·自动循环）
 
 ### 测试补强：审计日志 actor_name 与用户 display_name 一致性验证

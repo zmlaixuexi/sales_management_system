@@ -498,8 +498,14 @@ def confirm_order(
         db, request, current_user,
         action="order_confirm", resource_type="order",
         resource_id=str(order.id),
-        before_data={"order_no": order.order_no, "status": "draft", "total_amount": str(order.total_amount)},
-        after_data={"order_no": order.order_no, "status": "confirmed", "total_amount": str(order.total_amount)},
+        before_data={
+            "order_no": order.order_no, "status": "draft",
+            "total_amount": str(order.total_amount), "customer_id": str(order.customer_id),
+        },
+        after_data={
+            "order_no": order.order_no, "status": "confirmed",
+            "total_amount": str(order.total_amount), "customer_id": str(order.customer_id),
+        },
     )
     db.commit()
 

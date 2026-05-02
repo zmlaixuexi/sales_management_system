@@ -2660,3 +2660,37 @@ def test_100_audit_log_actor_name_matches_display_name():
     assert latest["actor_name"] == expected_name, (
         f"actor_name '{latest['actor_name']}' != display_name '{expected_name}'"
     )
+
+
+def test_101_order_confirm_audit_log_before_data_has_customer_id():
+    """订单确认审计日志 before_data 含 customer_id"""
+    headers = _admin_auth()
+    # 创建客户+商品+订单
+    resp = client.post("/api/v1/customers", json={"name": "确认审计客户101", "phone": "13801011010"}, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/products", json={
+        "name": "确认审计商品101", "sale_price": "120.00", "cost_price": "60.00", "stock_quantity": 15,
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cid,
+        "items": [{"product_id": pid, "quantity": 1, "unit_price": "120.00"}],
+    }, headers=headers)
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+
+    # 确认
+    resp = client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=order_confirm", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == oid)
+    assert log["before_data"] is not None
+    assert "customer_id" in log["before_data"], f"before_data 缺少 customer_id: {log['before_data']}"
+    assert log["before_data"]["customer_id"] == cid
+    assert "customer_id" in log["after_data"], f"after_data 缺少 customer_id: {log['after_data']}"
+    assert log["after_data"]["customer_id"] == cid
