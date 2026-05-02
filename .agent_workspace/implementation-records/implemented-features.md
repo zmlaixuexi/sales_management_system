@@ -6,6 +6,14 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-185
+
+- 名称：请求日志响应体大小字段
+- 轮次：Round 269（自动循环）
+- 描述：RequestLogMiddleware 从 Content-Length 头读取响应体大小，写入 extra_fields.resp_bytes 和日志消息尾部
+- 涉及文件：backend/app/core/request_log.py、backend/tests/test_middleware.py
+- 验证：833 后端测试全绿（+1），ruff/mypy 0 errors
+
 ## 功能编号：FEAT-20260502-184
 
 - 名称：生产环境健康检查脚本
