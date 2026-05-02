@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-02（第二百九十九轮·自动循环）
+
+### 安全：CORS 配置补充 7 项边界验证
+
+- 预检请求 credentials=true 验证
+- 允许方法列表边界（GET/POST/PUT/DELETE/OPTIONS 通过，PATCH 拒绝）
+- 自定义请求头白名单（Authorization/Content-Type/X-Request-ID 通过，X-Custom-Forbidden 拒绝）
+- 空 Origin 和 null Origin 拒绝
+- 修复 test_customer_crud.py 未使用变量 cid_a (F841)
+- 860 后端测试全绿（+7）
+
 ## 2026-05-02（第二百九十八轮·自动循环）
 
 ### 测试：客户模块补充 3 项边界条件测试
