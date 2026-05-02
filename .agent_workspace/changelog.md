@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-05-02（第三百四十二轮·自动循环）
+
+### 测试：冲正草稿/已取消订单收款 400 边界验证
+
+- `test_payment_crud.py`：新增 test_38/39（草稿订单冲正 400 + 已取消订单冲正 400）
+- 后端测试：956/956 全绿
+
+## 2026-05-02（第三百四十一轮·自动循环）
+
+### 测试：CRUD 403 权限全覆盖（客户/商品/订单/收款/认证）
+
+- `test_customer_crud.py`：新增 test_38/39/40（列表/创建/编辑 403）
+- `test_product_crud.py`：新增 test_36/37/38（列表/创建/编辑 403）
+- `test_order_crud.py`：新增 test_53/54/55/56/57（列表/创建/确认/取消/编辑 403）
+- `test_payment_crud.py`：新增 test_37（收款列表 403）
+- `test_auth.py`：新增 test_23（禁用用户登录 403）
+- 后端测试：954/954 全绿
+
+## 2026-05-02（第三百四十轮·自动循环）
+
+### 安全：客户邮箱格式校验（Pydantic validator）
+
+- `backend/app/schemas/customer.py`：添加 `_EMAIL_RE` 正则，`CustomerCreate` 和 `CustomerUpdate` 增加 `validate_email` 字段验证器，拒绝无效邮箱格式（如 `not-an-email`、`missing@domain`、`@no-user.com`）
+- `backend/tests/test_customer_crud.py`：新增 test_36（创建无效邮箱 422）、test_37（更新无效邮箱 422）
+- 后端测试：941/941 全绿
+
 ## 2026-05-02（第三百三十九轮·自动循环）
 
 ### 测试：订单负数量 422 验证
