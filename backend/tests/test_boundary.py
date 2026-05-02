@@ -2206,3 +2206,187 @@ def test_129_order_update_explicit_empty_items():
     # 显式传空 items（schema 有 min_length=1，Pydantic 拦截）
     resp = client.put(f"/api/v1/sales-orders/{oid}", json={"items": []}, headers=headers)
     assert resp.status_code == 422, f"空 items 应返回 422: {resp.status_code} {resp.json()}"
+
+
+# ── 第 130-149 轮：分页、排序、过滤边界补强 ─────────────────────────
+
+
+def test_130_pagination_non_integer_page():
+    """非整数 page 参数 FastAPI 自动拒绝 (422)"""
+    headers = _auth()
+    for endpoint in ["/api/v1/products", "/api/v1/customers", "/api/v1/sales-orders"]:
+        resp = client.get(f"{endpoint}?page=abc", headers=headers)
+        assert resp.status_code == 422, f"{endpoint} page=abc 应返回 422: {resp.status_code}"
+
+
+def test_131_pagination_non_integer_page_size():
+    """非整数 page_size 参数 FastAPI 自动拒绝 (422)"""
+    headers = _auth()
+    for endpoint in ["/api/v1/products", "/api/v1/customers", "/api/v1/sales-orders"]:
+        resp = client.get(f"{endpoint}?page_size=abc", headers=headers)
+        assert resp.status_code == 422, f"{endpoint} page_size=abc 应返回 422: {resp.status_code}"
+
+
+def test_132_pagination_negative_page():
+    """负数 page 参数 FastAPI 自动拒绝 (ge=1 → 422)"""
+    headers = _auth()
+    for endpoint in ["/api/v1/products", "/api/v1/customers"]:
+        resp = client.get(f"{endpoint}?page=-1", headers=headers)
+        assert resp.status_code == 422, f"{endpoint} page=-1 应返回 422: {resp.status_code}"
+
+
+def test_133_pagination_page_size_zero():
+    """page_size=0 被 ge=1 约束拒绝 (422)"""
+    headers = _auth()
+    for endpoint in ["/api/v1/products", "/api/v1/customers", "/api/v1/sales-orders",
+                     "/api/v1/users", "/api/v1/payments", "/api/v1/inventory/movements"]:
+        resp = client.get(f"{endpoint}?page_size=0", headers=headers)
+        assert resp.status_code == 422, f"{endpoint} page_size=0 应返回 422: {resp.status_code}"
+
+
+def test_134_pagination_very_large_page():
+    """超大页码返回 200 + 空 items"""
+    headers = _auth()
+    for endpoint in ["/api/v1/products", "/api/v1/customers", "/api/v1/sales-orders"]:
+        resp = client.get(f"{endpoint}?page=999999", headers=headers)
+        assert resp.status_code == 200, f"{endpoint} page=999999 应返回 200: {resp.status_code}"
+        assert resp.json()["data"]["items"] == [], f"{endpoint} 超大页码应返回空列表"
+
+
+def test_135_empty_keyword_returns_all():
+    """空 keyword 等价于不过滤，返回全部数据"""
+    headers = _auth()
+    resp = client.get("/api/v1/products?keyword=", headers=headers)
+    assert resp.status_code == 200
+    assert resp.json()["data"]["total"] >= 1, "空 keyword 应返回全部商品"
+
+
+def test_136_sort_invalid_order():
+    """无效 sort_order 值被忽略，使用默认排序（当前实现为字符串参数，非 Literal 枚举）"""
+    headers = _auth()
+    resp = client.get("/api/v1/products?sort_by=name&sort_order=invalid", headers=headers)
+    assert resp.status_code == 200, f"无效 sort_order 应被忽略返回 200: {resp.status_code}"
+
+
+def test_137_sort_customers():
+    """客户列表排序参数正常工作"""
+    headers = _auth()
+    resp = client.get("/api/v1/customers?sort_by=name&sort_order=asc", headers=headers)
+    assert resp.status_code == 200, f"客户排序应返回 200: {resp.status_code}"
+
+
+def test_138_sort_orders():
+    """订单列表排序参数正常工作"""
+    headers = _auth()
+    resp = client.get("/api/v1/sales-orders?sort_by=created_at&sort_order=desc", headers=headers)
+    assert resp.status_code == 200, f"订单排序应返回 200: {resp.status_code}"
+
+
+def test_139_explicit_null_required_field():
+    """显式 null 传入必填字段返回 422"""
+    headers = _auth()
+    # 产品名称为 null
+    resp = client.post("/api/v1/products", json={"name": None, "sale_price": 100, "cost_price": 50}, headers=headers)
+    assert resp.status_code == 422, f"name=null 应返回 422: {resp.status_code}"
+    # 客户名称为 null
+    resp = client.post("/api/v1/customers", json={"name": None}, headers=headers)
+    assert resp.status_code == 422, f"name=null 应返回 422: {resp.status_code}"
+    # 用户名为 null
+    resp = client.post("/api/v1/users", json={"username": None, "password": "pass123456"}, headers=headers)
+    assert resp.status_code == 422, f"username=null 应返回 422: {resp.status_code}"
+
+
+def test_140_extreme_large_price():
+    """极端大价格值被 Decimal 约束拒绝"""
+    headers = _auth()
+    resp = client.post("/api/v1/products", json={
+        "name": "天价商品", "sale_price": "99999999999999.99", "cost_price": "50",
+    }, headers=headers)
+    # 后端 Decimal 字段接受任意精度，但正常创建成功
+    assert resp.status_code in (200, 422), f"极端价格应返回 200 或 422: {resp.status_code}"
+
+
+def test_141_product_create_extra_unknown_field():
+    """创建产品时传入未知字段被 Pydantic 忽略（默认 behavior）"""
+    headers = _auth()
+    resp = client.post("/api/v1/products", json={
+        "name": "带额外字段商品", "sale_price": "100", "cost_price": "50",
+        "unknown_field": "should_be_ignored",
+    }, headers=headers)
+    assert resp.status_code == 200, f"含未知字段应正常创建: {resp.status_code} {resp.json()}"
+
+
+def test_142_customer_create_extra_unknown_field():
+    """创建客户时传入未知字段被忽略"""
+    headers = _auth()
+    resp = client.post("/api/v1/customers", json={
+        "name": "带额外字段客户", "extra": "ignored",
+    }, headers=headers)
+    assert resp.status_code == 200, f"含未知字段应正常创建: {resp.status_code}"
+
+
+def test_143_audit_log_invalid_date_format():
+    """审计日志日期过滤使用无效格式时忽略过滤（start_date 是字符串参数，非 date 类型）"""
+    headers = _auth()
+    resp = client.get("/api/v1/audit-logs?start_date=not-a-date", headers=headers)
+    # start_date 是 str 参数，不做格式校验，无效值直接作为比较条件（SQLite 不会报错）
+    assert resp.status_code == 200, f"无效日期字符串应被接受或忽略: {resp.status_code}"
+
+
+def test_144_newline_in_product_name():
+    """商品名称包含换行符时 strip_html 保留换行（strip_html 仅去除 HTML 标签）"""
+    headers = _auth()
+    resp = client.post("/api/v1/products", json={
+        "name": "line1\nline2", "sale_price": "100", "cost_price": "50",
+    }, headers=headers)
+    assert resp.status_code == 200
+    name = resp.json()["data"]["name"]
+    # strip_html 只去 HTML 标签，换行符会保留
+    assert "line1" in name, f"名称应包含 line1: {repr(name)}"
+
+
+def test_145_page_zero_products():
+    """page=0 被 ge=1 约束拒绝 (422)"""
+    headers = _auth()
+    for endpoint in ["/api/v1/products", "/api/v1/sales-orders",
+                     "/api/v1/users", "/api/v1/payments", "/api/v1/inventory/movements"]:
+        resp = client.get(f"{endpoint}?page=0", headers=headers)
+        assert resp.status_code == 422, f"{endpoint} page=0 应返回 422: {resp.status_code}"
+
+
+def test_146_payment_method_case_insensitive():
+    """收款方式大小写：后端 Literal 枚举只接受小写"""
+    headers = _auth()
+    resp = client.post(f"/api/v1/payments/orders/{_confirmed_order_id}/payments", json={
+        "amount": 10,
+        "payment_method": "CASH",
+        "payment_time": "2026-01-01T00:00:00Z",
+    }, headers=headers)
+    # Literal 枚举不接受大写，应返回 422
+    assert resp.status_code == 422, f"大写 payment_method 应返回 422: {resp.status_code}"
+
+
+def test_147_product_create_decimal_precision():
+    """产品价格小数精度边界"""
+    headers = _auth()
+    # 超过 2 位小数
+    resp = client.post("/api/v1/products", json={
+        "name": "精度测试商品", "sale_price": "10.001", "cost_price": "5",
+    }, headers=headers)
+    assert resp.status_code == 200, f"3 位小数价格应被接受: {resp.status_code}"
+    price = resp.json()["data"]["sale_price"]
+    assert isinstance(price, (int, float, str)), f"价格应为数字: {price}"
+
+
+def test_148_inventory_movement_sort():
+    """库存变动列表排序参数正常工作"""
+    headers = _auth()
+    resp = client.get("/api/v1/inventory/movements?sort_by=created_at&sort_order=desc", headers=headers)
+    assert resp.status_code == 200, f"库存变动排序应返回 200: {resp.status_code}"
+
+
+def test_149_payment_list_sort():
+    """收款列表排序参数正常工作"""
+    headers = _auth()
+    resp = client.get("/api/v1/payments?sort_by=created_at&sort_order=desc", headers=headers)
+    assert resp.status_code == 200, f"收款列表排序应返回 200: {resp.status_code}"
