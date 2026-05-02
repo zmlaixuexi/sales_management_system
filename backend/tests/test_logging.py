@@ -243,3 +243,32 @@ def test_setup_logging_text_formatter():
     root = logging.getLogger()
     assert len(root.handlers) >= 1
     assert isinstance(root.handlers[-1].formatter, _TextFormatter)
+
+
+def test_setup_logging_invalid_level_fallback_to_info():
+    """无效 LOG_LEVEL 回退到 INFO"""
+    from unittest.mock import patch
+
+    with patch("app.core.logging.settings") as mock_settings:
+        mock_settings.LOG_LEVEL = "INVALID_LEVEL"
+        mock_settings.LOG_FORMAT = "text"
+        setup_logging()
+    root = logging.getLogger()
+    assert root.level == logging.INFO
+
+
+def test_setup_logging_clears_existing_handlers():
+    """setup_logging 清除已有 handlers"""
+    from unittest.mock import patch
+
+    root = logging.getLogger()
+    extra = logging.StreamHandler()
+    root.addHandler(extra)
+    before = len(root.handlers)
+
+    with patch("app.core.logging.settings") as mock_settings:
+        mock_settings.LOG_LEVEL = "INFO"
+        mock_settings.LOG_FORMAT = "text"
+        setup_logging()
+
+    assert len(root.handlers) < before + 1
