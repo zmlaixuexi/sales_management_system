@@ -1340,3 +1340,37 @@ def test_67_payment_remark_max_length_boundary():
         "amount": "50.00", "payment_method": "transfer", "remark": "P" * 501,
     }, headers=headers)
     assert resp.status_code == 422, f"501 字符备注应被拒绝: {resp.status_code}"
+
+
+def test_68_customer_update_email_max_length_boundary():
+    """客户编辑邮箱恰好 200 字符通过，201 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/customers", json={"name": "邮箱边界客户68", "phone": "13900686868"}, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    # 恰好 200 字符
+    email_ok = "a" * 188 + "@example.com"  # 188 + 12 = 200
+    resp = client.put(f"/api/v1/customers/{cid}", json={"email": email_ok}, headers=headers)
+    assert resp.status_code == 200, f"200 字符邮箱应通过: {resp.json()}"
+
+    # 201 字符
+    email_long = "a" * 189 + "@example.com"  # 189 + 12 = 201
+    resp = client.put(f"/api/v1/customers/{cid}", json={"email": email_long}, headers=headers)
+    assert resp.status_code == 422, f"201 字符邮箱应被拒绝: {resp.status_code}"
+
+
+def test_69_customer_update_contact_name_max_length_boundary():
+    """客户编辑联系人恰好 100 字符通过，101 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/customers", json={"name": "联系人边界客户69", "phone": "13900696969"}, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    # 恰好 100 字符
+    resp = client.put(f"/api/v1/customers/{cid}", json={"contact_name": "联" * 100}, headers=headers)
+    assert resp.status_code == 200, f"100 字符联系人应通过: {resp.json()}"
+
+    # 101 字符
+    resp = client.put(f"/api/v1/customers/{cid}", json={"contact_name": "联" * 101}, headers=headers)
+    assert resp.status_code == 422, f"101 字符联系人应被拒绝: {resp.status_code}"
