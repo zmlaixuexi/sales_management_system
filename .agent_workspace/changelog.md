@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-02（第二百五十四轮·自动循环）
+
+### 重构：6 处手动 deleted_at 过滤替换为 active_query
+
+- export_service.py：export_products / export_customers / export_orders 3 处基查询
+- auth.py：login / refresh_token 2 处用户查询
+- reports.py：inventory_warning 1 处商品查询
+- 注意：generate_sequential_code 不适用 active_query（需看到已删除记录以避免序号冲突）
+- 注意：get_current_user 保留手动过滤（保持 mypy 类型安全）
+- 809 后端测试全绿，ruff 0 errors，mypy 0 errors
+
 ## 2026-05-02（第二百五十三轮·自动循环）
 
 ### 测试：补充 downloadCsv JSON 错误响应解析测试 2 项
