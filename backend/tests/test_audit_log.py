@@ -3002,3 +3002,19 @@ def test_110_customer_import_audit_log_after_data_has_import_count():
     assert log["after_data"]["created"] >= 1
     assert "errors" in log["after_data"], f"after_data 缺少 errors: {log['after_data']}"
     assert isinstance(log["after_data"]["errors"], int)
+
+
+def test_111_export_audit_log_before_data_is_none():
+    """导出操作审计日志 before_data 为 None"""
+    headers = _admin_auth()
+    # 触发商品导出
+    resp = client.get("/api/v1/exports/products?format=csv", headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=export_products&page_size=10", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    if len(items) > 0:
+        log = items[0]
+        assert log["before_data"] is None, f"export_products before_data 应为 None: {log['before_data']}"
+        assert log["resource_type"] == "product"

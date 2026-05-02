@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百二十五轮·自动循环）
+
+### 测试补强：导出操作审计日志 before_data 为 None 验证
+
+- `test_audit_log.py`：新增 test_111（export_products before_data 为 None，resource_type=product）
+- `docs/testing.md`：更新后端测试总数 1108→1109、总计 1490→1491、test_audit_log.py 112→113
+- 后端测试：1109/1109 全绿，ruff clean
+
 ## 2026-05-03（第四百二十四轮·自动循环）
 
 ### 测试补强：商品/客户导入审计日志 after_data 含导入数量
