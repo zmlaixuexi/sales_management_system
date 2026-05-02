@@ -2,6 +2,7 @@ import { lazy, Suspense, type ComponentType } from 'react'
 import { Spin } from 'antd'
 import type { RouteObject } from 'react-router-dom'
 import AppLayout from '@/routes/AppLayout'
+import ProtectedRoute from '@/routes/ProtectedRoute'
 
 const Loading = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
@@ -25,7 +26,7 @@ const routes: RouteObject[] = [
   },
   {
     path: '/',
-    element: <AppLayout />,
+    element: <ProtectedRoute><AppLayout /></ProtectedRoute>,
     children: [
       { index: true, element: lazyPage(() => import('@/pages/Dashboard')) },
       { path: 'products', element: lazyPage(() => import('@/pages/Products')) },
