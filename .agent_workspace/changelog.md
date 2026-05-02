@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第二百六十一轮·自动循环）
+
+### 修复：CustomerForm/OrderForm/AuditLogs 防止重复错误提示
+
+- CustomerForm：编辑模式加载客户数据 .catch() 添加 _toastDisplayed 检查
+- OrderForm：编辑模式加载订单数据 .catch() 添加 _toastDisplayed 检查
+- AuditLogs：加载筛选选项 catch 添加 _toastDisplayed 检查
+- 382 前端测试全绿，构建 262ms
+- 至此全前端 23 处 _toastDisplayed 防重复检查已全部完成
+
 ## 2026-05-02（第二百六十轮·自动循环）
 
 ### 修复：13 处前端组件防止重复错误提示（_toastDisplayed 检查）
