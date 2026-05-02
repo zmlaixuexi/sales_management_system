@@ -5,10 +5,14 @@ _prev_module = None
 
 
 def pytest_runtest_setup(item):
-    """每个测试模块切换时清空全局速率限制计数器（ratelimit 测试除外）"""
-    global _prev_module
+    """每个测试前清空收款防抖状态；模块切换时清空全局速率限制计数器"""
+    # 每个测试前重置收款防抖（同一模块内连续测试可能操作同一订单）
+    from app.services.payment_service import reset_payment_debounce
+    reset_payment_debounce()
+
     if "test_ratelimit" in item.nodeid:
         return
+    global _prev_module
     mod = item.module
     if mod is not _prev_module:
         _prev_module = mod

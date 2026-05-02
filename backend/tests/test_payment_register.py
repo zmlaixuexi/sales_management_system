@@ -14,7 +14,15 @@ from app.models.customer import Customer
 from app.models.order import SalesOrder
 from app.models.user import User
 from app.schemas.payment import PaymentCreate
-from app.services.payment_service import register_payment
+from app.services.payment_service import register_payment, reset_payment_debounce
+
+
+@pytest.fixture(autouse=True)
+def _reset_debounce():
+    """每个测试前后清空收款防抖状态"""
+    reset_payment_debounce()
+    yield
+    reset_payment_debounce()
 
 
 @pytest.fixture()
@@ -183,3 +191,63 @@ def test_register_payment_operator_recorded(db):
     order = db.get(SalesOrder, oid)
     assert order.updated_by == uid
     assert result["payment"].remark == "测试"
+
+
+def test_register_payment_debounce_blocks_rapid_duplicate(db):
+    """同一订单有请求处理中时第二次收款被 429 拦截"""
+    from app.services.payment_service import _payment_inflight, _payment_lock
+
+    uid = _seed_user(db, is_superuser=True, suffix="D1")
+    oid = _seed_order(db, uid, status="confirmed", total=2000, paid=0)
+    order_id_str = str(oid)
+
+    # 手动模拟 inflight 状态
+    with _payment_lock:
+        _payment_inflight.add(order_id_str)
+
+    data = PaymentCreate(amount="500", payment_method="cash")
+    with pytest.raises(HTTPException) as exc_info:
+        register_payment(db, order_id_str, data, db.get(User, uid))
+    assert exc_info.value.status_code == 429
+    assert "PAYMENT_RATE_LIMITED" in str(exc_info.value.detail)
+
+    # 清除后可正常提交
+    reset_payment_debounce()
+    result = register_payment(db, order_id_str, data, db.get(User, uid))
+    db.flush()
+    assert result["payment"].amount == Decimal("500")
+
+
+def test_register_payment_debounce_different_orders_ok(db):
+    """不同订单的收款互不干扰"""
+    uid = _seed_user(db, is_superuser=True, suffix="D2")
+    oid1 = _seed_order(db, uid, status="confirmed", total=1000, paid=0)
+    oid2 = _seed_order(db, uid, status="confirmed", total=1000, paid=0)
+
+    data1 = PaymentCreate(amount="100", payment_method="cash")
+    register_payment(db, str(oid1), data1, db.get(User, uid))
+    db.flush()
+
+    # 不同订单不受影响
+    data2 = PaymentCreate(amount="100", payment_method="cash")
+    result = register_payment(db, str(oid2), data2, db.get(User, uid))
+    db.flush()
+    assert result["payment"].amount == Decimal("100")
+
+
+def test_register_payment_debounce_clears_on_failure(db):
+    """收款失败时 inflight 标记被清除，可立即重试"""
+    uid = _seed_user(db, is_superuser=True, suffix="D3")
+    oid = _seed_order(db, uid, status="confirmed", total=500, paid=0)
+
+    # 第一次超额收款 → 400 失败
+    data_bad = PaymentCreate(amount="9999", payment_method="cash")
+    with pytest.raises(HTTPException) as exc_info:
+        register_payment(db, str(oid), data_bad, db.get(User, uid))
+    assert exc_info.value.status_code == 400
+
+    # inflight 已被清除，正确金额可立即提交
+    data_ok = PaymentCreate(amount="100", payment_method="cash")
+    result = register_payment(db, str(oid), data_ok, db.get(User, uid))
+    db.flush()
+    assert result["payment"].amount == Decimal("100")
