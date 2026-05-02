@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-05-03（第四百四十五轮·自动循环）
+
+### 代码质量 + 文档：代码检查 + API 文档审计修复
+
+- 代码质量：ruff/eslint/tsc 全 clean，无 unused vars/imports
+- API 文档审计发现 31 个差距，已全部修复：
+  - 错误码表补充 FILE_TOO_LARGE/FILE_INVALID_TYPE/FILE_NOT_FOUND/FILE_NOT_BOUND/INVALID_PASSWORD
+  - 健康检查/版本接口补充 version/revision 字段
+  - 速率限制补充登录 IP 限流说明（10 次/15 分钟）
+  - 用户/商品/客户/订单接口补充缺失字段和响应结构
+  - 库存/报表/审计接口补充响应结构文档
+  - 分页参数补充 page_size 最大值 100
+
 ## 2026-05-03（第四百四十四轮·自动循环）
 
 ### 修复 + 文档：phone Schema/Model 一致性 + database.md 字段约束
