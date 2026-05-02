@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百四十九轮·自动循环）
+
+### 安全加固：auth.py 补全 username/phone 输入消毒覆盖
+
+- `app/schemas/auth.py`：UserCreate 新增 username sanitize_validator、phone sanitize_validator；UserUpdate phone 加入 sanitize
+- 审计结果：6 个 schema 文件中 5 个已有完整覆盖，auth.py 是唯一缺口，现已补全
+- 1176 后端测试全绿，ruff clean
+
 ## 2026-05-03（第四百四十八轮·自动循环）
 
 ### 测试补强：客户无效手机号 422 验证及收款超额 400 验证
