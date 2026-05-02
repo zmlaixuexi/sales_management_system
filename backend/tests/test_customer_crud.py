@@ -576,3 +576,50 @@ def test_33_customer_soft_delete_audit_log():
         assert log.resource_type == "customer"
     finally:
         db.close()
+
+
+def test_34_delete_customer_not_found_404():
+    """删除不存在的客户返回 404"""
+    from app.core.security import create_access_token
+
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "crud_admin").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+    resp = client.delete(f"/api/v1/customers/{uuid.uuid4()}", headers=headers)
+    assert resp.status_code == 404
+
+
+def test_35_delete_customer_no_permission_403():
+    """无 customer:delete 权限用户删除客户返回 403"""
+    from app.core.security import create_access_token
+    from app.models.user import Permission, Role, RolePermission, UserRole
+
+    db = TestSession()
+    try:
+        nop = User(
+            id=uuid.uuid4(), username="no_customer_delete",
+            hashed_password=hash_password("testpass123"),
+            display_name="无删除权限", is_active=True, is_superuser=False,
+        )
+        db.add(nop)
+        perm = db.query(Permission).filter(Permission.code == "customer:list").first()
+        if not perm:
+            perm = Permission(id=uuid.uuid4(), code="customer:list", name="客户列表", module="customer")
+            db.add(perm)
+            db.flush()
+        role = Role(id=uuid.uuid4(), name="no_del_role", display_name="无删除角色")
+        db.add(role)
+        db.flush()
+        db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+        db.add(UserRole(user_id=nop.id, role_id=role.id))
+        db.commit()
+        token = create_access_token(str(nop.id))
+    finally:
+        db.close()
+
+    resp = client.delete(f"/api/v1/customers/{uuid.uuid4()}", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
