@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第三百一十轮·自动循环）
+
+### 安全：商品详情成本字段权限过滤 + 修复 schema 不一致
+
+- 修复 ProductDetail schema：cost_price/unit_profit/gross_margin 改为 Optional
+  （无 product:view_cost 权限时代码不返回这些字段，但 schema 标记为必填导致 ResponseValidationError）
+- 非特权用户查看商品详情时成本字段返回 None
+- 文档更新至 879 后端 / 382 前端
+- 880 后端测试全绿（+1）
+
 ## 2026-05-02（第三百零九轮·自动循环）
 
 ### 安全：商品列表成本字段权限过滤验证
