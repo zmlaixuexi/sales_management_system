@@ -1521,3 +1521,42 @@ def test_78_user_update_display_name_max_length_boundary():
     # 101 字符
     resp = client.put(f"/api/v1/users/{uid}", json={"display_name": "编" * 101}, headers=headers)
     assert resp.status_code == 422, f"101 字符显示名称应被拒绝: {resp.status_code}"
+
+
+def test_79_user_create_email_max_length_boundary():
+    """用户创建 email 恰好 200 字符通过，201 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    # 恰好 200 字符的邮箱：local 部分 + @ + domain
+    email_200 = "a" * 188 + "@example.com"  # 188 + 12 = 200
+    resp = client.post("/api/v1/users", json={
+        "username": "email_bnd_79", "password": "pass123456",
+        "email": email_200,
+    }, headers=headers)
+    assert resp.status_code == 200, f"200 字符邮箱应通过: {resp.json()}"
+
+    # 201 字符
+    email_201 = "a" * 189 + "@example.com"  # 189 + 12 = 201
+    resp = client.post("/api/v1/users", json={
+        "username": "email_bnd_79b", "password": "pass123456",
+        "email": email_201,
+    }, headers=headers)
+    assert resp.status_code == 422, f"201 字符邮箱应被拒绝: {resp.status_code}"
+
+
+def test_80_user_update_email_max_length_boundary():
+    """用户编辑 email 恰好 200 字符通过，201 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/users", json={
+        "username": "upd_email_bnd_80", "password": "pass123456",
+    }, headers=headers)
+    assert resp.status_code == 200
+    uid = resp.json()["data"]["id"]
+
+    email_200 = "a" * 188 + "@example.com"
+    resp = client.put(f"/api/v1/users/{uid}", json={"email": email_200}, headers=headers)
+    assert resp.status_code == 200, f"200 字符邮箱应通过: {resp.json()}"
+
+    email_201 = "a" * 189 + "@example.com"
+    resp = client.put(f"/api/v1/users/{uid}", json={"email": email_201}, headers=headers)
+    assert resp.status_code == 422, f"201 字符邮箱应被拒绝: {resp.status_code}"
