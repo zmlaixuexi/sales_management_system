@@ -466,3 +466,48 @@ def test_24_order_cancel_audit_log_fields():
     assert log["after_data"]["status"] == "cancelled"
     assert log["after_data"]["order_no"] == order_no
     assert log["resource_type"] == "order"
+
+
+def test_25_customer_create_audit_log_fields():
+    """客户创建审计日志 after_data 含 name 和 phone"""
+    headers = _admin_auth()
+    resp = client.post("/api/v1/customers", json={
+        "name": "审计字段客户",
+        "phone": "13811112222",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    resp = client.get("/api/v1/audit-logs?action=customer_create", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == cid)
+    assert log["after_data"]["name"] == "审计字段客户"
+    assert "phone" in log["after_data"]  # phone 字段存在（可能被脱敏为 ***）
+    assert log["resource_type"] == "customer"
+
+
+def test_26_customer_update_audit_log_fields():
+    """客户编辑审计日志 after_data 含更新后的 name 和 phone"""
+    headers = _admin_auth()
+    # 先创建客户
+    resp = client.post("/api/v1/customers", json={
+        "name": "编辑审计客户",
+        "phone": "13800001111",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    # 编辑客户
+    resp = client.put(f"/api/v1/customers/{cid}", json={
+        "phone": "13800002222",
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=customer_update", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == cid)
+    assert log["after_data"]["name"] == "编辑审计客户"
+    assert "phone" in log["after_data"]  # phone 字段存在（可能被脱敏为 ***）
+    assert log["resource_type"] == "customer"
