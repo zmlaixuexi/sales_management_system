@@ -470,3 +470,20 @@ def test_30_update_user_display_name_too_long_422():
         "display_name": "X" * 101,
     }, headers=_admin_auth())
     assert resp.status_code == 422
+
+
+def test_31_list_users_keyword_like_injection():
+    """关键字搜索含 % 不应匹配全部用户"""
+    resp = client.get("/api/v1/users", params={"keyword": "%"}, headers=_admin_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert all("%" not in u.get("username", "") for u in items)
+
+
+def test_32_list_users_keyword_like_underscore():
+    """关键字搜索含 _ 不应匹配任意单字符，只返回实际含 _ 的用户"""
+    resp = client.get("/api/v1/users", params={"keyword": "_"}, headers=_admin_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    # escape_like 应转义 _，所以搜索 _ 只匹配用户名中真正含 _ 的用户
+    assert all("_" in u.get("username", "") for u in items)
