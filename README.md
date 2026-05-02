@@ -134,7 +134,7 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（654 个）
+# 后端测试（677 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
@@ -181,8 +181,9 @@ npm run build
 | 导出辅助函数 | 22 | _dec/_str/_dt CSV 格式化，_product_row/_order_row 成本字段过滤，状态映射，_customer_row/_payment_row |
 | 文件服务 | 13 | 扩展名/MIME/大小/正常/webp/大写扩展名/扩展名与 MIME 独立校验/边界大小/魔数字节校验 |
 | CSV 导入校验 | 9 | 文件名/扩展名/BOM/编码/大小限制/空文件/仅有表头 |
+| Schema 校验器 | 23 | 全部 Pydantic field_validator：单价非负/金额正数/密码强度/strip_html XSS 防护 |
 | 慢查询 | 5 | 慢查询结构化日志记录、SQL 截断、阈值验证 |
-| **合计** | **654** | |
+| **合计** | **677** | |
 
 ### 前端测试覆盖
 

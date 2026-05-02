@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第一百七十四轮·自动循环）
+
+### 测试：新增 Schema 校验器单元测试覆盖全部 field_validator
+
+- 新建 `test_schema_validators.py`，23 个测试覆盖所有 Pydantic field_validator
+- 覆盖模块：OrderItemInput（单价非负）、OrderCreate/Update（备注 strip_html）、PaymentCreate（金额正数+备注 strip_html）、InventoryAdjust（备注 strip_html）、ProductCreate/Update（名称/备注 strip_html）、CustomerCreate/Update（名称/邮箱/联系人 strip_html）、UserCreate（密码强度+邮箱 strip_html）、UserUpdate（显示名 strip_html）、ChangePasswordRequest（密码强度+长度）
+- 后端 654→677，总计 992 tests
+
 ## 2026-05-02（第一百七十三轮·自动循环）
 
 ### 文档：修正 database.md 索引和 ER 图与模型代码一致
