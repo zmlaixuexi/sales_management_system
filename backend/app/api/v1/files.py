@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db, resp
+from app.api.deps import get_current_user, get_db, require_permission, resp
 from app.models.product import File, ProductImage
 from app.models.user import User
 from app.services.audit_service import log_user_action
@@ -27,7 +27,7 @@ async def upload_image_api(
     file: UploadFile,
     request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("product:create")),
 ):
     """上传图片，返回文件 ID 和访问 URL"""
     try:

@@ -44,9 +44,9 @@ router = APIRouter(
 # 允许的状态流转
 VALID_TRANSITIONS: dict[str, set[str]] = {
     "draft": {"confirmed", "cancelled"},
-    "confirmed": {"cancelled"},
+    "confirmed": {"cancelled", "partially_paid"},
     "cancelled": set(),
-    "partially_paid": {"cancelled"},
+    "partially_paid": {"partially_paid", "cancelled"},
     "completed": set(),
 }
 
@@ -507,6 +507,16 @@ def cancel_order(
                 "message": (
                     f"订单状态 {STATUS_LABELS.get(order.status, order.status)} 不允许取消"
                 ),
+            },
+        )
+
+    # 部分收款的订单必须先冲正所有收款才能取消
+    if order.status == "partially_paid" and (order.paid_amount or 0) > 0:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "ORDER_HAS_PAYMENTS",
+                "message": "该订单已有收款记录，请先冲正所有收款后再取消订单",
             },
         )
 

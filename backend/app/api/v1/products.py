@@ -131,13 +131,21 @@ def list_products(
         query = query.filter(Product.category_id == category_id)
 
     # 排序（白名单校验）
-    sort_col = getattr(Product, sort_by, None) if sort_by in SORTABLE_COLUMNS else None
-    if sort_col is None:
-        sort_col = Product.sort_weight
-    if sort_order == "asc":
-        query = query.order_by(sort_col.asc(), Product.created_at.desc())
+    if sort_by == "sort_weight" and sort_order == "desc":
+        # 默认复合排序：新商品优先 → 置顶权重 → 更新时间
+        query = query.order_by(
+            Product.sort_weight.desc(),
+            Product.created_at.desc(),
+            Product.updated_at.desc(),
+        )
     else:
-        query = query.order_by(sort_col.desc(), Product.created_at.desc())
+        sort_col = getattr(Product, sort_by, None) if sort_by in SORTABLE_COLUMNS else None
+        if sort_col is None:
+            sort_col = Product.sort_weight
+        if sort_order == "asc":
+            query = query.order_by(sort_col.asc(), Product.created_at.desc())
+        else:
+            query = query.order_by(sort_col.desc(), Product.created_at.desc())
 
     items, total = paginate(query.options(joinedload(Product.category)), page, page_size)
 
