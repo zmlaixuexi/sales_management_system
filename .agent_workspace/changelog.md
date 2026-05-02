@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第一百七十八轮·自动循环）
+
+### 工程：全量 CI 验证 + 修复 ruff lint 错误
+
+- 全量 CI 门禁验证：后端 677、前端 318、ruff 0、ESLint 0、tsc 0、build ✓
+- 修复 5 处 ruff lint：test_deps.py（import 排序/未使用 func/datetime.UTC）、test_export_helpers.py（kwargs.get 简化）、test_schema_validators.py（import 排序）
+
 ## 2026-05-02（第一百七十七轮·自动循环）
 
 ### 测试：补强 Login 页面测试（登录成功跳转/redirect 参数）

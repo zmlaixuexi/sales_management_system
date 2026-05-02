@@ -2,16 +2,16 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-177
-当前任务名称：测试补强 — Login 页面跳转和 redirect 参数
+当前任务编号：ROUND-178
+当前任务名称：全量 CI 验证 + ruff lint 修复
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 177：Login +2 测试（成功跳转首页/redirect 参数跳转），前端 316→318
+- Round 178：全量 CI 验证通过（677+318=995），修复 5 处 ruff lint 错误
+- Round 177：Login +2 测试，前端 316→318
 - Round 176：ProtectedRoute +1 测试，前端 315→316
-- Round 175：docs/testing.md 一致性对齐
 
 ## 最终验证状态
 
