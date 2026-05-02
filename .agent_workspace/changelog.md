@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-02（第一百六十四轮·自动循环）
+
+### 可观测性：文件操作审计日志补全（+2 tests，935→937）
+
+- `backend/app/api/v1/files.py`：upload_image_api 和 delete_image 添加 `log_user_action` 审计日志
+  - 上传记录 original_name 和 size_bytes
+  - 删除记录 original_name 和 object_key
+- `backend/tests/test_file_upload.py`：新增 2 个测试
+  - test_23_upload_creates_audit_log：验证上传产生 file_upload 审计日志
+  - test_24_delete_creates_audit_log：验证删除产生 file_delete 审计日志
+- 全部写操作审计日志覆盖完成（auth/products/customers/orders/payments/inventory/users/files/exports）
+
 ## 2026-05-02（第一百六十三轮·自动循环）
 
 ### 部署：Docker Compose 健康检查优化

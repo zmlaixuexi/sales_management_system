@@ -421,3 +421,57 @@ def test_22_get_other_user_file_forbidden():
         headers={"Authorization": f"Bearer {other_token}"},
     )
     assert resp.status_code == 403
+
+
+def test_23_upload_creates_audit_log():
+    """文件上传应记录审计日志"""
+    from app.models.audit import AuditLog
+
+    png_bytes = _make_png_bytes()
+    resp = client.post(
+        "/api/v1/files/images",
+        files={"file": ("audit_test.png", png_bytes, "image/png")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    file_id = resp.json()["data"]["id"]
+
+    db = TestSession()
+    try:
+        log = db.query(AuditLog).filter(
+            AuditLog.action == "file_upload",
+            AuditLog.resource_id == file_id,
+        ).first()
+        assert log is not None
+        assert log.resource_type == "file"
+        assert "audit_test.png" in str(log.after_data)
+    finally:
+        db.close()
+
+
+def test_24_delete_creates_audit_log():
+    """文件删除应记录审计日志"""
+    from app.models.audit import AuditLog
+
+    png_bytes = _make_png_bytes()
+    resp = client.post(
+        "/api/v1/files/images",
+        files={"file": ("delete_audit.png", png_bytes, "image/png")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    file_id = resp.json()["data"]["id"]
+
+    resp = client.delete(f"/api/v1/files/images/{file_id}", headers=_auth())
+    assert resp.status_code == 200
+
+    db = TestSession()
+    try:
+        log = db.query(AuditLog).filter(
+            AuditLog.action == "file_delete",
+            AuditLog.resource_id == file_id,
+        ).first()
+        assert log is not None
+        assert "delete_audit.png" in str(log.before_data)
+    finally:
+        db.close()

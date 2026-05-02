@@ -2,12 +2,13 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db, resp
 from app.models.product import File, ProductImage
 from app.models.user import User
+from app.services.audit_service import log_user_action
 from app.services.file_service import FileSizeExceededError, FileTypeError, delete_file, upload_image
 
 router = APIRouter(
@@ -24,12 +25,19 @@ router = APIRouter(
 @router.post("/images")
 async def upload_image_api(
     file: UploadFile,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     """上传图片，返回文件 ID 和访问 URL"""
     try:
         file_record = await upload_image(db, file, current_user.id)
+        log_user_action(
+            db, request, current_user,
+            action="file_upload", resource_type="file",
+            resource_id=str(file_record.id),
+            after_data={"original_name": file_record.original_name, "size_bytes": file_record.size_bytes},
+        )
         db.commit()
     except FileSizeExceededError as e:
         raise HTTPException(
@@ -83,6 +91,7 @@ def get_image(
 @router.delete("/images/{file_id}")
 def delete_image(
     file_id: uuid.UUID,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -108,6 +117,12 @@ def delete_image(
             detail={"code": "FILE_NOT_BOUND", "message": "该图片已绑定商品，无法删除"},
         )
 
+    log_user_action(
+        db, request, current_user,
+        action="file_delete", resource_type="file",
+        resource_id=str(file_id),
+        before_data={"original_name": file_record.original_name, "object_key": file_record.object_key},
+    )
     delete_file(db, file_id)
     db.commit()
 
