@@ -916,3 +916,106 @@ def test_46_product_update_nonexistent_category_rejected():
     assert resp.status_code == 400
     assert resp.json()["error"]["code"] == "VALIDATION_FAILED"
     assert "商品分类不存在" in resp.json()["error"]["message"]
+
+
+# --- SQL 注入搜索安全测试 ---
+
+
+def test_47_customer_search_sql_injection_safe():
+    """客户搜索关键词 SQL 注入安全"""
+    if not _tokens.get("access"):
+        resp = client.post("/api/v1/auth/login", json={
+            "username": "boundary_admin", "password": "pass123456",
+        })
+        assert resp.status_code == 200
+        _tokens["access"] = resp.json()["data"]["access_token"]
+
+    injection_payloads = [
+        "' OR '1'='1",
+        "'; DROP TABLE customers; --",
+        "100%' OR 1=1 --",
+        "\" OR \"\"=\"",
+    ]
+    for payload in injection_payloads:
+        resp = client.get(f"/api/v1/customers?keyword={payload}", headers=_auth())
+        assert resp.status_code == 200, f"SQL 注入 payload 导致非 200: {payload}"
+        items = resp.json()["data"]["items"]
+        # 不应返回所有客户（注入不应绕过过滤）
+        assert len(items) <= 1, f"SQL 注入可能泄露数据: payload={payload}, count={len(items)}"
+
+
+def test_48_product_search_sql_injection_safe():
+    """商品搜索关键词 SQL 注入安全"""
+    if not _tokens.get("access"):
+        resp = client.post("/api/v1/auth/login", json={
+            "username": "boundary_admin", "password": "pass123456",
+        })
+        assert resp.status_code == 200
+        _tokens["access"] = resp.json()["data"]["access_token"]
+
+    injection_payloads = [
+        "' OR '1'='1",
+        "'; DROP TABLE products; --",
+    ]
+    for payload in injection_payloads:
+        resp = client.get(f"/api/v1/products?keyword={payload}", headers=_auth())
+        assert resp.status_code == 200, f"SQL 注入 payload 导致非 200: {payload}"
+        items = resp.json()["data"]["items"]
+        assert len(items) <= 1, f"SQL 注入可能泄露数据: payload={payload}"
+
+
+def test_49_order_search_sql_injection_safe():
+    """订单搜索关键词 SQL 注入安全"""
+    if not _tokens.get("access"):
+        resp = client.post("/api/v1/auth/login", json={
+            "username": "boundary_admin", "password": "pass123456",
+        })
+        assert resp.status_code == 200
+        _tokens["access"] = resp.json()["data"]["access_token"]
+
+    resp = client.get("/api/v1/sales-orders?keyword=' OR '1'='1", headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) <= 5, "SQL 注入不应返回异常数量的订单"
+
+
+# --- 分页边界测试 ---
+
+
+def test_50_customer_list_page_zero_422():
+    """客户列表 page=0 返回 422"""
+    if not _tokens.get("access"):
+        resp = client.post("/api/v1/auth/login", json={
+            "username": "boundary_admin", "password": "pass123456",
+        })
+        assert resp.status_code == 200
+        _tokens["access"] = resp.json()["data"]["access_token"]
+
+    resp = client.get("/api/v1/customers?page=0", headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_51_product_list_page_size_over_max_422():
+    """商品列表 page_size=101 返回 422"""
+    if not _tokens.get("access"):
+        resp = client.post("/api/v1/auth/login", json={
+            "username": "boundary_admin", "password": "pass123456",
+        })
+        assert resp.status_code == 200
+        _tokens["access"] = resp.json()["data"]["access_token"]
+
+    resp = client.get("/api/v1/products?page_size=101", headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_52_order_list_negative_page_size_422():
+    """订单列表 page_size=-1 返回 422"""
+    if not _tokens.get("access"):
+        resp = client.post("/api/v1/auth/login", json={
+            "username": "boundary_admin", "password": "pass123456",
+        })
+        assert resp.status_code == 200
+        _tokens["access"] = resp.json()["data"]["access_token"]
+
+    resp = client.get("/api/v1/sales-orders?page_size=-1", headers=_auth())
+    assert resp.status_code == 422

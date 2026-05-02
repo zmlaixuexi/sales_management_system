@@ -83,8 +83,9 @@ def setup_module(module):
 
         # 销售员（有 customer:list/create 但无 customer:view_all）
         sale_user = _create_user_with_perms(db, "sale01", [
-            "customer:list", "customer:create",
+            "customer:list", "customer:create", "customer:update", "customer:delete",
             "order:list", "order:create", "order:view",
+            "order:update", "order:confirm", "order:cancel",
             "product:list",
             "report:sales",
         ])
@@ -347,3 +348,122 @@ def test_16_report_summary_admin_has_profit():
     assert "total_cost" in data, "管理员应看到 total_cost"
     assert "gross_profit" in data, "管理员应看到 gross_profit"
     assert "gross_margin" in data, "管理员应看到 gross_margin"
+
+
+# --- 对象级权限测试：check_owner_or_forbid ---
+
+
+def test_17_customer_detail_non_owner_forbidden():
+    """非所有者查看客户详情返回 403"""
+    resp = client.get(f"/api/v1/customers/{_customer_id_other}", headers=_auth("sale01"))
+    assert resp.status_code == 403
+    assert resp.json()["error"]["code"] == "AUTH_FORBIDDEN"
+
+
+def test_18_customer_detail_owner_allowed():
+    """所有者查看客户详情返回 200"""
+    resp = client.get(f"/api/v1/customers/{_customer_id_own}", headers=_auth("sale01"))
+    assert resp.status_code == 200
+
+
+def test_19_customer_update_non_owner_forbidden():
+    """非所有者编辑客户返回 403"""
+    resp = client.put(f"/api/v1/customers/{_customer_id_other}", json={
+        "name": "被篡改",
+    }, headers=_auth("sale01"))
+    assert resp.status_code == 403
+    assert resp.json()["error"]["code"] == "AUTH_FORBIDDEN"
+
+
+def test_20_customer_update_owner_allowed():
+    """所有者编辑客户返回 200"""
+    resp = client.put(f"/api/v1/customers/{_customer_id_own}", json={
+        "remark": "自己改的",
+    }, headers=_auth("sale01"))
+    assert resp.status_code == 200
+
+
+def test_21_customer_delete_non_owner_forbidden():
+    """非所有者删除客户返回 403"""
+    resp = client.delete(f"/api/v1/customers/{_customer_id_other}", headers=_auth("sale01"))
+    assert resp.status_code == 403
+    assert resp.json()["error"]["code"] == "AUTH_FORBIDDEN"
+
+
+def test_22_customer_transfer_non_owner_forbidden():
+    """非所有者转移客户返回 403"""
+    resp = client.post(f"/api/v1/customers/{_customer_id_other}/transfer", json={
+        "owner_user_id": _sale_user_id,
+    }, headers=_auth("sale01"))
+    assert resp.status_code == 403
+    assert resp.json()["error"]["code"] == "AUTH_FORBIDDEN"
+
+
+def test_23_order_detail_non_owner_forbidden():
+    """非所有者查看订单详情返回 403"""
+    # 管理员创建一个订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id_other,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth("perm_admin"))
+    assert resp.status_code == 200
+    admin_order_id = resp.json()["data"]["id"]
+
+    # 销售员不能看管理员订单详情
+    resp = client.get(f"/api/v1/sales-orders/{admin_order_id}", headers=_auth("sale01"))
+    assert resp.status_code == 403
+    assert resp.json()["error"]["code"] == "AUTH_FORBIDDEN"
+
+
+def test_24_order_update_non_owner_forbidden():
+    """非所有者编辑订单返回 403"""
+    # 管理员创建草稿订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id_other,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth("perm_admin"))
+    admin_order_id = resp.json()["data"]["id"]
+
+    resp = client.put(f"/api/v1/sales-orders/{admin_order_id}", json={
+        "remark": "被篡改",
+    }, headers=_auth("sale01"))
+    assert resp.status_code == 403
+
+
+def test_25_order_confirm_non_owner_forbidden():
+    """非所有者确认订单返回 403"""
+    # 管理员创建草稿订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id_other,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth("perm_admin"))
+    admin_order_id = resp.json()["data"]["id"]
+
+    resp = client.post(f"/api/v1/sales-orders/{admin_order_id}/confirm", headers=_auth("sale01"))
+    assert resp.status_code == 403
+
+
+def test_26_order_cancel_non_owner_forbidden():
+    """非所有者取消订单返回 403"""
+    # 管理员创建草稿订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id_other,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth("perm_admin"))
+    admin_order_id = resp.json()["data"]["id"]
+
+    resp = client.post(f"/api/v1/sales-orders/{admin_order_id}/cancel", headers=_auth("sale01"))
+    assert resp.status_code == 403
+
+
+def test_27_admin_bypasses_owner_check():
+    """超级管理员绕过所有权检查"""
+    # 管理员可以查看销售员的客户详情
+    resp = client.get(f"/api/v1/customers/{_customer_id_own}", headers=_auth("perm_admin"))
+    assert resp.status_code == 200
+
+    # 管理员可以编辑销售员的客户
+    resp = client.put(f"/api/v1/customers/{_customer_id_own}", json={
+        "remark": "管理员修改",
+    }, headers=_auth("perm_admin"))
+    assert resp.status_code == 200
