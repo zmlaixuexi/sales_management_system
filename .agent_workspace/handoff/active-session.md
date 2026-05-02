@@ -2,16 +2,16 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-174
-当前任务名称：测试补强 — Schema 校验器全覆盖
+当前任务编号：ROUND-175
+当前任务名称：文档完善 — docs/testing.md 一致性对齐
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 174：新增 test_schema_validators.py 23 个测试，覆盖全部 Pydantic field_validator
-- Round 173：docs/database.md 一致性检查 — 修复 14 处差异
-- Round 172：导出行函数 +9 测试，后端 645→654
+- Round 175：docs/testing.md 与实际测试输出对齐（概览/8 个模块计数/标记计数/schema_validators 新增）
+- Round 174：Schema 校验器全覆盖 23 tests
+- Round 173：database.md 一致性检查 14 处修复
 
 ## 最终验证状态
 
@@ -29,7 +29,6 @@
 
 继续 keep-going 模式。可选方向：
 - 继续测试补强
-- 文档完善（docs/testing.md 一致性复查）
 - 部署体验
 - 可观测性
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第一百七十五轮·自动循环）
+
+### 文档：更新 docs/testing.md 与实际测试输出对齐
+
+- 概览：后端 629→677、前端 310→315、总计 939→992
+- 更新 8 个模块测试计数：audit_log 17→19、integration 27→28、reports_audit 46→42、user_mgmt 21→25、customer_crud 25→28、product_crud 42→44、order_crud 40→43
+- 新增 test_schema_validators.py（23 tests）条目
+- 更新 test_deps.py 10→26、test_export_helpers.py 13→22、useSubmit 6→11
+- 更新测试标记计数（security 56→84 等）
+
 ## 2026-05-02（第一百七十四轮·自动循环）
 
 ### 测试：新增 Schema 校验器单元测试覆盖全部 field_validator
