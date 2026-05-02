@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第一百九十一轮·自动循环）
+
+### 测试：补强 request 封装函数边界测试（无参数 get/无 body post+put 3 项）
+
+- 扩展 `request.test.ts`（5→8 项）
+- get 无参数调用（params 为 undefined）
+- post 无 body 调用（logout 场景）
+- put 无 body 调用
+- 前端 336→339，总计 1050 tests
+
 ## 2026-05-02（第一百九十轮·自动循环）
 
 ### 测试：补强 downloadCsv 边界测试 + 全量 CI 验证

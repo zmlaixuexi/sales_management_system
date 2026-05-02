@@ -139,7 +139,7 @@ cd backend
 source .venv/bin/activate
 pytest tests/ -v
 
-# 前端测试（336 个）
+# 前端测试（339 个）
 cd frontend
 npm test
 
@@ -223,13 +223,13 @@ npm run build
 | 审计日志 API | 5 | fetchAuditLogs/筛选/日期范围/数据解析/fetchAuditActions |
 | 收款 API | 5 | fetchPayments/筛选/createPayment/备注/reversePayment |
 | 库存 API | 5 | fetchInventory/adjust/筛选 |
-| request 封装 | 5 | get/post/put/del/upload 调用验证 |
+| request 封装 | 8 | get/post/put/del/upload 调用验证（含无参数 get、无 body post/put） |
 | ErrorBoundary | 5 | 正常渲染 + 错误捕获 + 重试恢复 + 路由重置 + 返回首页 |
 | ProtectedRoute | 5 | 无 token 重定向/加载中/已认证渲染/fetchUser 失败/异步重定向/Spin large 尺寸 |
 | 登录页 | 7 | 渲染标题/输入框/登录按钮/提交调用 login/登录失败错误提示/成功跳转首页/redirect 参数跳转 |
 | API client | 5 | baseURL、token 附加、无 token、timeout 15s、Content-Type |
 | NotFound | 3 | 404 渲染/返回首页按钮/按钮点击导航 |
-| **合计** | **336** | |
+| **合计** | **339** | |
 
 ## API 概览
 
