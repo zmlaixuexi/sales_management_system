@@ -1202,3 +1202,12 @@ def test_47_order_logs_strip_cost_fields_for_non_privileged():
             if data and isinstance(data, dict):
                 for cf in cost_fields:
                     assert cf not in data, f"成本字段 {cf} 不应出现在 {field} 中"
+
+
+def test_48_list_orders_page_size_100():
+    """订单列表 page_size=100（最大值）正常返回"""
+    resp = client.get("/api/v1/sales-orders", params={"page_size": 100}, headers=_auth())
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["page_size"] == 100
+    assert isinstance(data["items"], list)

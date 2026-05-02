@@ -388,3 +388,12 @@ def test_24_adjust_remark_max_length_boundary():
         "remark": long_remark,
     }, headers=_auth())
     assert resp.status_code == 422
+
+
+def test_25_movements_page_size_100():
+    """库存流水 page_size=100（最大值）正常返回"""
+    resp = client.get("/api/v1/inventory/movements", params={"page_size": 100}, headers=_auth())
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["page_size"] == 100
+    assert isinstance(data["items"], list)
