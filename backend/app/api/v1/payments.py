@@ -3,7 +3,7 @@
 import uuid
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.api.deps import (

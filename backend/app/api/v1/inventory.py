@@ -2,10 +2,19 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
-from app.api.deps import PaginationParams, fmt_dt, get_db, paginate, paginated_resp, parse_uuid_or_400, require_permission, resp
+from app.api.deps import (
+    PaginationParams,
+    fmt_dt,
+    get_db,
+    paginate,
+    paginated_resp,
+    parse_uuid_or_400,
+    require_permission,
+    resp,
+)
 from app.models.order import InventoryMovement
 from app.models.product import Product
 from app.models.user import User

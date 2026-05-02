@@ -1,7 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import PaginationParams, fmt_dt, get_current_user, get_db, paginate, paginated_resp, parse_uuid_or_400, resp
+from app.api.deps import (
+    PaginationParams,
+    fmt_dt,
+    get_current_user,
+    get_db,
+    paginate,
+    paginated_resp,
+    parse_uuid_or_400,
+    resp,
+)
 from app.core.sanitize import escape_like
 from app.core.security import hash_password
 from app.models.user import Role, User, UserRole
