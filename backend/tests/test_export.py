@@ -865,3 +865,57 @@ def test_46_export_payments_audit_log():
         assert log.resource_type == "payment"
     finally:
         db.close()
+
+
+def test_38_export_empty_products_csv():
+    """导出空商品列表返回有效 CSV（仅 BOM + 表头行）"""
+    from app.core.security import create_access_token
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "export_tester").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+    resp = client.get("/api/v1/exports/products?keyword=ZZZZZ_NONEXISTENT", headers=headers)
+    assert resp.status_code == 200
+    assert "text/csv" in resp.headers["content-type"]
+    content = resp.text
+    assert content.startswith("﻿")  # BOM
+    lines = content.strip().split("\n")
+    assert len(lines) == 1  # 仅表头
+
+
+def test_39_export_empty_customers_csv():
+    """导出空客户列表返回有效 CSV（仅 BOM + 表头行）"""
+    from app.core.security import create_access_token
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "export_tester").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+    resp = client.get("/api/v1/exports/customers?keyword=ZZZZZ_NONEXISTENT", headers=headers)
+    assert resp.status_code == 200
+    assert "text/csv" in resp.headers["content-type"]
+    content = resp.text
+    assert content.startswith("﻿")
+    lines = content.strip().split("\n")
+    assert len(lines) == 1
+
+
+def test_40_export_empty_orders_csv():
+    """导出空订单列表返回有效 CSV（仅 BOM + 表头行）"""
+    from app.core.security import create_access_token
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "export_tester").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+    resp = client.get("/api/v1/exports/orders?keyword=ZZZZZ_NONEXISTENT", headers=headers)
+    assert resp.status_code == 200
+    assert "text/csv" in resp.headers["content-type"]
+    content = resp.text
+    assert content.startswith("﻿")
+    lines = content.strip().split("\n")
+    assert len(lines) == 1

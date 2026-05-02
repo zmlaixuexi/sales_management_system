@@ -2,32 +2,32 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-383
-当前任务名称：订单创建审计日志增强 + 报表 API 边界测试
+当前任务编号：ROUND-384
+当前任务名称：docs/testing.md 更新 + 导出 API 空数据 CSV 验证
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 383：订单创建审计日志 after_data 增加 status/customer_id，test_57 更新验证；报表 API 边界（test_60-62：趋势日期范围/排行默认 limit/销售人员默认结构），1062 后端测试全绿
-- Round 382：密码修改审计日志 after_data 完整性（test_68），1059 后端测试全绿
+- Round 384：docs/testing.md 全量更新至 1065（test_audit_log.py 70、test_reports_audit.py 67、标记计数同步、report 标记 131→148）；导出 API 空数据 CSV 格式验证（test_38-40：空商品/客户/订单导出仅含 BOM+表头），1065 后端测试全绿
+- Round 383：订单创建审计日志增强 + 报表 API 边界测试，1062 后端测试全绿
 
 ## 最终验证状态
 
 | 门禁 | 结果 |
 |---|---|
-| 后端测试 | 1062/1062 ✓ |
+| 后端测试 | 1065/1065 ✓ |
 | 前端测试 | 382/382 ✓ |
 | ruff | 0 errors ✓ |
-| 总计 | 1444 tests |
+| 总计 | 1447 tests |
 
 ## 下一步第一动作
 
 继续 keep-going 模式。可选无阻塞方向：
-- 代码质量：docs/testing.md 全量更新至 1062
-- 测试补强：导出 API 空数据 CSV 格式验证
+- 测试补强：导出 API 空收款 CSV 格式验证
 - 测试补强：客户创建审计日志 after_data 完整性
 - 测试补强：商品删除审计日志验证
+- 代码质量：docs/testing.md 导出测试 37→40
 
 ## 阻塞问题
 

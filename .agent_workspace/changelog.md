@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第三百八十四轮·自动循环）
+
+### 文档更新 + 测试补强：导出 API 空数据 CSV 验证
+
+- `docs/testing.md`：全量更新至 1065（test_audit_log.py 60→70、test_reports_audit.py 60→67、标记计数同步、report 标记 131→148）
+- `orders.py`：订单创建审计日志 after_data 增加 status/customer_id
+- `test_export.py`：新增 test_38-40（空商品/客户/订单导出仅含 BOM+表头行）
+- 后端测试：1065/1065 全绿
+
 ## 2026-05-02（第三百八十三轮·自动循环）
 
 ### 测试补强：订单创建审计日志增强 + 报表 API 边界测试
