@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百零五轮·自动循环）
+
+### 工程：前端未使用变量清理
+
+- usePaginatedList.ts 函数类型参数 params → _params
+- CustomerDetail/OrderDetail 测试文件 resolveFn 类型参数 v → _v
+- 382 前端测试全绿，ESLint/TypeScript/build 通过
+
 ## 2026-05-02（第三百零四轮·自动循环）
 
 ### 验证：全面门禁检查通过
