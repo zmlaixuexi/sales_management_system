@@ -1672,3 +1672,37 @@ def test_65_order_cancel_audit_log_before_data():
     assert log["after_data"]["status"] == "cancelled"
     assert log["after_data"]["total_amount"] == "20.00"
     assert log["resource_type"] == "order"
+
+
+def test_66_inventory_decrease_audit_log():
+    """库存减少审计日志 before_data/after_data 含 name 和正确的 stock_quantity"""
+    headers = _admin_auth()
+    # 创建商品（库存 50）
+    resp = client.post("/api/v1/products", json={
+        "name": "库存减少审计商品",
+        "cost_price": "10.00",
+        "sale_price": "20.00",
+        "stock_quantity": 50,
+        "status": "active",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    # 减少库存 20
+    resp = client.post("/api/v1/inventory/adjustments", json={
+        "product_id": pid,
+        "quantity_change": -20,
+        "remark": "减少库存审计",
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=inventory_adjust", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == pid and i["after_data"]["change"] == -20)
+    assert log["before_data"]["name"] == "库存减少审计商品"
+    assert log["before_data"]["stock_quantity"] == 50
+    assert log["after_data"]["name"] == "库存减少审计商品"
+    assert log["after_data"]["stock_quantity"] == 30
+    assert log["after_data"]["change"] == -20
+    assert log["resource_type"] == "product"

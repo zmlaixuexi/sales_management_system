@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百八十轮·自动循环）
+
+### 测试补强：库存减少审计日志 + 报表 API 边界验证
+
+- `test_audit_log.py`：新增 test_66（库存减少 before_data/after_data 含 name 和正确的 stock_quantity/change）
+- `test_reports_audit.py`：新增 test_56-59（period=custom 400、30d 响应结构、不存在 action 空列表、不存在 resource_type 空列表）
+- 后端测试：1057/1057 全绿
+
 ## 2026-05-02（第三百七十九轮·自动循环）
 
 ### 测试补强：订单确认/取消审计日志 before_data 增强

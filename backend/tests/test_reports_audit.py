@@ -909,3 +909,42 @@ def test_55_inventory_warning_high_threshold_empty():
     assert isinstance(data["items"], list)
     assert data["threshold"] == 999999
     assert "total" in data
+
+
+def test_56_sales_summary_period_custom():
+    """销售汇总 period=custom（不支持）返回 400"""
+    token = create_access_token(subject=_user_id)
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = client.get("/api/v1/reports/sales-summary?period=custom", headers=headers)
+    assert resp.status_code == 400
+
+
+def test_57_sales_summary_period_30d_response_structure():
+    """销售汇总 period=30d 正常返回含 total_amount/order_count"""
+    token = create_access_token(subject=_user_id)
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = client.get("/api/v1/reports/sales-summary?period=30d", headers=headers)
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert "total_amount" in data
+    assert "order_count" in data
+
+
+def test_58_audit_log_filter_nonexistent_action():
+    """审计日志筛选不存在的 action 返回空列表"""
+    token = create_access_token(subject=_user_id)
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = client.get("/api/v1/audit-logs?action=nonexistent_action_xyz", headers=headers)
+    assert resp.status_code == 200
+    assert resp.json()["data"]["total"] == 0
+    assert resp.json()["data"]["items"] == []
+
+
+def test_59_audit_log_filter_nonexistent_resource_type():
+    """审计日志筛选不存在的 resource_type 返回空列表"""
+    token = create_access_token(subject=_user_id)
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = client.get("/api/v1/audit-logs?resource_type=nonexistent_type_xyz", headers=headers)
+    assert resp.status_code == 200
+    assert resp.json()["data"]["total"] == 0
+    assert resp.json()["data"]["items"] == []
