@@ -25,6 +25,7 @@ def list_audit_logs(
     pagination: PaginationParams = Depends(),
     action: str | None = None,
     resource_type: str | None = None,
+    resource_id: str | None = None,
     actor_id: uuid.UUID | None = None,
     start_date: str | None = None,
     end_date: str | None = None,
@@ -39,6 +40,8 @@ def list_audit_logs(
         query = query.filter(AuditLog.action == action)
     if resource_type:
         query = query.filter(AuditLog.resource_type == resource_type)
+    if resource_id:
+        query = query.filter(AuditLog.resource_id == resource_id)
     if actor_id:
         query = query.filter(AuditLog.actor_id == actor_id)
     if start_date:

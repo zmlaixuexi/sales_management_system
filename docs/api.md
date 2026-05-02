@@ -621,7 +621,7 @@ JSON 日志格式示例：
 
 操作日志列表。
 
-**查询参数**：`page`, `page_size`, `action`, `resource_type`, `actor_id`, `start_date`, `end_date`, `keyword`
+**查询参数**：`page`, `page_size`, `action`, `resource_type`, `resource_id`, `actor_id`, `start_date`, `end_date`, `keyword`
 
 **响应字段**：每条日志包含 `ip_address`、`user_agent`、`request_id`（请求元数据）。敏感字段（password、phone、email 等）自动脱敏。
 

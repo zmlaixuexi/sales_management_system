@@ -3143,3 +3143,36 @@ def test_116_export_audit_logs_all_types_before_data_none():
             assert log["before_data"] is None, (
                 f"{action} before_data 应为 None: {log['before_data']}"
             )
+
+
+def test_117_audit_logs_filter_by_resource_id():
+    """审计日志按 resource_id 精确筛选"""
+    headers = _admin_auth()
+    # 创建商品获取 resource_id
+    create_resp = client.post("/api/v1/products", json={
+        "name": "资源ID筛选测试商品", "sale_price": "100", "cost_price": "50",
+    }, headers=headers)
+    assert create_resp.status_code == 200
+    product_id = create_resp.json()["data"]["id"]
+
+    # 按 resource_id 精确查询
+    resp = client.get(f"/api/v1/audit-logs?resource_id={product_id}", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    for item in items:
+        assert item["resource_id"] == product_id
+
+    # 按 resource_type + resource_id 组合查询
+    resp2 = client.get(f"/api/v1/audit-logs?resource_type=product&resource_id={product_id}", headers=headers)
+    assert resp2.status_code == 200
+    items2 = resp2.json()["data"]["items"]
+    assert len(items2) >= 1
+    for item in items2:
+        assert item["resource_id"] == product_id
+        assert item["resource_type"] == "product"
+
+    # 不存在的 resource_id 返回空列表
+    resp3 = client.get("/api/v1/audit-logs?resource_id=00000000-0000-0000-0000-000000000000", headers=headers)
+    assert resp3.status_code == 200
+    assert resp3.json()["data"]["total"] == 0
