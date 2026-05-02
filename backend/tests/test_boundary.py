@@ -1932,3 +1932,69 @@ def test_106_payment_invalid_method():
         "amount": "10", "payment_method": "bitcoin",
     }, headers=headers)
     assert resp.status_code == 422, f"无效收款方式应返回 422: {resp.status_code} {resp.json()}"
+
+
+def test_107_customer_create_invalid_source():
+    """客户创建无效 source 返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/customers", json={
+        "name": "无效来源客户", "phone": "13901070707", "source": "invalid_source",
+    }, headers=headers)
+    assert resp.status_code == 422, f"无效 source 应返回 422: {resp.status_code}"
+
+
+def test_108_customer_create_invalid_level():
+    """客户创建无效 level 返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/customers", json={
+        "name": "无效等级客户", "phone": "13901080808", "level": "platinum",
+    }, headers=headers)
+    assert resp.status_code == 422, f"无效 level 应返回 422: {resp.status_code}"
+
+
+def test_109_customer_create_invalid_follow_status():
+    """客户创建无效 follow_status 返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/customers", json={
+        "name": "无效跟进状态客户", "phone": "13901090909", "follow_status": "unknown",
+    }, headers=headers)
+    assert resp.status_code == 422, f"无效 follow_status 应返回 422: {resp.status_code}"
+
+
+def test_110_customer_update_invalid_source():
+    """客户编辑无效 source 返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/customers", json={
+        "name": "编辑无效来源客户110", "phone": "13901101010",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    resp = client.put(f"/api/v1/customers/{cid}", json={"source": "invalid"}, headers=headers)
+    assert resp.status_code == 422, f"无效 source 应返回 422: {resp.status_code}"
+
+
+def test_111_customer_update_invalid_level():
+    """客户编辑无效 level 返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/customers", json={
+        "name": "编辑无效等级客户111", "phone": "13901111111",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    resp = client.put(f"/api/v1/customers/{cid}", json={"level": "diamond"}, headers=headers)
+    assert resp.status_code == 422, f"无效 level 应返回 422: {resp.status_code}"
+
+
+def test_112_customer_update_invalid_follow_status():
+    """客户编辑无效 follow_status 返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/customers", json={
+        "name": "编辑无效跟进状态客户112", "phone": "13901121212",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    resp = client.put(f"/api/v1/customers/{cid}", json={"follow_status": "frozen"}, headers=headers)
+    assert resp.status_code == 422, f"无效 follow_status 应返回 422: {resp.status_code}"
