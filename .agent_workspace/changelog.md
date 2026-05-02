@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第一百八十六轮·自动循环）
+
+### 测试：补强 API client 配置测试（timeout/Content-Type 2 项）
+
+- 扩展 `client.test.ts`（3→5 项）
+- 验证 timeout 默认 15 秒
+- 验证默认 Content-Type 头存在
+- 前端 327→329，总计 1040 tests
+
 ## 2026-05-02（第一百八十五轮·自动循环）
 
 ### 测试：新增导出 API _csv_filename 单元测试（3 项）
