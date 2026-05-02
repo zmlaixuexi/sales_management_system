@@ -201,3 +201,40 @@ def test_security_headers_referrer_policy():
     resp = client.get("/api/test")
     assert resp.headers["Referrer-Policy"] == "strict-origin-when-cross-origin"
     assert resp.headers["Permissions-Policy"] == "camera=(), microphone=(), geolocation=()"
+
+
+def test_security_headers_xss_protection():
+    """X-XSS-Protection 头设置正确"""
+    app = FastAPI()
+    app.add_middleware(SecurityHeadersMiddleware)
+
+    @app.get("/api/v1/test")
+    async def test_endpoint():
+        return {"ok": True}
+
+    client = TestClient(app)
+    resp = client.get("/api/v1/test")
+    assert resp.headers["X-XSS-Protection"] == "1; mode=block"
+
+
+def test_security_headers_on_error_responses():
+    """错误响应也应包含安全头"""
+    from fastapi.responses import JSONResponse
+
+    app = FastAPI()
+    app.add_middleware(SecurityHeadersMiddleware)
+
+    @app.exception_handler(ValueError)
+    async def value_error_handler(request, exc):
+        return JSONResponse(status_code=500, content={"detail": str(exc)})
+
+    @app.get("/api/v1/test")
+    async def test_endpoint():
+        raise ValueError("test error")
+
+    client = TestClient(app, raise_server_exceptions=False)
+    resp = client.get("/api/v1/test")
+    assert resp.status_code == 500
+    assert resp.headers["X-Content-Type-Options"] == "nosniff"
+    assert resp.headers["X-Frame-Options"] == "DENY"
+    assert resp.headers["Cache-Control"] == "no-store"
