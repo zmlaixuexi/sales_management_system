@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百五十五轮·自动循环）
+
+### 文档：同步测试总数和配置变更
+
+- testing.md：后端测试总数 1190→1210，总计 1572→1592，补充边界测试补强描述（分页/排序/null/极端值等）
+- deployment.md：Nginx gzip 压缩描述更新为"级别 6，16×8K buffer"
+- api.md：PRODUCT_SKU_DUPLICATED 区分创建时 409 Conflict 和更新时 400 Bad Request
+
 ## 2026-05-03（第四百五十四轮·自动循环）
 
 ### 性能优化：Nginx gzip 压缩级别提升 + 前端 bundle 分析
