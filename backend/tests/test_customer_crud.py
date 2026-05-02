@@ -539,3 +539,40 @@ def test_32_list_customers_page_size_over_max_422():
 
     resp = client.get("/api/v1/customers", params={"page_size": 101}, headers=headers)
     assert resp.status_code == 422
+
+
+def test_33_customer_soft_delete_audit_log():
+    """客户软删除产生审计日志"""
+    from app.core.security import create_access_token
+    from app.models.audit import AuditLog
+
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "crud_admin").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+    # 创建一个可删除的客户
+    resp = client.post("/api/v1/customers", json={
+        "name": "审计删除客户",
+        "phone": "13800009977",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    # 软删除
+    resp = client.delete(f"/api/v1/customers/{cid}", headers=headers)
+    assert resp.status_code == 200
+
+    # 直接查询数据库验证审计日志
+    db = TestSession()
+    try:
+        log = db.query(AuditLog).filter(
+            AuditLog.action == "customer_delete",
+            AuditLog.resource_id == cid,
+        ).first()
+        assert log is not None
+        assert log.resource_type == "customer"
+    finally:
+        db.close()
