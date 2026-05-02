@@ -110,6 +110,9 @@ make docker-down
 |---|---|---|
 | APP_ENV | development | 应用环境（development / production） |
 | BACKEND_PORT | 8000 | 后端服务端口 |
+| FRONTEND_PORT | 5173 | 前端开发服务端口（仅 Docker 开发环境） |
+| HTTP_PORT | 80 | 生产环境 Nginx 端口 |
+| UVICORN_WORKERS | 2 | Uvicorn Worker 数量（仅生产环境） |
 
 ### 数据库
 
@@ -117,6 +120,9 @@ make docker-down
 |---|---|---|
 | DATABASE_URL | — | PostgreSQL 连接字符串（同步驱动） |
 | DATABASE_ASYNC_URL | — | PostgreSQL 连接字符串（异步驱动） |
+| POSTGRES_USER | postgres | PostgreSQL 用户名（Docker 环境使用） |
+| POSTGRES_PASSWORD | — | PostgreSQL 密码（**Docker 环境必须设置**） |
+| POSTGRES_DB | sales_mgmt | PostgreSQL 数据库名（Docker 环境使用） |
 | DB_POOL_SIZE | 5 | 连接池大小（生产建议 10） |
 | DB_MAX_OVERFLOW | 10 | 连接池最大溢出（生产建议 20） |
 | DB_POOL_RECYCLE_SECONDS | 1800 | 连接回收时间（秒） |
@@ -170,9 +176,25 @@ make docker-down
 生产环境 Nginx 配置（`deploy/nginx.conf`）：
 
 - 前端 SPA 路由支持（try_files fallback）
-- API 请求代理到后端
-- 静态资源 7 天缓存
+- API 请求代理到后端（`/api/` → `http://backend`）
+- 上传文件代理到后端（`/uploads/` → `http://backend`）
+- 健康检查代理（`/health` → `/api/v1/health`）
+- 静态资源 7 天缓存（js/css/图片/字体等）
+- Gzip 压缩
 - 安全响应头（CSP、X-Frame-Options、X-Content-Type-Options 等）
+- 隐藏文件拒绝访问（`.env`、`.git` 等）
+- 请求体大小限制 20MB（`client_max_body_size`，为后端 `MAX_IMAGE_SIZE_MB`/`MAX_CSV_IMPORT_SIZE_MB` 的上限）
+
+## 数据持久化
+
+Docker Compose 使用命名卷持久化数据：
+
+| 卷名 | 挂载点 | 用途 |
+|---|---|---|
+| postgres_data | /var/lib/postgresql/data | 数据库数据 |
+| uploads_data | /app/uploads | 上传文件 |
+
+删除容器不会丢失数据，但 `docker compose down -v` 会删除卷。
 
 ## 数据库备份与恢复
 
