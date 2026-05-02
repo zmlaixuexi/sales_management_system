@@ -134,7 +134,7 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（609 个）
+# 后端测试（623 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
@@ -177,12 +177,12 @@ npm run build
 | 订单金额计算 | 10 | _calc_order_totals 金额/零值/精度，_prepare_item 价格/折扣/快照/低于成本价阻止 |
 | 商品利润计算 | 6 | _calc_profit 基本利润/除零保护/亏损/零利润/精度/高毛利率 |
 | 审计服务函数 | 11 | _mask_sensitive 脱敏（含手机号/邮箱），model_to_dict 模型转换，get_request_meta |
-| 日志格式器 | 6 | _JsonFormatter JSON 输出/异常/extra_fields，log_action 容错 |
+| 日志格式器 | 10 | _JsonFormatter JSON 输出/异常/extra_fields，log_action 容错，request_id/user_id contextvar 注入/空值/优先级 |
 | 导出辅助函数 | 13 | _dec/_str/_dt CSV 格式化 |
-| 文件服务 | 4 | 扩展名/MIME/大小/正常 |
+| 文件服务 | 13 | 扩展名/MIME/大小/正常/webp/大写扩展名/扩展名与 MIME 独立校验/边界大小/魔数字节校验 |
 | CSV 导入校验 | 9 | 文件名/扩展名/BOM/编码/大小限制/空文件/仅有表头 |
 | 慢查询 | 5 | 慢查询结构化日志记录、SQL 截断、阈值验证 |
-| **合计** | **609** | |
+| **合计** | **623** | |
 
 ### 前端测试覆盖
 

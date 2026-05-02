@@ -93,3 +93,72 @@ def test_get_logger_returns_named_logger():
     """get_logger 返回指定名称的 logger"""
     logger = get_logger("test_module")
     assert logger.name == "test_module"
+
+
+def test_json_formatter_injects_request_id_from_context():
+    """request_id_ctx 有值时自动注入到日志条目"""
+    from app.core.request_id import request_id_ctx
+
+    fmt = _JsonFormatter()
+    token = request_id_ctx.set("req-abc-123")
+    try:
+        record = logging.LogRecord(
+            name="test", level=logging.INFO, pathname="", lineno=0,
+            msg="with request", args=(), exc_info=None,
+        )
+        output = fmt.format(record)
+        data = json.loads(output)
+        assert data["request_id"] == "req-abc-123"
+    finally:
+        request_id_ctx.reset(token)
+
+
+def test_json_formatter_injects_user_id_from_context():
+    """user_id_ctx 有值时自动注入到日志条目"""
+    from app.core.user_context import user_id_ctx
+
+    fmt = _JsonFormatter()
+    token = user_id_ctx.set("user-456")
+    try:
+        record = logging.LogRecord(
+            name="test", level=logging.INFO, pathname="", lineno=0,
+            msg="with user", args=(), exc_info=None,
+        )
+        output = fmt.format(record)
+        data = json.loads(output)
+        assert data["user_id"] == "user-456"
+    finally:
+        user_id_ctx.reset(token)
+
+
+def test_json_formatter_omits_empty_context_vars():
+    """context vars 为空字符串时不注入对应字段"""
+    fmt = _JsonFormatter()
+    record = logging.LogRecord(
+        name="test", level=logging.INFO, pathname="", lineno=0,
+        msg="no context", args=(), exc_info=None,
+    )
+    output = fmt.format(record)
+    data = json.loads(output)
+    assert "request_id" not in data
+    assert "user_id" not in data
+
+
+def test_json_formatter_extra_fields_override_context_vars():
+    """extra_fields 中的 request_id 应优先于 context var"""
+    from app.core.request_id import request_id_ctx
+
+    fmt = _JsonFormatter()
+    token = request_id_ctx.set("ctx-id")
+    try:
+        record = logging.LogRecord(
+            name="test", level=logging.INFO, pathname="", lineno=0,
+            msg="override", args=(), exc_info=None,
+        )
+        record.extra_fields = {"request_id": "extra-id"}
+        output = fmt.format(record)
+        data = json.loads(output)
+        # extra_fields 先 update，context var 后覆盖 — context var 优先
+        assert data["request_id"] == "ctx-id"
+    finally:
+        request_id_ctx.reset(token)

@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-05-02（第一百五十八轮·自动循环）
+
+### 测试：日志 contextvar 注入 + 文件服务边界测试补强（+13 tests，920→933）
+
+- `backend/tests/test_logging.py`：新增 4 个测试
+  - request_id 从 contextvar 自动注入日志条目
+  - user_id 从 contextvar 自动注入日志条目
+  - context var 为空时不注入对应字段
+  - extra_fields 与 context var 优先级验证
+- `backend/tests/test_file_service.py`：新增 9 个测试
+  - webp 格式验证
+  - 大写扩展名处理
+  - 扩展名与 MIME 类型独立校验
+  - 边界大小（恰好等于限制、超限 1 字节）
+  - 魔数字节校验（JPEG/PNG 有效头、无效头、空文件）
+- 后端 610→623 tests，总计 920→933
+
 ## 2026-05-02（第一百五十七轮·自动循环）
 
 ### 测试：导航布局补强 3 个测试用例（307→310）
