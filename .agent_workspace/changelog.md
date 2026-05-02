@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-02（第二百六十四轮·自动循环）
+
+### 文档：修正 api.md 6 处与实际实现不一致
+
+- 健康检查：database "connected" → "ok"（匹配实际返回值）
+- 修改密码：补充 INVALID_PASSWORD 错误码说明
+- 销售汇总：利润字段标注需要 report:profit 权限
+- 文件上传：补充 original_name/content_type/size_bytes 响应字段
+- 客户排行/销售排行：order:view_cost → report:profit，补充 user_id 字段
+- API 端点全面核查：所有 53 个端点均已实现且在 api.md 中有记录
+
 ## 2026-05-02（第二百六十三轮·自动循环）
 
 ### 文档：更新 implemented-features.md（FEAT-181~184）
