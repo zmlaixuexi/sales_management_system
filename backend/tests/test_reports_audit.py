@@ -752,3 +752,39 @@ def test_49_sales_summary_zero_data():
     assert Decimal(data["total_amount"]) == 0
     assert data["order_count"] == 0
     assert Decimal(data["gross_margin"]) == 0
+
+
+def test_50_sales_trend_zero_data():
+    """无订单用户销售趋势返回零填充日期"""
+    from app.models.user import Permission, Role, RolePermission, UserRole
+
+    db = TestSession()
+    try:
+        user = User(
+            id=uuid.uuid4(), username="zero_trend_user",
+            hashed_password=hash_password("testpass123"),
+            display_name="零趋势用户", is_active=True, is_superuser=False,
+        )
+        db.add(user)
+        role = Role(id=uuid.uuid4(), name="zero_trend_role", display_name="零趋势角色")
+        db.add(role)
+        db.flush()
+        for code in ["report:sales"]:
+            perm = db.query(Permission).filter(Permission.code == code).first()
+            if not perm:
+                perm = Permission(id=uuid.uuid4(), code=code, name=code, module="report")
+                db.add(perm)
+                db.flush()
+            db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+        db.add(UserRole(user_id=user.id, role_id=role.id))
+        db.commit()
+        token = create_access_token(subject=str(user.id))
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/reports/sales-trend?period=7d", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) > 0, "趋势应包含日期填充"
+    assert all(Decimal(item["amount"]) == 0 for item in items), "所有日期金额应为零"
+    assert all(item["order_count"] == 0 for item in items), "所有日期订单数应为零"
