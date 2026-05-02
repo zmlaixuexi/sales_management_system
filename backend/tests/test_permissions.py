@@ -86,6 +86,7 @@ def setup_module(module):
             "customer:list", "customer:create",
             "order:list", "order:create", "order:view",
             "product:list",
+            "report:sales",
         ])
         global _sale_user_id
         _sale_user_id = str(sale_user.id)
@@ -281,3 +282,68 @@ def test_10_order_logs_strip_cost_fields():
         # 销售员无 product:view_cost，不应看到成本字段
         assert "cost_price" not in after
         assert "subtotal_cost" not in after
+
+
+def test_11_export_products_no_cost_columns():
+    """无 product:view_cost 权限用户导出商品 CSV 不含成本价列"""
+    resp = client.get("/api/v1/exports/products", headers=_auth("sale01"))
+    assert resp.status_code == 200
+    content = resp.text
+    lines = content.strip().split("\n")
+    header = lines[0]
+    assert "成本价" not in header, "无 view_cost 权限导出不应含成本价列"
+    assert "利润" not in header, "无 view_cost 权限导出不应含利润列"
+
+
+def test_12_export_products_admin_has_cost_columns():
+    """管理员导出商品 CSV 含成本价列"""
+    resp = client.get("/api/v1/exports/products", headers=_auth("perm_admin"))
+    assert resp.status_code == 200
+    content = resp.text
+    lines = content.strip().split("\n")
+    header = lines[0]
+    assert "成本价" in header, "管理员导出应含成本价列"
+
+
+def test_13_export_orders_no_profit_columns():
+    """无 product:view_cost 权限用户导出订单 CSV 不含成本/毛利列"""
+    resp = client.get("/api/v1/exports/orders", headers=_auth("sale01"))
+    assert resp.status_code == 200
+    content = resp.text
+    lines = content.strip().split("\n")
+    header = lines[0]
+    assert "成本" not in header, "无 view_cost 权限导出订单不应含成本列"
+    assert "毛利" not in header, "无 view_cost 权限导出订单不应含毛利列"
+
+
+def test_14_export_orders_admin_has_profit_columns():
+    """管理员导出订单 CSV 含成本/毛利列"""
+    resp = client.get("/api/v1/exports/orders", headers=_auth("perm_admin"))
+    assert resp.status_code == 200
+    content = resp.text
+    lines = content.strip().split("\n")
+    header = lines[0]
+    assert "成本" in header, "管理员导出订单应含成本列"
+    assert "毛利" in header, "管理员导出订单应含毛利列"
+
+
+def test_15_report_summary_no_profit():
+    """无 report:profit 权限用户查看报表不含成本/毛利数据"""
+    resp = client.get("/api/v1/reports/sales-summary?period=30d", headers=_auth("sale01"))
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert "total_cost" not in data, "无 report:profit 不应返回 total_cost"
+    assert "gross_profit" not in data, "无 report:profit 不应返回 gross_profit"
+    assert "gross_margin" not in data, "无 report:profit 不应返回 gross_margin"
+    assert "total_amount" in data, "应返回 total_amount"
+    assert "order_count" in data, "应返回 order_count"
+
+
+def test_16_report_summary_admin_has_profit():
+    """管理员查看报表含成本/毛利数据"""
+    resp = client.get("/api/v1/reports/sales-summary?period=30d", headers=_auth("perm_admin"))
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert "total_cost" in data, "管理员应看到 total_cost"
+    assert "gross_profit" in data, "管理员应看到 gross_profit"
+    assert "gross_margin" in data, "管理员应看到 gross_margin"
