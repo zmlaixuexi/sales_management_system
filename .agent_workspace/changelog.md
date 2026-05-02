@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百二十四轮·自动循环）
+
+### 测试补强：商品/客户导入审计日志 after_data 含导入数量
+
+- `test_audit_log.py`：新增 test_109（商品导入 after_data 含 created/errors）、test_110（客户导入 after_data 含 created/errors）
+- `docs/testing.md`：更新后端测试总数 1106→1108、总计 1488→1490、test_audit_log.py 110→112
+- 后端测试：1108/1108 全绿，ruff clean
+
 ## 2026-05-03（第四百二十二轮·自动循环）
 
 ### 测试补强：商品停用审计日志 after_data 含 status=disabled 验证

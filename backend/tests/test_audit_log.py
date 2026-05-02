@@ -2950,3 +2950,55 @@ def test_108_product_disable_audit_log_after_data_has_status_disabled():
         f"after_data.status 不是 disabled: {log['after_data']['status']}"
     )
     assert log["before_data"]["status"] == "active"
+
+
+def test_109_product_import_audit_log_after_data_has_import_count():
+    """商品导入审计日志 after_data 含 created 和 errors 字段"""
+    headers = _admin_auth()
+    csv_content = "商品名称,销售价,成本价,库存\n导入审计商品A,100.00,50.00,10\n导入审计商品B,200.00,80.00,5"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=headers,
+    )
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=product_import", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) > 0
+    log = items[0]
+    assert log["after_data"] is not None
+    assert "created" in log["after_data"], f"after_data 缺少 created: {log['after_data']}"
+    assert isinstance(log["after_data"]["created"], int)
+    assert log["after_data"]["created"] >= 1
+    assert "errors" in log["after_data"], f"after_data 缺少 errors: {log['after_data']}"
+    assert isinstance(log["after_data"]["errors"], int)
+
+
+def test_110_customer_import_audit_log_after_data_has_import_count():
+    """客户导入审计日志 after_data 含 created 和 errors 字段"""
+    headers = _admin_auth()
+    csv_content = (
+        "客户名称,电话,来源,等级\n"
+        "导入审计客户110A,13900110001,online,normal\n"
+        "导入审计客户110B,13900110002,offline,vip"
+    )
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=headers,
+    )
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=customer_import", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) > 0
+    log = items[0]
+    assert log["after_data"] is not None
+    assert "created" in log["after_data"], f"after_data 缺少 created: {log['after_data']}"
+    assert isinstance(log["after_data"]["created"], int)
+    assert log["after_data"]["created"] >= 1
+    assert "errors" in log["after_data"], f"after_data 缺少 errors: {log['after_data']}"
+    assert isinstance(log["after_data"]["errors"], int)
