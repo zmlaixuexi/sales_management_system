@@ -682,3 +682,74 @@ def test_27_reverse_all_payments_order_back_to_confirmed():
     resp = client.get(f"/api/v1/sales-orders/{order_id}", headers=_auth())
     assert resp.json()["data"]["status"] == "confirmed"
     assert resp.json()["data"]["paid_amount"] == "0.00"
+
+
+def test_28_payment_list_excludes_deleted_order():
+    """已删除订单的收款记录不出现在收款列表"""
+    db = TestSession()
+    try:
+        from datetime import UTC, datetime
+
+        admin = db.query(User).filter(User.id == uuid.UUID(_admin_id)).first()
+        customer = Customer(
+            id=uuid.uuid4(),
+            name="删除订单收款测试客户",
+            phone="13900990077",
+            owner_user_id=admin.id,
+            created_by=admin.id,
+        )
+        db.add(customer)
+        db.flush()
+        product = Product(
+            id=uuid.uuid4(),
+            name="删除订单收款测试商品",
+            sku="PAY-DEL-001",
+            sale_price=100,
+            cost_price=50,
+            stock_quantity=10,
+            status="active",
+            created_by=admin.id,
+            updated_by=admin.id,
+        )
+        db.add(product)
+        db.flush()
+        order = SalesOrder(
+            id=uuid.uuid4(),
+            order_no="SO-PAY-DEL",
+            customer_id=customer.id,
+            sales_user_id=admin.id,
+            status="confirmed",
+            total_amount=100,
+            total_cost=50,
+            gross_profit=50,
+            gross_margin=0.5,
+            paid_amount=100,
+            created_by=admin.id,
+            updated_by=admin.id,
+        )
+        db.add(order)
+        db.flush()
+        payment = Payment(
+            id=uuid.uuid4(),
+            order_id=order.id,
+            amount=100,
+            payment_method="cash",
+            operator_id=admin.id,
+            status="normal",
+        )
+        db.add(payment)
+        db.flush()
+        pid = str(payment.id)
+        oid = str(order.id)
+
+        # 软删除订单
+        order.deleted_at = datetime.now(UTC)
+        db.commit()
+    finally:
+        db.close()
+
+    # 收款列表不应包含已删除订单的收款
+    resp = client.get("/api/v1/payments", headers=_auth())
+    assert resp.status_code == 200
+    ids = [p["id"] for p in resp.json()["data"]["items"]]
+    assert pid not in ids, "已删除订单的收款不应出现在列表中"

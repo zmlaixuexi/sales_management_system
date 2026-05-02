@@ -198,6 +198,14 @@ def test_09_verify_deleted():
     assert resp.status_code == 404
 
 
+def test_09b_list_excludes_deleted():
+    """列表不含已删除客户"""
+    resp = client.get("/api/v1/customers", headers=_auth())
+    assert resp.status_code == 200
+    ids = [c["id"] for c in resp.json()["data"]["items"]]
+    assert _customer_id not in ids
+
+
 def test_10_update_customer_empty_name():
     """编辑客户名称为空"""
     # 创建一个新客户用于测试
