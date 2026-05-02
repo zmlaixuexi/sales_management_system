@@ -44,6 +44,12 @@ def pytest_collection_modifyitems(items):
         "test_export_helpers": "export",
         "test_csv_import": "import",
         "test_file_service": "security",
+        "test_auth_rate_limit": "security",
+        "test_product_helpers": "crud",
+        "test_customer_helpers": "crud",
+        "test_order_inventory": "crud",
+        "test_order_validate_items": "crud",
+        "test_payment_register": "crud",
     }
     for item in items:
         for pattern, marker in file_markers.items():

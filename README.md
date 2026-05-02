@@ -134,7 +134,7 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（716 个）
+# 后端测试（760 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
@@ -187,7 +187,12 @@ npm run build
 | 安全模块 | 14 | hash_password bcrypt 哈希/盐值、verify_password 正确/错误/空密码、create_access_token 解码/type/exp/自定义过期、create_refresh_token 解码/type/exp/长于 access |
 | 报表辅助函数 | 11 | _date_range 全分支（today/7d/30d/this_month/last_month/跨月边界/跨年边界/月初/无效 period）、_apply_data_scope 管理员/销售 |
 | 慢查询 | 5 | 慢查询结构化日志记录、SQL 截断、阈值验证 |
-| **合计** | **716** | |
+| 商品辅助函数 | 10 | _validate_category_id 存在/不存在，_get_default_category_id 已存在/自动创建，_batch_sales_stats 空列表/无订单/已确认/排除草稿取消/排除软删除/多订单汇总 |
+| 客户辅助函数 | 4 | _validate_owner_user 活跃/不存在/已禁用/软删除 |
+| 订单库存辅助函数 | 10 | _deduct_inventory 正常/库存不足/商品不存在/软删除/多明细/恰好等于需求，_restore_inventory 正常/不存在静默跳过/软删除跳过/多明细 |
+| 订单明细校验 | 10 | _validate_and_prepare_items 单个/多商品/不存在/软删除/停用/禁用/自定义单价/空列表/无效 UUID/混合 |
+| 收款登记服务 | 10 | register_payment 部分/全额/分次收款，订单不存在/草稿/取消/完成拒绝，超额/恰好剩余，操作人记录 |
+| **合计** | **760** | |
 
 ### 前端测试覆盖
 
