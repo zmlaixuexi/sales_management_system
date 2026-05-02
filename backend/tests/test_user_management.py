@@ -487,3 +487,12 @@ def test_32_list_users_keyword_like_underscore():
     items = resp.json()["data"]["items"]
     # escape_like 应转义 _，所以搜索 _ 只匹配用户名中真正含 _ 的用户
     assert all("_" in u.get("username", "") for u in items)
+
+
+def test_33_list_users_page_size_100():
+    """用户列表 page_size=100（最大值）正常返回"""
+    resp = client.get("/api/v1/users", params={"page_size": 100}, headers=_admin_auth())
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["page_size"] == 100
+    assert isinstance(data["items"], list)

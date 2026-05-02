@@ -881,3 +881,32 @@ def test_33_payment_list_page_size_100():
     data = resp.json()["data"]
     assert data["page_size"] == 100
     assert isinstance(data["items"], list)
+
+
+def test_34_payment_remark_xss_sanitized():
+    """收款备注 HTML 标签被清理"""
+    # 创建并确认新订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    order_id = resp.json()["data"]["id"]
+
+    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
+    assert resp.status_code == 200
+
+    # 创建带 HTML 标签备注的收款
+    resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
+        "amount": "10", "payment_method": "cash",
+        "remark": "<script>alert('xss')</script>正常备注",
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    # 通过列表验证备注已清理
+    resp = client.get("/api/v1/payments", params={"order_id": order_id}, headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    payment = next(p for p in items if p.get("remark"))
+    assert "<script>" not in payment["remark"]
+    assert "正常备注" in payment["remark"]
