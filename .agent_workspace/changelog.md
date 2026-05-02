@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百八十二轮·自动循环）
+
+### 测试补强：密码修改审计日志 after_data 完整性验证
+
+- `auth.py`：密码修改审计日志增加 after_data（含 username 和 action）
+- `test_audit_log.py`：新增 test_68（密码修改 after_data 含 username/action，before_data 为 None，ip_address 非空）
+- 后端测试：1059/1059 全绿
+
 ## 2026-05-02（第三百八十一轮·自动循环）
 
 ### 测试补强：用户禁用/启用审计日志 before_data 验证

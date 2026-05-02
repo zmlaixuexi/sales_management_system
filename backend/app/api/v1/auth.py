@@ -168,6 +168,7 @@ def change_password(
         db, action="password_change", resource_type="user",
         resource_id=str(current_user.id), actor_id=current_user.id,
         actor_name=current_user.display_name or current_user.username,
+        after_data={"username": current_user.username, "action": "password_change"},
         **meta,
     )
     db.commit()
