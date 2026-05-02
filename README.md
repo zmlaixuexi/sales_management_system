@@ -134,7 +134,7 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（760 个）
+# 后端测试（767 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
@@ -192,7 +192,8 @@ npm run build
 | 订单库存辅助函数 | 10 | _deduct_inventory 正常/库存不足/商品不存在/软删除/多明细/恰好等于需求，_restore_inventory 正常/不存在静默跳过/软删除跳过/多明细 |
 | 订单明细校验 | 10 | _validate_and_prepare_items 单个/多商品/不存在/软删除/停用/禁用/自定义单价/空列表/无效 UUID/混合 |
 | 收款登记服务 | 10 | register_payment 部分/全额/分次收款，订单不存在/草稿/取消/完成拒绝，超额/恰好剩余，操作人记录 |
-| **合计** | **760** | |
+| 请求体大小限制 | 7 | GET/OPTIONS 不受限，正常 POST 通过，超限返回 413，multipart 豁免，恰好等于限制通过 |
+| **合计** | **767** | |
 
 ### 前端测试覆盖
 

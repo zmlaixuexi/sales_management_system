@@ -50,6 +50,7 @@ def pytest_collection_modifyitems(items):
         "test_order_inventory": "crud",
         "test_order_validate_items": "crud",
         "test_payment_register": "crud",
+        "test_body_limit": "security",
     }
     for item in items:
         for pattern, marker in file_markers.items():

@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 import app.core.logging
 from app.api.v1.router import api_router
+from app.core.body_limit import BodyLimitMiddleware
 from app.core.config import settings
 from app.core.ratelimit import add_rate_limit
 from app.core.request_id import RequestIDMiddleware
@@ -135,6 +136,7 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
 )
 
+app.add_middleware(BodyLimitMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RequestLogMiddleware)
 app.add_middleware(RequestIDMiddleware)
