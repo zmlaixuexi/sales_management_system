@@ -1416,3 +1416,48 @@ def test_72_product_update_name_max_length_boundary():
     # 201 字符
     resp = client.put(f"/api/v1/products/{pid}", json={"name": "商" * 201}, headers=headers)
     assert resp.status_code == 422, f"201 字符名称应被拒绝: {resp.status_code}"
+
+
+def test_73_product_create_sku_max_length_boundary():
+    """商品创建 SKU 恰好 50 字符通过，51 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    # 恰好 50 字符
+    resp = client.post("/api/v1/products", json={"name": "SKU边界商品73", "price": 10.00, "sku": "S" * 50}, headers=headers)
+    assert resp.status_code == 200, f"50 字符 SKU 应通过: {resp.json()}"
+
+    # 51 字符
+    resp = client.post("/api/v1/products", json={"name": "SKU边界商品73b", "price": 10.00, "sku": "S" * 51}, headers=headers)
+    assert resp.status_code == 422, f"51 字符 SKU 应被拒绝: {resp.status_code}"
+
+
+def test_74_product_update_sku_max_length_boundary():
+    """商品编辑 SKU 恰好 50 字符通过，51 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/products", json={"name": "SKU编辑边界74", "price": 10.00}, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    # 恰好 50 字符（用唯一前缀避免与 test_73 的 SKU 冲突）
+    resp = client.put(f"/api/v1/products/{pid}", json={"sku": "U" * 50}, headers=headers)
+    assert resp.status_code == 200, f"50 字符 SKU 应通过: {resp.json()}"
+
+    # 51 字符
+    resp = client.put(f"/api/v1/products/{pid}", json={"sku": "U" * 51}, headers=headers)
+    assert resp.status_code == 422, f"51 字符 SKU 应被拒绝: {resp.status_code}"
+
+
+def test_75_customer_update_name_max_length_boundary():
+    """客户编辑名称恰好 200 字符通过，201 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/customers", json={"name": "名称编辑边界75", "phone": "13900757575"}, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    # 恰好 200 字符
+    resp = client.put(f"/api/v1/customers/{cid}", json={"name": "名" * 200}, headers=headers)
+    assert resp.status_code == 200, f"200 字符名称应通过: {resp.json()}"
+
+    # 201 字符
+    resp = client.put(f"/api/v1/customers/{cid}", json={"name": "名" * 201}, headers=headers)
+    assert resp.status_code == 422, f"201 字符名称应被拒绝: {resp.status_code}"
