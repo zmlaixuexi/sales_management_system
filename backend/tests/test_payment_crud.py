@@ -1141,3 +1141,30 @@ def test_45_create_payment_empty_amount_422():
         "payment_method": "cash",
     }, headers=headers)
     assert resp.status_code == 422
+
+
+def test_46_double_reverse_second_returns_404():
+    """同一笔收款冲正两次：第一次成功，第二次返回 404"""
+    # 创建并确认订单 + 收款
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    order_id = resp.json()["data"]["id"]
+    client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
+
+    pay_resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
+        "amount": "50", "payment_method": "cash",
+    }, headers=_auth())
+    assert pay_resp.status_code == 200
+    pay_id = pay_resp.json()["data"]["id"]
+
+    # 第一次冲正成功
+    resp1 = client.post(f"/api/v1/payments/{pay_id}/reverse", headers=_auth())
+    assert resp1.status_code == 200
+
+    # 第二次冲正返回 404（已被 with_for_update 行锁保护）
+    resp2 = client.post(f"/api/v1/payments/{pay_id}/reverse", headers=_auth())
+    assert resp2.status_code == 404
+    assert "已冲正" in resp2.json()["error"]["message"]

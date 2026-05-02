@@ -124,7 +124,12 @@ def reverse_payment(
     current_user: User = Depends(require_permission("payment:reverse")),
 ):
     """冲正收款"""
-    payment = db.query(Payment).filter(Payment.id == payment_id, Payment.status == "normal").first()
+    payment = (
+        db.query(Payment)
+        .filter(Payment.id == payment_id, Payment.status == "normal")
+        .with_for_update()
+        .first()
+    )
     if not payment:
         raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "收款记录不存在或已冲正"})
 
