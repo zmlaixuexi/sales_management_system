@@ -342,13 +342,15 @@ def transfer_customer(
     # 校验目标用户存在且活跃
     _validate_owner_user(db, owner_uid)
 
+    old_owner = str(customer.owner_user_id) if customer.owner_user_id else None
     customer.owner_user_id = owner_uid
     customer.updated_by = current_user.id
     log_user_action(
         db, request, current_user,
         action="customer_transfer", resource_type="customer",
         resource_id=str(customer.id),
-        after_data={"owner_user_id": str(new_owner_id)},
+        before_data={"name": customer.name, "owner_user_id": old_owner},
+        after_data={"name": customer.name, "owner_user_id": str(new_owner_id)},
     )
     db.commit()
 

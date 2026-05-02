@@ -419,6 +419,12 @@ def update_order(
         raise HTTPException(status_code=400, detail={"code": "ORDER_INVALID_STATUS", "message": "只有草稿订单可以编辑"})
 
     raw_items = data.items
+    before_snapshot = {
+        "order_no": order.order_no,
+        "status": order.status,
+        "total_amount": str(order.total_amount),
+        "remark": order.remark,
+    }
     if raw_items is not None:
 
         # 删除旧明细
@@ -447,7 +453,8 @@ def update_order(
         db, request, current_user,
         action="order_update", resource_type="order",
         resource_id=str(order.id),
-        after_data={"order_no": order.order_no},
+        before_data=before_snapshot,
+        after_data={"order_no": order.order_no, "status": order.status, "total_amount": str(order.total_amount)},
     )
     db.commit()
 

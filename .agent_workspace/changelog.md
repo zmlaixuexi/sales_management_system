@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-05-02（第三百七十七轮·自动循环）
+
+### 测试补强：客户转移审计日志 before_data 增强
+
+- `customers.py`：客户转移审计日志增加 before_data（含 name 和原 owner_user_id）
+- `test_audit_log.py`：新增 test_62（客户转移 before_data 含原 owner，after_data 含新 owner）
+- 后端测试：1049/1049 全绿
+
+## 2026-05-02（第三百七十六轮·自动循环）
+
+### 测试补强：订单编辑审计日志 before_data 增强
+
+- `orders.py`：订单编辑审计日志增加 before_data（含 order_no/status/total_amount/remark），after_data 增加 status/total_amount
+- `test_audit_log.py`：新增 test_61（订单编辑 before_data 含原 total_amount，after_data 含新值）
+- 后端测试：1048/1048 全绿
+
 ## 2026-05-02（第三百七十五轮·自动循环）
 
 ### 测试补强：审计日志搜索/分页/筛选验证 + docs/testing.md 同步

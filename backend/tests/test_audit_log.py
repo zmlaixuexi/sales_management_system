@@ -1430,3 +1430,102 @@ def test_60_audit_log_export_action_type_filter():
         for log in items:
             assert log["action"] == "export_products"
             assert log["resource_type"] == "product"
+
+
+def test_61_order_update_audit_log_before_data():
+    """订单编辑审计日志 before_data 含编辑前 total_amount，after_data 含编辑后值"""
+    headers = _admin_auth()
+    # 创建商品
+    resp = client.post("/api/v1/products", json={
+        "name": "订单编辑审计商品",
+        "cost_price": "10.00",
+        "sale_price": "20.00",
+        "stock_quantity": 100,
+        "status": "active",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    # 创建客户
+    resp = client.post("/api/v1/customers", json={
+        "name": "订单编辑审计客户",
+        "phone": "13300007777",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cust_id = resp.json()["data"]["id"]
+
+    # 创建订单（2件 × 20.00 = 40.00）
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cust_id,
+        "items": [{"product_id": pid, "quantity": 2, "unit_price": "20.00"}],
+    }, headers=headers)
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+
+    # 编辑订单（改为 3件 × 20.00 = 60.00）
+    resp = client.put(f"/api/v1/sales-orders/{oid}", json={
+        "items": [{"product_id": pid, "quantity": 3, "unit_price": "20.00"}],
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    # 验证审计日志
+    resp = client.get("/api/v1/audit-logs?action=order_update", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == oid)
+    assert log["before_data"]["order_no"] is not None
+    assert log["before_data"]["status"] == "draft"
+    assert log["before_data"]["total_amount"] == "40.00"
+    assert log["after_data"]["order_no"] is not None
+    assert log["after_data"]["status"] == "draft"
+    assert log["after_data"]["total_amount"] == "60.00"
+    assert log["resource_type"] == "order"
+
+
+def test_62_customer_transfer_audit_log_before_data():
+    """客户转移审计日志 before_data 含原 owner_user_id，after_data 含新 owner_user_id"""
+    headers = _admin_auth()
+    # 创建客户
+    resp = client.post("/api/v1/customers", json={
+        "name": "转移审计客户",
+        "phone": "13200008888",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    # 获取管理员 user_id 作为原 owner
+    db = TestSession()
+    try:
+        admin = db.query(User).filter(User.username == "audit_tester").first()
+        admin_id = str(admin.id)
+    finally:
+        db.close()
+
+    # 创建目标用户
+    target = User(
+        id=uuid.uuid4(), username="transfer_target_62",
+        hashed_password=hash_password("testpass123"),
+        display_name="转移目标62", is_active=True, is_superuser=False,
+    )
+    db = TestSession()
+    db.add(target)
+    db.commit()
+    target_id = str(target.id)
+    db.close()
+
+    # 转移客户
+    resp = client.post(f"/api/v1/customers/{cid}/transfer", json={
+        "owner_user_id": target_id,
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    # 验证审计日志
+    resp = client.get("/api/v1/audit-logs?action=customer_transfer", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == cid)
+    assert log["before_data"]["name"] == "转移审计客户"
+    assert log["before_data"]["owner_user_id"] == admin_id
+    assert log["after_data"]["name"] == "转移审计客户"
+    assert log["after_data"]["owner_user_id"] == target_id
+    assert log["resource_type"] == "customer"
