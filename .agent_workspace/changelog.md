@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-03（第四百七十八轮·自动循环）
+
+### 文档：testing.md 更新前端测试计数和模块描述
+
+- 前端测试总数 409→417，总计 1628→1636
+- OrderDetail 测试数 9→14，新增操作日志相关测试描述
+- orders-api 测试数 14→16，新增 fetchOrderLogs 测试描述
+- Payments 测试描述添加导出按钮
+- file_service/file_upload 描述同步异常策略变更
+
 ## 2026-05-03（第四百七十七轮·自动循环）
 
 ### 重构：file_service 异常策略统一为 HTTPException
