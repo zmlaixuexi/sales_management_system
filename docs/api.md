@@ -27,12 +27,16 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "detail": {
+  "success": false,
+  "error": {
     "code": "ERROR_CODE",
     "message": "错误描述"
-  }
+  },
+  "request_id": "uuid"
 }
 ```
+
+422 参数校验错误（FastAPI 自动校验失败）格式相同，`code` 固定为 `VALIDATION_FAILED`。
 
 分页响应的 `data` 结构：
 
@@ -52,16 +56,21 @@ Authorization: Bearer <access_token>
 | 400 | VALIDATION_FAILED | 参数校验失败 |
 | 400 | ORDER_EMPTY_ITEMS | 订单明细为空 |
 | 400 | ORDER_INVALID_STATUS | 订单状态不允许此操作 |
+| 400 | ORDER_HAS_PAYMENTS | 订单已有收款记录，需先冲正 |
 | 400 | INVENTORY_NOT_ENOUGH | 库存不足 |
 | 400 | PAYMENT_AMOUNT_EXCEEDED | 收款金额超过剩余应收 |
 | 400 | PRICE_BELOW_COST | 订单明细单价低于商品成本价 |
 | 400 | PRODUCT_SKU_DUPLICATED | 商品编码重复 |
+| 400 | CUSTOMER_HAS_ORDERS | 客户有未删除订单，无法删除 |
+| 400 | IMPORT_FAILED | CSV 导入失败 |
 | 401 | AUTH_UNAUTHORIZED | 未认证或 Token 无效 |
 | 403 | AUTH_FORBIDDEN | 无权限执行此操作 |
 | 404 | RESOURCE_NOT_FOUND | 资源不存在 |
 | 409 | CUSTOMER_DUPLICATED_WARNING | 客户手机号重复 |
 | 409 | PRODUCT_IN_USE | 商品已被订单引用，无法删除 |
+| 422 | VALIDATION_FAILED | 请求参数格式错误（FastAPI 校验） |
 | 429 | RATE_LIMIT_EXCEEDED | 请求过于频繁，请稍后再试 |
+| 500 | SYSTEM_INTERNAL_ERROR | 服务器内部错误 |
 
 ## 速率限制
 
