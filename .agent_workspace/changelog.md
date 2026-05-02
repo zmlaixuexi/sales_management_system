@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百二十三轮·自动循环）
+
+### 质量：清理冗余 joinedload — 统一使用模型层 lazy="selectin"
+
+- products.py、customers.py、orders.py 移除查询层冗余的 joinedload/subqueryload
+- 模型层 selectin 自动批量加载关联对象，天然避免笛卡尔积
+- 代码更简洁，774 后端测试全绿
+- 更新 implemented-features.md 补充 Round 215-222 的 8 项功能记录
+
 ## 2026-05-02（第二百二十二轮·自动循环）
 
 ### 部署：新增回滚脚本 rollback.sh
