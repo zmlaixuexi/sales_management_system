@@ -3018,3 +3018,61 @@ def test_111_export_audit_log_before_data_is_none():
         log = items[0]
         assert log["before_data"] is None, f"export_products before_data 应为 None: {log['before_data']}"
         assert log["resource_type"] == "product"
+
+
+def test_112_file_upload_audit_log_after_data_has_file_info():
+    """文件上传审计日志 after_data 含 original_name 和 size_bytes"""
+    headers = _admin_auth()
+    # 上传图片（1x1 PNG）
+    import base64
+    png_data = base64.b64decode(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
+    )
+    resp = client.post(
+        "/api/v1/files/images",
+        files={"file": ("test_audit.png", png_data, "image/png")},
+        headers=headers,
+    )
+    assert resp.status_code == 200
+    file_id = resp.json()["data"]["id"]
+
+    resp = client.get("/api/v1/audit-logs?action=file_upload", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == file_id)
+    assert log["after_data"] is not None
+    assert "original_name" in log["after_data"], f"after_data 缺少 original_name: {log['after_data']}"
+    assert log["after_data"]["original_name"] == "test_audit.png"
+    assert "size_bytes" in log["after_data"], f"after_data 缺少 size_bytes: {log['after_data']}"
+    assert isinstance(log["after_data"]["size_bytes"], int)
+    assert log["resource_type"] == "file"
+
+
+def test_113_file_delete_audit_log_before_data_has_file_info():
+    """文件删除审计日志 before_data 含 original_name 和 object_key"""
+    headers = _admin_auth()
+    import base64
+    png_data = base64.b64decode(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
+    )
+    resp = client.post(
+        "/api/v1/files/images",
+        files={"file": ("test_delete_audit.png", png_data, "image/png")},
+        headers=headers,
+    )
+    assert resp.status_code == 200
+    file_id = resp.json()["data"]["id"]
+
+    # 删除文件
+    resp = client.delete(f"/api/v1/files/images/{file_id}", headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=file_delete", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == file_id)
+    assert log["before_data"] is not None
+    assert "original_name" in log["before_data"], f"before_data 缺少 original_name: {log['before_data']}"
+    assert log["before_data"]["original_name"] == "test_delete_audit.png"
+    assert "object_key" in log["before_data"], f"before_data 缺少 object_key: {log['before_data']}"
+    assert log["resource_type"] == "file"

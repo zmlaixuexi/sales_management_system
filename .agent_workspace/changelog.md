@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百二十六轮·自动循环）
+
+### 测试补强：文件上传/删除审计日志 after_data/before_data 含文件信息验证
+
+- `test_audit_log.py`：新增 test_112（文件上传 after_data 含 original_name/size_bytes）、test_113（文件删除 before_data 含 original_name/object_key）
+- `docs/testing.md`：更新后端测试总数 1109→1111、总计 1491→1493、test_audit_log.py 113→115
+- 后端测试：1111/1111 全绿，ruff clean
+
 ## 2026-05-03（第四百二十五轮·自动循环）
 
 ### 测试补强：导出操作审计日志 before_data 为 None 验证
