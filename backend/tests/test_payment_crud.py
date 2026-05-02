@@ -986,3 +986,96 @@ def test_37_list_payments_no_permission_403():
 
     resp = client.get("/api/v1/payments", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 403
+
+
+def _admin_auth():
+    """直接生成 admin token"""
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "pay_tester").first()
+        return {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+
+def test_38_reverse_payment_draft_order_400():
+    """冲正草稿订单的收款返回 400（订单状态不允许）"""
+    headers = _admin_auth()
+
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "pay_tester").first()
+        cat = db.query(ProductCategory).first()
+        cust = db.query(Customer).first()
+        prod = db.query(Product).filter(Product.sku == "PAY-TEST-01").first()
+
+        uid = uuid.uuid4().hex[:8]
+        # 直接创建草稿订单
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=f"PAY-DRAFT-{uid}", customer_id=cust.id,
+            sales_user_id=user.id, status="draft",
+            total_amount=100, total_cost=60,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=prod.id,
+            product_name_snapshot=prod.name, cost_price_snapshot=60,
+            quantity=1, unit_price=100, subtotal_amount=100, subtotal_cost=60,
+        ))
+
+        # 直接创建收款记录（绕过 API，因为草稿订单 API 不允许收款）
+        payment = Payment(
+            id=uuid.uuid4(), order_id=order.id,
+            amount=Decimal("100"), payment_method="cash",
+            status="normal", operator_id=user.id,
+        )
+        db.add(payment)
+        db.commit()
+        pay_id = str(payment.id)
+    finally:
+        db.close()
+
+    resp = client.post(f"/api/v1/payments/{pay_id}/reverse", headers=headers)
+    assert resp.status_code == 400
+    assert resp.json()["error"]["code"] == "ORDER_INVALID_STATUS"
+
+
+def test_39_reverse_payment_cancelled_order_400():
+    """冲正已取消订单的收款返回 400"""
+    headers = _admin_auth()
+
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "pay_tester").first()
+        cat = db.query(ProductCategory).first()
+        cust = db.query(Customer).first()
+        prod = db.query(Product).filter(Product.sku == "PAY-TEST-01").first()
+
+        uid = uuid.uuid4().hex[:8]
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=f"PAY-CANCEL-{uid}", customer_id=cust.id,
+            sales_user_id=user.id, status="cancelled",
+            total_amount=100, total_cost=60,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=prod.id,
+            product_name_snapshot=prod.name, cost_price_snapshot=60,
+            quantity=1, unit_price=100, subtotal_amount=100, subtotal_cost=60,
+        ))
+        payment = Payment(
+            id=uuid.uuid4(), order_id=order.id,
+            amount=Decimal("100"), payment_method="cash",
+            status="normal", operator_id=user.id,
+        )
+        db.add(payment)
+        db.commit()
+        pay_id = str(payment.id)
+    finally:
+        db.close()
+
+    resp = client.post(f"/api/v1/payments/{pay_id}/reverse", headers=headers)
+    assert resp.status_code == 400
+    assert resp.json()["error"]["code"] == "ORDER_INVALID_STATUS"
