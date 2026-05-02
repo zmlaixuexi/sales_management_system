@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-02（第一百九十五轮·自动循环）
+
+### 测试：新增订单库存辅助函数单元测试（10 项）
+
+- 新建 `test_order_inventory.py`，10 个测试覆盖 orders.py 库存辅助函数
+  - _deduct_inventory（6 项）：正常扣减/库存不足/商品不存在/软删除商品
+    /多明细同时扣减/库存恰好等于需求
+  - _restore_inventory（4 项）：正常回滚/商品不存在静默跳过/软删除跳过/多明细同时回滚
+- 验证 InventoryMovement 记录（movement_type/quantity_before/change/after/related_id）
+- 后端 730→740，总计 1079 tests
+
 ## 2026-05-02（第一百九十四轮·自动循环）
 
 ### 测试：新增商品和客户辅助函数单元测试（14 项）
