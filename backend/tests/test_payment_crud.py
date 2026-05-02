@@ -910,3 +910,9 @@ def test_34_payment_remark_xss_sanitized():
     payment = next(p for p in items if p.get("remark"))
     assert "<script>" not in payment["remark"]
     assert "正常备注" in payment["remark"]
+
+
+def test_35_payment_list_page_size_over_max_422():
+    """收款列表 page_size=101 超出上限返回 422"""
+    resp = client.get("/api/v1/payments", params={"page_size": 101}, headers=_auth())
+    assert resp.status_code == 422

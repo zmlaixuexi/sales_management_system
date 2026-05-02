@@ -525,3 +525,17 @@ def test_31_list_customers_page_size_100():
     data = resp.json()["data"]
     assert data["page_size"] == 100
     assert isinstance(data["items"], list)
+
+
+def test_32_list_customers_page_size_over_max_422():
+    """客户列表 page_size=101 超出上限返回 422"""
+    from app.core.security import create_access_token
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "crud_admin").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/customers", params={"page_size": 101}, headers=headers)
+    assert resp.status_code == 422

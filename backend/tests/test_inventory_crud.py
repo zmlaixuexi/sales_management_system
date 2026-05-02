@@ -397,3 +397,9 @@ def test_25_movements_page_size_100():
     data = resp.json()["data"]
     assert data["page_size"] == 100
     assert isinstance(data["items"], list)
+
+
+def test_26_movements_page_size_over_max_422():
+    """库存流水 page_size=101 超出上限返回 422"""
+    resp = client.get("/api/v1/inventory/movements", params={"page_size": 101}, headers=_auth())
+    assert resp.status_code == 422

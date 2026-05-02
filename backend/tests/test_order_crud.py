@@ -1266,3 +1266,9 @@ def test_49_order_remark_xss_sanitized():
     remark = resp.json()["data"]["remark"]
     assert "<script>" not in remark
     assert "正常备注" in remark
+
+
+def test_50_list_orders_page_size_over_max_422():
+    """订单列表 page_size=101 超出上限返回 422"""
+    resp = client.get("/api/v1/sales-orders", params={"page_size": 101}, headers=_auth())
+    assert resp.status_code == 422

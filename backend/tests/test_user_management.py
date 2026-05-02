@@ -496,3 +496,9 @@ def test_33_list_users_page_size_100():
     data = resp.json()["data"]
     assert data["page_size"] == 100
     assert isinstance(data["items"], list)
+
+
+def test_34_list_users_page_size_over_max_422():
+    """用户列表 page_size=101 超出上限返回 422"""
+    resp = client.get("/api/v1/users", params={"page_size": 101}, headers=_admin_auth())
+    assert resp.status_code == 422
