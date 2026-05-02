@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-03（第四百五十三轮·自动循环）
+
+### 代码质量：修复异常处理不一致
+
+审计后端 79 处 HTTPException，修复 3 处不一致：
+- 产品创建 SKU 重复：400 Bad Request → 409 Conflict（语义更准确）
+- 产品/客户导入提交失败：500 Internal Server Error → 400 Bad Request（消息改为"违反唯一性约束"）
+- 同步更新 3 个测试文件的断言
+- 其余发现：error code 命名一致（UPPER_SNAKE_CASE）、detail 结构一致（code+message）、消息语言一致（中文）
+
 ## 2026-05-03（第四百五十二轮·自动循环）
 
 ### 测试补强：20 个边界场景测试
