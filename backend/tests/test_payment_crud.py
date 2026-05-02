@@ -1126,3 +1126,21 @@ def test_43_payment_list_data_scope_non_owner():
     assert resp.status_code == 200
     items = resp.json()["data"]["items"]
     assert len(items) == 0, "非归属用户不应看到其他人的收款"
+
+
+def test_44_create_payment_invalid_method_422():
+    """无效收款方式返回 422"""
+    headers = _admin_auth()
+    resp = client.post(f"/api/v1/payments/orders/{_confirmed_order_id}/payments", json={
+        "amount": "10", "payment_method": "crypto",
+    }, headers=headers)
+    assert resp.status_code == 422
+
+
+def test_45_create_payment_empty_amount_422():
+    """收款金额为空返回 422"""
+    headers = _admin_auth()
+    resp = client.post(f"/api/v1/payments/orders/{_confirmed_order_id}/payments", json={
+        "payment_method": "cash",
+    }, headers=headers)
+    assert resp.status_code == 422
