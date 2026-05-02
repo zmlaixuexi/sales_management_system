@@ -6,6 +6,14 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-166
+
+- 名称：前端商品和客户 API 测试扩展
+- 轮次：Round 209（自动循环）
+- 描述：扩展 products-api.test.ts（8→16）和 customers-api.test.ts（7→12），覆盖分类筛选、排序、派生字段、图片列表、可选字段、联系方式更新、转移
+- 涉及文件：frontend/src/__tests__/products-api.test.ts、frontend/src/__tests__/customers-api.test.ts
+- 验证：378 前端测试全部通过，ESLint 0 errors
+
 ## 功能编号：FEAT-20260502-165
 
 - 名称：前端审计日志和认证 API 测试扩展
