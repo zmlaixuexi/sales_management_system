@@ -788,3 +788,102 @@ def test_50_sales_trend_zero_data():
     assert len(items) > 0, "趋势应包含日期填充"
     assert all(Decimal(item["amount"]) == 0 for item in items), "所有日期金额应为零"
     assert all(item["order_count"] == 0 for item in items), "所有日期订单数应为零"
+
+
+def test_51_product_ranking_zero_data():
+    """无订单用户商品排行返回空列表"""
+    db = TestSession()
+    try:
+        user = User(
+            id=uuid.uuid4(), username="zero_rank_product",
+            hashed_password=hash_password("testpass123"),
+            display_name="零排行商品", is_active=True, is_superuser=False,
+        )
+        db.add(user)
+        role = Role(id=uuid.uuid4(), name="zero_rank_product_role", display_name="零排行商品角色")
+        db.add(role)
+        db.flush()
+        for code in ["report:sales"]:
+            perm = db.query(Permission).filter(Permission.code == code).first()
+            if not perm:
+                perm = Permission(id=uuid.uuid4(), code=code, name=code, module="report")
+                db.add(perm)
+                db.flush()
+            db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+        db.add(UserRole(user_id=user.id, role_id=role.id))
+        db.commit()
+        token = create_access_token(subject=str(user.id))
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/reports/product-ranking?period=30d", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["items"] == []
+    assert data["period"] == "30d"
+
+
+def test_52_customer_ranking_zero_data():
+    """无订单用户客户排行返回空列表"""
+    db = TestSession()
+    try:
+        user = User(
+            id=uuid.uuid4(), username="zero_rank_customer",
+            hashed_password=hash_password("testpass123"),
+            display_name="零排行客户", is_active=True, is_superuser=False,
+        )
+        db.add(user)
+        role = Role(id=uuid.uuid4(), name="zero_rank_customer_role", display_name="零排行客户角色")
+        db.add(role)
+        db.flush()
+        for code in ["report:sales"]:
+            perm = db.query(Permission).filter(Permission.code == code).first()
+            if not perm:
+                perm = Permission(id=uuid.uuid4(), code=code, name=code, module="report")
+                db.add(perm)
+                db.flush()
+            db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+        db.add(UserRole(user_id=user.id, role_id=role.id))
+        db.commit()
+        token = create_access_token(subject=str(user.id))
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/reports/customer-ranking?period=30d", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["items"] == []
+    assert data["period"] == "30d"
+
+
+def test_53_salesperson_ranking_zero_data():
+    """无订单用户销售人员排行返回空列表"""
+    db = TestSession()
+    try:
+        user = User(
+            id=uuid.uuid4(), username="zero_rank_sp",
+            hashed_password=hash_password("testpass123"),
+            display_name="零排行销售", is_active=True, is_superuser=False,
+        )
+        db.add(user)
+        role = Role(id=uuid.uuid4(), name="zero_rank_sp_role", display_name="零排行销售角色")
+        db.add(role)
+        db.flush()
+        for code in ["report:sales"]:
+            perm = db.query(Permission).filter(Permission.code == code).first()
+            if not perm:
+                perm = Permission(id=uuid.uuid4(), code=code, name=code, module="report")
+                db.add(perm)
+                db.flush()
+            db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+        db.add(UserRole(user_id=user.id, role_id=role.id))
+        db.commit()
+        token = create_access_token(subject=str(user.id))
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/reports/salesperson-ranking?period=30d", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["items"] == []
+    assert data["period"] == "30d"
