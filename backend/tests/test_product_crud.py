@@ -788,3 +788,39 @@ def test_31_list_products_page_size_100():
     data = resp.json()["data"]
     assert data["page_size"] == 100
     assert isinstance(data["items"], list)
+
+
+def test_32_list_products_page_size_over_max_422():
+    """商品列表 page_size=101 超出上限返回 422"""
+    resp = client.get("/api/v1/products", params={"page_size": 101}, headers=_admin_auth())
+    assert resp.status_code == 422
+
+
+def test_33_product_soft_delete_audit_log():
+    """商品软删除产生审计日志"""
+    from app.models.audit import AuditLog
+
+    # 创建一个可删除的商品
+    resp = client.post("/api/v1/products", json={
+        "name": "审计删除商品",
+        "sale_price": "50",
+        "cost_price": "30",
+    }, headers=_admin_auth())
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    # 软删除
+    resp = client.delete(f"/api/v1/products/{pid}", headers=_admin_auth())
+    assert resp.status_code == 200
+
+    # 直接查询数据库验证审计日志
+    db = TestSession()
+    try:
+        log = db.query(AuditLog).filter(
+            AuditLog.action == "product_delete",
+            AuditLog.resource_id == pid,
+        ).first()
+        assert log is not None
+        assert log.resource_type == "product"
+    finally:
+        db.close()
