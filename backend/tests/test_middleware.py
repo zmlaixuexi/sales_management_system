@@ -1,6 +1,5 @@
 """中间件测试 — BodyLimitMiddleware / RequestLogMiddleware"""
 
-import json
 import logging
 from unittest.mock import patch
 
@@ -9,7 +8,7 @@ from fastapi.testclient import TestClient
 
 from app.core.body_limit import BodyLimitMiddleware
 from app.core.request_log import RequestLogMiddleware
-
+from app.core.security_headers import SecurityHeadersMiddleware
 
 # ─── BodyLimitMiddleware ────────────────────────────────────
 
@@ -155,8 +154,6 @@ def test_request_log_skips_non_api_paths(caplog):
 
 
 # ─── SecurityHeadersMiddleware ──────────────────────────────
-
-from app.core.security_headers import SecurityHeadersMiddleware
 
 
 def test_security_headers_present_on_api_responses():

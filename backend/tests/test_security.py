@@ -2,7 +2,10 @@
 
 from datetime import timedelta
 
+import pytest
 from jose import jwt
+from jose.exceptions import ExpiredSignatureError, JWTError
+from pydantic import ValidationError
 
 from app.core.config import settings
 from app.core.security import (
@@ -11,6 +14,7 @@ from app.core.security import (
     hash_password,
     verify_password,
 )
+from app.schemas.auth import ChangePasswordRequest, UserCreate
 
 # ─── hash_password ──────────────────────────────────────────
 
@@ -190,10 +194,9 @@ def test_tampered_token_rejected():
     token = create_access_token("user-1")
     # 修改 token 最后一个字符
     tampered = token[:-2] + ("aa" if token[-2:] != "aa" else "bb")
-    from jose.exceptions import JWTError
     try:
         jwt.decode(tampered, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
-        assert False, "篡改的 token 不应解码成功"
+        pytest.fail("篡改的 token 不应解码成功")
     except JWTError:
         pass
 
@@ -201,10 +204,9 @@ def test_tampered_token_rejected():
 def test_token_wrong_secret_rejected():
     """用错误密钥解码 token 失败"""
     token = create_access_token("user-1")
-    from jose.exceptions import JWTError
     try:
         jwt.decode(token, "wrong-secret-key", algorithms=[settings.JWT_ALGORITHM])
-        assert False, "错误密钥不应解码成功"
+        pytest.fail("错误密钥不应解码成功")
     except JWTError:
         pass
 
@@ -212,10 +214,9 @@ def test_token_wrong_secret_rejected():
 def test_expired_token_rejected():
     """已过期的 token 解码失败"""
     token = create_access_token("user-1", expires_delta=timedelta(seconds=-1))
-    from jose.exceptions import ExpiredSignatureError
     try:
         jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
-        assert False, "过期 token 不应解码成功"
+        pytest.fail("过期 token 不应解码成功")
     except ExpiredSignatureError:
         pass
 
@@ -260,10 +261,6 @@ def test_password_beyond_72_bytes():
 
 
 # ─── 密码强度校验（Schema 层） ───────────────────────────────
-
-import pytest
-from pydantic import ValidationError
-from app.schemas.auth import ChangePasswordRequest, UserCreate
 
 
 @pytest.mark.parametrize("pwd,error_keyword", [

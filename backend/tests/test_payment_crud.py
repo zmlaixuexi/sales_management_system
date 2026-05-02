@@ -741,7 +741,6 @@ def test_28_payment_list_excludes_deleted_order():
         db.add(payment)
         db.flush()
         pid = str(payment.id)
-        oid = str(order.id)
 
         # 软删除订单
         order.deleted_at = datetime.now(UTC)

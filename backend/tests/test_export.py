@@ -1,6 +1,7 @@
 """数据导出集成测试 — 验证 CSV 导出功能"""
 
 import uuid
+from datetime import UTC
 
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -578,8 +579,9 @@ def test_37_export_payments_invalid_order_id_422():
 
 def test_38_export_products_excludes_deleted():
     """已删除商品不出现在导出结果中"""
+    from datetime import datetime
+
     from app.models.product import Product
-    from datetime import datetime, timezone
 
     # 创建一个新商品
     resp = client.post("/api/v1/products", json={
@@ -596,7 +598,7 @@ def test_38_export_products_excludes_deleted():
     db = TestSession()
     try:
         db.query(Product).filter(Product.id == uuid.UUID(del_pid)).update(
-            {"deleted_at": datetime.now(timezone.utc)}
+            {"deleted_at": datetime.now(UTC)}
         )
         db.commit()
     finally:
@@ -610,8 +612,9 @@ def test_38_export_products_excludes_deleted():
 
 def test_39_export_customers_excludes_deleted():
     """已删除客户不出现在导出结果中"""
+    from datetime import datetime
+
     from app.models.customer import Customer
-    from datetime import datetime, timezone
 
     # 创建一个新客户
     resp = client.post("/api/v1/customers", json={
@@ -625,7 +628,7 @@ def test_39_export_customers_excludes_deleted():
     db = TestSession()
     try:
         db.query(Customer).filter(Customer.id == uuid.UUID(del_cid)).update(
-            {"deleted_at": datetime.now(timezone.utc)}
+            {"deleted_at": datetime.now(UTC)}
         )
         db.commit()
     finally:
@@ -639,8 +642,9 @@ def test_39_export_customers_excludes_deleted():
 
 def test_40_export_orders_excludes_deleted():
     """已删除订单不出现在导出结果中"""
+    from datetime import datetime
+
     from app.models.order import SalesOrder
-    from datetime import datetime, timezone
 
     # 创建一个新订单
     resp = client.post("/api/v1/sales-orders", json={
@@ -654,7 +658,7 @@ def test_40_export_orders_excludes_deleted():
     db = TestSession()
     try:
         db.query(SalesOrder).filter(SalesOrder.id == uuid.UUID(del_oid)).update(
-            {"deleted_at": datetime.now(timezone.utc)}
+            {"deleted_at": datetime.now(UTC)}
         )
         db.commit()
     finally:
@@ -676,8 +680,9 @@ def test_40_export_orders_excludes_deleted():
 
 def test_41_export_payments_excludes_deleted_order():
     """已删除订单关联的收款不出现在导出结果中"""
+    from datetime import datetime
+
     from app.models.order import SalesOrder
-    from datetime import datetime, timezone
 
     # 创建订单 + 确认 + 收款
     resp = client.post("/api/v1/sales-orders", json={
@@ -698,7 +703,7 @@ def test_41_export_payments_excludes_deleted_order():
     db = TestSession()
     try:
         db.query(SalesOrder).filter(SalesOrder.id == uuid.UUID(del_oid)).update(
-            {"deleted_at": datetime.now(timezone.utc)}
+            {"deleted_at": datetime.now(UTC)}
         )
         db.commit()
     finally:
