@@ -833,3 +833,36 @@ def test_38_export_customers_audit_log_fields():
     assert log["action"] == "export_customers"
     assert log["resource_type"] == "customer"
     assert log["after_data"]["keyword"] == "审计"
+
+
+def test_39_export_orders_audit_log_fields():
+    """订单导出审计日志 after_data 含 keyword 和 status"""
+    headers = _admin_auth()
+    resp = client.get("/api/v1/exports/orders?keyword=ORD&status=completed", headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=export_orders", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    log = items[0]
+    assert log["action"] == "export_orders"
+    assert log["resource_type"] == "order"
+    assert log["after_data"]["keyword"] == "ORD"
+    assert log["after_data"]["status"] == "completed"
+
+
+def test_40_export_payments_audit_log_fields():
+    """收款导出审计日志 after_data 含 order_id"""
+    headers = _admin_auth()
+    resp = client.get("/api/v1/exports/payments", headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=export_payments", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    log = items[0]
+    assert log["action"] == "export_payments"
+    assert log["resource_type"] == "payment"
+    assert "order_id" in log["after_data"]

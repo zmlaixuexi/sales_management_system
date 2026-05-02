@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百五十四轮·自动循环）
+
+### 测试：导出订单/收款审计日志字段验证
+
+- `test_audit_log.py`：新增 test_39（export_orders after_data 含 keyword/status）、test_40（export_payments after_data 含 order_id）
+- 审计日志测试文件达到 42 个，覆盖全部 10 种操作类型
+- 后端测试：1006/1006 全绿
+
 ## 2026-05-02（第三百五十三轮·自动循环）
 
 ### 测试：导出操作审计日志字段验证
