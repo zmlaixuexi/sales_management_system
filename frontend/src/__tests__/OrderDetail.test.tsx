@@ -64,8 +64,8 @@ vi.mock('antd', () => ({
   ),
   Space: ({ children }: any) => <span>{children}</span>,
   Tag: ({ children, color }: any) => <span data-testid="tag" data-color={color}>{children}</span>,
-  Popconfirm: ({ title, children }: any) => (
-    <span data-testid="popconfirm" data-title={title}>{children}</span>
+  Popconfirm: ({ title, children, onConfirm }: any) => (
+    <span data-testid="popconfirm" data-title={title} onClick={onConfirm}>{children}</span>
   ),
   InputNumber: ({ value, onChange }: any) => (
     <input data-testid="input-number" value={value} onChange={(e: any) => onChange?.(parseFloat(e.target.value))} />
@@ -258,5 +258,94 @@ describe('OrderDetail', () => {
     await waitFor(() => {
       expect(_orderMocks.fetchOrderLogs).toHaveBeenCalledWith('order-1', { page: 1, page_size: 10 })
     })
+  })
+
+  it('确认订单按钮点击调用 confirmOrder', async () => {
+    _orderMocks.confirmOrder.mockResolvedValueOnce({ success: true, data: { id: 'order-1', status: 'confirmed' } })
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('确认订单')).toBeInTheDocument()
+    })
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    const confirmPop = popconfirms.find((p) => p.getAttribute('data-title')?.includes('确认订单'))
+    expect(confirmPop).toBeTruthy()
+    confirmPop!.click()
+    await waitFor(() => {
+      expect(_orderMocks.confirmOrder).toHaveBeenCalledWith('order-1')
+    })
+  })
+
+  it('取消订单按钮点击调用 cancelOrder', async () => {
+    _orderMocks.cancelOrder.mockResolvedValueOnce({ success: true, data: { id: 'order-1', status: 'cancelled' } })
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('取消订单')).toBeInTheDocument()
+    })
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    const cancelPop = popconfirms.find((p) => p.getAttribute('data-title')?.includes('取消该订单'))
+    expect(cancelPop).toBeTruthy()
+    cancelPop!.click()
+    await waitFor(() => {
+      expect(_orderMocks.cancelOrder).toHaveBeenCalledWith('order-1')
+    })
+  })
+
+  it('冲正按钮存在且有确认弹窗', async () => {
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('冲正')).toBeInTheDocument()
+    })
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    const reversePop = popconfirms.find((p) => p.getAttribute('data-title')?.includes('冲正'))
+    expect(reversePop).toBeTruthy()
+  })
+
+  it('确认订单失败显示错误提示', async () => {
+    _orderMocks.confirmOrder.mockRejectedValueOnce(new Error('confirm failed'))
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('确认订单')).toBeInTheDocument()
+    })
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    const confirmPop = popconfirms.find((p) => p.getAttribute('data-title')?.includes('确认订单'))
+    confirmPop!.click()
+    await waitFor(() => {
+      expect(_messageError).toHaveBeenCalled()
+    })
+  })
+
+  it('已确认订单显示登记收款按钮', async () => {
+    const confirmedData = {
+      success: true,
+      data: {
+        id: 'order-1',
+        order_no: 'ORD-CONF-001',
+        status: 'confirmed',
+        total_amount: '1000',
+        total_cost: '600',
+        gross_profit: '400',
+        gross_margin: '40',
+        paid_amount: '0',
+        created_at: '2026-05-01T10:00:00Z',
+        remark: null,
+        items: [
+          { id: 'item-1', product_name_snapshot: '商品A', product_sku_snapshot: 'SKU-001', quantity: 2, unit_price: '500', discount_amount: '0', subtotal_amount: '1000', product_image_url_snapshot: null },
+        ],
+        payments: [],
+      },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(confirmedData)
+    renderOrderDetail()
+    // 先等待订单加载
+    await waitFor(() => {
+      expect(screen.getByText(/ORD-CONF-001/)).toBeInTheDocument()
+    })
+    // 再检查登记收款按钮
+    const buttons = screen.getAllByTestId('button')
+    const payBtn = buttons.find((b) => b.textContent?.includes('登记收款'))
+    expect(payBtn).toBeTruthy()
+    // 确认按钮不应出现
+    const confirmBtn = buttons.find((b) => b.textContent?.includes('确认订单'))
+    expect(confirmBtn).toBeFalsy()
   })
 })
