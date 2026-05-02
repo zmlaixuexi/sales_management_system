@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百五十三轮·自动循环）
+
+### 测试补强：商品 main_image_url 超长 422 边界验证
+
+- `test_boundary.py`：新增 test_127（商品创建 main_image_url 500/501 边界）、test_128（商品编辑 500/501 边界）
+- `docs/testing.md`：更新后端测试总数 1185→1187、总计 1567→1569、test_boundary.py 126→128
+- 后端测试：1187/1187 全绿，ruff clean
+
 ## 2026-05-03（第四百五十二轮·自动循环）
 
 ### 代码质量：前端 lint/test/build 全面验证
