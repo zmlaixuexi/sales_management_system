@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第四百四十九轮·自动循环）
+
+### 部署体验：deployment.md 与 Docker 配置一致性修复
+
+- 补充 7 个缺失环境变量（POSTGRES_USER/PASSWORD/DB、FRONTEND_PORT、HTTP_PORT、UVICORN_WORKERS）
+- Nginx 章节补充上传代理、健康检查代理、Gzip、隐藏文件拒绝、client_max_body_size 20MB
+- 新增数据持久化章节（postgres_data/uploads_data 命名卷）
+- Docker Compose 架构与文档已一致
+
 ## 2026-05-03（第四百四十八轮·自动循环）
 
 ### 回归验证：全面门禁通过
