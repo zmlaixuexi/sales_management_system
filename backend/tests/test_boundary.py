@@ -2048,3 +2048,63 @@ def test_118_invalid_uuid_path_user():
     headers = _auth_for_user(_user_id)
     resp = client.put("/api/v1/users/not-a-uuid", json={"display_name": "test"}, headers=headers)
     assert resp.status_code in (400, 422), f"无效 UUID 应返回 400/422: {resp.status_code}"
+
+
+def test_119_product_not_found_uuid():
+    """合法但不存在的 UUID 访问商品返回 404"""
+    headers = _auth_for_user(_user_id)
+    fake_uuid = "00000000-0000-0000-0000-000000000000"
+    resp = client.get(f"/api/v1/products/{fake_uuid}", headers=headers)
+    assert resp.status_code == 404, f"不存在的商品应返回 404: {resp.status_code}"
+
+
+def test_120_customer_not_found_uuid():
+    """合法但不存在的 UUID 访问客户返回 404"""
+    headers = _auth_for_user(_user_id)
+    fake_uuid = "00000000-0000-0000-0000-000000000000"
+    resp = client.get(f"/api/v1/customers/{fake_uuid}", headers=headers)
+    assert resp.status_code == 404, f"不存在的客户应返回 404: {resp.status_code}"
+
+
+def test_121_order_not_found_uuid():
+    """合法但不存在的 UUID 访问订单返回 404"""
+    headers = _auth_for_user(_user_id)
+    fake_uuid = "00000000-0000-0000-0000-000000000000"
+    resp = client.get(f"/api/v1/sales-orders/{fake_uuid}", headers=headers)
+    assert resp.status_code == 404, f"不存在的订单应返回 404: {resp.status_code}"
+
+
+def test_122_customer_create_invalid_email():
+    """客户创建无效邮箱格式返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    # 缺少 @
+    resp = client.post("/api/v1/customers", json={
+        "name": "无效邮箱客户122a", "phone": "13901220001", "email": "no-at-sign",
+    }, headers=headers)
+    assert resp.status_code == 422, f"缺少 @ 应返回 422: {resp.status_code}"
+
+    # 缺少域名
+    resp = client.post("/api/v1/customers", json={
+        "name": "无效邮箱客户122b", "phone": "13901220002", "email": "user@",
+    }, headers=headers)
+    assert resp.status_code == 422, f"缺少域名应返回 422: {resp.status_code}"
+
+    # 多个 @
+    resp = client.post("/api/v1/customers", json={
+        "name": "无效邮箱客户122c", "phone": "13901220003", "email": "a@@b.com",
+    }, headers=headers)
+    assert resp.status_code == 422, f"多个 @ 应返回 422: {resp.status_code}"
+
+
+def test_123_customer_update_invalid_email():
+    """客户编辑无效邮箱格式返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/customers", json={
+        "name": "邮箱编辑客户123", "phone": "13901230001",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    resp = client.put(f"/api/v1/customers/{cid}", json={"email": "not-an-email"}, headers=headers)
+    assert resp.status_code == 422, f"无效邮箱应返回 422: {resp.status_code}"
