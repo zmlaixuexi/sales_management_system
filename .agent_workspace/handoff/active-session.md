@@ -2,17 +2,19 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-223
-当前任务名称：代码质量 — lazy loading 统一 + 实现记录更新
+当前任务编号：ROUND-225
+当前任务名称：部署体验 — 部署前检查脚本
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 223：
-  - 清理 3 个文件的冗余 joinedload/subqueryload，统一使用模型层 lazy="selectin"
-  - 更新 implemented-features.md 补充 Round 215-222 的 8 项功能记录
-- Round 222：新增 deploy/rollback.sh 回滚脚本
+- Round 225：
+  - 新增 deploy/pre-deploy-check.sh 部署前检查脚本
+  - 8 项自动化检查：文件完整性、环境变量、Docker、代码质量、前端构建、迁移一致性、端口、磁盘
+  - 支持 --skip-tests / --skip-build 选项
+  - 实际运行验证 19 通过/0 失败
+- Round 224：基础设施全面验证（迁移链、模型一致性、健康检查、代码质量）
 
 ## 最终验证状态
 
@@ -22,14 +24,18 @@
 | 前端测试 | 380/380 ✓ |
 | ruff | 0 errors ✓ |
 | mypy | 0 errors ✓ |
+| 前端构建 | 263ms ✓ |
+| 迁移链 | 6 迁移，16 表，完整 ✓ |
+| 部署检查 | 19/19 通过 ✓ |
 | 总计 | 1154 tests |
 
 ## 下一步第一动作
 
 继续 keep-going 模式。可选方向：
 - 安全加固（CSRF token）
-- 可观测性（慢查询告警阈值调优）
-- 部署体验（部署前检查脚本）
+- 可观测性（慢查询告警通知）
+- 文档完善（API 文档补充）
+- 性能优化（API 响应缓存）
 
 ## 阻塞问题
 
