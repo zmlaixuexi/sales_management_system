@@ -74,7 +74,7 @@ def _calc_order_totals(items: list[dict]) -> dict:
         total_amount += Decimal(str(item.get("subtotal_amount", "0")))
         total_cost += Decimal(str(item.get("subtotal_cost", "0")))
     gross_profit = total_amount - total_cost
-    gross_margin = (gross_profit / total_amount * Decimal("100") / Decimal("100")).quantize(
+    gross_margin = (gross_profit / total_amount).quantize(
         Decimal("0.0001"), rounding=ROUND_HALF_UP
     ) if total_amount > 0 else Decimal("0")
     return {
@@ -101,7 +101,7 @@ def _prepare_item(
         )
     sale_price = product.sale_price
     discount_amount = sale_price - price
-    discount_rate = (discount_amount / sale_price * Decimal("100") / Decimal("100")).quantize(
+    discount_rate = (discount_amount / sale_price).quantize(
         Decimal("0.0001"), rounding=ROUND_HALF_UP
     ) if sale_price > 0 else Decimal("0")
     subtotal_amount = price * quantity
