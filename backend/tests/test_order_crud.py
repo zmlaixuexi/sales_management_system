@@ -1211,3 +1211,58 @@ def test_48_list_orders_page_size_100():
     data = resp.json()["data"]
     assert data["page_size"] == 100
     assert isinstance(data["items"], list)
+
+
+def test_49_order_remark_xss_sanitized():
+    """订单更新备注 HTML 标签被清理"""
+    from app.models.customer import Customer
+    from app.models.product import Product
+
+    db = TestSession()
+    try:
+        admin = db.query(User).filter(User.username == "order_tester").first()
+        cust = Customer(
+            id=uuid.uuid4(), name="XSS备注客户", phone="13800009998",
+            owner_user_id=admin.id,
+        )
+        db.add(cust)
+        cat = db.query(ProductCategory).first()
+        prod = Product(
+            id=uuid.uuid4(), name="XSS备注商品", sku="ORD-XSS-REMARK",
+            sale_price=100, cost_price=60, stock_quantity=10, status="active",
+            category_id=cat.id,
+        )
+        db.add(prod)
+
+        # 直接创建订单（绕过 generate_sequential_code）
+        order = SalesOrder(
+            id=uuid.uuid4(),
+            order_no="ORD-XSS-TEST-001",
+            customer_id=cust.id,
+            sales_user_id=admin.id,
+            status="draft",
+            total_amount=100,
+            total_cost=60,
+            gross_profit=40,
+            gross_margin=0.4,
+            paid_amount=0,
+            remark="",
+        )
+        db.add(order)
+        db.commit()
+        oid = str(order.id)
+    finally:
+        db.close()
+
+    # 更新备注含 HTML 标签
+    resp = client.put(f"/api/v1/sales-orders/{oid}", json={
+        "remark": "<script>alert('xss')</script>正常备注",
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    # 通过详情验证备注已清理
+    resp = client.get(f"/api/v1/sales-orders/{oid}", headers=_auth())
+    assert resp.status_code == 200
+    remark = resp.json()["data"]["remark"]
+    assert "<script>" not in remark
+    assert "正常备注" in remark
