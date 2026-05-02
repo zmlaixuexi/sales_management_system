@@ -6,6 +6,14 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-164
+
+- 名称：前端用户和库存 API 测试扩展
+- 轮次：Round 207（自动循环）
+- 描述：扩展 users-api.test.ts（5→11 项）和 inventory-api.test.ts（5→10 项），覆盖分页、完整数据返回、最少/完整参数创建、角色更新、正负数调整
+- 涉及文件：frontend/src/__tests__/users-api.test.ts、frontend/src/__tests__/inventory-api.test.ts
+- 验证：360 前端测试全部通过，ESLint 0 errors
+
 ## 功能编号：FEAT-20260502-163
 
 - 名称：前端订单和收款 API 边界条件测试
