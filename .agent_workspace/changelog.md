@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百二十九轮·自动循环）
+
+### 安全：补全 Pydantic schema remark 字段 max_length 限制
+
+- PaymentCreate.remark 添加 max_length=500
+- InventoryAdjust.remark 添加 max_length=500
+- 审查全部 schema：其余字段已有完整长度限制
+- 793 后端测试全绿，无回归
+
 ## 2026-05-02（第二百二十八轮·自动循环）
 
 ### 测试：软删除过滤测试（客户列表 + 支付列表）
