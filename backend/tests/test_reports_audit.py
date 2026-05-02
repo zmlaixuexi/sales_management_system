@@ -691,3 +691,27 @@ def test_45_sales_trend_response_structure():
         assert "date" in item
         assert "amount" in item
         assert "order_count" in item
+
+
+# ─── limit 边界值补强 ──────────────────────────────────────────
+
+def test_46_customer_ranking_limit_over_max_422():
+    """客户排行 limit=51 超出上限返回 422"""
+    resp = client.get("/api/v1/reports/customer-ranking?limit=51", headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_47_salesperson_ranking_limit_zero_422():
+    """销售人员排行 limit=0 返回 422"""
+    resp = client.get("/api/v1/reports/salesperson-ranking?limit=0", headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_48_product_ranking_limit_max_50():
+    """商品排行 limit=50（最大值）正常返回"""
+    token = create_access_token(subject=_user_id)
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = client.get("/api/v1/reports/product-ranking?limit=50", headers=headers)
+    assert resp.status_code == 200
+    body = resp.json()["data"]
+    assert isinstance(body["items"], list)
