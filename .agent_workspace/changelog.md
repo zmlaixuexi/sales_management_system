@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百八十六轮·自动循环）
+
+### 测试补强：用户创建审计日志 + 空收款 CSV 导出验证
+
+- `test_audit_log.py`：新增 test_71（用户创建 after_data 含 username/display_name，before_data 为 None）
+- `test_export.py`：新增 test_41（空收款导出仅含 BOM+表头行）
+- 后端测试：1069/1069 全绿
+
 ## 2026-05-02（第三百八十五轮·自动循环）
 
 ### 测试补强：商品删除/客户创建审计日志验证

@@ -1841,3 +1841,24 @@ def test_70_customer_create_audit_log_after_data_completeness():
     assert log["after_data"]["name"] == "创建完整性客户"
     assert "phone" in log["after_data"]
     assert log["resource_type"] == "customer"
+
+
+def test_71_user_create_audit_log_after_data_has_is_active():
+    """用户创建审计日志 after_data 含 is_active"""
+    headers = _admin_auth()
+    resp = client.post("/api/v1/users", json={
+        "username": "create_active_user",
+        "password": "password123",
+        "display_name": "创建活跃用户",
+    }, headers=headers)
+    assert resp.status_code == 200
+    uid = resp.json()["data"]["id"]
+
+    resp = client.get("/api/v1/audit-logs?action=user_create", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == uid)
+    assert log["after_data"]["username"] == "create_active_user"
+    assert log["after_data"]["display_name"] == "创建活跃用户"
+    assert log["before_data"] is None
+    assert log["resource_type"] == "user"

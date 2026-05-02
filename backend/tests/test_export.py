@@ -919,3 +919,21 @@ def test_40_export_empty_orders_csv():
     assert content.startswith("﻿")
     lines = content.strip().split("\n")
     assert len(lines) == 1
+
+
+def test_41_export_empty_payments_csv():
+    """导出空收款列表返回有效 CSV（仅 BOM + 表头行）"""
+    from app.core.security import create_access_token
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "export_tester").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+    resp = client.get("/api/v1/exports/payments?order_id=00000000-0000-0000-0000-000000000000", headers=headers)
+    assert resp.status_code == 200
+    assert "text/csv" in resp.headers["content-type"]
+    content = resp.text
+    assert content.startswith("﻿")
+    lines = content.strip().split("\n")
+    assert len(lines) == 1
