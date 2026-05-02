@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百七十一轮·自动循环）
+
+### 代码质量：移除订单计算冗余公式
+
+- orders.py _calc_order_totals 和 _prepare_item 中 `* Decimal("100") / Decimal("100")` 冗余运算移除
+- gross_margin 和 discount_rate 计算结果不变，公式更清晰
+- 833 后端测试全绿
+
 ## 2026-05-02（第二百七十轮·自动循环）
 
 ### 文档：执行文档 8.5 节补充遗漏的 12 个 API 端点
