@@ -2117,3 +2117,27 @@ def test_79_customer_delete_audit_log_before_data_completeness():
     assert "owner_user_id" in log["before_data"]
     assert log["after_data"]["deleted"] is True
     assert log["resource_type"] == "customer"
+
+
+def test_80_audit_log_action_values_are_known():
+    """审计日志 action 字段值域验证 — 所有 action 均为已知值"""
+    headers = _admin_auth()
+    # 触发多种操作
+    client.post("/api/v1/auth/login", json={"username": "audit_tester", "password": "wrong"})
+    resp = client.get("/api/v1/audit-logs", headers=headers)
+    assert resp.status_code == 200
+    known_actions = {
+        "login_success", "login_failed",
+        "product_create", "product_update", "product_disable", "product_delete",
+        "customer_create", "customer_update", "customer_transfer", "customer_delete",
+        "order_create", "order_update", "order_confirm", "order_cancel",
+        "payment_create", "payment_reverse",
+        "inventory_adjust",
+        "user_create", "user_update", "user_disable", "user_enable",
+        "password_change",
+        "customer_import", "product_import",
+        "export",
+    }
+    items = resp.json()["data"]["items"]
+    for log in items:
+        assert log["action"] in known_actions, f"未知 action: {log['action']}"

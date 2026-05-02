@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第三百九十五轮·自动循环）
+
+### 代码质量 + 测试补强：docs/testing.md 同步 + 审计日志 action 值域验证
+
+- `docs/testing.md`：更新后端测试总数 1072→1077、总计 1454→1459、test_audit_log.py 76→79，更新覆盖描述
+- `test_audit_log.py`：新增 test_80（审计日志 action 值域验证，所有日志 action 均为已知枚举值）
+- 后端测试：1078/1078 全绿，ruff clean
+
 ## 2026-05-03（第三百九十四轮·自动循环）
 
 ### 测试补强：客户删除审计日志 before_data 含完整客户信息
