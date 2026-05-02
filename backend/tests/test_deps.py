@@ -1,19 +1,25 @@
 """deps.py 辅助函数单元测试"""
 
 import uuid
+from datetime import datetime, timezone
 
 import pytest
 from fastapi import HTTPException
+from sqlalchemy import String, create_engine, DateTime, func
+from sqlalchemy.orm import Mapped, Session, mapped_column, sessionmaker
 
 from app.api.deps import (
     _get_user_permissions,
     check_owner_or_forbid,
+    generate_sequential_code,
     get_or_404,
     has_permission,
+    paginate,
     paginated_resp,
     parse_uuid_or_400,
     resp,
 )
+from app.db.session import Base
 from app.models.user import User
 
 
@@ -165,3 +171,140 @@ def test_paginated_resp_custom_message():
     """自定义分页消息"""
     result = paginated_resp([], page=1, page_size=20, total=0, message="无数据")
     assert result["message"] == "无数据"
+
+
+# ---- DB 依赖函数 ----
+# 使用内存 SQLite 测试 get_or_404 / generate_sequential_code / paginate
+
+_engine = create_engine("sqlite:///:memory:")
+_TestSession = sessionmaker(bind=_engine)
+
+
+class _FakeModel(Base):
+    """带 deleted_at 的测试模型"""
+    __tablename__ = "_test_fake"
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    name: Mapped[str] = mapped_column(String(100))
+    code: Mapped[str | None] = mapped_column(String(64))
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class _NoDeleteModel(Base):
+    """不带 deleted_at 的测试模型"""
+    __tablename__ = "_test_no_delete"
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    name: Mapped[str] = mapped_column(String(100))
+
+
+Base.metadata.create_all(_engine)
+
+
+@pytest.fixture()
+def db():
+    session = _TestSession()
+    try:
+        yield session
+    finally:
+        session.query(_FakeModel).delete()
+        session.query(_NoDeleteModel).delete()
+        session.commit()
+        session.close()
+
+
+# ---- get_or_404 ----
+
+
+def test_get_or_404_found(db: Session):
+    """存在记录正常返回"""
+    obj = _FakeModel(name="测试")
+    db.add(obj)
+    db.commit()
+    result = get_or_404(db, _FakeModel, obj.id, "商品")
+    assert result.id == obj.id
+
+
+def test_get_or_404_not_found(db: Session):
+    """不存在记录抛 404"""
+    with pytest.raises(HTTPException) as exc_info:
+        get_or_404(db, _FakeModel, uuid.uuid4(), "商品")
+    assert exc_info.value.status_code == 404
+    assert "商品不存在" in exc_info.value.detail["message"]
+
+
+def test_get_or_404_invalid_uuid(db: Session):
+    """无效 UUID 抛 404"""
+    with pytest.raises(HTTPException) as exc_info:
+        get_or_404(db, _FakeModel, "bad-uuid", "商品")
+    assert exc_info.value.status_code == 404
+
+
+def test_get_or_404_soft_deleted(db: Session):
+    """软删除记录返回 404"""
+    obj = _FakeModel(name="已删除", deleted_at=datetime.now(timezone.utc))
+    db.add(obj)
+    db.commit()
+    with pytest.raises(HTTPException) as exc_info:
+        get_or_404(db, _FakeModel, obj.id, "商品")
+    assert exc_info.value.status_code == 404
+
+
+def test_get_or_404_no_deleted_at(db: Session):
+    """无 deleted_at 字段的模型正常查找"""
+    obj = _NoDeleteModel(name="无删除字段")
+    db.add(obj)
+    db.commit()
+    result = get_or_404(db, _NoDeleteModel, obj.id, "分类")
+    assert result.name == "无删除字段"
+
+
+# ---- generate_sequential_code ----
+
+
+def test_generate_sequential_first(db: Session):
+    """无历史记录时从 0001 开始"""
+    code = generate_sequential_code(db, _FakeModel, _FakeModel.code, "ORD")
+    assert code.endswith("-0001")
+    assert code.startswith("ORD")
+
+
+def test_generate_sequential_increments(db: Session):
+    """有历史记录时序号递增"""
+    today = datetime.now().strftime("%Y%m%d")
+    prev_code = f"ORD{today}-0003"
+    db.add(_FakeModel(name="a", code=prev_code))
+    db.commit()
+    code = generate_sequential_code(db, _FakeModel, _FakeModel.code, "ORD")
+    assert code == f"ORD{today}-0004"
+
+
+# ---- paginate ----
+
+
+def test_paginate_first_page(db: Session):
+    """分页第一页"""
+    for i in range(5):
+        db.add(_FakeModel(name=f"item-{i}"))
+    db.commit()
+    query = db.query(_FakeModel)
+    items, total = paginate(query, page=1, page_size=3)
+    assert total == 5
+    assert len(items) == 3
+
+
+def test_paginate_last_page(db: Session):
+    """分页最后一页不足 page_size"""
+    for i in range(5):
+        db.add(_FakeModel(name=f"item-{i}"))
+    db.commit()
+    query = db.query(_FakeModel)
+    items, total = paginate(query, page=2, page_size=3)
+    assert total == 5
+    assert len(items) == 2
+
+
+def test_paginate_empty(db: Session):
+    """空表返回空"""
+    query = db.query(_FakeModel)
+    items, total = paginate(query, page=1, page_size=10)
+    assert total == 0
+    assert items == []
