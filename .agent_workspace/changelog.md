@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百五十三轮·自动循环）
+
+### 测试：补充 downloadCsv JSON 错误响应解析测试 2 项
+
+- test: blob 为 JSON 错误响应时抛出后端错误消息
+- test: blob 为 JSON 但无 error.message 时使用默认消息
+- 前端 382 测试全绿（+2），总计 1191
+
 ## 2026-05-02（第二百五十二轮·自动循环）
 
 ### 修复：downloadCsv 解析 JSON 错误响应避免下载错误文件

@@ -2,27 +2,27 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-252
+当前任务编号：ROUND-253
 当前任务名称：自动循环验证
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 253：补充 downloadCsv JSON 错误响应解析测试 2 项（382 前端测试全绿）
 - Round 252：修复 downloadCsv 解析 JSON 错误响应（380 前端测试全绿）
 - Round 251：修复 CustomerForm/ProductForm/OrderForm 加载数据失败错误处理
-- Round 250：全量门禁验证通过（809+380+ruff 0+tsc 0+260ms = 1189 tests）
 
 ## 最终验证状态
 
 | 门禁 | 结果 |
 |---|---|
 | 后端测试 | 809/809 ✓ |
-| 前端测试 | 380/380 ✓ |
+| 前端测试 | 382/382 ✓ |
 | ruff | 0 errors ✓ |
 | mypy | 0 errors ✓ |
 | 前端构建 | 260ms ✓ |
-| 总计 | 1189 tests |
+| 总计 | 1191 tests |
 
 ## 下一步第一动作
 
