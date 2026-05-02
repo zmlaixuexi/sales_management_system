@@ -5,6 +5,7 @@ from datetime import datetime
 from fastapi import Depends, HTTPException, Query, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
+from sqlalchemy import Integer, func
 from sqlalchemy.orm import InstrumentedAttribute, Session
 
 from app.core.config import settings
@@ -156,10 +157,13 @@ def generate_sequential_code(db: Session, model: type[Base], column: Instrumente
     """
     today = datetime.now().strftime("%Y%m%d")
     full_prefix = f"{prefix}{today}-"
+    prefix_len = len(full_prefix)
+    # 用数字排序避免字符串排序 0009 > 0010 的问题
+    seq_col = func.cast(func.substr(column, prefix_len + 1), Integer)
     last = (
         db.query(model)
         .filter(column.like(f"{full_prefix}%"))
-        .order_by(column.desc())
+        .order_by(seq_col.desc())
         .first()
     )
     last_value = getattr(last, column.key, None) if last else None

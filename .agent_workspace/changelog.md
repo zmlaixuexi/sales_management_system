@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第三百二十轮·自动循环）
+
+### Bug 修复：generate_sequential_code 数字排序
+
+- 修复 `order_by(column.desc())` 字符串排序导致序号 > 9 时 UNIQUE 冲突
+- 改用 `func.cast(func.substr(...), Integer)` 数字排序
+- 添加序号 > 9 递增验证测试（test_generate_sequential_beyond_9）
+- 文档更新至 899 后端 / 382 前端
+- 899 后端测试全绿（+1）
+
 ## 2026-05-02（第三百一十九轮·自动循环）
 
 ### 安全：订单备注 XSS 清理 E2E 测试

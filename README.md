@@ -134,7 +134,7 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（898 个）
+# 后端测试（899 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
@@ -160,7 +160,7 @@ npm run build
 | 数据导出 | 37 | 四模块 CSV 导出、多维度筛选、空数据、认证、审计日志、BOM/表头/字段数/状态映射验证 |
 | 文件上传 | 24 | 上传成功、类型/大小校验、获取/删除、认证、文件所有权检查、伪装扩展名/魔数字节、审计日志 |
 | 权限校验 | 10 | 数据范围、敏感字段过滤、权限码拦截、导出过滤 |
-| 权限辅助函数 | 26 | _get_user_permissions 多角色收集/去重，has_permission，check_owner_or_forbid，parse_uuid_or_400，resp，paginated_resp，get_or_404（存在/不存在/软删除/无 deleted_at），generate_sequential_code，paginate |
+| 权限辅助函数 | 27 | _get_user_permissions 多角色收集/去重，has_permission，check_owner_or_forbid，parse_uuid_or_400，resp，paginated_resp，get_or_404（存在/不存在/软删除/无 deleted_at），generate_sequential_code（含序号 > 9 数字排序验证），paginate |
 | 异常路径 | 33 | 缺字段、负值、重复、404、状态转换、库存不足、伪造 Token、无效 UUID、收款导出数据范围、LIKE 注入防护（订单+客户） |
 | 验证补充 | 25 | refresh_token 异常、价格/库存/名称校验、CSV 边界、用户列表、密码强度、客户 source/level 枚举 |
 | 边界测试 | 47 | 认证边界、订单状态机、收款边界、用户管理、库存调整、Token 刷新、流水类型筛选 |
@@ -199,7 +199,7 @@ npm run build
 | 边界条件 + 安全 | 6 | SQL 注入搜索安全（3 项）、分页边界 page=0/page_size=101/page_size=-1（3 项） |
 | 软删除过滤 | 2 | 客户列表排除已删除、支付列表排除已删除订单 |
 | 外键验证 | 4 | 客户 owner_user_id 无效/不存在、订单 customer_id 不存在、订单 items 含不存在商品 |
-| **合计** | **898** | |
+| **合计** | **899** | |
 
 ### 前端测试覆盖
 

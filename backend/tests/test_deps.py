@@ -277,6 +277,16 @@ def test_generate_sequential_increments(db: Session):
     assert code == f"ORD{today}-0004"
 
 
+def test_generate_sequential_beyond_9(db: Session):
+    """序号超过 9 时正确递增（字符串排序 0009 > 0010 问题验证）"""
+    today = datetime.now().strftime("%Y%m%d")
+    for i in range(1, 12):
+        db.add(_FakeModel(name=f"seq-{i}", code=f"ORD{today}-{i:04d}"))
+    db.commit()
+    code = generate_sequential_code(db, _FakeModel, _FakeModel.code, "ORD")
+    assert code == f"ORD{today}-0012"
+
+
 # ---- paginate ----
 
 
