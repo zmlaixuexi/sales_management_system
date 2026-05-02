@@ -1875,3 +1875,60 @@ def test_100_product_update_negative_stock():
 
     resp = client.put(f"/api/v1/products/{pid}", json={"stock_quantity": -1}, headers=headers)
     assert resp.status_code == 422, f"负库存应返回 422: {resp.status_code} {resp.json()}"
+
+
+def test_101_order_create_quantity_zero():
+    """订单创建数量为 0 返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 0}],
+    }, headers=headers)
+    assert resp.status_code == 422, f"数量为 0 应返回 422: {resp.status_code} {resp.json()}"
+
+
+def test_102_order_create_quantity_negative():
+    """订单创建数量为负数返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": -1}],
+    }, headers=headers)
+    assert resp.status_code == 422, f"数量为负数应返回 422: {resp.status_code} {resp.json()}"
+
+
+def test_103_order_create_empty_items():
+    """订单创建空 items 返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [],
+    }, headers=headers)
+    assert resp.status_code == 422, f"空 items 应返回 422: {resp.status_code} {resp.json()}"
+
+
+def test_104_payment_amount_zero():
+    """收款金额为 0 返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post(f"/api/v1/sales-orders/{_confirmed_order_id}/payments", json={
+        "amount": "0", "payment_method": "cash",
+    }, headers=headers)
+    assert resp.status_code == 422, f"收款金额为 0 应返回 422: {resp.status_code} {resp.json()}"
+
+
+def test_105_payment_amount_negative():
+    """收款金额为负数返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post(f"/api/v1/sales-orders/{_confirmed_order_id}/payments", json={
+        "amount": "-10", "payment_method": "cash",
+    }, headers=headers)
+    assert resp.status_code == 422, f"收款金额为负数应返回 422: {resp.status_code} {resp.json()}"
+
+
+def test_106_payment_invalid_method():
+    """收款方式无效值返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post(f"/api/v1/sales-orders/{_confirmed_order_id}/payments", json={
+        "amount": "10", "payment_method": "bitcoin",
+    }, headers=headers)
+    assert resp.status_code == 422, f"无效收款方式应返回 422: {resp.status_code} {resp.json()}"
