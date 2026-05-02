@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百一十八轮·自动循环）
+
+### 性能：list_orders 笛卡尔积修复 + 全面权限/导出验证
+
+- 修复 list_orders 中 joinedload(items) + joinedload(payments) 产生的笛卡尔积，payments 改为 subqueryload
+- 全面验证：ProductForm 成本价字段（创建必填，无需隐藏）、ReportsCenter 利润权限（后端 report:profit + 前端数据驱动）、导出接口（敏感字段+数据范围过滤）
+- N+1 查询检查：5 个列表接口无 N+1 问题，768 + 380 = 1148 tests 全绿
+
 ## 2026-05-02（第二百一十七轮·自动循环）
 
 ### 安全：敏感字段前端权限控制 + 测试补强
