@@ -1,9 +1,9 @@
-"""日志模块单元测试 — _JsonFormatter / log_action 异常处理"""
+"""日志模块单元测试 — _JsonFormatter / _TextFormatter / setup_logging / log_action 异常处理"""
 
 import json
 import logging
 
-from app.core.logging import _JsonFormatter, get_logger
+from app.core.logging import _JsonFormatter, _TextFormatter, get_logger, setup_logging
 from app.services.audit_service import log_action
 
 # ─── _JsonFormatter ─────────────────────────────────────────
@@ -162,3 +162,84 @@ def test_json_formatter_extra_fields_override_context_vars():
         assert data["request_id"] == "ctx-id"
     finally:
         request_id_ctx.reset(token)
+
+
+# ─── _TextFormatter ──────────────────────────────────────────
+
+
+def test_text_formatter_basic():
+    """文本格式器输出包含时间、级别、logger 名和消息"""
+    fmt = _TextFormatter()
+    record = logging.LogRecord(
+        name="app.test", level=logging.WARNING, pathname="", lineno=0,
+        msg="something happened", args=(), exc_info=None,
+    )
+    output = fmt.format(record)
+    assert "WARNING" in output
+    assert "app.test" in output
+    assert "something happened" in output
+
+
+def test_text_formatter_datefmt():
+    """文本格式器使用 ISO 日期格式"""
+    fmt = _TextFormatter()
+    record = logging.LogRecord(
+        name="test", level=logging.INFO, pathname="", lineno=0,
+        msg="ok", args=(), exc_info=None,
+    )
+    output = fmt.format(record)
+    # datefmt="%Y-%m-%dT%H:%M:%S"
+    assert "T" in output.split()[0]
+
+
+# ─── setup_logging ────────────────────────────────────────────
+
+
+def test_setup_logging_sets_root_level():
+    """setup_logging 设置 root logger 级别"""
+    from unittest.mock import patch
+
+    with patch("app.core.logging.settings") as mock_settings:
+        mock_settings.LOG_LEVEL = "DEBUG"
+        mock_settings.LOG_FORMAT = "text"
+        setup_logging()
+    root = logging.getLogger()
+    assert root.level == logging.DEBUG
+
+
+def test_setup_logging_suppresses_third_party():
+    """第三方库日志级别设为 WARNING"""
+    from unittest.mock import patch
+
+    with patch("app.core.logging.settings") as mock_settings:
+        mock_settings.LOG_LEVEL = "DEBUG"
+        mock_settings.LOG_FORMAT = "text"
+        setup_logging()
+    assert logging.getLogger("uvicorn.access").level == logging.WARNING
+    assert logging.getLogger("sqlalchemy.engine").level == logging.WARNING
+
+
+def test_setup_logging_json_formatter():
+    """LOG_FORMAT=json 时使用 _JsonFormatter"""
+    from unittest.mock import patch
+
+    with patch("app.core.logging.settings") as mock_settings:
+        mock_settings.LOG_LEVEL = "INFO"
+        mock_settings.LOG_FORMAT = "json"
+        setup_logging()
+    root = logging.getLogger()
+    assert len(root.handlers) >= 1
+    assert isinstance(root.handlers[-1].formatter, _JsonFormatter)
+
+
+def test_setup_logging_text_formatter():
+    """LOG_FORMAT=text 时使用 _TextFormatter"""
+    from unittest.mock import patch
+
+    with patch("app.core.logging.settings") as mock_settings:
+        mock_settings.LOG_LEVEL = "INFO"
+        mock_settings.LOG_FORMAT = "text"
+        setup_logging()
+    root = logging.getLogger()
+    assert len(root.handlers) >= 1
+    assert isinstance(root.handlers[-1].formatter, _TextFormatter)
