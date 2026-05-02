@@ -120,3 +120,63 @@ def test_refresh_token_longer_expiry():
     a_payload = jwt.decode(access, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
     r_payload = jwt.decode(refresh, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
     assert r_payload["exp"] > a_payload["exp"]
+
+
+# ─── verify_password 异常防御 ────────────────────────────────
+
+
+def test_verify_password_invalid_hash_returns_false():
+    """无效哈希格式不抛异常，返回 False"""
+    assert verify_password("anypass", "not-a-bcrypt-hash") is False
+
+
+def test_verify_password_empty_hash_returns_false():
+    """空哈希不抛异常，返回 False"""
+    assert verify_password("anypass", "") is False
+
+
+def test_verify_password_none_hash_returns_false():
+    """None 哈希不抛异常，返回 False"""
+    assert verify_password("anypass", None) is False
+
+
+# ─── JWT iat / jti 字段 ─────────────────────────────────────
+
+
+def test_access_token_has_iat():
+    """access token 包含 iat 签发时间"""
+    token = create_access_token("user-1")
+    payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    assert "iat" in payload
+    assert isinstance(payload["iat"], (int, float))
+
+
+def test_refresh_token_has_iat():
+    """refresh token 包含 iat 签发时间"""
+    token = create_refresh_token("user-1")
+    payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    assert "iat" in payload
+
+
+def test_access_token_has_jti():
+    """access token 包含 jti 唯一标识"""
+    token = create_access_token("user-1")
+    payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    assert "jti" in payload
+    assert len(payload["jti"]) == 36  # UUID 格式
+
+
+def test_refresh_token_has_jti():
+    """refresh token 包含 jti 唯一标识"""
+    token = create_refresh_token("user-1")
+    payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    assert "jti" in payload
+
+
+def test_tokens_have_unique_jti():
+    """每次生成的 token jti 不同"""
+    t1 = create_access_token("user-1")
+    t2 = create_access_token("user-1")
+    p1 = jwt.decode(t1, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    p2 = jwt.decode(t2, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    assert p1["jti"] != p2["jti"]
