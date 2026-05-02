@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第三百四十七轮·自动循环）
+
+### 测试：客户转移审计日志字段验证
+
+- `test_audit_log.py`：新增 test_30（customer_transfer after_data 含 owner_user_id 变化）
+- 后端测试：996/996 全绿
+
 ## 2026-05-02（第三百四十六轮·自动循环）
 
 ### 测试：收款登记审计日志字段验证

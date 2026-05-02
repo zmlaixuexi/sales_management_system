@@ -613,3 +613,42 @@ def test_29_payment_create_audit_log_fields():
     assert log["after_data"]["amount"] == "40.00"
     assert log["after_data"]["method"] == "cash"
     assert log["resource_type"] == "payment"
+
+
+def test_30_customer_transfer_audit_log_fields():
+    """客户转移审计日志 after_data 含 owner_user_id"""
+    headers = _admin_auth()
+    # 创建客户
+    resp = client.post("/api/v1/customers", json={
+        "name": "转移审计客户",
+        "phone": "13900009999",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    # 创建目标用户
+    from app.models.user import User as UserModel
+    target = UserModel(
+        id=uuid.uuid4(), username="transfer_target_30",
+        hashed_password=hash_password("testpass123"),
+        display_name="转移目标", is_active=True, is_superuser=False,
+    )
+    db = TestSession()
+    db.add(target)
+    db.commit()
+    target_id = str(target.id)
+    db.close()
+
+    # 转移客户
+    resp = client.post(f"/api/v1/customers/{cid}/transfer", json={
+        "owner_user_id": target_id,
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    # 验证审计日志
+    resp = client.get("/api/v1/audit-logs?action=customer_transfer", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == cid)
+    assert log["after_data"]["owner_user_id"] == target_id
+    assert log["resource_type"] == "customer"
