@@ -155,8 +155,8 @@ def reverse_payment(
         db, request, current_user,
         action="payment_reverse", resource_type="payment",
         resource_id=str(payment.id),
-        before_data={"amount": str(payment.amount), "status": "normal"},
-        after_data={"status": "reversed"},
+        before_data={"amount": str(payment.amount), "status": "normal", "order_id": str(payment.order_id)},
+        after_data={"amount": str(payment.amount), "status": "reversed", "order_id": str(payment.order_id)},
     )
     db.commit()
 

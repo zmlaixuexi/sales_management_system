@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百五十九轮·自动循环）
+
+### 测试补强：冲正收款审计日志字段完整性验证
+
+- `payments.py`：补充冲正审计日志 before_data/after_data 含 order_id 和 amount 字段
+- `test_audit_log.py`：新增 test_43（冲正审计日志 before_data 含 amount/order_id/status，after_data 含 amount/order_id/status=reversed）
+- 后端测试：1024/1024 全绿
+
 ## 2026-05-02（第三百五十八轮·自动循环）
 
 ### 安全加固：JWT refresh token 过期边界验证

@@ -927,3 +927,59 @@ def test_42_customer_delete_has_orders_blocked():
     resp = client.delete(f"/api/v1/customers/{cid}", headers=headers)
     assert resp.status_code == 400
     assert "订单" in resp.json()["error"]["message"]
+
+
+def test_43_payment_reverse_audit_log_fields():
+    """冲正收款审计日志 before_data/after_data 含 amount、order_id、status"""
+    headers = _admin_auth()
+    # 创建商品 + 客户
+    resp = client.post("/api/v1/products", json={
+        "name": "冲正审计商品",
+        "cost_price": "10.00",
+        "sale_price": "30.00",
+        "stock_quantity": 100,
+        "status": "active",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    resp = client.post("/api/v1/customers", json={
+        "name": "冲正审计客户",
+        "phone": "13600001111",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cust_id = resp.json()["data"]["id"]
+
+    # 创建并确认订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cust_id,
+        "items": [{"product_id": pid, "quantity": 3}],
+    }, headers=headers)
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=headers)
+
+    # 登记收款
+    resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
+        "amount": "90.00",
+        "payment_method": "cash",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pay_id = resp.json()["data"]["id"]
+
+    # 冲正
+    resp = client.post(f"/api/v1/payments/{pay_id}/reverse", headers=headers)
+    assert resp.status_code == 200
+
+    # 验证审计日志字段完整性
+    resp = client.get("/api/v1/audit-logs?action=payment_reverse", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == pay_id)
+    assert log["before_data"]["amount"] == "90.00"
+    assert log["before_data"]["status"] == "normal"
+    assert log["before_data"]["order_id"] == oid
+    assert log["after_data"]["amount"] == "90.00"
+    assert log["after_data"]["status"] == "reversed"
+    assert log["after_data"]["order_id"] == oid
+    assert log["resource_type"] == "payment"
