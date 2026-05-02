@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Card, Form, Input, Button, message, Typography } from 'antd'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useAuthStore } from '../stores/auth'
+import { useAuthStore } from '@/stores/auth'
 import { getApiErrorMessage } from '@/utils'
 
 const { Title } = Typography
