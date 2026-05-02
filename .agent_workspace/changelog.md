@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第二百三十六轮·自动循环）
+
+### 文档：数据库文档订单状态机补充 partially_paid 状态
+
+- 状态机更新：draft → confirmed → partially_paid → completed（含收款取消说明）
+- 与实际 VALID_TRANSITIONS 代码一致
+
 ## 2026-05-02（第二百三十五轮·自动循环）
 
 ### 测试：外键验证边界条件测试（4 项新增）
