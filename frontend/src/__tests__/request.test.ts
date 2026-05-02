@@ -70,4 +70,31 @@ describe('request 封装函数', () => {
     )
     expect(result.data.id).toBe('file1')
   })
+
+  it('get 无参数调用', async () => {
+    mockClient.get.mockResolvedValueOnce({
+      data: { success: true, data: [], message: 'ok' },
+    })
+    const result = await get('/products')
+    expect(mockClient.get).toHaveBeenCalledWith('/products', { params: undefined })
+    expect(result.data).toEqual([])
+  })
+
+  it('post 无 body 调用', async () => {
+    mockClient.post.mockResolvedValueOnce({
+      data: { success: true, data: null, message: 'ok' },
+    })
+    const result = await post('/auth/logout')
+    expect(mockClient.post).toHaveBeenCalledWith('/auth/logout', undefined)
+    expect(result.success).toBe(true)
+  })
+
+  it('put 无 body 调用', async () => {
+    mockClient.put.mockResolvedValueOnce({
+      data: { success: true, data: null, message: 'ok' },
+    })
+    const result = await put('/products/123')
+    expect(mockClient.put).toHaveBeenCalledWith('/products/123', undefined)
+    expect(result.success).toBe(true)
+  })
 })
