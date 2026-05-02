@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百六十四轮·自动循环）
+
+### 文档：database.md 补全全部索引记录
+
+- 补充 10 个未记录的复合索引（users/products/customers/sales_orders/sales_order_items/inventory_movements/payments/audit_logs）
+- 新增 3 个缺失的索引节（files/checksum、product_images/product_id、product_price_history/product_id）
+- 索引文档现在与 migration 和 model 完全一致
+
 ## 2026-05-03（第四百六十三轮·自动循环）
 
 ### 修复：CustomerUpdate.phone max_length 20→30 + database.md 文档纠偏
