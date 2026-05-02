@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百四十轮·自动循环）
+
+### 重构：提取 fmt_dt() 工具函数，22 处 datetime 格式化统一
+
+- deps.py 新增 `fmt_dt(dt)` 函数：安全将 datetime 转为 ISO 字符串
+- 6 个 router（orders×7、customers×4、products×5、payments×2、inventory×1、audit_logs×1、users×2）共 22 处替换
+- 所有 `xxx.isoformat() if xxx else None` → `fmt_dt(xxx)`
+- 797 测试全绿，零回归
+
 ## 2026-05-02（第二百三十九轮·自动循环）
 
 ### 重构：提取 PaginationParams 依赖类，8 处分页参数统一
