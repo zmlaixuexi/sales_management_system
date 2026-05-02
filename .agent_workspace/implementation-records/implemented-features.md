@@ -6,6 +6,38 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-200
+
+- 名称：输入消毒（sanitize）全覆盖 + 效果验证
+- 轮次：Round 449-450（自动循环）
+- 描述：审计 6 个 schema 文件 sanitize 覆盖率，补全 auth.py username/phone 缺失消毒；新增 9 个消毒效果验证测试（商品/客户/用户/订单/收款），覆盖所有自由文本字段的 HTML 标签移除
+- 涉及文件：backend/app/schemas/auth.py、backend/tests/test_sanitize.py
+- 验证：1185 后端测试全绿，6/6 schema sanitize 覆盖
+
+## 功能编号：FEAT-20260503-199
+
+- 名称：边界测试全面覆盖（max_length/枚举/格式/UUID/404/400）
+- 轮次：Round 410-448（自动循环）
+- 描述：test_boundary.py 从 64 个测试扩展至 126 个，新增测试覆盖：max_length 边界（订单备注、收款备注、客户名称/邮箱/联系人/备注、商品名称/SKU/备注、用户名/显示名称/邮箱/密码）、枚举无效值（客户 source/level/follow_status、商品 status、收款方式）、格式校验（邮箱、手机号、密码强度）、负值（价格/库存/收款金额）、路径参数（无效 UUID 422、不存在资源 404）、收款超额、空 items
+- 涉及文件：backend/tests/test_boundary.py
+- 验证：1185 后端测试全绿，ruff clean
+
+## 功能编号：FEAT-20260503-198
+
+- 名称：审计日志字段完整性补强（26 个操作类型）
+- 轮次：Round 402-410（自动循环）
+- 描述：所有 26 个操作类型的 before_data/after_data 字段完整覆盖——订单创建含 items、订单编辑按需含 items、订单确认/取消含 customer_id、商品/客户删除含 deleted=True、导入含 created/errors、导出 before_data=None、文件上传含 original_name/size_bytes、密码修改含 username/action；新增 test_95-116 交叉验证（ip_address、user_agent、actor_name、action/resource_type 映射、分页 total、时间降序）
+- 涉及文件：backend/app/api/v1/orders.py、backend/tests/test_audit_log.py
+- 验证：1185 后端测试全绿
+
+## 功能编号：FEAT-20260503-197
+
+- 名称：代码质量清理 + mypy 类型检查全绿
+- 轮次：Round 430、442（自动循环）
+- 描述：清理 app/ 目录 9 处未使用函数参数（slow_query.py、main.py、audit_logs.py、inventory.py、reports.py）；修复 reports.py 毛利报表查询 result 空值保护；pyproject.toml 添加 tests/ ARG001 per-file-ignores
+- 涉及文件：backend/app/core/slow_query.py、app/main.py、app/api/v1/*.py、pyproject.toml
+- 验证：mypy 54 源文件 0 error，ruff 0 errors
+
 ## 功能编号：FEAT-20260502-186
 
 - 名称：执行文档 8.5 节 API 模块清单补全
