@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第四百四十三轮·自动循环）
+
+### 安全加固：开发工具依赖升级
+
+- 升级 conda 环境 dev 工具：pip 25.3→26.1、Pygments 2.19.2→2.20.0、wheel 0.45.1→0.47.0
+- pip-audit --path conda env: 4 vulnerabilities → 0
+- 运行时依赖（fastapi/sqlalchemy/cryptography/python-jose 等）无已知漏洞
+- 1189 后端测试全绿，无回归
+
 ## 2026-05-03（第四百四十二轮·自动循环）
 
 ### 需求验证：全量回归检查
