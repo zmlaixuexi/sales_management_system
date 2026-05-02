@@ -862,3 +862,63 @@ def test_35_delete_product_no_permission_403():
 
     resp = client.delete(f"/api/v1/products/{uuid.uuid4()}", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 403
+
+
+def _make_user_without_perm(username: str, keep_perm: str):
+    """创建一个只有 keep_perm 权限但无商品操作权限的用户"""
+    from app.core.security import create_access_token
+    from app.models.user import Permission, Role, RolePermission, UserRole
+
+    db = TestSession()
+    try:
+        user = User(
+            id=uuid.uuid4(), username=username,
+            hashed_password=hash_password("testpass123"),
+            display_name=username, is_active=True, is_superuser=False,
+        )
+        db.add(user)
+        perm = db.query(Permission).filter(Permission.code == keep_perm).first()
+        if not perm:
+            perm = Permission(id=uuid.uuid4(), code=keep_perm, name=keep_perm, module="test")
+            db.add(perm)
+            db.flush()
+        role = Role(id=uuid.uuid4(), name=f"{username}_role", display_name=username)
+        db.add(role)
+        db.flush()
+        db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+        db.add(UserRole(user_id=user.id, role_id=role.id))
+        db.commit()
+        return create_access_token(str(user.id))
+    finally:
+        db.close()
+
+
+def test_36_list_products_no_permission_403():
+    """无 product:list 权限用户获取商品列表返回 403"""
+    token = _make_user_without_perm("no_prod_list", "product:create")
+    resp = client.get("/api/v1/products", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
+
+
+def test_37_create_product_no_permission_403():
+    """无 product:create 权限用户创建商品返回 403"""
+    token = _make_user_without_perm("no_prod_create", "product:list")
+    resp = client.post("/api/v1/products", json={
+        "name": "无权限商品", "sale_price": "10", "cost_price": "5",
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
+
+
+def test_38_update_product_no_permission_403():
+    """无 product:update 权限用户编辑商品返回 403"""
+    # 先用 admin 创建商品
+    resp = client.post("/api/v1/products", json={
+        "name": "403编辑商品", "sale_price": "10", "cost_price": "5",
+    }, headers=_admin_auth())
+    pid = resp.json()["data"]["id"]
+
+    token = _make_user_without_perm("no_prod_update", "product:list")
+    resp = client.put(f"/api/v1/products/{pid}", json={
+        "name": "尝试编辑",
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403

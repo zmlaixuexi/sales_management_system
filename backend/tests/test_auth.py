@@ -312,3 +312,27 @@ def test_change_password_audit_log():
         "old_password": "auditpass123",
         "new_password": "testpass123",
     }, headers={"Authorization": f"Bearer {token2}"})
+
+
+def test_23_login_disabled_user_403():
+    """禁用用户登录返回 403"""
+    from app.core.security import hash_password
+    from app.models.user import User
+
+    db = TestSession()
+    try:
+        disabled = User(
+            id=uuid.uuid4(), username="disabled_login_user",
+            hashed_password=hash_password("testpass123"),
+            display_name="禁用用户", is_active=False, is_superuser=False,
+        )
+        db.add(disabled)
+        db.commit()
+    finally:
+        db.close()
+
+    resp = client.post("/api/v1/auth/login", json={
+        "username": "disabled_login_user",
+        "password": "testpass123",
+    })
+    assert resp.status_code == 403

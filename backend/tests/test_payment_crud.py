@@ -954,3 +954,35 @@ def test_36_reverse_payment_audit_log():
         assert after["status"] == "reversed"
     finally:
         db.close()
+
+
+def test_37_list_payments_no_permission_403():
+    """无 payment:list 权限用户获取收款列表返回 403"""
+    from app.core.security import create_access_token
+    from app.models.user import Permission, Role, RolePermission, UserRole
+
+    db = TestSession()
+    try:
+        user = User(
+            id=uuid.uuid4(), username="no_payment_list",
+            hashed_password=hash_password("testpass123"),
+            display_name="无收款列表权限", is_active=True, is_superuser=False,
+        )
+        db.add(user)
+        perm = db.query(Permission).filter(Permission.code == "payment:create").first()
+        if not perm:
+            perm = Permission(id=uuid.uuid4(), code="payment:create", name="收款创建", module="payment")
+            db.add(perm)
+            db.flush()
+        role = Role(id=uuid.uuid4(), name="no_pay_list_role", display_name="无收款列表角色")
+        db.add(role)
+        db.flush()
+        db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+        db.add(UserRole(user_id=user.id, role_id=role.id))
+        db.commit()
+        token = create_access_token(str(user.id))
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/payments", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403

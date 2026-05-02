@@ -666,3 +666,72 @@ def test_35_delete_customer_no_permission_403():
 
     resp = client.delete(f"/api/v1/customers/{uuid.uuid4()}", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 403
+
+
+def _make_user_without_perm(username: str, keep_perm: str):
+    """创建一个只有 keep_perm 权限但没有 customer:xxx 操作权限的用户"""
+    from app.core.security import create_access_token
+    from app.models.user import Permission, Role, RolePermission, UserRole
+
+    db = TestSession()
+    try:
+        user = User(
+            id=uuid.uuid4(), username=username,
+            hashed_password=hash_password("testpass123"),
+            display_name=username, is_active=True, is_superuser=False,
+        )
+        db.add(user)
+        perm = db.query(Permission).filter(Permission.code == keep_perm).first()
+        if not perm:
+            perm = Permission(id=uuid.uuid4(), code=keep_perm, name=keep_perm, module="test")
+            db.add(perm)
+            db.flush()
+        role = Role(id=uuid.uuid4(), name=f"{username}_role", display_name=username)
+        db.add(role)
+        db.flush()
+        db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+        db.add(UserRole(user_id=user.id, role_id=role.id))
+        db.commit()
+        return create_access_token(str(user.id))
+    finally:
+        db.close()
+
+
+def test_38_list_customers_no_permission_403():
+    """无 customer:list 权限用户获取客户列表返回 403"""
+    token = _make_user_without_perm("no_cust_list", "customer:create")
+    resp = client.get("/api/v1/customers", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
+
+
+def test_39_create_customer_no_permission_403():
+    """无 customer:create 权限用户创建客户返回 403"""
+    token = _make_user_without_perm("no_cust_create", "customer:list")
+    resp = client.post("/api/v1/customers", json={
+        "name": "无权限客户",
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
+
+
+def test_40_update_customer_no_permission_403():
+    """无 customer:update 权限用户编辑客户返回 403"""
+    from app.core.security import create_access_token
+
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "crud_admin").first()
+        admin_headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+    # 先用 admin 创建客户
+    resp = client.post("/api/v1/customers", json={
+        "name": "403编辑客户", "phone": "13800003377",
+    }, headers=admin_headers)
+    cid = resp.json()["data"]["id"]
+
+    token = _make_user_without_perm("no_cust_update", "customer:list")
+    resp = client.put(f"/api/v1/customers/{cid}", json={
+        "name": "尝试编辑",
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403

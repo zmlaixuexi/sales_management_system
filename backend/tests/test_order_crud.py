@@ -1393,3 +1393,111 @@ def test_52_order_update_audit_log():
         assert log.resource_type == "order"
     finally:
         db.close()
+
+
+def _make_user_without_perm(username: str, keep_perm: str):
+    """创建一个只有 keep_perm 权限但无订单操作权限的用户"""
+    from app.models.user import Permission, Role, RolePermission, UserRole
+
+    db = TestSession()
+    try:
+        user = User(
+            id=uuid.uuid4(), username=username,
+            hashed_password=hash_password("testpass123"),
+            display_name=username, is_active=True, is_superuser=False,
+        )
+        db.add(user)
+        perm = db.query(Permission).filter(Permission.code == keep_perm).first()
+        if not perm:
+            perm = Permission(id=uuid.uuid4(), code=keep_perm, name=keep_perm, module="test")
+            db.add(perm)
+            db.flush()
+        role = Role(id=uuid.uuid4(), name=f"{username}_role", display_name=username)
+        db.add(role)
+        db.flush()
+        db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+        db.add(UserRole(user_id=user.id, role_id=role.id))
+        db.commit()
+        return create_access_token(str(user.id))
+    finally:
+        db.close()
+
+
+def _fresh_order_ids():
+    """创建全新的客户+商品+订单，返回 (order_id, headers)"""
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "order_tester").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+        cat = db.query(ProductCategory).first()
+
+        uid = uuid.uuid4().hex[:8]
+        cust = Customer(id=uuid.uuid4(), name=f"403客户{uid}", phone=f"1380000{uid[:4]}")
+        db.add(cust)
+
+        prod = Product(
+            id=uuid.uuid4(), name=f"403商品{uid}", sku=f"ORD-403-{uid}",
+            sale_price=100, cost_price=60, stock_quantity=10,
+            status="active", category_id=cat.id,
+        )
+        db.add(prod)
+        db.flush()
+
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=f"ORD-403-{uid}", customer_id=cust.id,
+            sales_user_id=user.id, status="draft",
+            total_amount=100, total_cost=60,
+        )
+        db.add(order)
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=prod.id,
+            product_name_snapshot=prod.name, cost_price_snapshot=60,
+            quantity=1, unit_price=100, subtotal_amount=100, subtotal_cost=60,
+        ))
+        db.commit()
+        return str(order.id), headers
+    finally:
+        db.close()
+
+
+def test_53_list_orders_no_permission_403():
+    """无 order:list 权限用户获取订单列表返回 403"""
+    token = _make_user_without_perm("no_order_list", "order:create")
+    resp = client.get("/api/v1/sales-orders", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
+
+
+def test_54_create_order_no_permission_403():
+    """无 order:create 权限用户创建订单返回 403"""
+    token = _make_user_without_perm("no_order_create", "order:list")
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": str(uuid.uuid4()),
+        "items": [{"product_id": str(uuid.uuid4()), "quantity": 1}],
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
+
+
+def test_55_confirm_order_no_permission_403():
+    """无 order:confirm 权限用户确认订单返回 403"""
+    oid, _ = _fresh_order_ids()
+    token = _make_user_without_perm("no_order_confirm", "order:list")
+    resp = client.post(f"/api/v1/sales-orders/{oid}/confirm", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
+
+
+def test_56_cancel_order_no_permission_403():
+    """无 order:cancel 权限用户取消订单返回 403"""
+    oid, _ = _fresh_order_ids()
+    token = _make_user_without_perm("no_order_cancel", "order:list")
+    resp = client.post(f"/api/v1/sales-orders/{oid}/cancel", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
+
+
+def test_57_update_order_no_permission_403():
+    """无 order:update 权限用户编辑订单返回 403"""
+    oid, _ = _fresh_order_ids()
+    token = _make_user_without_perm("no_order_update", "order:list")
+    resp = client.put(f"/api/v1/sales-orders/{oid}", json={
+        "remark": "尝试编辑",
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
