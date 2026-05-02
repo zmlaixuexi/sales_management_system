@@ -676,7 +676,10 @@ def test_31_product_disable_audit_log_fields():
     items = resp.json()["data"]["items"]
     log = next(i for i in items if i["resource_id"] == pid)
     assert log["before_data"]["status"] == "active"
+    assert log["before_data"]["name"] == "停用审计商品"
+    assert "sku" in log["before_data"]
     assert log["after_data"]["status"] == "disabled"
+    assert log["after_data"]["name"] == "停用审计商品"
     assert log["resource_type"] == "product"
 
 

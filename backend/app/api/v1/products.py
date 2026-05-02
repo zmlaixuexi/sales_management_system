@@ -501,13 +501,15 @@ def disable_product(
     """停用商品"""
     product = get_or_404(db, Product, product_id, "商品")
 
+    old_status = product.status
     product.status = "disabled"
     product.updated_by = current_user.id
     log_user_action(
         db, request, current_user,
         action="product_disable", resource_type="product",
         resource_id=str(product.id),
-        before_data={"status": "active"}, after_data={"status": "disabled"},
+        before_data={"name": product.name, "sku": product.sku, "status": old_status},
+        after_data={"name": product.name, "status": "disabled"},
     )
     db.commit()
 

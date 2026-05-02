@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百六十七轮·自动循环）
+
+### 测试补强：商品停用审计日志 before_data 增强
+
+- `products.py`：停用审计日志 before_data 从硬编码 `{"status": "active"}` 改为含 name/sku/实际 status
+- `test_audit_log.py`：增强 test_31 验证 before_data 含 name 和 sku，after_data 含 name
+- 后端测试：1033/1033 全绿
+
 ## 2026-05-02（第三百六十六轮·自动循环）
 
 ### 测试补强：商品更新审计日志 before_data 修复与变更对比验证
