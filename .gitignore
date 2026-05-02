@@ -13,12 +13,20 @@ build/
 .venv/
 venv/
 .pytest_cache/
+.mypy_cache/
 
 # 测试数据库
 *.db
 
 # Node
 node_modules/
+frontend/dist/
+
+# 日志
+*.log
+
+# 备份
+backups/
 
 # 上传文件
 uploads/
