@@ -1,5 +1,48 @@
 # Changelog
 
+## 2026-05-02（第三百七十四轮·自动循环）
+
+### 测试补强：审计日志 created_at 降序排列验证
+
+- `test_audit_log.py`：新增 test_58（审计日志默认按 created_at 降序排列）
+- 后端测试：1045/1045 全绿
+
+## 2026-05-02（第三百七十三轮·自动循环）
+
+### 测试补强：创建操作 before_data 验证与订单创建 after_data 完整性
+
+- `test_audit_log.py`：新增 test_56（创建类操作 product_create/customer_create before_data 为 None）、test_57（订单创建 after_data 含 order_no/total_amount）
+- 后端测试：1044/1044 全绿
+
+## 2026-05-02（第三百七十二轮·自动循环）
+
+### 测试补强：审计日志 API 响应字段完整性验证
+
+- `test_audit_log.py`：新增 test_54（审计日志 user_agent/request_id/id/created_at 非空）、test_55（resource_id 是有效 UUID 格式）
+- 后端测试：1042/1042 全绿
+
+## 2026-05-02（第三百七十一轮·自动循环）
+
+### 测试补强：库存调整审计日志 before_data 增强
+
+- `inventory.py`：库存调整审计日志 before_data/after_data 增加 name 字段
+- `test_audit_log.py`：新增 test_53（库存调整 before_data 含 name 和调整前 stock_quantity，after_data 含调整后值）
+- 后端测试：1040/1040 全绿
+
+## 2026-05-02（第三百七十轮·自动循环）
+
+### 测试补强：审计日志搜索/过滤结果完整性验证
+
+- `test_audit_log.py`：新增 test_48（日期范围筛选结果均在指定范围内）、test_49（关键字搜索按 actor_name 匹配）、test_50（不匹配关键字返回空列表）、test_51（action+日期组合筛选双条件满足）、test_52（关键字按 resource_id 部分匹配）
+- 后端测试：1039/1039 全绿
+
+## 2026-05-02（第三百六十九轮·自动循环）
+
+### 文档更新：docs/testing.md 测试文件计数同步
+
+- `docs/testing.md`：test_auth.py 35→37 个测试（新增 test_31-38 refresh token 边界/禁用用户 token/密码修改后 token 行为描述），test_audit_log.py 45→49 个测试（新增 test_41-47 横断完整性/before_data 验证描述），test_boundary.py 保持 64 个测试
+- 后端测试：1034/1034 全绿，ruff 检查通过
+
 ## 2026-05-02（第三百六十八轮·自动循环）
 
 ### 测试补强：审计日志横断完整性验证

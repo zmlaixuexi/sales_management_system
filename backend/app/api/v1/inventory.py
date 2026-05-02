@@ -121,8 +121,8 @@ def adjust_inventory(
         db, request, current_user,
         action="inventory_adjust", resource_type="product",
         resource_id=str(product.id),
-        before_data={"stock_quantity": before},
-        after_data={"stock_quantity": after, "change": quantity_change},
+        before_data={"name": product.name, "stock_quantity": before},
+        after_data={"name": product.name, "stock_quantity": after, "change": quantity_change},
     )
     db.commit()
 

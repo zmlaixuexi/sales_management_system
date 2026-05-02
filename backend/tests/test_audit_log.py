@@ -1099,3 +1099,289 @@ def test_47_all_audit_logs_have_actor_and_ip():
         assert log["action"] is not None
         assert log["resource_type"] is not None
         assert log["created_at"] is not None
+
+
+def test_48_date_range_filter_results_within_range():
+    """日期范围筛选：返回的审计日志 created_at 均在指定范围内"""
+    headers = _admin_auth()
+    # 获取全量日志的时间范围
+    resp = client.get("/api/v1/audit-logs", params={"page_size": 50}, headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) > 0
+    # 用最早和最晚时间作为范围，验证全量匹配
+    dates = [i["created_at"] for i in items]
+    dates.sort()
+    start = dates[0][:10]  # YYYY-MM-DD
+    end = dates[-1][:10]
+
+    resp = client.get(
+        "/api/v1/audit-logs",
+        params={"start_date": start, "end_date": end + "T23:59:59"},
+        headers=headers,
+    )
+    assert resp.status_code == 200
+    filtered = resp.json()["data"]["items"]
+    assert len(filtered) > 0
+    # 验证每条记录的日期在范围内
+    for log in filtered:
+        d = log["created_at"][:10]
+        assert start <= d <= end, f"日期 {d} 不在范围 [{start}, {end}] 内"
+
+
+def test_49_keyword_search_matches_actor_name():
+    """关键字搜索：按 actor_name 搜索返回匹配结果"""
+    headers = _admin_auth()
+    # 使用已知存在的 actor_name 关键字搜索
+    resp = client.get(
+        "/api/v1/audit-logs",
+        params={"keyword": "审计测试员"},
+        headers=headers,
+    )
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) > 0
+    for log in items:
+        assert "审计测试员" in log["actor_name"]
+
+
+def test_50_keyword_search_no_match_returns_empty():
+    """关键字搜索：不匹配的关键字返回空列表"""
+    headers = _admin_auth()
+    resp = client.get(
+        "/api/v1/audit-logs",
+        params={"keyword": "ZZZZZ_NONEXISTENT_KEYWORD_ZZZZZ"},
+        headers=headers,
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["total"] == 0
+    assert resp.json()["data"]["items"] == []
+
+
+def test_51_combined_action_and_date_filter():
+    """组合筛选：action + start_date 同时过滤，结果满足两个条件"""
+    headers = _admin_auth()
+    # 先获取所有 login_success 日志
+    resp = client.get("/api/v1/audit-logs", params={"action": "login_success"}, headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    if len(items) == 0:
+        return  # 无 login_success 日志则跳过
+    dates = [i["created_at"][:10] for i in items]
+    start = min(dates)
+    end = max(dates)
+
+    # 组合筛选
+    resp = client.get(
+        "/api/v1/audit-logs",
+        params={"action": "login_success", "start_date": start, "end_date": end + "T23:59:59"},
+        headers=headers,
+    )
+    assert resp.status_code == 200
+    filtered = resp.json()["data"]["items"]
+    assert len(filtered) > 0
+    for log in filtered:
+        assert log["action"] == "login_success"
+        d = log["created_at"][:10]
+        assert start <= d <= end
+
+
+def test_52_keyword_search_by_resource_id():
+    """关键字搜索：按 resource_id 部分匹配返回结果"""
+    headers = _admin_auth()
+    # 获取一条日志的 resource_id 用于搜索
+    resp = client.get("/api/v1/audit-logs", params={"page_size": 1}, headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) > 0
+    rid = items[0]["resource_id"]
+    # 取 resource_id 的中间部分作为关键字
+    partial = rid[len(rid) // 4: len(rid) // 4 + 8]
+
+    resp = client.get(
+        "/api/v1/audit-logs",
+        params={"keyword": partial},
+        headers=headers,
+    )
+    assert resp.status_code == 200
+    matched = resp.json()["data"]["items"]
+    assert len(matched) > 0
+    for log in matched:
+        assert partial in log["resource_id"]
+
+
+def test_53_inventory_adjust_audit_log_before_data():
+    """库存调整审计日志 before_data 含 name 和调整前 stock_quantity，after_data 含调整后值"""
+    headers = _admin_auth()
+    # 创建商品
+    resp = client.post("/api/v1/products", json={
+        "name": "库存审计商品",
+        "cost_price": "10.00",
+        "sale_price": "20.00",
+        "stock_quantity": 30,
+        "status": "active",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    # 调整库存
+    resp = client.post("/api/v1/inventory/adjustments", json={
+        "product_id": pid,
+        "quantity_change": 15,
+        "remark": "审计测试补货",
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=inventory_adjust", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == pid)
+    assert log["before_data"]["name"] == "库存审计商品"
+    assert log["before_data"]["stock_quantity"] == 30
+    assert log["after_data"]["name"] == "库存审计商品"
+    assert log["after_data"]["stock_quantity"] == 45
+    assert log["after_data"]["change"] == 15
+    assert log["resource_type"] == "product"
+
+
+def test_54_audit_log_response_has_user_agent_and_request_id():
+    """审计日志 API 响应字段 user_agent/request_id 非空"""
+    headers = _admin_auth()
+    # 执行一个操作确保有审计日志
+    resp = client.post("/api/v1/products", json={
+        "name": "字段完整性商品",
+        "cost_price": "10.00",
+        "sale_price": "20.00",
+        "stock_quantity": 5,
+        "status": "active",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    resp = client.get("/api/v1/audit-logs?action=product_create", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == pid)
+    assert log["user_agent"] is not None
+    assert log["request_id"] is not None
+    assert isinstance(log["id"], str)
+    assert isinstance(log["created_at"], str)
+
+
+def test_55_audit_log_resource_id_is_valid_uuid():
+    """审计日志 resource_id 是有效 UUID 格式"""
+    headers = _admin_auth()
+    resp = client.get("/api/v1/audit-logs", params={"page_size": 10}, headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) > 0
+    for log in items:
+        rid = log["resource_id"]
+        if rid:
+            # 验证是有效 UUID
+            parsed = uuid.UUID(rid)
+            assert str(parsed) == rid
+
+
+def test_56_create_operations_have_no_before_data():
+    """创建类操作（product_create/customer_create/user_create）before_data 为 None"""
+    headers = _admin_auth()
+    # 创建商品
+    resp = client.post("/api/v1/products", json={
+        "name": "创建无before商品",
+        "cost_price": "10.00",
+        "sale_price": "20.00",
+        "stock_quantity": 5,
+        "status": "active",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    # 创建客户
+    resp = client.post("/api/v1/customers", json={
+        "name": "创建无before客户",
+        "phone": "13500005555",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    # 验证商品创建日志
+    resp = client.get("/api/v1/audit-logs?action=product_create", headers=headers)
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == pid)
+    assert log["before_data"] is None
+    assert log["after_data"] is not None
+
+    # 验证客户创建日志
+    resp = client.get("/api/v1/audit-logs?action=customer_create", headers=headers)
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == cid)
+    assert log["before_data"] is None
+    assert log["after_data"] is not None
+
+
+def test_57_order_create_audit_log_after_data():
+    """订单创建审计日志 after_data 含 order_no 和 total_amount"""
+    headers = _admin_auth()
+    # 创建商品
+    resp = client.post("/api/v1/products", json={
+        "name": "订单审计商品",
+        "cost_price": "10.00",
+        "sale_price": "25.00",
+        "stock_quantity": 100,
+        "status": "active",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    # 创建客户
+    resp = client.post("/api/v1/customers", json={
+        "name": "订单审计客户",
+        "phone": "13400006666",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cust_id = resp.json()["data"]["id"]
+
+    # 创建订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cust_id,
+        "items": [{"product_id": pid, "quantity": 3, "unit_price": "25.00"}],
+    }, headers=headers)
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+    order_no = resp.json()["data"]["order_no"]
+
+    # 验证订单创建审计日志
+    resp = client.get("/api/v1/audit-logs?action=order_create", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == oid)
+    assert log["before_data"] is None
+    assert log["after_data"]["order_no"] == order_no
+    assert log["after_data"]["total_amount"] == "75.00"
+    assert log["resource_type"] == "order"
+
+
+def test_58_audit_logs_ordered_by_created_at_desc():
+    """审计日志默认按 created_at 降序排列（最新在前）"""
+    headers = _admin_auth()
+    # 执行操作确保有审计日志
+    client.post("/api/v1/auth/login", json={
+        "username": "audit_tester", "password": "testpass123",
+    })
+    client.post("/api/v1/products", json={
+        "name": "排序审计商品",
+        "cost_price": "10.00",
+        "sale_price": "20.00",
+        "stock_quantity": 5,
+        "status": "active",
+    }, headers=headers)
+
+    resp = client.get("/api/v1/audit-logs", params={"page_size": 50}, headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) > 1
+    for i in range(len(items) - 1):
+        assert items[i]["created_at"] >= items[i + 1]["created_at"], (
+            f"第 {i} 条 {items[i]['created_at']} 应 >= 第 {i + 1} 条 {items[i + 1]['created_at']}"
+        )
