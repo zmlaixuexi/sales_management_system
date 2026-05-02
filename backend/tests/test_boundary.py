@@ -1374,3 +1374,45 @@ def test_69_customer_update_contact_name_max_length_boundary():
     # 101 字符
     resp = client.put(f"/api/v1/customers/{cid}", json={"contact_name": "联" * 101}, headers=headers)
     assert resp.status_code == 422, f"101 字符联系人应被拒绝: {resp.status_code}"
+
+
+def test_70_customer_create_name_max_length_boundary():
+    """客户创建名称恰好 200 字符通过，201 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    # 恰好 200 字符
+    resp = client.post("/api/v1/customers", json={"name": "客" * 200, "phone": "13900707070"}, headers=headers)
+    assert resp.status_code == 200, f"200 字符名称应通过: {resp.json()}"
+
+    # 201 字符
+    resp = client.post("/api/v1/customers", json={"name": "客" * 201, "phone": "13900717171"}, headers=headers)
+    assert resp.status_code == 422, f"201 字符名称应被拒绝: {resp.status_code}"
+
+
+def test_71_product_create_name_max_length_boundary():
+    """商品创建名称恰好 200 字符通过，201 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    # 恰好 200 字符
+    resp = client.post("/api/v1/products", json={"name": "商" * 200, "price": 10.00}, headers=headers)
+    assert resp.status_code == 200, f"200 字符名称应通过: {resp.json()}"
+
+    # 201 字符
+    resp = client.post("/api/v1/products", json={"name": "商" * 201, "price": 10.00}, headers=headers)
+    assert resp.status_code == 422, f"201 字符名称应被拒绝: {resp.status_code}"
+
+
+def test_72_product_update_name_max_length_boundary():
+    """商品编辑名称恰好 200 字符通过，201 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/products", json={"name": "名称边界商品72", "price": 10.00}, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    # 恰好 200 字符
+    resp = client.put(f"/api/v1/products/{pid}", json={"name": "商" * 200}, headers=headers)
+    assert resp.status_code == 200, f"200 字符名称应通过: {resp.json()}"
+
+    # 201 字符
+    resp = client.put(f"/api/v1/products/{pid}", json={"name": "商" * 201}, headers=headers)
+    assert resp.status_code == 422, f"201 字符名称应被拒绝: {resp.status_code}"
