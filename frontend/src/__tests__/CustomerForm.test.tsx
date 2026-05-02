@@ -197,4 +197,63 @@ describe('CustomerForm', () => {
       expect(screen.getByText('保存修改')).toBeInTheDocument()
     })
   })
+
+  it('电话字段有 maxLength 限制', () => {
+    renderNewCustomer()
+    const inputs = screen.getAllByTestId('input')
+    const phoneInput = inputs.find((inp) => inp.getAttribute('placeholder') === '联系电话')
+    expect(phoneInput).toHaveAttribute('maxlength', '30')
+  })
+
+  it('邮箱字段有 maxLength 限制', () => {
+    renderNewCustomer()
+    const inputs = screen.getAllByTestId('input')
+    const emailInput = inputs.find((inp) => inp.getAttribute('placeholder') === '邮箱地址')
+    expect(emailInput).toHaveAttribute('maxlength', '100')
+  })
+
+  it('客户名称字段有 maxLength 限制', () => {
+    renderNewCustomer()
+    const inputs = screen.getAllByTestId('input')
+    const nameInput = inputs.find((inp) => inp.getAttribute('placeholder') === '请输入客户名称')
+    expect(nameInput).toHaveAttribute('maxlength', '100')
+  })
+
+  it('备注字段有 maxLength 限制', () => {
+    renderNewCustomer()
+    const textarea = screen.getByTestId('textarea')
+    expect(textarea).toHaveAttribute('maxlength', '500')
+  })
+
+  it('来源下拉包含正确选项', () => {
+    renderNewCustomer()
+    const selects = screen.getAllByTestId('select')
+    // 来源 select 包含 转介绍/线上/线下/广告/其他
+    const sourceSelect = selects[0]
+    const options = Array.from(sourceSelect.querySelectorAll('option'))
+    const optionTexts = options.map((o) => o.textContent)
+    expect(optionTexts).toContain('转介绍')
+    expect(optionTexts).toContain('线上')
+    expect(optionTexts).toContain('其他')
+  })
+
+  it('等级下拉包含正确选项', () => {
+    renderNewCustomer()
+    const selects = screen.getAllByTestId('select')
+    const levelSelect = selects[1]
+    const options = Array.from(levelSelect.querySelectorAll('option'))
+    const optionTexts = options.map((o) => o.textContent)
+    expect(optionTexts).toContain('VIP')
+    expect(optionTexts).toContain('普通')
+  })
+
+  it('跟进状态下拉包含正确选项', () => {
+    renderNewCustomer()
+    const selects = screen.getAllByTestId('select')
+    const followSelect = selects[2]
+    const options = Array.from(followSelect.querySelectorAll('option'))
+    const optionTexts = options.map((o) => o.textContent)
+    expect(optionTexts).toContain('新客户')
+    expect(optionTexts).toContain('已成交')
+  })
 })
