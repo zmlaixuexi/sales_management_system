@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百一十二轮·自动循环）
+
+### 可观测性：健康检查和版本端点新增 git commit revision
+
+- /health 和 /version 端点返回 revision 字段（git rev-parse --short HEAD）
+- 启动时计算一次，缓存到模块级变量 GIT_REVISION
+- 18 个健康检查测试全部通过，mypy 0 errors
+
 ## 2026-05-02（第二百一十一轮·自动循环）
 
 ### 可观测性：前端 API 请求自动生成 X-Request-ID 头
