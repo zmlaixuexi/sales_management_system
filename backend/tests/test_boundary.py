@@ -2191,3 +2191,18 @@ def test_128_product_update_main_image_url_max_length():
     url_501 = url_500 + "y"
     resp = client.put(f"/api/v1/products/{pid}", json={"main_image_url": url_501}, headers=headers)
     assert resp.status_code == 422, f"501 字符 URL 应被拒绝: {resp.status_code}"
+
+
+def test_129_order_update_explicit_empty_items():
+    """订单编辑显式传空 items 列表返回 422（schema min_length=1）"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=headers)
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+
+    # 显式传空 items（schema 有 min_length=1，Pydantic 拦截）
+    resp = client.put(f"/api/v1/sales-orders/{oid}", json={"items": []}, headers=headers)
+    assert resp.status_code == 422, f"空 items 应返回 422: {resp.status_code} {resp.json()}"
