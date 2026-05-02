@@ -983,3 +983,30 @@ def test_43_payment_reverse_audit_log_fields():
     assert log["after_data"]["status"] == "reversed"
     assert log["after_data"]["order_id"] == oid
     assert log["resource_type"] == "payment"
+
+
+def test_44_customer_update_audit_log_before_data():
+    """客户编辑审计日志 before_data 含编辑前的 name 和 phone"""
+    headers = _admin_auth()
+    # 创建客户
+    resp = client.post("/api/v1/customers", json={
+        "name": "编辑前名称",
+        "phone": "13600003333",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    # 编辑客户名称
+    resp = client.put(f"/api/v1/customers/{cid}", json={
+        "name": "编辑后名称",
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=customer_update", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == cid)
+    assert log["before_data"]["name"] == "编辑前名称"
+    assert "phone" in log["before_data"]
+    assert log["after_data"]["name"] == "编辑后名称"
+    assert log["resource_type"] == "customer"

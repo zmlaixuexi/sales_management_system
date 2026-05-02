@@ -226,6 +226,8 @@ def update_customer(
 
     check_owner_or_forbid(current_user, customer.owner_user_id, "customer:view_all", "客户")
 
+    before_snapshot = {"name": customer.name, "phone": customer.phone}
+
     if data.name is not None:
         name = data.name.strip()
         if not name:
@@ -267,6 +269,7 @@ def update_customer(
         db, request, current_user,
         action="customer_update", resource_type="customer",
         resource_id=str(customer.id),
+        before_data=before_snapshot,
         after_data={"name": customer.name, "phone": customer.phone},
     )
     db.commit()

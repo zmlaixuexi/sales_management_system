@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百六十三轮·自动循环）
+
+### 测试补强：客户编辑审计日志 before_data 字段完整性验证
+
+- `customers.py`：补充客户更新审计日志的 `before_data`（含编辑前的 name 和 phone）
+- `test_audit_log.py`：新增 test_44（客户编辑 before_data 含原始名称，after_data 含新名称）
+- 后端测试：1029/1029 全绿
+
 ## 2026-05-02（第三百六十二轮·自动循环）
 
 ### 代码质量：docs/testing.md 更新 + ruff 修复
