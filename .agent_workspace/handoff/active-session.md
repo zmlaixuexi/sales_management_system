@@ -2,31 +2,31 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-360
+当前任务编号：ROUND-361
 当前任务名称：自动循环验证
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 360：用户禁用后 token 立即失效验证（test_35 access token + test_36 refresh token），1026 后端测试全绿
-- Round 359：冲正审计日志字段完整性验证，1024 后端测试全绿
+- Round 361：收款冲正后订单状态回退验证（test_62 partially_paid→confirmed + test_63 completed→partially_paid），1028 后端测试全绿
+- Round 360：用户禁用后 token 立即失效验证，1026 后端测试全绿
 
 ## 最终验证状态
 
 | 门禁 | 结果 |
 |---|---|
-| 后端测试 | 1026/1026 ✓ |
+| 后端测试 | 1028/1028 ✓ |
 | 前端测试 | 382/382 ✓ |
 | ruff | 0 errors ✓ |
-| 总计 | 1408 tests |
+| 总计 | 1410 tests |
 
 ## 下一步第一动作
 
 继续 keep-going 模式。可选无阻塞方向：
-- 测试补强：收款冲正后订单状态回退验证（confirmed/partially_paid）
-- 代码质量：docs/testing.md 测试计数更新至 1026
+- 代码质量：docs/testing.md 测试计数更新至 1028
 - 测试补强：商品成本价大于等于售价拒绝边界验证
+- 测试补强：订单编辑后金额快照更新验证
 
 ## 阻塞问题
 

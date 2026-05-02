@@ -1183,3 +1183,72 @@ def test_61_update_cancelled_order_rejected():
         "remark": "已取消不可编辑",
     }, headers=_auth())
     assert resp.status_code == 400
+
+
+# --- 收款冲正后订单状态回退 ---
+
+
+def test_62_reverse_partial_payment_back_to_confirmed():
+    """部分收款冲正全部收款后订单状态回到 confirmed"""
+    _ensure_login()
+    # 创建并确认订单（总价 200）
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 2}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
+
+    # 部分收款 50（状态变为 partially_paid）
+    resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
+        "amount": "50", "payment_method": "cash",
+    }, headers=_auth())
+    assert resp.status_code == 200
+    pay_id = resp.json()["data"]["id"]
+    assert resp.json()["data"]["order_status"] == "partially_paid"
+
+    # 冲正
+    resp = client.post(f"/api/v1/payments/{pay_id}/reverse", headers=_auth())
+    assert resp.status_code == 200
+
+    # 订单状态应回到 confirmed（paid_amount = 0）
+    resp = client.get(f"/api/v1/sales-orders/{oid}", headers=_auth())
+    assert resp.status_code == 200
+    assert resp.json()["data"]["status"] == "confirmed"
+    assert str(resp.json()["data"]["paid_amount"]) in ("0", "0.00")
+
+
+def test_63_reverse_full_payment_back_to_partially_paid():
+    """全额收款后冲正部分收款，状态回到 partially_paid"""
+    _ensure_login()
+    # 创建并确认订单（总价 100）
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
+
+    # 分两笔收款
+    resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
+        "amount": "60", "payment_method": "cash",
+    }, headers=_auth())
+    assert resp.status_code == 200
+    pay1 = resp.json()["data"]["id"]
+
+    resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
+        "amount": "40", "payment_method": "transfer",
+    }, headers=_auth())
+    assert resp.status_code == 200
+    pay2 = resp.json()["data"]["id"]
+    assert resp.json()["data"]["order_status"] == "completed"
+
+    # 冲正第二笔（40），paid_amount = 60，状态应回到 partially_paid
+    resp = client.post(f"/api/v1/payments/{pay2}/reverse", headers=_auth())
+    assert resp.status_code == 200
+
+    resp = client.get(f"/api/v1/sales-orders/{oid}", headers=_auth())
+    assert resp.status_code == 200
+    assert resp.json()["data"]["status"] == "partially_paid"
