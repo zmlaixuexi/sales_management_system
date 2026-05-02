@@ -1816,3 +1816,62 @@ def test_96_change_password_no_letter():
         "old_password": "pass123456", "new_password": "1234567890",
     }, headers=headers)
     assert resp.status_code == 422, f"无字母新密码应被拒绝: {resp.status_code}"
+
+
+def test_97_product_create_negative_price():
+    """商品创建负销售价返回 400，负成本价返回 400"""
+    headers = _auth_for_user(_user_id)
+
+    resp = client.post("/api/v1/products", json={
+        "name": "负价格商品97", "price": -10.00,
+    }, headers=headers)
+    # 注意：API 字段名是 sale_price/cost_price，price 不是有效字段
+    # 使用正确字段名
+    resp = client.post("/api/v1/products", json={
+        "name": "负销售价商品97a", "sale_price": "-10", "cost_price": "5",
+    }, headers=headers)
+    assert resp.status_code == 400, f"负销售价应返回 400: {resp.status_code} {resp.json()}"
+
+    resp = client.post("/api/v1/products", json={
+        "name": "负成本价商品97b", "sale_price": "10", "cost_price": "-5",
+    }, headers=headers)
+    assert resp.status_code == 400, f"负成本价应返回 400: {resp.status_code} {resp.json()}"
+
+
+def test_98_product_update_negative_price():
+    """商品编辑负销售价返回 400，负成本价返回 400"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/products", json={
+        "name": "负价格编辑商品98", "sale_price": "10", "cost_price": "5",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    resp = client.put(f"/api/v1/products/{pid}", json={"sale_price": "-10"}, headers=headers)
+    assert resp.status_code == 400, f"负销售价应返回 400: {resp.status_code} {resp.json()}"
+
+    resp = client.put(f"/api/v1/products/{pid}", json={"cost_price": "-5"}, headers=headers)
+    assert resp.status_code == 400, f"负成本价应返回 400: {resp.status_code} {resp.json()}"
+
+
+def test_99_product_create_negative_stock():
+    """商品创建负库存返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    resp = client.post("/api/v1/products", json={
+        "name": "负库存商品99", "sale_price": "10", "stock_quantity": -1,
+    }, headers=headers)
+    assert resp.status_code == 422, f"负库存应返回 422: {resp.status_code} {resp.json()}"
+
+
+def test_100_product_update_negative_stock():
+    """商品编辑负库存返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/products", json={
+        "name": "负库存编辑商品100", "sale_price": "10",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    resp = client.put(f"/api/v1/products/{pid}", json={"stock_quantity": -1}, headers=headers)
+    assert resp.status_code == 422, f"负库存应返回 422: {resp.status_code} {resp.json()}"
