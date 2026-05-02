@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百四十一轮·自动循环）
+
+### 重构：提取 sanitize_text 公共函数，9 处验证器统一引用
+
+- core/sanitize.py 新增 `sanitize_text(v)` 函数：None 安全的文本消毒
+- 6 个 schema（order×2、customer×2、product×2、payment×1、inventory×1、auth×2）共 9 处验证器统一引用 `_sanitize`
+- 移除各 schema 中重复的 `strip_html` import
+- 797 测试全绿，零回归
+
 ## 2026-05-02（第二百四十轮·自动循环）
 
 ### 重构：提取 fmt_dt() 工具函数，22 处 datetime 格式化统一
