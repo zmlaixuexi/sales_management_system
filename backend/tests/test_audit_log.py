@@ -2316,3 +2316,22 @@ def test_87_login_failed_audit_log_actor_id_is_none():
     failed_log = next(i for i in items if i["actor_name"] == "nonexistent_user_xyz")
     assert failed_log["actor_id"] is None
     assert failed_log["action"] == "login_failed"
+
+
+def test_88_audit_log_created_at_iso8601_format():
+    """审计日志 created_at 为 ISO 8601 格式"""
+    import re
+    headers = _admin_auth()
+    # 确保有审计日志数据
+    client.post("/api/v1/products", json={
+        "name": "ISO格式商品", "sale_price": "10.00", "cost_price": "5.00",
+    }, headers=headers)
+    resp = client.get("/api/v1/audit-logs", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) > 0
+    iso_pattern = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
+    for log in items:
+        assert iso_pattern.match(log["created_at"]), (
+            f"created_at 格式错误: {log['created_at']}"
+        )

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百零三轮·自动循环）
+
+### 代码质量 + 测试补强：docs/testing.md 同步 + 审计日志 created_at ISO 8601 格式验证
+
+- `docs/testing.md`：更新后端测试总数 1082→1085、总计 1464→1467、test_audit_log.py 84→87
+- `test_audit_log.py`：新增 test_88（审计日志 created_at 为 ISO 8601 格式 YYYY-MM-DDTHH:MM:SS）
+- 后端测试：1086/1086 全绿，ruff clean
+
 ## 2026-05-03（第四百零二轮·自动循环）
 
 ### 测试补强：登录失败审计日志 actor_id 为 None 验证
