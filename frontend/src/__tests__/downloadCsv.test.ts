@@ -134,4 +134,26 @@ describe('downloadCsv', () => {
       responseType: 'blob',
     })
   })
+
+  it('blob 为 JSON 错误响应时抛出后端错误消息', async () => {
+    const errorJson = JSON.stringify({ success: false, error: { code: 'AUTH_FORBIDDEN', message: '无导出权限' } })
+    const blob = new Blob([errorJson], { type: 'application/json' })
+    mockGet.mockResolvedValueOnce({
+      data: blob,
+      headers: {},
+    })
+
+    await expect(downloadCsv('/exports/products')).rejects.toThrow('无导出权限')
+  })
+
+  it('blob 为 JSON 但无 error.message 时使用默认消息', async () => {
+    const errorJson = JSON.stringify({ success: false })
+    const blob = new Blob([errorJson], { type: 'application/json' })
+    mockGet.mockResolvedValueOnce({
+      data: blob,
+      headers: {},
+    })
+
+    await expect(downloadCsv('/exports/products')).rejects.toThrow('导出失败')
+  })
 })
