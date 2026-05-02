@@ -748,3 +748,160 @@ class TestOrderAuthBoundary:
         """无效 UUID 确认订单返回 422"""
         resp = client.post("/api/v1/sales-orders/not-a-uuid/confirm", headers=_auth())
         assert resp.status_code == 422
+
+
+def test_37_unit_price_equals_cost_price_zero_margin():
+    """成交单价等于成本价应成功，毛利率为 0"""
+    db = TestSession()
+    try:
+        user = db.query(User).first()
+        cat = db.query(ProductCategory).first()
+        prod = Product(
+            id=uuid.uuid4(), name="零利润商品", sku="ORD-ZERO-01",
+            sale_price=100, cost_price=60, stock_quantity=10,
+            status="active", category_id=cat.id,
+        )
+        db.add(prod)
+        cust = Customer(
+            id=uuid.uuid4(), name="零利润客户", phone="13800000099",
+            owner_user_id=user.id, created_by=user.id,
+        )
+        db.add(cust)
+        db.flush()
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no="ORD-ZERO-MARGIN",
+            customer_id=cust.id, sales_user_id=user.id,
+            status="draft", total_amount=120, total_cost=120,
+            gross_profit=0, gross_margin=0, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=prod.id,
+            product_sku_snapshot=prod.sku, product_name_snapshot=prod.name,
+            quantity=2, unit_price=60, discount_amount=40, discount_rate=0.4,
+            cost_price_snapshot=60, subtotal_amount=120, subtotal_cost=120,
+        ))
+        db.commit()
+        oid = str(order.id)
+    finally:
+        db.close()
+
+    # 验证通过 API 获取详情确认金额
+    resp = client.get(f"/api/v1/sales-orders/{oid}", headers=_auth())
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["gross_profit"] == "0.00"
+    assert data["gross_margin"] == "0.0000"
+
+
+def test_38_order_logs_endpoint():
+    """订单操作日志端点返回审计记录"""
+    db = TestSession()
+    try:
+        user = db.query(User).first()
+        cat = db.query(ProductCategory).first()
+        prod = Product(
+            id=uuid.uuid4(), name="日志测试商品", sku="ORD-LOG-01",
+            sale_price=100, cost_price=60, stock_quantity=10,
+            status="active", category_id=cat.id,
+        )
+        db.add(prod)
+        cust = Customer(
+            id=uuid.uuid4(), name="日志测试客户", phone="13800000098",
+            owner_user_id=user.id, created_by=user.id,
+        )
+        db.add(cust)
+        db.flush()
+        # 直接创建订单，避免序列冲突
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no="ORD-LOG-TEST",
+            customer_id=cust.id, sales_user_id=user.id,
+            status="draft", total_amount=100, total_cost=60,
+            gross_profit=40, gross_margin=0.4, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=prod.id,
+            product_sku_snapshot=prod.sku, product_name_snapshot=prod.name,
+            quantity=1, unit_price=100, discount_amount=0, discount_rate=0,
+            cost_price_snapshot=60, subtotal_amount=100, subtotal_cost=60,
+        ))
+        db.commit()
+        oid = str(order.id)
+    finally:
+        db.close()
+
+    # 确认订单（通过 API 以产生审计日志）
+    resp = client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
+    assert resp.status_code == 200
+
+    # 查询日志
+    resp = client.get(f"/api/v1/sales-orders/{oid}/logs", headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    assert "action" in items[0]
+    assert "created_at" in items[0]
+
+
+def test_39_draft_cancel_no_inventory_movement():
+    """取消草稿订单不应产生库存变动记录"""
+    from app.models.order import InventoryMovement
+    db = TestSession()
+    try:
+        user = db.query(User).first()
+        cat = db.query(ProductCategory).first()
+        prod = Product(
+            id=uuid.uuid4(), name="草稿取消测试商品", sku="ORD-DRAFT-CANCEL",
+            sale_price=100, cost_price=60, stock_quantity=10,
+            status="active", category_id=cat.id,
+        )
+        db.add(prod)
+        cust = Customer(
+            id=uuid.uuid4(), name="草稿取消测试客户", phone="13800000097",
+            owner_user_id=user.id, created_by=user.id,
+        )
+        db.add(cust)
+        db.flush()
+        # 直接创建草稿订单，避免序列冲突
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no="ORD-DRAFT-CANCEL",
+            customer_id=cust.id, sales_user_id=user.id,
+            status="draft", total_amount=100, total_cost=60,
+            gross_profit=40, gross_margin=0.4, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=prod.id,
+            product_sku_snapshot=prod.sku, product_name_snapshot=prod.name,
+            quantity=1, unit_price=100, discount_amount=0, discount_rate=0,
+            cost_price_snapshot=60, subtotal_amount=100, subtotal_cost=60,
+        ))
+        db.commit()
+        oid = str(order.id)
+        pid = str(prod.id)
+
+        before_count = db.query(InventoryMovement).filter(
+            InventoryMovement.product_id == prod.id,
+        ).count()
+    finally:
+        db.close()
+
+    # 取消草稿（通过 API）
+    resp = client.post(f"/api/v1/sales-orders/{oid}/cancel", headers=_auth())
+    assert resp.status_code == 200
+
+    db = TestSession()
+    try:
+        after_count = db.query(InventoryMovement).filter(
+            InventoryMovement.product_id == uuid.UUID(pid),
+        ).count()
+        assert after_count == before_count, "取消草稿订单不应产生库存变动"
+    finally:
+        db.close()
