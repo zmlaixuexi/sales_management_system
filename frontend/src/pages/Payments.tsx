@@ -1,10 +1,12 @@
 import { Table, Button, Tag, Space } from 'antd'
+import { DownloadOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
 import { fetchPayments } from '@/api/payments'
 import type { Payment } from '@/api/payments'
 import { formatAmount } from '@/utils'
 import { usePaginatedList } from '@/hooks/usePaginatedList'
+import { downloadCsv } from '@/api/request'
 import { paymentStatusMap as statusMap, paymentMethodMap } from '@/constants/statusMaps'
 
 export default function PaymentsPage() {
@@ -77,6 +79,7 @@ export default function PaymentsPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
         <h2 style={{ margin: 0 }}>收款记录</h2>
         <Space>
+          <Button icon={<DownloadOutlined />} onClick={() => downloadCsv('/exports/payments')}>导出</Button>
           <span style={{ color: '#888' }}>共 {total} 条记录</span>
         </Space>
       </div>

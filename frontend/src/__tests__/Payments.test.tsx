@@ -189,4 +189,9 @@ describe('PaymentsPage', () => {
     const row = screen.getByTestId('row-pay-002-mnopqr')
     expect(row.textContent).toContain('--')
   })
+
+  it('渲染导出按钮', () => {
+    renderPayments()
+    expect(screen.getByText('导出')).toBeInTheDocument()
+  })
 })
