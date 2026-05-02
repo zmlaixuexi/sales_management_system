@@ -153,6 +153,60 @@ def test_request_log_skips_non_api_paths(caplog):
     assert len(log_records) == 0
 
 
+def test_request_log_records_post_method(caplog):
+    """POST 请求被正确记录方法"""
+    app = FastAPI()
+    app.add_middleware(RequestLogMiddleware)
+
+    @app.post("/api/v1/submit")
+    async def submit():
+        return {"ok": True}
+
+    with caplog.at_level(logging.INFO, logger="app.request"):
+        client = TestClient(app)
+        resp = client.post("/api/v1/submit", json={"data": "test"})
+        assert resp.status_code == 200
+
+    log_records = [r for r in caplog.records if r.name == "app.request"]
+    assert len(log_records) >= 1
+    assert "POST" in log_records[0].msg
+
+
+def test_request_log_slow_request_warning_level(caplog):
+    """慢请求使用 WARNING 级别记录"""
+    app = FastAPI()
+    app.add_middleware(RequestLogMiddleware)
+
+    @app.get("/api/v1/slow")
+    async def slow_endpoint():
+        return {"ok": True}
+
+    with (
+        patch("app.core.request_log.settings") as mock_settings,
+        patch("app.core.request_log.time") as mock_time,
+        caplog.at_level(logging.DEBUG, logger="app.request"),
+    ):
+        mock_settings.SLOW_REQUEST_THRESHOLD_MS = 100
+        call_count = 0
+
+        def fake_monotonic():
+            nonlocal call_count
+            call_count += 1
+            if call_count <= 1:
+                return 1000.0
+            return 1000.0 + 0.2  # 200ms > 100ms threshold
+
+        mock_time.monotonic = fake_monotonic
+        client = TestClient(app)
+        resp = client.get("/api/v1/slow")
+        assert resp.status_code == 200
+
+    log_records = [r for r in caplog.records if r.name == "app.request"]
+    assert len(log_records) >= 1
+    assert log_records[0].levelno == logging.WARNING
+    assert "SLOW" in log_records[0].msg
+
+
 # ─── SecurityHeadersMiddleware ──────────────────────────────
 
 
