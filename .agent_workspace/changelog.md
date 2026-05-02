@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百一十轮·自动循环）
+
+### 文档：更新 README 和 testing.md 反映最新前端测试状态
+
+- 全量 CI 验证：ruff 0 + mypy 0 + 767 后端 + ESLint 0 + tsc 0 + 378 前端 = 1145
+- README：前端测试数 339→378，更新 API 测试模块行（orders 6→14、payments 5→11、products 8→16、customers 7→12、users 5→11、inventory 5→10、auditLogs 5→11、auth 5→8）
+- testing.md：前端测试总数 339→378，总计 1106→1145，更新 API 模块详解表
+
 ## 2026-05-02（第二百零九轮·自动循环）
 
 ### 测试：扩展商品和客户 API 测试（+11 项，前端总计 378）
