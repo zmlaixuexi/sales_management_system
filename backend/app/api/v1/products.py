@@ -478,13 +478,15 @@ def delete_product(
             detail={"code": "PRODUCT_IN_USE", "message": "该商品已被订单引用，无法删除"},
         )
 
+    before_snapshot = {"name": product.name, "sku": product.sku, "status": product.status}
     product.deleted_at = datetime.now()
     product.updated_by = current_user.id
     log_user_action(
         db, request, current_user,
         action="product_delete", resource_type="product",
         resource_id=str(product.id),
-        before_data={"name": product.name, "sku": product.sku},
+        before_data=before_snapshot,
+        after_data={"name": product.name, "sku": product.sku, "deleted": True},
     )
     db.commit()
 

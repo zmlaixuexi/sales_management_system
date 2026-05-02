@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百八十五轮·自动循环）
+
+### 测试补强：商品删除/客户创建审计日志验证
+
+- `products.py`：商品软删除审计日志增加 after_data（含 name/sku/deleted=True），before_data 增加 status
+- `test_audit_log.py`：新增 test_69（商品删除 before_data 含 status、after_data 含 deleted=True）、test_70（客户创建 after_data 含 name/phone）
+- 后端测试：1067/1067 全绿
+
 ## 2026-05-02（第三百八十四轮·自动循环）
 
 ### 文档更新 + 测试补强：导出 API 空数据 CSV 验证

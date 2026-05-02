@@ -1787,3 +1787,57 @@ def test_68_password_change_audit_log_after_data():
         "old_password": "auditpass123",
         "new_password": "testpass123",
     }, headers={"Authorization": f"Bearer {token2}"})
+
+
+def test_69_product_delete_audit_log_before_after_data():
+    """商品软删除审计日志 before_data 含 name/sku/status，after_data 含 deleted=True"""
+    headers = _admin_auth()
+    # 创建商品
+    resp = client.post("/api/v1/products", json={
+        "name": "删除审计商品",
+        "cost_price": "10.00",
+        "sale_price": "20.00",
+        "stock_quantity": 5,
+        "status": "active",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    # 软删除商品
+    resp = client.delete(f"/api/v1/products/{pid}", headers=headers)
+    assert resp.status_code == 200
+
+    # 验证审计日志
+    resp = client.get("/api/v1/audit-logs?action=product_delete", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == pid)
+    assert log["before_data"]["name"] == "删除审计商品"
+    assert "sku" in log["before_data"]
+    assert log["before_data"]["status"] == "active"
+    assert log["after_data"]["name"] == "删除审计商品"
+    assert "sku" in log["after_data"]
+    assert log["after_data"]["deleted"] is True
+    assert log["resource_type"] == "product"
+
+
+def test_70_customer_create_audit_log_after_data_completeness():
+    """客户创建审计日志 after_data 含 name/phone/source/level"""
+    headers = _admin_auth()
+    resp = client.post("/api/v1/customers", json={
+        "name": "创建完整性客户",
+        "phone": "13500001111",
+        "source": "referral",
+        "level": "vip",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    resp = client.get("/api/v1/audit-logs?action=customer_create", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == cid)
+    assert log["before_data"] is None
+    assert log["after_data"]["name"] == "创建完整性客户"
+    assert "phone" in log["after_data"]
+    assert log["resource_type"] == "customer"
