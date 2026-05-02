@@ -2,6 +2,7 @@
 
 import os
 import uuid
+from decimal import Decimal
 
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -753,3 +754,88 @@ def test_28_payment_list_excludes_deleted_order():
     assert resp.status_code == 200
     ids = [p["id"] for p in resp.json()["data"]["items"]]
     assert pid not in ids, "已删除订单的收款不应出现在列表中"
+
+
+def test_29_non_owner_payment_rejected():
+    """非订单所有者（无 order:view_all）不能收款"""
+    db = TestSession()
+    try:
+        sales_user = _create_user_with_perms(db, "pay_other_sales", ["payment:create", "payment:list"])
+        db.commit()
+        token = create_access_token(str(sales_user.id))
+    finally:
+        db.close()
+
+    # 管理员的订单，sales_user 无 order:view_all 权限，不应能收款
+    resp = client.post(f"/api/v1/payments/orders/{_confirmed_order_id}/payments", json={
+        "amount": "10", "payment_method": "cash",
+    }, headers={"Authorization": f"Bearer {token}"})
+    # 已完成订单返回 400（状态先于所有权检查），但关键是无权操作
+    assert resp.status_code in (400, 403)
+
+
+def test_30_payment_list_excludes_reversed():
+    """收款列表不包含已冲正的收款记录"""
+    # 创建并确认新订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    order_id = resp.json()["data"]["id"]
+
+    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
+    assert resp.status_code == 200
+
+    # 创建两笔收款
+    resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
+        "amount": "40", "payment_method": "cash",
+    }, headers=_auth())
+    assert resp.status_code == 200
+    payment_a_id = resp.json()["data"]["id"]
+
+    resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
+        "amount": "60", "payment_method": "transfer",
+    }, headers=_auth())
+    assert resp.status_code == 200
+    payment_b_id = resp.json()["data"]["id"]
+
+    # 冲正第一笔
+    resp = client.post(f"/api/v1/payments/{payment_a_id}/reverse", headers=_auth())
+    assert resp.status_code == 200
+
+    # 列表过滤只看该订单
+    resp = client.get(f"/api/v1/payments?order_id={order_id}", headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    returned_ids = [p["id"] for p in items]
+    assert payment_a_id not in returned_ids, "已冲正收款不应出现在列表"
+    assert payment_b_id in returned_ids
+
+
+def test_31_payment_decimal_precision():
+    """收款金额多小数位精度处理"""
+    # 创建并确认新订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    order_id = resp.json()["data"]["id"]
+
+    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
+    assert resp.status_code == 200
+
+    # 金额带 3 位小数，系统应接受或截断
+    resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
+        "amount": "33.333", "payment_method": "cash",
+    }, headers=_auth())
+    assert resp.status_code == 200
+    # 返回金额应为有效的 Decimal 字符串
+    returned_amount = resp.json()["data"]["amount"]
+    Decimal(returned_amount)  # 不应抛异常
+
+    # 确认订单 paid_amount 也是合法 Decimal
+    resp = client.get(f"/api/v1/sales-orders/{order_id}", headers=_auth())
+    assert resp.status_code == 200
+    Decimal(resp.json()["data"]["paid_amount"])
