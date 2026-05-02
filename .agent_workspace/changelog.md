@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第三百六十八轮·自动循环）
+
+### 测试补强：审计日志横断完整性验证
+
+- `test_audit_log.py`：新增 test_47（验证所有审计日志包含 actor_name/ip_address/action/resource_type/created_at，login_failed 的 actor_id 可为 None）
+- 后端测试：1034/1034 全绿
+
 ## 2026-05-02（第三百六十七轮·自动循环）
 
 ### 测试补强：商品停用审计日志 before_data 增强

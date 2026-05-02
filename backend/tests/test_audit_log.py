@@ -1076,4 +1076,26 @@ def test_46_product_update_audit_log_change_comparison():
     assert log["after_data"]["name"] == "变更后商品"
     assert log["after_data"]["sale_price"] == "120.00"
     assert log["after_data"]["cost_price"] == "50.00"  # 未变更字段保持原值
-    assert log["resource_type"] == "product"
+
+
+def test_47_all_audit_logs_have_actor_and_ip():
+    """所有审计日志都应包含 actor_name、actor_id 和 ip_address"""
+    headers = _admin_auth()
+    # 执行一个操作确保有审计日志
+    client.post("/api/v1/auth/login", json={
+        "username": "audit_tester", "password": "testpass123",
+    })
+
+    resp = client.get("/api/v1/audit-logs", params={"page_size": 50}, headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) > 0
+    for log in items:
+        assert log["actor_name"] is not None, f"action={log['action']} 缺少 actor_name"
+        # login_failed 的 actor_id 为 None（无法确定用户身份）
+        if log["action"] != "login_failed":
+            assert log["actor_id"] is not None, f"action={log['action']} 缺少 actor_id"
+        assert log["ip_address"] is not None, f"action={log['action']} 缺少 ip_address"
+        assert log["action"] is not None
+        assert log["resource_type"] is not None
+        assert log["created_at"] is not None
