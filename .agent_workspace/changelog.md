@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第一百八十八轮·自动循环）
+
+### 工程：提取重复 statusMap 为共享常量模块 constants/statusMaps.ts
+
+- 新建 `frontend/src/constants/statusMaps.ts`，集中定义 5 个业务状态映射
+- productStatusMap、orderStatusMap、paymentStatusMap、customerSourceMap、customerLevelMap
+- 6 个页面组件消除重复定义：Products、Orders、OrderDetail、Payments、Customers、CustomerDetail
+- 净减少 17 行重复代码
+
 ## 2026-05-02（第一百八十七轮·自动循环）
 
 ### 文档：更新 docs/testing.md 与实际测试输出对齐（992→1040）
