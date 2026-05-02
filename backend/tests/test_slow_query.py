@@ -113,3 +113,40 @@ def test_slow_query_disabled_when_threshold_zero(caplog):
         conn.execute(text("SELECT 1"))
 
     assert "SLOW SQL" not in caplog.text
+
+
+def test_slow_query_includes_request_id(caplog):
+    """慢查询日志包含 request_id 用于链路追踪"""
+    import logging
+
+    from app.core.slow_query import _after_cursor_execute
+
+    captured_records: list[logging.LogRecord] = []
+    logger = logging.getLogger("app.slow_query")
+
+    original_handle = logger.handle
+
+    def capture_handle(record: logging.LogRecord) -> None:
+        captured_records.append(record)
+        original_handle(record)
+
+    with (
+        patch("app.core.slow_query.settings") as mock_settings,
+        patch("app.core.slow_query._query_start_ctx") as mock_ctx,
+        patch("app.core.slow_query.time") as mock_time,
+        patch.object(logger, "handle", capture_handle),
+    ):
+        mock_settings.SLOW_SQL_THRESHOLD_MS = 100
+        mock_ctx.get.return_value = 1000.0
+        mock_time.monotonic.return_value = 1100.0
+
+        # 设置 request_id
+        from app.core.request_id import request_id_ctx
+        token = request_id_ctx.set("test-req-123")
+        try:
+            _after_cursor_execute(None, None, "SELECT 1", None, None, None)
+        finally:
+            request_id_ctx.reset(token)
+
+    assert len(captured_records) == 1
+    assert captured_records[0].extra_fields["request_id"] == "test-req-123"
