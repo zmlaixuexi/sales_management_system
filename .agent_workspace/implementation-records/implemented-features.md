@@ -6,6 +6,14 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-163
+
+- 名称：前端订单和收款 API 边界条件测试
+- 轮次：Round 206（自动循环）
+- 描述：扩展 orders-api.test.ts（6→14 项）和 payments-api.test.ts（5→11 项），覆盖分页、筛选、多商品创建、微信/支付宝支付方式、完整响应解析
+- 涉及文件：frontend/src/__tests__/orders-api.test.ts、frontend/src/__tests__/payments-api.test.ts
+- 验证：351 前端测试全部通过，ESLint 0 errors
+
 ## 功能编号：FEAT-20260502-162
 
 - 名称：备份脚本支持上传文件
