@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第一百六十三轮·自动循环）
+
+### 部署：Docker Compose 健康检查优化
+
+- `deploy/docker-compose.dev.yml`：添加 backend healthcheck（`/api/v1/health`，15s 间隔）
+- `deploy/docker-compose.prod.yml`：添加 nginx healthcheck（`wget --spider`，15s 间隔）
+- Nginx 配置语法验证通过（docker nginx -t）
+
 ## 2026-05-02（第一百六十二轮·自动循环）
 
 ### 文档：README 测试计数与实际 pytest/vitest 输出对齐

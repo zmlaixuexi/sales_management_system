@@ -75,6 +75,12 @@ services:
     restart: always
     ports:
       - "${HTTP_PORT:-80}:80"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:80/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - frontend_dist:/usr/share/nginx/html:ro
