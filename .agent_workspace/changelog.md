@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第一百七十九轮·自动循环）
+
+### 工程：移除未使用的 PaginationParams 类型导出
+
+- 全量死代码审计：后端 ruff F401 0 错误、前端 ESLint 0 错误
+- 移除 `PaginationParams` 类型（frontend/src/types/index.ts），定义但从未被任何模块导入
+
 ## 2026-05-02（第一百七十八轮·自动循环）
 
 ### 工程：全量 CI 验证 + 修复 ruff lint 错误
