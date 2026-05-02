@@ -339,7 +339,18 @@ def update_product(
     current_user: User = Depends(require_permission("product:update")),
 ):
     """编辑商品"""
-    product = get_or_404(db, Product, product_id, "商品")
+    # stock_quantity 变更需要行锁防止并发读取旧值导致库存流水 quantity_before 不一致
+    if data.stock_quantity is not None:
+        product = (
+            active_query(db, Product)
+            .filter(Product.id == product_id)
+            .with_for_update()
+            .first()
+        )
+        if not product:
+            raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "商品不存在"})
+    else:
+        product = get_or_404(db, Product, product_id, "商品")
 
     # 检查价格变更，记录价格历史
     old_sale_price = product.sale_price
