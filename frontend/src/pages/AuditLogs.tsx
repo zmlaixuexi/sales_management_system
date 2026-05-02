@@ -68,7 +68,7 @@ export default function AuditLogs() {
       setActions(data.actions || []);
       setResourceTypes(data.resource_types || []);
     } catch (e: unknown) {
-      if (!(e as any)?._toastDisplayed) message.error('加载筛选选项失败')
+      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error('加载筛选选项失败')
     }
   }, []);
 

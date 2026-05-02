@@ -28,7 +28,7 @@ export default function CustomerDetail() {
       const res = await fetchCustomer(id)
       if (res.success) setCustomer(res.data)
     } catch (e: unknown) {
-      if (!(e as any)?._toastDisplayed) message.error('加载客户详情失败')
+      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error('加载客户详情失败')
     } finally {
       setLoading(false)
     }
@@ -56,7 +56,7 @@ export default function CustomerDetail() {
       message.success('客户已删除')
       navigate('/customers')
     } catch (e: unknown) {
-      if (!(e as any)?._toastDisplayed) message.error(getApiErrorMessage(e, '删除失败'))
+      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error(getApiErrorMessage(e, '删除失败'))
     } finally {
       setDeleting(false)
     }

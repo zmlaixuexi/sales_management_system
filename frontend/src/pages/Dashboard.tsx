@@ -50,7 +50,7 @@ export default function Dashboard() {
         setWarningThreshold(warnRes.data.threshold)
       }
     } catch (e: unknown) {
-      if (!(e as any)?._toastDisplayed) message.error('加载看板数据失败，请稍后重试')
+      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error('加载看板数据失败，请稍后重试')
     } finally {
       setLoading(false)
     }

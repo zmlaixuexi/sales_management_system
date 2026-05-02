@@ -97,7 +97,7 @@ export default function UsersPage() {
         refresh()
       }
     } catch (e: unknown) {
-      if (!(e as any)?._toastDisplayed) message.error(getApiErrorMessage(e, '操作失败'))
+      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error(getApiErrorMessage(e, '操作失败'))
     }
   }
 
