@@ -99,6 +99,20 @@ def test_03_rate_limit_429():
     assert got_429, "应在大量请求后触发 429"
 
 
+def test_03b_rate_limit_429_has_headers():
+    """429 响应也应携带 RateLimit 响应头"""
+    got_429 = False
+    for _ in range(2000):
+        resp = client.get("/api/v1/products", headers=_auth())
+        if resp.status_code == 429:
+            got_429 = True
+            assert "X-RateLimit-Limit" in resp.headers
+            assert "X-RateLimit-Remaining" in resp.headers
+            assert resp.headers["X-RateLimit-Remaining"] == "0"
+            break
+    assert got_429
+
+
 def test_04_sliding_window_cleans_expired():
     """滑动窗口清理过期条目"""
     w = _SlidingWindow()

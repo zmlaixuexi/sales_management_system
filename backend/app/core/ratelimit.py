@@ -60,13 +60,16 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             bucket = self._buckets[client_ip]
             count = bucket.count(self.window, now)
             if count >= self.max_requests:
-                return JSONResponse(
+                response = JSONResponse(
                     status_code=429,
                     content={
                         "success": False,
                         "error": {"code": "RATE_LIMIT_EXCEEDED", "message": "请求过于频繁，请稍后再试"},
                     },
                 )
+                response.headers["X-RateLimit-Limit"] = str(self.max_requests)
+                response.headers["X-RateLimit-Remaining"] = "0"
+                return response
             bucket.record(now)
 
         response = await call_next(request)

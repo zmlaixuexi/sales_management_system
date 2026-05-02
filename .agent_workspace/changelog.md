@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第一百五十九轮·自动循环）
+
+### 需求符合性验证 + 429 响应 RateLimit 头修复（+1 test，933→934）
+
+- 需求符合性验证：批量导入/前端 loading/ErrorBoundary/速率限制/Token refresh/密码强度 6 项检查
+- `backend/app/core/ratelimit.py`：429 响应现在携带 `X-RateLimit-Limit` 和 `X-RateLimit-Remaining` 头（remaining=0）
+- `backend/tests/test_ratelimit.py`：新增 `test_03b_rate_limit_429_has_headers` 验证 429 响应头
+- 后端 623→624 tests，总计 933→934
+
 ## 2026-05-02（第一百五十八轮·自动循环）
 
 ### 测试：日志 contextvar 注入 + 文件服务边界测试补强（+13 tests，920→933）
