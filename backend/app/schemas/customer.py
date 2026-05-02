@@ -1,8 +1,11 @@
+import re
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
 from app.core.sanitize import sanitize_text as _sanitize
+
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 CustomerSource = Literal["referral", "online", "offline", "ad", "other"]
 CustomerLevel = Literal["vip", "important", "normal", "potential"]
@@ -25,6 +28,13 @@ class CustomerCreate(BaseModel):
     def sanitize_text(cls, v: str | None) -> str | None:
         return _sanitize(v)
 
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v: str | None) -> str | None:
+        if v and not _EMAIL_RE.match(v):
+            raise ValueError("邮箱格式不正确")
+        return v
+
 
 class CustomerUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=200)
@@ -41,6 +51,13 @@ class CustomerUpdate(BaseModel):
     @classmethod
     def sanitize_text(cls, v: str | None) -> str | None:
         return _sanitize(v)
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v: str | None) -> str | None:
+        if v and not _EMAIL_RE.match(v):
+            raise ValueError("邮箱格式不正确")
+        return v
 
 
 class CustomerTransfer(BaseModel):

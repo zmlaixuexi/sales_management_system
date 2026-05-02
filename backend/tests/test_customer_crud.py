@@ -593,6 +593,49 @@ def test_34_delete_customer_not_found_404():
     assert resp.status_code == 404
 
 
+def test_36_create_customer_invalid_email_422():
+    """创建客户邮箱格式不正确返回 422"""
+    from app.core.security import create_access_token
+
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "crud_admin").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+    for bad_email in ["not-an-email", "missing@domain", "@no-user.com", "spaces in@email.com"]:
+        resp = client.post("/api/v1/customers", json={
+            "name": "邮箱格式客户", "email": bad_email,
+        }, headers=headers)
+        assert resp.status_code == 422, f"{bad_email} should be rejected"
+
+
+def test_37_update_customer_invalid_email_422():
+    """更新客户邮箱格式不正确返回 422"""
+    from app.core.security import create_access_token
+
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "crud_admin").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+    # 先创建一个客户
+    resp = client.post("/api/v1/customers", json={
+        "name": "邮箱编辑客户", "phone": "13800008877",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    # 更新为无效邮箱
+    resp = client.put(f"/api/v1/customers/{cid}", json={
+        "email": "bad-email",
+    }, headers=headers)
+    assert resp.status_code == 422
+
+
 def test_35_delete_customer_no_permission_403():
     """无 customer:delete 权限用户删除客户返回 403"""
     from app.core.security import create_access_token
