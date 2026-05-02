@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-05-02（第一百六十五轮·自动循环）
+
+### 代码质量：mypy 类型错误修复 + 全量代码整洁度验证
+
+- `backend/app/api/v1/users.py:162`：修复 `after` dict 类型注解，允许 `is_active` bool 值（`dict[str, str | None]` → `dict`）
+- 全量代码质量扫描：
+  - ruff F401/F841: 0 issues
+  - ESLint: 0 errors
+  - TypeScript --noEmit: 0 errors
+  - mypy: 0 errors (53 source files)
+  - console.log/print/breakpoint 残留: 0
+  - TODO/FIXME/HACK 注释: 0
+
 ## 2026-05-02（第一百六十四轮·自动循环）
 
 ### 可观测性：文件操作审计日志补全（+2 tests，935→937）

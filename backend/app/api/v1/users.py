@@ -159,7 +159,7 @@ def update_user(
 
     db.commit()
 
-    after = {"username": user.username, "display_name": user.display_name}
+    after: dict = {"username": user.username, "display_name": user.display_name}
     if req.is_active is not None:
         after["is_active"] = req.is_active
     log_user_action(
