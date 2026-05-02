@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百零五轮·自动循环）
+
+### 代码质量 + 测试补强：docs/testing.md 同步 + 审计日志 id 有效 UUID 验证
+
+- `docs/testing.md`：更新后端测试总数 1085→1087、总计 1467→1469、test_audit_log.py 87→89
+- `test_audit_log.py`：新增 test_90（审计日志 id 字段为有效 UUID，遍历所有日志逐一验证）
+- 后端测试：1088/1088 全绿，ruff clean
+
 ## 2026-05-03（第四百零四轮·自动循环）
 
 ### 测试补强：客户转移审计日志 after_data 含 name 和 owner_user_id 完整性验证

@@ -2373,3 +2373,20 @@ def test_89_customer_transfer_audit_log_after_data_completeness():
     assert log["after_data"]["name"] == "转移审计客户"
     assert log["after_data"]["owner_user_id"] == target_uid
     assert log["resource_type"] == "customer"
+
+
+def test_90_audit_log_id_is_valid_uuid():
+    """审计日志 id 字段为有效 UUID"""
+    headers = _admin_auth()
+    # 确保有数据
+    client.post("/api/v1/products", json={
+        "name": "UUID验证商品", "sale_price": "10.00", "cost_price": "5.00",
+    }, headers=headers)
+    resp = client.get("/api/v1/audit-logs", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) > 0
+    for log in items:
+        # UUID() 会抛 ValueError 如果格式无效
+        parsed = uuid.UUID(log["id"])
+        assert str(parsed) == log["id"]
