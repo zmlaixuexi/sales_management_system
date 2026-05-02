@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百一十三轮·自动循环）
+
+### 测试补强：审计日志 user_agent 非空验证
+
+- `test_audit_log.py`：新增 test_99（所有审计日志 user_agent 非空验证）
+- `docs/testing.md`：更新后端测试总数 1096→1097、总计 1478→1479、test_audit_log.py 100→101
+- 后端测试：1097/1097 全绿，ruff clean
+
 ## 2026-05-03（第四百一十二轮·自动循环）
 
 ### 测试补强：客户删除审计日志 after_data 含 deleted=True 验证

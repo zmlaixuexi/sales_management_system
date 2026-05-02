@@ -2615,3 +2615,22 @@ def test_98_customer_delete_audit_log_after_data_has_deleted():
     assert log["after_data"] is not None
     assert log["after_data"].get("deleted") is True, f"after_data.deleted 不是 True: {log['after_data']}"
     assert log["resource_type"] == "customer"
+
+
+def test_99_audit_log_user_agent_non_null():
+    """所有审计日志 user_agent 非空验证"""
+    headers = _admin_auth()
+    # 创建商品触发审计日志
+    resp = client.post("/api/v1/products", json={
+        "name": "UA验证商品99", "sale_price": "60.00", "cost_price": "25.00", "stock_quantity": 8,
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?page_size=100", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) > 0
+    for log in items:
+        assert log["user_agent"] is not None, f"user_agent 为空: action={log['action']}"
+        assert isinstance(log["user_agent"], str), f"user_agent 非字符串: {log['user_agent']}"
+        assert len(log["user_agent"]) > 0, f"user_agent 为空字符串: action={log['action']}"
