@@ -257,3 +257,42 @@ def test_password_beyond_72_bytes():
     h = hash_password(pwd73)
     # bcrypt 截断到 72 字节，所以 73 字节和 72 字节密码验证结果相同
     assert verify_password(pwd72, h) is True
+
+
+# ─── 密码强度校验（Schema 层） ───────────────────────────────
+
+import pytest
+from pydantic import ValidationError
+from app.schemas.auth import ChangePasswordRequest, UserCreate
+
+
+@pytest.mark.parametrize("pwd,error_keyword", [
+    ("123456", "字母"),
+    ("abcdef", "数字"),
+])
+def test_user_create_rejects_weak_passwords(pwd, error_keyword):
+    """创建用户时拒绝弱密码"""
+    with pytest.raises(ValidationError, match=error_keyword):
+        UserCreate(username="test", password=pwd)
+
+
+def test_user_create_rejects_short_password():
+    """创建用户时拒绝短于 6 位的密码"""
+    with pytest.raises(ValidationError, match="at least 6"):
+        UserCreate(username="test", password="ab1")
+
+
+def test_user_create_accepts_strong_password():
+    """创建用户时接受符合要求的密码"""
+    u = UserCreate(username="test", password="test12")
+    assert u.password == "test12"
+
+
+@pytest.mark.parametrize("pwd,error_keyword", [
+    ("123456", "字母"),
+    ("abcdef", "数字"),
+])
+def test_change_password_rejects_weak_new_password(pwd, error_keyword):
+    """修改密码时拒绝弱新密码"""
+    with pytest.raises(ValidationError, match=error_keyword):
+        ChangePasswordRequest(old_password="oldpass1", new_password=pwd)
