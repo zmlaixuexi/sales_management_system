@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第三百四十二轮·自动循环）
+
+### 测试：订单确认审计日志字段完整性验证
+
+- `test_audit_log.py`：新增 test_23（验证 order_confirm after_data 含 order_no 和 status=confirmed）
+- 后端测试：989/989 全绿
+
 ## 2026-05-02（第三百四十一轮·自动循环）
 
 ### 测试：库存调整审计日志字段完整性验证
