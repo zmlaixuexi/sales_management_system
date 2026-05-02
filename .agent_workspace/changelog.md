@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-05-03（第四百六十三轮·自动循环）
+
+### 修复：CustomerUpdate.phone max_length 20→30 + database.md 文档纠偏
+
+**代码修复：**
+- CustomerUpdate.phone max_length 20→30，与 CustomerCreate 和 Customer(String(30)) 对齐
+- PostgreSQL 环境下超过 20 字符的手机号更新会被拒绝，此 bug 在 SQLite 环境下不可见
+
+**文档纠正：**
+- database.md 中 19 处 created_at/updated_at 由 YES→NO（所有表的时间戳列均不可空，server_default）
+- product_categories.sort_order 由 YES→NO
+- payment_method 枚举补充 other 值
+
 ## 2026-05-03（第四百六十二轮·自动循环）
 
 ### 文档：testing.md 补充前端页面测试覆盖描述
