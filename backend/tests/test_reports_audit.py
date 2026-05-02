@@ -639,3 +639,55 @@ def test_42_sales_summary_decimal_precision():
     assert data["gross_margin"].count(".") == 1
     decimal_places = len(data["gross_margin"].rstrip("0").split(".")[1])
     assert decimal_places <= 2
+
+
+def test_43_sales_summary_response_structure():
+    """销售汇总响应结构完整"""
+    token = create_access_token(subject=_user_id)
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = client.get("/api/v1/reports/sales-summary?period=7d", headers=headers)
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert "total_amount" in data
+    assert "order_count" in data
+    assert "period" in data
+    assert "start_date" in data
+    assert "end_date" in data
+    assert "total_cost" in data
+    assert "gross_profit" in data
+    assert "gross_margin" in data
+    # 金额字段为合法 Decimal 字符串
+    Decimal(data["total_amount"])
+    Decimal(data["gross_margin"])
+
+
+def test_44_product_ranking_response_structure():
+    """商品排行响应结构完整"""
+    token = create_access_token(subject=_user_id)
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = client.get("/api/v1/reports/product-ranking?period=7d", headers=headers)
+    assert resp.status_code == 200
+    body = resp.json()["data"]
+    assert "items" in body
+    assert "period" in body
+    if body["items"]:
+        item = body["items"][0]
+        assert "product_id" in item
+        assert "product_name" in item
+        assert "total_quantity" in item
+
+
+def test_45_sales_trend_response_structure():
+    """销售趋势响应结构完整"""
+    token = create_access_token(subject=_user_id)
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = client.get("/api/v1/reports/sales-trend?period=7d", headers=headers)
+    assert resp.status_code == 200
+    body = resp.json()["data"]
+    assert "items" in body
+    assert "period" in body
+    if body["items"]:
+        item = body["items"][0]
+        assert "date" in item
+        assert "amount" in item
+        assert "order_count" in item
