@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百六十五轮·自动循环）
+
+### 测试：中间件单元测试 7 项
+
+- BodyLimitMiddleware：小请求通过、超大请求 413、multipart 豁免、GET 豁免（4 项）
+- RequestLogMiddleware：API 请求记录日志、X-Response-Time 头、非 API 路径跳过（3 项）
+- 823 后端测试全绿（+7）
+
 ## 2026-05-02（第二百六十四轮·自动循环）
 
 ### 文档：修正 api.md 6 处与实际实现不一致
