@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第一百九十九轮·自动循环）
+
+### 代码质量：修复 ratelimit.py mypy 类型错误
+
+- 拆分 response 变量为 error_resp（429 错误响应）/ response（正常响应）避免变量重定义
+- 添加 Response 类型注解使类型推断正确
+- mypy 检查结果：0 errors in 53 source files
+
 ## 2026-05-02（第一百九十八轮·自动循环）
 
 ### 文档：更新测试文档和 README 反映最新测试状态（760+339=1099）
