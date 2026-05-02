@@ -485,7 +485,8 @@ def confirm_order(
         db, request, current_user,
         action="order_confirm", resource_type="order",
         resource_id=str(order.id),
-        after_data={"order_no": order.order_no, "status": "confirmed"},
+        before_data={"order_no": order.order_no, "status": "draft", "total_amount": str(order.total_amount)},
+        after_data={"order_no": order.order_no, "status": "confirmed", "total_amount": str(order.total_amount)},
     )
     db.commit()
 
@@ -531,13 +532,15 @@ def cancel_order(
         items = db.query(SalesOrderItem).filter(SalesOrderItem.order_id == order.id).all()
         _restore_inventory(db, order.id, items, current_user.id)
 
+    old_status = order.status
     order.status = "cancelled"
     order.updated_by = current_user.id
     log_user_action(
         db, request, current_user,
         action="order_cancel", resource_type="order",
         resource_id=str(order.id),
-        after_data={"order_no": order.order_no, "status": "cancelled"},
+        before_data={"order_no": order.order_no, "status": old_status, "total_amount": str(order.total_amount)},
+        after_data={"order_no": order.order_no, "status": "cancelled", "total_amount": str(order.total_amount)},
     )
     db.commit()
 

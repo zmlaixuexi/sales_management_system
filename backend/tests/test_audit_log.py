@@ -1529,3 +1529,146 @@ def test_62_customer_transfer_audit_log_before_data():
     assert log["after_data"]["name"] == "转移审计客户"
     assert log["after_data"]["owner_user_id"] == target_id
     assert log["resource_type"] == "customer"
+
+
+def test_63_payment_create_audit_log_before_data_is_none():
+    """收款登记审计日志 before_data 为 None（创建操作），after_data 含 order_id/amount/method"""
+    headers = _admin_auth()
+    # 创建商品 + 客户
+    resp = client.post("/api/v1/products", json={
+        "name": "收款before商品",
+        "cost_price": "10.00",
+        "sale_price": "25.00",
+        "stock_quantity": 100,
+        "status": "active",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    resp = client.post("/api/v1/customers", json={
+        "name": "收款before客户",
+        "phone": "13100009999",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cust_id = resp.json()["data"]["id"]
+
+    # 创建并确认订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cust_id,
+        "items": [{"product_id": pid, "quantity": 2}],
+    }, headers=headers)
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=headers)
+
+    # 登记收款
+    resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
+        "amount": "50.00",
+        "payment_method": "transfer",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pay_id = resp.json()["data"]["id"]
+
+    # 验证审计日志
+    resp = client.get("/api/v1/audit-logs?action=payment_create", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == pay_id)
+    assert log["before_data"] is None
+    assert log["after_data"]["order_id"] == oid
+    assert log["after_data"]["amount"] == "50.00"
+    assert log["after_data"]["method"] == "transfer"
+    assert log["resource_type"] == "payment"
+
+
+def test_64_order_confirm_audit_log_before_data():
+    """订单确认审计日志 before_data 含 status=draft，after_data 含 status=confirmed"""
+    headers = _admin_auth()
+    # 创建商品
+    resp = client.post("/api/v1/products", json={
+        "name": "确认审计商品",
+        "cost_price": "10.00",
+        "sale_price": "30.00",
+        "stock_quantity": 100,
+        "status": "active",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    # 创建客户
+    resp = client.post("/api/v1/customers", json={
+        "name": "确认审计客户",
+        "phone": "13000001111",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cust_id = resp.json()["data"]["id"]
+
+    # 创建订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cust_id,
+        "items": [{"product_id": pid, "quantity": 2, "unit_price": "30.00"}],
+    }, headers=headers)
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+
+    # 确认订单
+    resp = client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=headers)
+    assert resp.status_code == 200
+
+    # 验证审计日志
+    resp = client.get("/api/v1/audit-logs?action=order_confirm", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == oid)
+    assert log["before_data"]["status"] == "draft"
+    assert log["before_data"]["total_amount"] == "60.00"
+    assert log["after_data"]["status"] == "confirmed"
+    assert log["after_data"]["total_amount"] == "60.00"
+    assert log["resource_type"] == "order"
+
+
+def test_65_order_cancel_audit_log_before_data():
+    """订单取消审计日志 before_data 含原 status，after_data 含 status=cancelled"""
+    headers = _admin_auth()
+    # 创建商品
+    resp = client.post("/api/v1/products", json={
+        "name": "取消审计商品",
+        "cost_price": "10.00",
+        "sale_price": "20.00",
+        "stock_quantity": 100,
+        "status": "active",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    # 创建客户
+    resp = client.post("/api/v1/customers", json={
+        "name": "取消审计客户",
+        "phone": "13000002222",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cust_id = resp.json()["data"]["id"]
+
+    # 创建并确认订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cust_id,
+        "items": [{"product_id": pid, "quantity": 1}],
+    }, headers=headers)
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=headers)
+
+    # 取消订单
+    resp = client.post(f"/api/v1/sales-orders/{oid}/cancel", headers=headers)
+    assert resp.status_code == 200
+
+    # 验证审计日志
+    resp = client.get("/api/v1/audit-logs?action=order_cancel", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == oid)
+    assert log["before_data"]["status"] == "confirmed"
+    assert log["before_data"]["total_amount"] == "20.00"
+    assert log["after_data"]["status"] == "cancelled"
+    assert log["after_data"]["total_amount"] == "20.00"
+    assert log["resource_type"] == "order"

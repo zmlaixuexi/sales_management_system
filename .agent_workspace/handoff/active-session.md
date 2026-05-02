@@ -2,31 +2,32 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-377
-当前任务名称：订单编辑 + 客户转移审计日志 before_data 增强
+当前任务编号：ROUND-379
+当前任务名称：订单确认/取消审计日志 before_data 增强
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 377：客户转移审计日志增加 before_data（含 name/owner_user_id），test_62 验证完整性，1049 后端测试全绿
-- Round 376：订单编辑审计日志增加 before_data（含 order_no/status/total_amount/remark），test_61 验证完整性，1048 后端测试全绿
+- Round 379：订单确认/取消审计日志增加 before_data（含 order_no/status/total_amount），test_64-65 验证完整性，1052 后端测试全绿
+- Round 378：收款登记审计日志验证（test_63），1050 后端测试全绿
 
 ## 最终验证状态
 
 | 门禁 | 结果 |
 |---|---|
-| 后端测试 | 1049/1049 ✓ |
+| 后端测试 | 1052/1052 ✓ |
 | 前端测试 | 382/382 ✓ |
 | ruff | 0 errors ✓ |
-| 总计 | 1431 tests |
+| 总计 | 1434 tests |
 
 ## 下一步第一动作
 
 继续 keep-going 模式。可选无阻塞方向：
-- 测试补强：收款登记审计日志 before_data 验证
+- 测试补强：订单创建审计日志 after_data 增加更多信息
 - 测试补强：报表 API 边界验证
-- 代码质量：docs/testing.md 更新至 1049
+- 代码质量：docs/testing.md 更新至 1052
+- 测试补强：库存调整（减少）审计日志验证
 
 ## 阻塞问题
 

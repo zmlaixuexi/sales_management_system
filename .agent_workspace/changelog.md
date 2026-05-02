@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-05-02（第三百七十九轮·自动循环）
+
+### 测试补强：订单确认/取消审计日志 before_data 增强
+
+- `orders.py`：订单确认审计日志增加 before_data（含 order_no/status/total_amount）
+- `orders.py`：订单取消审计日志增加 before_data（含 order_no/原 status/total_amount）
+- `test_audit_log.py`：新增 test_64（确认 before_data status=draft）、test_65（取消 before_data status=confirmed）
+- 后端测试：1052/1052 全绿
+
+## 2026-05-02（第三百七十八轮·自动循环）
+
+### 测试补强：收款登记审计日志 before_data 验证
+
+- `test_audit_log.py`：新增 test_63（收款登记 before_data 为 None、after_data 含 order_id/amount/method）
+- 后端测试：1050/1050 全绿
+
 ## 2026-05-02（第三百七十七轮·自动循环）
 
 ### 测试补强：客户转移审计日志 before_data 增强
