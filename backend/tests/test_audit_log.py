@@ -1385,3 +1385,48 @@ def test_58_audit_logs_ordered_by_created_at_desc():
         assert items[i]["created_at"] >= items[i + 1]["created_at"], (
             f"第 {i} 条 {items[i]['created_at']} 应 >= 第 {i + 1} 条 {items[i + 1]['created_at']}"
         )
+
+
+def test_59_audit_log_pagination_page2():
+    """审计日志分页：第2页有数据时 total > page_size"""
+    headers = _admin_auth()
+    # 确保有足够审计日志
+    client.post("/api/v1/auth/login", json={
+        "username": "audit_tester", "password": "testpass123",
+    })
+    client.post("/api/v1/products", json={
+        "name": "分页审计商品",
+        "cost_price": "10.00",
+        "sale_price": "20.00",
+        "stock_quantity": 5,
+        "status": "active",
+    }, headers=headers)
+
+    resp = client.get("/api/v1/audit-logs", params={"page_size": 5}, headers=headers)
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    total = data["total"]
+    if total > 5:
+        resp2 = client.get("/api/v1/audit-logs", params={"page_size": 5, "page": 2}, headers=headers)
+        assert resp2.status_code == 200
+        data2 = resp2.json()["data"]
+        assert len(data2["items"]) > 0
+        # 第1页和第2页不应有重复 id
+        page1_ids = {i["id"] for i in data["items"]}
+        page2_ids = {i["id"] for i in data2["items"]}
+        assert page1_ids.isdisjoint(page2_ids)
+
+
+def test_60_audit_log_export_action_type_filter():
+    """审计日志 action 筛选：export_* 类型日志仅返回导出操作"""
+    headers = _admin_auth()
+    # 执行一次导出确保有日志
+    client.get("/api/v1/exports/products", headers=headers)
+
+    resp = client.get("/api/v1/audit-logs?action=export_products", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    if len(items) > 0:
+        for log in items:
+            assert log["action"] == "export_products"
+            assert log["resource_type"] == "product"

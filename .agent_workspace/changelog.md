@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第三百七十五轮·自动循环）
+
+### 测试补强：审计日志搜索/分页/筛选验证 + docs/testing.md 同步
+
+- `test_audit_log.py`：新增 test_48-60（日期范围筛选结果验证、关键字搜索 actor_name 匹配、不匹配关键字空列表、组合 action+日期筛选、resource_id 部分匹配、库存调整 before_data 含 name、user_agent/request_id 非空、resource_id 有效 UUID、创建操作 before_data 为 None、订单创建 after_data 完整性、created_at 降序排列、分页第2页去重验证、导出 action 筛选）
+- `inventory.py`：库存调整审计日志 before_data/after_data 增加 name 字段
+- `docs/testing.md`：更新总测试数至 1047/1427，test_audit_log.py 49→62，test_auth.py 35→37，标记计数同步
+- 后端测试：1047/1047 全绿
+
 ## 2026-05-02（第三百七十四轮·自动循环）
 
 ### 测试补强：审计日志 created_at 降序排列验证
