@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第三百九十轮·自动循环）
+
+### 代码质量 + 测试补强：docs/testing.md 同步 + 商品创建审计日志 after_data 含 stock_quantity
+
+- `docs/testing.md`：更新后端测试总数 1062→1072、总计 1444→1454、test_audit_log.py 70→76、test_export.py 37→41、test_reports_audit.py 67→70
+- `backend/app/api/v1/products.py`：商品创建审计日志 after_data 新增 stock_quantity 字段
+- `test_audit_log.py`：新增 test_75（商品创建 after_data 含 stock_quantity=200/sale_price/name）
+- 后端测试：1073/1073 全绿，ruff clean
+
 ## 2026-05-02（第三百八十八轮·自动循环）
 
 ### 测试补强：库存调整归零审计日志验证

@@ -254,7 +254,11 @@ def create_product(
         db, request, current_user,
         action="product_create", resource_type="product",
         resource_id=str(product.id),
-        after_data={"name": name, "sku": sku, "sale_price": str(sale_price), "cost_price": str(cost_price)},
+        after_data={
+            "name": name, "sku": sku,
+            "sale_price": str(sale_price), "cost_price": str(cost_price),
+            "stock_quantity": product.stock_quantity,
+        },
     )
     db.commit()
 

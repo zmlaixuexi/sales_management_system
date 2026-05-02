@@ -1949,3 +1949,53 @@ def test_73_inventory_adjust_to_zero_audit_log():
     assert log["after_data"]["stock_quantity"] == 0
     assert log["after_data"]["change"] == -10
     assert log["resource_type"] == "product"
+
+
+def test_74_customer_update_audit_log_phone_in_before_data():
+    """客户编辑审计日志 before_data 含 phone 字段（可能被脱敏）"""
+    headers = _admin_auth()
+    # 创建客户
+    resp = client.post("/api/v1/customers", json={
+        "name": "手机号验证客户",
+        "phone": "13900003333",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    # 编辑客户名称（不改手机）
+    resp = client.put(f"/api/v1/customers/{cid}", json={
+        "name": "手机号验证客户改名",
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=customer_update", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == cid)
+    assert log["before_data"]["name"] == "手机号验证客户"
+    assert "phone" in log["before_data"]
+    assert log["after_data"]["name"] == "手机号验证客户改名"
+    assert "phone" in log["after_data"]
+    assert log["resource_type"] == "customer"
+
+
+def test_75_product_create_audit_log_after_data_has_stock_and_price():
+    """商品创建审计日志 after_data 含 stock_quantity 和 sale_price"""
+    headers = _admin_auth()
+    resp = client.post("/api/v1/products", json={
+        "name": "审计商品-库存价格",
+        "sale_price": "99.90",
+        "cost_price": "50.00",
+        "stock_quantity": 200,
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    resp = client.get("/api/v1/audit-logs?action=product_create", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == pid)
+    assert log["after_data"]["stock_quantity"] == 200
+    assert log["after_data"]["sale_price"] == "99.90"
+    assert log["after_data"]["name"] == "审计商品-库存价格"
+    assert log["resource_type"] == "product"
