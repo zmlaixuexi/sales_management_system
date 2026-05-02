@@ -1,4 +1,4 @@
-.PHONY: help dev dev-backend dev-frontend install test test-unit test-integration test-backend test-frontend coverage coverage-frontend lint lint-backend lint-frontend typecheck typecheck-backend quality ci build build-frontend db-migrate db-check db-seed db-backup db-restore docker-up docker-down clean
+.PHONY: help dev dev-backend dev-frontend install test test-unit test-integration test-backend test-frontend coverage coverage-frontend lint lint-fix lint-backend lint-frontend typecheck typecheck-backend quality ci build build-frontend db-migrate db-check db-seed db-backup db-restore docker-up docker-down clean
 
 # 后端 Python：优先使用 venv，回退到系统 python
 PYTHON ?= $(shell [ -f backend/.venv/bin/python ] && echo ".venv/bin/python" || echo "python")
@@ -54,6 +54,10 @@ lint-frontend: ## 前端 lint 检查
 	cd frontend && npx eslint src/ --max-warnings=0
 
 lint: lint-backend lint-frontend ## 全部 lint 检查
+
+lint-fix: ## 自动修复 lint 问题
+	cd backend && ruff check --fix .
+	cd frontend && npx eslint src/ --fix
 
 typecheck: typecheck-backend typecheck-frontend ## 全部类型检查（mypy + tsc）
 
