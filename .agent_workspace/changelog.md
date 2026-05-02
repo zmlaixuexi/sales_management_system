@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第三百四十三轮·自动循环）
+
+### 测试：订单取消审计日志字段完整性验证
+
+- `test_audit_log.py`：新增 test_24（验证 order_cancel after_data 含 order_no 和 status=cancelled）
+- 后端测试：990/990 全绿
+
 ## 2026-05-02（第三百四十二轮·自动循环）
 
 ### 测试：订单确认审计日志字段完整性验证

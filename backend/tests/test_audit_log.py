@@ -438,3 +438,31 @@ def test_23_order_confirm_audit_log_fields():
     assert log["after_data"]["status"] == "confirmed"
     assert log["after_data"]["order_no"] == order_no
     assert log["resource_type"] == "order"
+
+
+def test_24_order_cancel_audit_log_fields():
+    """订单取消审计日志 after_data 含 order_no 和 status=cancelled"""
+    # 重新启用商品
+    client.put(f"/api/v1/products/{_product_id}", json={"status": "active"}, headers=_auth())
+
+    # 创建新订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+    order_no = resp.json()["data"]["order_no"]
+
+    # 取消订单
+    resp = client.post(f"/api/v1/sales-orders/{oid}/cancel", headers=_auth())
+    assert resp.status_code == 200
+
+    # 查询取消审计日志
+    resp = client.get("/api/v1/audit-logs?action=order_cancel", headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == oid)
+    assert log["after_data"]["status"] == "cancelled"
+    assert log["after_data"]["order_no"] == order_no
+    assert log["resource_type"] == "order"
