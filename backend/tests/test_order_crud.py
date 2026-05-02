@@ -165,6 +165,13 @@ class TestOrderCreate:
         }, headers=_auth())
         assert resp.status_code == 422
 
+    def test_05a_create_order_negative_quantity_422(self):
+        resp = client.post("/api/v1/sales-orders", json={
+            "customer_id": _customer_id,
+            "items": [{"product_id": _product_id, "quantity": -1}],
+        }, headers=_auth())
+        assert resp.status_code == 422
+
     def test_05b_create_order_negative_price_422(self):
         resp = client.post("/api/v1/sales-orders", json={
             "customer_id": _customer_id,
