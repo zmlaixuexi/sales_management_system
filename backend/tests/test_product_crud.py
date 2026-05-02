@@ -898,3 +898,28 @@ def test_38_update_product_no_permission_403():
         "name": "尝试编辑",
     }, headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 403
+
+
+def test_39_create_product_sku_too_long_422():
+    """SKU 超过 max_length 返回 422"""
+    resp = client.post("/api/v1/products", json={
+        "name": "SKU超长商品", "sku": "S" * 51,
+        "sale_price": "10", "cost_price": "5",
+    }, headers=_admin_auth())
+    assert resp.status_code == 422
+
+
+def test_40_create_product_remark_strips_html():
+    """商品备注应自动移除 HTML 标签"""
+    resp = client.post("/api/v1/products", json={
+        "name": "HTML备注商品", "sale_price": "10", "cost_price": "5",
+        "remark": "<script>alert('xss')</script>正常备注",
+    }, headers=_admin_auth())
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    resp = client.get(f"/api/v1/products/{pid}", headers=_admin_auth())
+    assert resp.status_code == 200
+    remark = resp.json()["data"].get("remark", "")
+    assert "<script>" not in remark
+    assert "正常备注" in remark
