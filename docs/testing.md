@@ -4,13 +4,13 @@
 
 | 指标 | 值 |
 |---|---|
-| 后端测试总数 | 1001 |
+| 后端测试总数 | 1012 |
 | 后端测试文件 | 42 |
 | 前端测试总数 | 382 |
 | 前端测试文件 | 37 |
-| 测试总计 | 1383 |
+| 测试总计 | 1394 |
 | 后端覆盖率 | 99.79% |
-| 覆盖模块 | 认证、商品、客户、订单、库存、收款、报表（含客户/销售人员排行）、审计日志（含手机号/邮箱脱敏、全操作 before_data/after_data 字段完整性验证）、数据导出（含权限/数据范围/敏感字段边界）、批量导入（含负价格/非法格式/英文表头/批量内去重）、权限校验（含导出敏感字段过滤、报表利润权限）、速率限制、SQL 注入防护、XSS 防护、请求 ID 中间件、CORS 验证、日志格式器（JSON/文本/setup_logging）、金额计算、文件服务（含 FILE_TOO_LARGE/FILE_NOT_BOUND 错误码、上传权限 403）、密码强度（含注册/修改密码边界验证：过短/纯特殊字符/无数字/无字母）、订单操作日志、支付路径（含已取消/已完成订单拒绝、无权限 403）、派生销售字段、响应体 request_id、报表 period 参数校验、CSV 导入校验（含行数上限+XSS 消毒+commit 回滚）、客户 source/level 枚举校验、生产环境 OpenAPI 禁用、SQL 慢查询日志、用户管理（含角色列表 API 和权限边界）、安全模块（bcrypt 72 字节截断/JWT token 篡改/过期/错误密钥/iat/jti）、报表辅助函数（_date_range/_apply_data_scope）、导出 API 辅助函数（_csv_filename）、登录速率限制辅助函数（_check_login_rate_limit/_record_login_fail）、商品辅助函数（_batch_sales_stats/_validate_category_id/_get_default_category_id）、客户辅助函数（_validate_owner_user）、订单库存辅助函数（_deduct_inventory/_restore_inventory）、订单明细校验（_validate_and_prepare_items）、收款登记服务（register_payment）、请求体大小限制中间件（BodyLimitMiddleware）、外键验证边界（含无效 UUID/不存在用户/不存在客户/不存在商品）、导出服务软删除过滤（商品/客户/订单/收款排除已删除记录）、中间件（BodyLimit 请求体限制/RequestLog 日志记录）、CRUD 403 权限全覆盖（客户/商品/订单/收款/认证）、对象级权限验证（客户详情/编辑/删除/转移、订单详情/编辑/确认/取消/日志）、数据范围过滤（客户列表、订单列表、收款列表）、输入格式校验（邮箱/手机号 Pydantic validator、商品 SKU 超长、收款金额零/负数）、冲正边界（草稿/已取消订单收款 400）、报表零数据验证（汇总零值/趋势日期填充/排行空列表/库存预警权限与结构）、审计日志字段完整性（登录成功/失败、商品创建/编辑/停用、客户创建/编辑/转移、订单确认/取消、收款登记/冲正、库存调整、用户创建/编辑） |
+| 覆盖模块 | 认证、商品、客户、订单、库存、收款、报表（含客户/销售人员排行）、审计日志（含手机号/邮箱脱敏、全操作 before_data/after_data 字段完整性验证）、数据导出（含权限/数据范围/敏感字段边界）、批量导入（含负价格/非法格式/英文表头/批量内去重）、权限校验（含导出敏感字段过滤、报表利润权限）、速率限制、SQL 注入防护、XSS 防护、请求 ID 中间件、CORS 验证、日志格式器（JSON/文本/setup_logging）、金额计算、文件服务（含 FILE_TOO_LARGE/FILE_NOT_BOUND 错误码、上传权限 403）、密码强度（含注册/修改密码边界验证：过短/纯特殊字符/无数字/无字母）、订单操作日志、支付路径（含已取消/已完成订单拒绝、无权限 403）、派生销售字段、响应体 request_id、报表 period 参数校验、CSV 导入校验（含行数上限+XSS 消毒+commit 回滚）、客户 source/level 枚举校验、生产环境 OpenAPI 禁用、SQL 慢查询日志、用户管理（含角色列表 API 和权限边界）、安全模块（bcrypt 72 字节截断/JWT token 篡改/过期/错误密钥/iat/jti）、JWT token 边界验证（过期 token/错误签名/缺少 type 字段/错误 type/软删除用户/不存在用户均返回 401）、报表辅助函数（_date_range/_apply_data_scope）、导出 API 辅助函数（_csv_filename）、登录速率限制辅助函数（_check_login_rate_limit/_record_login_fail）、商品辅助函数（_batch_sales_stats/_validate_category_id/_get_default_category_id）、客户辅助函数（_validate_owner_user）、订单库存辅助函数（_deduct_inventory/_restore_inventory）、订单明细校验（_validate_and_prepare_items）、收款登记服务（register_payment）、请求体大小限制中间件（BodyLimitMiddleware）、外键验证边界（含无效 UUID/不存在用户/不存在客户/不存在商品）、导出服务软删除过滤（商品/客户/订单/收款排除已删除记录）、中间件（BodyLimit 请求体限制/RequestLog 日志记录）、CRUD 403 权限全覆盖（客户/商品/订单/收款/认证）、对象级权限验证（客户详情/编辑/删除/转移、订单详情/编辑/确认/取消/日志）、数据范围过滤（客户列表、订单列表、收款列表）、输入格式校验（邮箱/手机号 Pydantic validator、商品 SKU 超长、收款金额零/负数）、冲正边界（草稿/已取消订单收款 400）、报表零数据验证（汇总零值/趋势日期填充/排行空列表/库存预警权限与结构）、审计日志字段完整性（登录成功/失败、商品创建/编辑/停用、客户创建/编辑/转移、订单确认/取消、收款登记/冲正、库存调整、用户创建/编辑） |
 
 ## 运行测试
 
@@ -152,7 +152,7 @@ pytest -m "not slow"  # 排除慢速测试
 | test_request_id_in_response_body_passthrough | 响应体透传请求中的 request_id |
 | test_openapi_disabled_in_production | 生产环境 OpenAPI 文档端点配置为 None |
 
-### test_auth.py（16 个测试）
+### test_auth.py（29 个测试）
 
 认证模块，测试用户为非超级用户。
 
@@ -166,6 +166,24 @@ pytest -m "not slow"  # 排除慢速测试
 | test_non_admin_forbidden | 非管理员访问 /users 被 403 |
 | test_login_nonexistent_user | 不存在用户返回 401 |
 | test_refresh_rejected_for_inactive_user | 禁用用户刷新 Token 被拒绝 |
+| test_change_password_success | 修改密码成功 |
+| test_change_password_wrong_old | 原密码错误返回 400 |
+| test_change_password_weak_new | 弱密码（纯数字）返回 422 |
+| test_change_password_no_digits | 无数字密码返回 422 |
+| test_login_rate_limit_after_failures | 连续失败 10 次触发速率限制 |
+| test_change_password_requires_auth | 未认证修改密码 401 |
+| test_change_password_empty_old_password_422 | 空旧密码 422 |
+| test_refresh_invalid_token_401 | 无效 refresh token 401 |
+| test_refresh_access_token_rejected_401 | access token 作为 refresh 被拒绝 |
+| test_change_password_audit_log | 修改密码产生审计日志 |
+| test_23_login_disabled_user_403 | 禁用用户登录 403 |
+| test_24_login_sql_injection_safe | SQL 注入字符安全 |
+| test_25_expired_access_token_rejected | 已过期 token 返回 401 |
+| test_26_token_with_invalid_signature_rejected | 错误签名 token 返回 401 |
+| test_27_token_missing_type_field_rejected | 缺少 type 字段 token 返回 401 |
+| test_28_token_wrong_type_rejected | 错误 type token 返回 401 |
+| test_29_token_deleted_user_rejected | 软删除用户 token 返回 401 |
+| test_30_token_nonexistent_user_rejected | 不存在用户 token 返回 401 |
 
 ### test_integration.py（28 个测试，8 个类）
 

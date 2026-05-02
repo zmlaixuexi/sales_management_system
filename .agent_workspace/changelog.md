@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-05-02（第三百五十五轮·自动循环）
+
+### 安全加固：JWT token 过期边界验证
+
+- `test_auth.py`：新增 6 个测试（test_25~test_30）
+  - 过期 access token 返回 401
+  - 错误签名 token 返回 401
+  - 缺少 type 字段 token 返回 401
+  - 错误 type token 返回 401
+  - 软删除用户 token 返回 401
+  - 不存在用户 token 返回 401
+- `test_inventory_crud.py`：修复 ruff line-too-long（行长 126→多行拆分）
+- 后端测试：1012/1012 全绿，ruff 0 errors
+
 ## 2026-05-02（第三百五十四轮·自动循环）
 
 ### 测试：导出订单/收款审计日志字段验证

@@ -425,7 +425,11 @@ def test_27_adjust_audit_log_fields():
     assert resp.status_code == 200
     items = resp.json()["data"]["items"]
     # 用唯一 remark 匹配本轮调整
-    log = next(i for i in items if i["resource_id"] == _product_id and i["before_data"].get("stock_quantity") == stock_before)
+    log = next(
+        i for i in items
+        if i["resource_id"] == _product_id
+        and i["before_data"].get("stock_quantity") == stock_before
+    )
 
     # before_data 应包含调整前库存
     assert log["before_data"]["stock_quantity"] == stock_before
