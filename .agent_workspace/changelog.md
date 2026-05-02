@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百五十二轮·自动循环）
+
+### 修复：downloadCsv 解析 JSON 错误响应避免下载错误文件
+
+- request.ts 的 downloadCsv 添加 blob type 检查
+- 当后端返回 JSON 错误（如 403 权限不足）但 responseType 为 blob 时，解析 JSON 提取错误消息并抛出
+- 避免用户下载到包含错误 JSON 的 .csv 文件
+- 380 前端测试全绿，构建 261ms
+
 ## 2026-05-02（第二百五十一轮·自动循环）
 
 ### 修复：表单编辑页加载数据失败时提示错误并返回列表页

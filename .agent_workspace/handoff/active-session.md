@@ -2,16 +2,16 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-251
+当前任务编号：ROUND-252
 当前任务名称：自动循环验证
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 251：修复 CustomerForm/ProductForm/OrderForm 加载数据失败错误处理（380 前端测试全绿）
+- Round 252：修复 downloadCsv 解析 JSON 错误响应（380 前端测试全绿）
+- Round 251：修复 CustomerForm/ProductForm/OrderForm 加载数据失败错误处理
 - Round 250：全量门禁验证通过（809+380+ruff 0+tsc 0+260ms = 1189 tests）
-- Round 249：前端错误处理审查 + 修复 Login/Products 硬编码错误消息
 
 ## 最终验证状态
 
