@@ -13,7 +13,7 @@ class PaymentCreate(BaseModel):
     payment_method: Literal["cash", "transfer", "wechat", "alipay", "other"] = Field(
         ..., description="收款方式"
     )
-    remark: str | None = Field(None, description="备注")
+    remark: str | None = Field(None, max_length=500, description="备注")
 
     @field_validator("amount")
     @classmethod
