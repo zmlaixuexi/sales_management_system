@@ -230,3 +230,24 @@ def test_login_rate_limit_does_not_affect_success():
     resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
     assert resp.status_code == 200
     _login_fail_counts.clear()
+
+
+def test_change_password_requires_auth():
+    """未认证修改密码返回 401"""
+    resp = client.post("/api/v1/auth/change-password", json={
+        "old_password": "testpass123",
+        "new_password": "newpass123",
+    })
+    assert resp.status_code == 401
+
+
+def test_change_password_empty_old_password_422():
+    """空旧密码返回 422"""
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    token = login_resp.json()["data"]["access_token"]
+
+    resp = client.post("/api/v1/auth/change-password", json={
+        "old_password": "",
+        "new_password": "newpass123",
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 422
