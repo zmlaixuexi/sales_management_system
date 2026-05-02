@@ -47,7 +47,7 @@ class CustomerCreate(BaseModel):
 class CustomerUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=100)
     contact_name: str | None = Field(None, max_length=100)
-    phone: str | None = Field(None, max_length=20)
+    phone: str | None = Field(None, max_length=30)
     email: str | None = Field(None, max_length=100)
     source: CustomerSource | None = None
     level: CustomerLevel | None = None

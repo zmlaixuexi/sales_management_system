@@ -46,8 +46,8 @@ sales_orders ──< sales_order_items (CASCADE)
 | email | String(100) | YES | 邮箱 |
 | is_active | Boolean | NO | 默认 True |
 | is_superuser | Boolean | NO | 默认 False |
-| created_at | DateTime(tz) | YES | 服务端 now() |
-| updated_at | DateTime(tz) | YES | onupdate now() |
+| created_at | DateTime(tz) | NO | 服务端 now() |
+| updated_at | DateTime(tz) | NO | onupdate now() |
 | deleted_at | DateTime(tz) | YES | 软删除标记 |
 
 **索引**：username (UNIQUE), deleted_at
@@ -60,8 +60,8 @@ sales_orders ──< sales_order_items (CASCADE)
 | name | String(50) | NO | UNIQUE |
 | display_name | String(100) | YES | 显示名 |
 | description | String(255) | YES | 说明 |
-| created_at | DateTime(tz) | YES | |
-| updated_at | DateTime(tz) | YES | |
+| created_at | DateTime(tz) | NO | |
+| updated_at | DateTime(tz) | NO | |
 
 ### permissions — 权限
 
@@ -72,7 +72,7 @@ sales_orders ──< sales_order_items (CASCADE)
 | name | String(100) | NO | 权限名称 |
 | module | String(50) | NO | 所属模块 |
 | description | String(255) | YES | 说明 |
-| created_at | DateTime(tz) | YES | |
+| created_at | DateTime(tz) | NO | |
 
 ### user_roles — 用户角色关联
 
@@ -97,9 +97,9 @@ sales_orders ──< sales_order_items (CASCADE)
 | id | UUID | NO | PK |
 | name | String(100) | NO | 分类名 |
 | parent_id | UUID | YES | FK → product_categories.id (自引用) |
-| sort_order | Integer | YES | 默认 0 |
-| created_at | DateTime(tz) | YES | |
-| updated_at | DateTime(tz) | YES | |
+| sort_order | Integer | NO | 默认 0 |
+| created_at | DateTime(tz) | NO | |
+| updated_at | DateTime(tz) | NO | |
 
 ### products — 商品
 
@@ -118,8 +118,8 @@ sales_orders ──< sales_order_items (CASCADE)
 | remark | Text | YES | 备注 |
 | created_by | UUID | YES | FK → users.id |
 | updated_by | UUID | YES | FK → users.id |
-| created_at | DateTime(tz) | YES | |
-| updated_at | DateTime(tz) | YES | |
+| created_at | DateTime(tz) | NO | |
+| updated_at | DateTime(tz) | NO | |
 | deleted_at | DateTime(tz) | YES | 软删除 |
 
 **索引**：sku (UNIQUE), name, category_id, status
@@ -138,7 +138,7 @@ sales_orders ──< sales_order_items (CASCADE)
 | checksum | String(128) | YES | 校验和 |
 | public_url | Text | YES | 访问 URL |
 | created_by | UUID | YES | FK → users.id |
-| created_at | DateTime(tz) | YES | |
+| created_at | DateTime(tz) | NO | |
 
 ### product_images — 商品图片
 
@@ -161,7 +161,7 @@ sales_orders ──< sales_order_items (CASCADE)
 | old_cost_price | Numeric(12,2) | YES | |
 | new_cost_price | Numeric(12,2) | YES | |
 | changed_by | UUID | YES | FK → users.id |
-| created_at | DateTime(tz) | YES | |
+| created_at | DateTime(tz) | NO | |
 
 ### customers — 客户
 
@@ -179,8 +179,8 @@ sales_orders ──< sales_order_items (CASCADE)
 | remark | Text | YES | 备注 |
 | created_by | UUID | YES | FK → users.id |
 | updated_by | UUID | YES | FK → users.id |
-| created_at | DateTime(tz) | YES | |
-| updated_at | DateTime(tz) | YES | |
+| created_at | DateTime(tz) | NO | |
+| updated_at | DateTime(tz) | NO | |
 | deleted_at | DateTime(tz) | YES | 软删除 |
 
 **索引**：name, phone, owner_user_id, deleted_at
@@ -202,8 +202,8 @@ sales_orders ──< sales_order_items (CASCADE)
 | remark | Text | YES | 备注 |
 | created_by | UUID | YES | FK → users.id |
 | updated_by | UUID | YES | FK → users.id |
-| created_at | DateTime(tz) | YES | |
-| updated_at | DateTime(tz) | YES | |
+| created_at | DateTime(tz) | NO | |
+| updated_at | DateTime(tz) | NO | |
 | deleted_at | DateTime(tz) | YES | 软删除 |
 
 **索引**：order_no (UNIQUE), customer_id, sales_user_id, status, created_at, deleted_at
@@ -244,7 +244,7 @@ sales_orders ──< sales_order_items (CASCADE)
 | related_id | UUID | YES | 关联 ID |
 | operator_id | UUID | YES | FK → users.id |
 | remark | Text | YES | 备注 |
-| created_at | DateTime(tz) | YES | |
+| created_at | DateTime(tz) | NO | |
 
 **索引**：product_id
 
@@ -255,12 +255,12 @@ sales_orders ──< sales_order_items (CASCADE)
 | id | UUID | NO | PK |
 | order_id | UUID | NO | FK → sales_orders.id |
 | amount | Numeric(12,2) | NO | 收款金额 |
-| payment_method | String(30) | NO | cash / transfer / wechat / alipay |
+| payment_method | String(30) | NO | cash / transfer / wechat / alipay / other |
 | paid_at | DateTime(tz) | YES | 收款时间 |
 | operator_id | UUID | YES | FK → users.id |
 | status | String(20) | NO | normal / reversed |
 | remark | Text | YES | 备注 |
-| created_at | DateTime(tz) | YES | |
+| created_at | DateTime(tz) | NO | |
 
 **索引**：order_id
 
@@ -279,7 +279,7 @@ sales_orders ──< sales_order_items (CASCADE)
 | ip_address | String(45) | YES | 请求 IP |
 | user_agent | String(500) | YES | 浏览器 UA |
 | request_id | String(64) | YES | 请求追踪 ID |
-| created_at | DateTime(tz) | YES | |
+| created_at | DateTime(tz) | NO | |
 
 **索引**：actor_id, action, resource_type, created_at, 复合索引 (action, resource_type)
 
