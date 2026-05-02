@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百七十八轮·自动循环）
+
+### 代码质量：消除 ESLint 23 个 no-explicit-any 错误
+
+- 11 个页面文件中 `(e as any)?._toastDisplayed` 替换为 `(e as Record<string, boolean>)?._toastDisplayed`
+- ESLint 从 26 problems 降至 3 warnings（均为 useEffect navigate false positive）
+- TypeScript 零错误，382 前端测试全绿
+
 ## 2026-05-02（第二百七十七轮·自动循环）
 
 ### 可观测性：健康检查脚本增加数据库状态和版本信息
