@@ -139,7 +139,7 @@ cd backend
 source .venv/bin/activate
 pytest tests/ -v
 
-# 前端测试（378 个）
+# 前端测试（380 个）
 cd frontend
 npm test
 
@@ -234,9 +234,9 @@ npm run build
 | ErrorBoundary | 5 | 正常渲染 + 错误捕获 + 重试恢复 + 路由重置 + 返回首页 |
 | ProtectedRoute | 5 | 无 token 重定向/加载中/已认证渲染/fetchUser 失败/异步重定向/Spin large 尺寸 |
 | 登录页 | 7 | 渲染标题/输入框/登录按钮/提交调用 login/登录失败错误提示/成功跳转首页/redirect 参数跳转 |
-| API client | 5 | baseURL、token 附加、无 token、timeout 15s、Content-Type |
+| API client | 7 | baseURL、token 附加、无 token、timeout 15s、Content-Type、X-Request-ID 生成和唯一性 |
 | NotFound | 3 | 404 渲染/返回首页按钮/按钮点击导航 |
-| **合计** | **378** | |
+| **合计** | **380** | |
 
 ## API 概览
 
