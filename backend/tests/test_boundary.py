@@ -1634,3 +1634,43 @@ def test_84_product_update_remark_max_length_boundary():
 
     resp = client.put(f"/api/v1/products/{pid}", json={"remark": "编" * 501}, headers=headers)
     assert resp.status_code == 422, f"501 字符备注应被拒绝: {resp.status_code}"
+
+
+def test_85_customer_create_email_max_length_boundary():
+    """客户创建 email 恰好 200 字符通过，201 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    email_200 = "a" * 188 + "@example.com"
+    resp = client.post(
+        "/api/v1/customers",
+        json={"name": "邮箱边界客户85", "phone": "13900858585", "email": email_200},
+        headers=headers,
+    )
+    assert resp.status_code == 200, f"200 字符邮箱应通过: {resp.json()}"
+
+    email_201 = "a" * 189 + "@example.com"
+    resp = client.post(
+        "/api/v1/customers",
+        json={"name": "邮箱边界客户85b", "phone": "13900868686", "email": email_201},
+        headers=headers,
+    )
+    assert resp.status_code == 422, f"201 字符邮箱应被拒绝: {resp.status_code}"
+
+
+def test_86_customer_create_contact_name_max_length_boundary():
+    """客户创建 contact_name 恰好 100 字符通过，101 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    resp = client.post(
+        "/api/v1/customers",
+        json={"name": "联系人边界客户86", "phone": "13900878787", "contact_name": "联" * 100},
+        headers=headers,
+    )
+    assert resp.status_code == 200, f"100 字符联系人应通过: {resp.json()}"
+
+    resp = client.post(
+        "/api/v1/customers",
+        json={"name": "联系人边界客户86b", "phone": "13900888888", "contact_name": "联" * 101},
+        headers=headers,
+    )
+    assert resp.status_code == 422, f"101 字符联系人应被拒绝: {resp.status_code}"
