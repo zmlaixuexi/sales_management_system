@@ -396,7 +396,7 @@ def test_25_create_user_phone_too_long_422():
     resp = client.post("/api/v1/users", json={
         "username": "longphoneuser",
         "password": "password123",
-        "phone": "1" * 21,
+        "phone": "1" * 31,
     }, headers=_auth())
     assert resp.status_code == 422
 

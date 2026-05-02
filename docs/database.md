@@ -283,6 +283,43 @@ sales_orders ──< sales_order_items (CASCADE)
 
 **索引**：actor_id, action, resource_type, created_at, 复合索引 (action, resource_type)
 
+## 字段约束
+
+Schema 验证层（Pydantic `max_length`）和数据库层（`String(N)`）的约束关系：
+
+### 完全一致（Schema = Model）
+
+| 表 | 字段 | 长度 |
+|---|---|---|
+| users | username | 50 |
+| users | display_name | 100 |
+| users | email | 100 |
+| users | phone | 30 |
+| customers | name | 100 |
+| customers | contact_name | 100 |
+| customers | email | 100 |
+| customers | phone | 30 |
+| products | name | 100 |
+
+### Schema 更严格（安全差异）
+
+| 表 | 字段 | Schema | Model | 说明 |
+|---|---|---|---|---|
+| products | sku | 50 | 64 | 自动生成 SKU 约 18 字符，50 已充裕 |
+| products | main_image_url | 500 | Text | Schema 限制输入长度 |
+| *（多表）* | remark | 500 | Text | Schema 限制输入长度，DB 无上限 |
+| users | password | 100 | 255 | 原始密码 vs 哈希存储，逻辑不同 |
+
+### 验证规则
+
+| 字段 | 规则 |
+|---|---|
+| phone（客户） | 正则 `^1[3-9]\d{9}$`，仅接受中国大陆手机号 |
+| email | 正则 `^[^@\s]+@[^@\s]+\.[^@\s]+$` |
+| password | 至少 6 位，必须含字母和数字 |
+| sku | 自动生成 `SPU-YYYYMMDD-XXXX`，唯一 |
+| order_no | 自动生成 `ORD-YYYYMMDD-XXXX`，唯一 |
+
 ## 种子数据
 
 系统初始化时（`python -m app.db.seed`）创建：
