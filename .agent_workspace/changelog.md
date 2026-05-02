@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百三十三轮·自动循环）
+
+### 工程：Makefile 新增 deploy-check 和 deploy-rollback 命令
+
+- `make deploy-check`：调用 pre-deploy-check.sh 部署前检查
+- `make deploy-rollback`：调用 rollback.sh 回滚（TARGET=v1.0.0）
+- `make help` 正确显示所有命令
+
 ## 2026-05-02（第二百三十二轮·自动循环）
 
 ### 文档：测试计数同步 774→793，总计 1174→1173
