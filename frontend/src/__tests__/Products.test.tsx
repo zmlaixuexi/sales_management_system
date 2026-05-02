@@ -260,6 +260,36 @@ describe('ProductsPage', () => {
     expect(screen.getByText('导出')).toBeInTheDocument()
   })
 
+  it('导出按钮点击调用 downloadCsv', async () => {
+    const { downloadCsv } = await import('@/api/request')
+    renderProducts()
+    const buttons = screen.getAllByTestId('button')
+    const exportBtn = buttons.find((b) => b.textContent?.includes('导出'))
+    expect(exportBtn).toBeTruthy()
+    exportBtn!.click()
+    expect(downloadCsv).toHaveBeenCalledWith('/exports/products', expect.objectContaining({}))
+  })
+
+  it('删除确认弹窗点击触发 handleDelete', async () => {
+    _productMocks.deleteProduct.mockResolvedValueOnce({ success: true })
+    renderProducts()
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    expect(popconfirms.length).toBeGreaterThan(0)
+    popconfirms[0].click()
+    expect(_productMocks.deleteProduct).toHaveBeenCalled()
+  })
+
+  it('停用按钮点击触发 handleDisable', async () => {
+    _productMocks.disableProduct.mockResolvedValueOnce({ success: true })
+    renderProducts()
+    // 找到停用按钮（只在上架商品行出现）
+    const buttons = screen.getAllByTestId('button')
+    const disableBtn = buttons.find((b) => b.textContent?.includes('停用'))
+    expect(disableBtn).toBeTruthy()
+    disableBtn!.click()
+    expect(_productMocks.disableProduct).toHaveBeenCalled()
+  })
+
   it('有筛选条件时空数据显示"没有匹配的商品"', () => {
     Object.assign(_paginatedListReturn, { data: [], total: 0, keyword: '不存在的商品' })
     renderProducts()

@@ -217,4 +217,36 @@ describe('CustomersPage', () => {
     _paginatedListReturn.total = 3
     _paginatedListReturn.loading = false
   })
+
+  it('删除确认弹窗点击触发 handleDelete', async () => {
+    _customerMocks.deleteCustomer.mockResolvedValueOnce({ success: true })
+    renderCustomers()
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    expect(popconfirms.length).toBeGreaterThan(0)
+    // Popconfirm mock 的 onClick 直接调用 onConfirm -> handleDelete
+    await import('@ant-design/icons').then(() => {}) // 确保 mocks 就绪
+    popconfirms[0].click()
+    expect(_customerMocks.deleteCustomer).toHaveBeenCalled()
+  })
+
+  it('导出按钮点击调用 downloadCsv', async () => {
+    const { downloadCsv } = await import('@/api/request')
+    renderCustomers()
+    const buttons = screen.getAllByTestId('button')
+    const exportBtn = buttons.find((b) => b.textContent?.includes('导出'))
+    expect(exportBtn).toBeTruthy()
+    exportBtn!.click()
+    expect(downloadCsv).toHaveBeenCalledWith('/exports/customers', expect.objectContaining({}))
+  })
+
+  it('导入按钮存在', () => {
+    renderCustomers()
+    expect(screen.getByText('导入')).toBeInTheDocument()
+  })
+
+  it('编辑按钮存在于操作列', () => {
+    renderCustomers()
+    const editBtns = screen.getAllByText('编辑')
+    expect(editBtns.length).toBeGreaterThanOrEqual(1)
+  })
 })
