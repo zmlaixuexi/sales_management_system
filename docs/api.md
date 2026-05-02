@@ -212,7 +212,7 @@ JSON 日志格式示例：
 
 ## 用户管理
 
-> 以下接口仅超级管理员可用。
+> 以下接口通过 `is_superuser` 字段判断权限，仅超级管理员（`is_superuser=True`）可访问，不使用 `require_permission()` 权限码校验。
 
 ### GET /users
 
@@ -714,14 +714,14 @@ JSON 日志格式示例：
 
 | 权限码 | 说明 |
 |---|---|
-| user:list | 查看用户列表 |
-| user:create | 创建用户 |
-| user:update | 编辑用户 |
-| user:delete | 删除用户 |
-| role:list | 查看角色列表 |
-| role:create | 创建角色 |
-| role:update | 编辑角色 |
-| role:delete | 删除角色 |
+| user:list | 查看用户列表（¹） |
+| user:create | 创建用户（¹） |
+| user:update | 编辑用户（¹） |
+| user:delete | 删除用户（¹²） |
+| role:list | 查看角色列表（¹） |
+| role:create | 创建角色（¹²） |
+| role:update | 编辑角色（¹²） |
+| role:delete | 删除角色（¹²） |
 | product:list | 商品列表和详情 |
 | product:create | 新增商品 |
 | product:update | 编辑和停用商品 |
@@ -747,6 +747,11 @@ JSON 日志格式示例：
 | report:sales | 查看销售报表（含排行榜） |
 | report:profit | 查看利润报表 |
 | audit:view | 查看审计日志 |
+
+权限码脚注：
+
+- （¹）种子数据中已定义，但用户/角色管理接口通过 `is_superuser` 布尔字段判断权限，不经过 `require_permission()` 校验。
+- （²）对应接口尚未实现：`DELETE /users/{user_id}` 和角色 CRUD 端点（`POST /roles`、`PUT /roles/{id}`、`DELETE /roles/{id}`）。
 
 ---
 
