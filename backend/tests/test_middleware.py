@@ -131,3 +131,55 @@ def test_request_log_skips_non_api_paths(caplog):
 
     log_records = [r for r in caplog.records if r.name == "app.request"]
     assert len(log_records) == 0
+
+
+# ─── SecurityHeadersMiddleware ──────────────────────────────
+
+from app.core.security_headers import SecurityHeadersMiddleware
+
+
+def test_security_headers_present_on_api_responses():
+    """API 响应包含安全头"""
+    app = FastAPI()
+    app.add_middleware(SecurityHeadersMiddleware)
+
+    @app.get("/api/v1/test")
+    async def test_endpoint():
+        return {"ok": True}
+
+    client = TestClient(app)
+    resp = client.get("/api/v1/test")
+    assert resp.headers["X-Content-Type-Options"] == "nosniff"
+    assert resp.headers["X-Frame-Options"] == "DENY"
+    assert resp.headers["Cache-Control"] == "no-store"
+    assert "Content-Security-Policy" in resp.headers
+    assert "default-src 'none'" in resp.headers["Content-Security-Policy"]
+
+
+def test_security_headers_present_on_non_api_responses():
+    """非 API 路径也包含安全头"""
+    app = FastAPI()
+    app.add_middleware(SecurityHeadersMiddleware)
+
+    @app.get("/health")
+    async def health():
+        return {"status": "ok"}
+
+    client = TestClient(app)
+    resp = client.get("/health")
+    assert resp.headers["X-Content-Type-Options"] == "nosniff"
+
+
+def test_security_headers_referrer_policy():
+    """Referrer-Policy 头设置正确"""
+    app = FastAPI()
+    app.add_middleware(SecurityHeadersMiddleware)
+
+    @app.get("/api/test")
+    async def test_endpoint():
+        return {"ok": True}
+
+    client = TestClient(app)
+    resp = client.get("/api/test")
+    assert resp.headers["Referrer-Policy"] == "strict-origin-when-cross-origin"
+    assert resp.headers["Permissions-Policy"] == "camera=(), microphone=(), geolocation=()"
