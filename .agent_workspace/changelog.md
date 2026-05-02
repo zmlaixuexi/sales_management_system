@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-03（第三百九十八轮·自动循环）
+
+### 测试补强：审计日志 resource_type 值域验证
+
+- `test_audit_log.py`：新增 test_83（审计日志 resource_type 值域验证，所有日志 resource_type 均为已知枚举值 user/product/customer/order/payment/system）
+- 后端测试：1081/1081 全绿，ruff clean
+
 ## 2026-05-03（第三百九十七轮·自动循环）
 
 ### 测试补强：用户编辑审计日志 before_data/after_data 字段完整性验证

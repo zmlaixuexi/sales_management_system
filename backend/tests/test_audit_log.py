@@ -2208,3 +2208,19 @@ def test_82_user_update_audit_log_before_after_data_completeness():
     assert log["after_data"]["username"] == "update_audit_user"
     assert log["after_data"]["display_name"] == "编辑后名称"
     assert log["resource_type"] == "user"
+
+
+def test_83_audit_log_resource_type_values_are_known():
+    """审计日志 resource_type 值域验证 — 所有 resource_type 均为已知值"""
+    headers = _admin_auth()
+    known_resource_types = {
+        "user", "product", "customer", "order", "payment", "system",
+    }
+    resp = client.get("/api/v1/audit-logs", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) > 0
+    for log in items:
+        assert log["resource_type"] in known_resource_types, (
+            f"未知 resource_type: {log['resource_type']}"
+        )
