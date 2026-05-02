@@ -131,6 +131,14 @@ def get_or_404(db: Session, model: type[Base], entity_id: uuid.UUID | str, label
     return obj
 
 
+def active_query(db: Session, model: type[Base]):
+    """创建已过滤软删除的查询。若模型有 deleted_at 列则自动排除。"""
+    query = db.query(model)
+    if hasattr(model, "deleted_at"):
+        query = query.filter(model.deleted_at.is_(None))
+    return query
+
+
 def resp(data=None, message: str = "操作成功") -> dict:
     """构建标准成功响应字典。"""
     from app.core.request_id import request_id_ctx

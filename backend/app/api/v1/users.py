@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import (
     PaginationParams,
+    active_query,
     fmt_dt,
     get_current_user,
     get_db,
@@ -53,7 +54,7 @@ def list_users(
             detail={"code": "AUTH_FORBIDDEN", "message": "无权限访问用户管理"},
         )
 
-    query = db.query(User).filter(User.deleted_at.is_(None))
+    query = active_query(db, User)
     if keyword:
         query = query.filter(User.username.ilike(f"%{escape_like(keyword)}%", escape="\\"))
 

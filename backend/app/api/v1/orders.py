@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import (
     PaginationParams,
+    active_query,
     check_owner_or_forbid,
     fmt_dt,
     generate_sequential_code,
@@ -227,7 +228,7 @@ def list_orders(
 ):
     """订单列表"""
     can_view_cost = has_permission(current_user, "product:view_cost")
-    query = db.query(SalesOrder).filter(SalesOrder.deleted_at.is_(None))
+    query = active_query(db, SalesOrder)
 
     # 数据范围：无 order:view_all 权限只能看本人订单
     if not has_permission(current_user, "order:view_all"):

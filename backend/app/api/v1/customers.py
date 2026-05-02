@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import (
     PaginationParams,
+    active_query,
     check_owner_or_forbid,
     fmt_dt,
     get_db,
@@ -68,7 +69,7 @@ def list_customers(
     current_user: User = Depends(require_permission("customer:list")),
 ):
     """客户列表"""
-    query = db.query(Customer).filter(Customer.deleted_at.is_(None))
+    query = active_query(db, Customer)
 
     # 数据范围：无 customer:view_all 权限只能看本人客户
     if not has_permission(current_user, "customer:view_all"):

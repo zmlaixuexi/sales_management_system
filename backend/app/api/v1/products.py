@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import (
     PaginationParams,
+    active_query,
     fmt_dt,
     generate_sequential_code,
     get_db,
@@ -122,7 +123,7 @@ def list_products(
 ):
     """商品列表"""
     can_view_cost = has_permission(current_user, "product:view_cost")
-    query = db.query(Product).filter(Product.deleted_at.is_(None))
+    query = active_query(db, Product)
 
     if keyword:
         query = query.filter(Product.name.ilike(f"%{escape_like(keyword)}%", escape="\\"))
