@@ -2,15 +2,15 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-335
+当前任务编号：ROUND-336
 当前任务名称：自动循环验证
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 336：移除幽灵权限 report:ranking（文档+seed.py），934 后端测试全绿
 - Round 335：审计日志全覆盖 — 补强 6 个缺口（import/export/order_update），934 后端测试全绿
-- Round 334：商品软删除审计日志验证 + page_size=101 超限，928 后端测试全绿
 
 ## 最终验证状态
 

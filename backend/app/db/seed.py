@@ -50,9 +50,8 @@ PERMISSIONS = [
     ("payment:create", "登记收款", "收款管理"),
     ("payment:reverse", "冲正收款", "收款管理"),
     # 报表
-    ("report:sales", "查看销售报表", "报表"),
+    ("report:sales", "查看销售报表（含排行榜）", "报表"),
     ("report:profit", "查看利润报表", "报表"),
-    ("report:ranking", "查看排行榜", "报表"),
     # 审计日志
     ("audit:view", "查看操作日志", "审计"),
 ]
@@ -65,7 +64,7 @@ ROLE_PERMISSIONS = {
         "customer:list", "customer:create", "customer:update", "customer:view_all",
         "order:list", "order:create", "order:update", "order:confirm", "order:cancel", "order:view_all",
         "payment:list",
-        "report:sales", "report:profit", "report:ranking",
+        "report:sales", "report:profit",
         "inventory:list",
     ],
     "sales": [
@@ -83,7 +82,7 @@ ROLE_PERMISSIONS = {
         "product:list", "product:view_cost",
         "order:list", "order:view_all",
         "payment:list", "payment:create", "payment:reverse",
-        "report:sales", "report:profit", "report:ranking",
+        "report:sales", "report:profit",
     ],
     "audit": [
         "audit:view",

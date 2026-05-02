@@ -703,9 +703,8 @@ JSON 日志格式示例：
 | payment:reverse | 冲正收款 |
 | inventory:list | 库存流水 |
 | inventory:adjust | 手工调整库存 |
-| report:sales | 查看销售报表 |
+| report:sales | 查看销售报表（含排行榜） |
 | report:profit | 查看利润报表 |
-| report:ranking | 查看排行榜 |
 | audit:view | 查看审计日志 |
 
 ---

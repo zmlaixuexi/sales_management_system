@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百三十六轮·自动循环）
+
+### 文档+代码：移除幽灵权限 report:ranking
+
+- docs/api.md 权限表移除不存在的 report:ranking，合并到 report:sales 描述
+- seed.py 移除 report:ranking 权限定义和角色分配（代码从未检查此权限）
+- ruff 零错误，934 后端测试全绿
+
 ## 2026-05-02（第三百三十五轮·自动循环）
 
 ### 测试：审计日志全覆盖 — 补强 6 个缺口
