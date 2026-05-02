@@ -45,6 +45,7 @@ const RESOURCE_LABELS: Record<string, string> = {
 export default function AuditLogs() {
   const [actionFilter, setActionFilter] = useState<string | undefined>();
   const [resourceFilter, setResourceFilter] = useState<string | undefined>();
+  const [resourceIdFilter, setResourceIdFilter] = useState<string | undefined>();
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null] | null>(null);
   const [actions, setActions] = useState<string[]>([]);
   const [resourceTypes, setResourceTypes] = useState<string[]>([]);
@@ -52,6 +53,7 @@ export default function AuditLogs() {
   const filters = {
     action: actionFilter,
     resource_type: resourceFilter,
+    resource_id: resourceIdFilter,
     start_date: dateRange?.[0]?.format('YYYY-MM-DD'),
     end_date: dateRange?.[1]?.format('YYYY-MM-DD'),
   };
@@ -161,6 +163,13 @@ export default function AuditLogs() {
           value={resourceFilter}
           onChange={(v) => { setResourceFilter(v); setPage(1) }}
           options={resourceTypes.map(r => ({ label: RESOURCE_LABELS[r] || r, value: r }))}
+        />
+        <Input.Search
+          placeholder="资源ID精确筛选"
+          style={{ width: 180 }}
+          onSearch={(v) => { setResourceIdFilter(v || undefined); setPage(1) }}
+          allowClear
+          onClear={() => { setResourceIdFilter(undefined); setPage(1) }}
         />
         <RangePicker
           value={dateRange}

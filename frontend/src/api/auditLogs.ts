@@ -32,6 +32,7 @@ export async function fetchAuditLogs(params: {
   page_size?: number;
   action?: string;
   resource_type?: string;
+  resource_id?: string;
   start_date?: string;
   end_date?: string;
   keyword?: string;
