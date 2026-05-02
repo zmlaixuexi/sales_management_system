@@ -58,8 +58,8 @@ export default function ProductsPage() {
       await disableProduct(id)
       message.success('停用成功')
       loadData()
-    } catch {
-      message.error('停用失败')
+    } catch (e: unknown) {
+      message.error(getApiErrorMessage(e, '停用失败'))
     }
   }
 

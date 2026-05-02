@@ -3,6 +3,7 @@ import { Card, Form, Input, Button, message, Typography } from 'antd'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '../stores/auth'
+import { getApiErrorMessage } from '@/utils'
 
 const { Title } = Typography
 
@@ -18,8 +19,8 @@ export default function Login() {
       await login(values.username, values.password)
       const redirect = searchParams.get('redirect') || '/'
       navigate(redirect, { replace: true })
-    } catch {
-      message.error('用户名或密码错误')
+    } catch (e: unknown) {
+      message.error(getApiErrorMessage(e, '用户名或密码错误'))
     } finally {
       setLoading(false)
     }
