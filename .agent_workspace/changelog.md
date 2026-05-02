@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第一百六十七轮·自动循环）
+
+### 文档：docs/testing.md 与实际测试输出对齐
+
+- 概览表更新：后端 592→629, 前端 258→310, 总计 850→939, 文件数 30→31, 前端文件 36→37
+- 模块计数更新：test_health 17→18, test_auth 14→16, test_file_upload 22→24, test_ratelimit 4→5, test_file_service 4→13, test_logging 6→10, test_payment_crud 25→27, test_inventory_crud 20→21
+- 覆盖内容描述更新：新增审计日志、XSS strip_html、状态回退、魔数字节校验等说明
+
 ## 2026-05-02（第一百六十六轮·自动循环）
 
 ### 安全：收款冲正状态回退边界测试（+2 tests，937→939）
