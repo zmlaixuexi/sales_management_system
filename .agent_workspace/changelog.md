@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百三十轮·自动循环）
+
+### 自动循环：Backlog P1/P2 状态确认 + 进度提交
+
+- 确认 Backlog P1（批量导入 CSV）已完整实现
+- 确认 Backlog P2（ErrorBoundary + usePaginatedList 统一 loading/error/retry）已完整实现
+- 确认 Backlog P2（前端 429 自动重试 + 401 刷新 + 统一错误提示）已完整实现
+- 全量门禁通过：793 后端 + 380 前端 = 1173 测试
+
 ## 2026-05-02（第二百二十九轮·自动循环）
 
 ### 安全：补全 Pydantic schema remark 字段 max_length 限制

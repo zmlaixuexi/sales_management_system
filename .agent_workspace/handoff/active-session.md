@@ -3,17 +3,16 @@
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
 当前任务编号：ROUND-230
-当前任务名称：全量门禁验证 + 继续推进
+当前任务名称：Backlog P1/P2 状态确认
 当前 Agent：Claude
-任务状态：进行中
+任务状态：已完成
 
 ## 最近完成
 
+- Round 230：确认 Backlog P1（批量导入）、P2（错误边界/Loading/429 重试）全部已实现
 - Round 229：Pydantic schema remark 字段 max_length 补全
 - Round 228：软删除过滤测试（客户列表 + 支付列表）
 - Round 227：对象级权限 + SQL 注入搜索安全 + 分页边界测试（17 项）
-- Round 226：API 文档错误格式修正和错误码补全
-- Round 225：部署前检查脚本 pre-deploy-check.sh
 
 ## 最终验证状态
 
