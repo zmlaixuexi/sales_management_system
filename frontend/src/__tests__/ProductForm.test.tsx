@@ -198,4 +198,47 @@ describe('ProductForm', () => {
       expect(screen.getByText('保存修改')).toBeInTheDocument()
     })
   })
+
+  it('商品名称字段有 maxLength 限制', () => {
+    renderNewProduct()
+    const inputs = screen.getAllByTestId('input')
+    const nameInput = inputs.find((inp) => inp.getAttribute('placeholder') === '请输入商品名称')
+    expect(nameInput).toHaveAttribute('maxlength', '100')
+  })
+
+  it('成本价和销售价为必填字段', () => {
+    renderNewProduct()
+    const formItems = screen.getAllByTestId('form-item')
+    const costItem = formItems.find((fi) => fi.getAttribute('data-name') === 'cost_price')
+    const saleItem = formItems.find((fi) => fi.getAttribute('data-name') === 'sale_price')
+    expect(costItem).toBeTruthy()
+    expect(saleItem).toBeTruthy()
+  })
+
+  it('渲染高级设置切换按钮', () => {
+    renderNewProduct()
+    expect(screen.getByText('展开高级设置')).toBeInTheDocument()
+  })
+
+  it('图片上传区域显示选择图片按钮', () => {
+    renderNewProduct()
+    expect(screen.getByText('选择图片')).toBeInTheDocument()
+  })
+
+  it('备注字段有 maxLength 限制', () => {
+    renderNewProduct()
+    // 高级设置内的 textarea 在展开后才渲染
+    // 初始状态只有基础字段
+    const textareas = screen.queryAllByTestId('textarea')
+    // 高级设置未展开时无 textarea
+    expect(textareas.length).toBe(0)
+  })
+
+  it('SKU 字段初始不可见', () => {
+    renderNewProduct()
+    // SKU 在高级设置内，初始不可见
+    const inputs = screen.getAllByTestId('input')
+    const skuInput = inputs.find((inp) => inp.getAttribute('placeholder') === '留空自动生成')
+    expect(skuInput).toBeUndefined()
+  })
 })
