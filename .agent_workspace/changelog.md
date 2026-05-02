@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第二百零四轮·自动循环）
+
+### 安全：新增请求体大小限制中间件
+
+- 新增 `BodyLimitMiddleware`，检查 Content-Length 头，超过 MAX_JSON_BODY_MB（默认 1MB）返回 413 PAYLOAD_TOO_LARGE
+- GET/HEAD/OPTIONS 请求不受限，multipart/form-data 和 /uploads 路径豁免
+- 新增配置项 `MAX_JSON_BODY_MB`，同步更新 .env.example 和 docker-compose 配置
+- 7 个测试覆盖：正常 POST、GET 不受限、超限拒绝、multipart 豁免、OPTIONS 不受限、恰好限制通过
+- 后端 760→767，总计 1106 tests
+
 ## 2026-05-02（第二百零二轮·自动循环）
 
 ### 工程：Makefile 新增 lint-fix 命令

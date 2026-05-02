@@ -6,6 +6,23 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-161
+
+- 名称：请求体大小限制中间件
+- 轮次：Round 204（自动循环）
+- 描述：新增 BodyLimitMiddleware，检查 JSON API 请求的 Content-Length，超过 MAX_JSON_BODY_MB（默认 1MB）返回 413 PAYLOAD_TOO_LARGE。GET/HEAD/OPTIONS 不受限，multipart/form-data 文件上传豁免
+- 涉及文件：backend/app/core/body_limit.py、backend/app/main.py、backend/app/core/config.py
+- 测试：7 个测试（test_body_limit.py），后端 760→767
+- 验证：ruff 0 + mypy 0 + 767 tests + ESLint 0 + tsc 0 + 339 tests = 1106
+
+## 功能编号：FEAT-20260502-160
+
+- 名称：nginx 安全加固
+- 轮次：Round 203（自动循环）
+- 描述：nginx 新增隐藏文件拦截（location ~ /\. { deny all }）、/uploads/ 代理头、/health 健康检查端点（代理到后端，不写日志）
+- 涉及文件：deploy/nginx.conf
+- 验证：nginx -t 语法检查通过，1109 tests 全部通过
+
 ## 功能编号：FEAT-20260502-159
 
 - 名称：收款登记服务单元测试
