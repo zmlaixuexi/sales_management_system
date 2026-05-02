@@ -329,3 +329,16 @@ def test_20_movements_filter_invalid_product():
     resp = client.get(f"/api/v1/inventory/movements?product_id={fake_id}", headers=_auth())
     assert resp.status_code == 200
     assert resp.json()["data"]["total"] == 0
+
+
+def test_21_adjust_remark_strips_html():
+    """库存备注应自动移除 HTML 标签，防止存储型 XSS"""
+    from app.schemas.inventory import InventoryAdjust
+
+    item = InventoryAdjust(
+        product_id=str(uuid.uuid4()),
+        quantity_change=1,
+        remark="<script>alert('xss')</script>正常备注",
+    )
+    assert "<script>" not in item.remark
+    assert "正常备注" in item.remark

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第一百六十轮·自动循环）
+
+### 安全：XSS 防护审计 — 修复库存备注 strip_html 缺失（+1 test，934→935）
+
+- 审计全部用户输入文本字段的 XSS 防护覆盖
+- `backend/app/schemas/inventory.py`：`InventoryAdjust.remark` 添加 `strip_html` 验证器
+- `backend/tests/test_inventory_crud.py`：新增 `test_21_adjust_remark_strips_html` 验证 HTML 标签被移除
+- 后端 624→625 tests，总计 934→935
+
 ## 2026-05-02（第一百五十九轮·自动循环）
 
 ### 需求符合性验证 + 429 响应 RateLimit 头修复（+1 test，933→934）
