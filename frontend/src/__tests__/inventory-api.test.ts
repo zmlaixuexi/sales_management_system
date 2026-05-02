@@ -38,6 +38,27 @@ describe('库存 API', () => {
     expect(mockGet).toHaveBeenCalledWith('/inventory/movements', { movement_type: 'manual_adjust' })
   })
 
+  it('fetchInventoryMovements 支持分页', async () => {
+    mockGet.mockResolvedValueOnce(ok({ items: [], page: 3, page_size: 10, total: 30 }))
+    const res = await fetchInventoryMovements({ page: 3, page_size: 10 })
+    expect(mockGet).toHaveBeenCalledWith('/inventory/movements', { page: 3, page_size: 10 })
+    expect(res.data.page).toBe(3)
+  })
+
+  it('fetchInventoryMovements 返回完整流水记录', async () => {
+    const items = [{
+      id: 'm1', product_id: 'p1', movement_type: 'order_deduct',
+      quantity_before: 100, quantity_change: -5, quantity_after: 95,
+      related_type: 'sales_order', related_id: 'o1',
+      remark: '订单确认扣减', created_at: '2026-05-01T10:00:00Z',
+    }]
+    mockGet.mockResolvedValueOnce(ok({ items, page: 1, page_size: 20, total: 1 }))
+    const res = await fetchInventoryMovements({ page: 1 })
+    expect(res.data.items).toHaveLength(1)
+    expect(res.data.items[0].movement_type).toBe('order_deduct')
+    expect(res.data.items[0].quantity_change).toBe(-5)
+  })
+
   it('adjustInventory 调用 POST /inventory/adjustments', async () => {
     mockPost.mockResolvedValueOnce(ok({
       product_id: 'p1', quantity_before: 10, quantity_change: 5, quantity_after: 15,
@@ -55,5 +76,20 @@ describe('库存 API', () => {
     expect(mockPost).toHaveBeenCalledWith('/inventory/adjustments', {
       product_id: 'p1', quantity_change: -3, remark: '盘亏',
     })
+  })
+
+  it('adjustInventory 正数调整增加库存', async () => {
+    mockPost.mockResolvedValueOnce(ok({
+      product_id: 'p2', quantity_before: 20, quantity_change: 10, quantity_after: 30,
+    }))
+    const res = await adjustInventory({ product_id: 'p2', quantity_change: 10, remark: '采购入库' })
+    expect(res.data.quantity_before).toBe(20)
+    expect(res.data.quantity_after).toBe(30)
+  })
+
+  it('fetchInventoryMovements 无参数调用', async () => {
+    mockGet.mockResolvedValueOnce(ok({ items: [], page: 1, page_size: 20, total: 0 }))
+    await fetchInventoryMovements()
+    expect(mockGet).toHaveBeenCalledWith('/inventory/movements', undefined)
   })
 })
