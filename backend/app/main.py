@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):
     # 确保上传目录存在
     upload_dir = Path(settings.UPLOAD_DIR)
     upload_dir.mkdir(parents=True, exist_ok=True)
@@ -78,7 +78,7 @@ app = FastAPI(
 
 
 @app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
+async def http_exception_handler(_request: Request, exc: HTTPException):
     """将 HTTPException 统一为 {success: false, error: {code, message}, request_id} 格式"""
     from app.core.request_id import request_id_ctx
 
@@ -97,7 +97,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 
 @app.exception_handler(RequestValidationError)
-def validation_exception_handler(request: Request, exc: RequestValidationError):
+def validation_exception_handler(_request: Request, exc: RequestValidationError):
     """将 FastAPI 默认 422 校验错误统一为规范格式"""
     from app.core.request_id import request_id_ctx
 
@@ -114,7 +114,7 @@ def validation_exception_handler(request: Request, exc: RequestValidationError):
 
 
 @app.exception_handler(Exception)
-def unhandled_exception_handler(request: Request, exc: Exception):
+def unhandled_exception_handler(request: Request, _exc: Exception):
     """全局未处理异常：返回一致 JSON 格式，防泄露内部详情"""
     from app.core.request_id import request_id_ctx
 

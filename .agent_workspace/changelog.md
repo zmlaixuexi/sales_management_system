@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-03（第四百三十轮·自动循环）
+
+### 代码质量：清理 app/ 目录未使用函数参数
+
+- `app/core/slow_query.py`：hook 函数未用参数加 `_` 前缀（保持 SQLAlchemy 事件签名兼容）
+- `app/main.py`：lifespan、exception handler 未用参数加 `_` 前缀
+- `app/api/v1/audit_logs.py`：权限校验参数加 `_` 前缀
+- `app/api/v1/inventory.py`：权限校验参数加 `_` 前缀
+- `app/api/v1/reports.py`：权限校验参数加 `_` 前缀
+- app/ 目录 ruff ARG001 检查从 14 个降至 0，全部测试 1116/1116 全绿
+
 ## 2026-05-03（第四百二十九轮·自动循环）
 
 ### 测试补强：订单创建/编辑备注超长 422 边界测试

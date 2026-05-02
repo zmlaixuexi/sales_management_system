@@ -308,7 +308,7 @@ def salesperson_ranking(
 def inventory_warning(
     threshold: int = Query(None, ge=0, description="库存预警阈值"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("report:sales")),
+    _current_user: User = Depends(require_permission("report:sales")),
 ):
     """库存预警：低于阈值的商品列表"""
     if threshold is None:

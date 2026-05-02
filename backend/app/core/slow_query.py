@@ -16,13 +16,13 @@ _query_start_ctx: ContextVar[float] = ContextVar("sql_query_start", default=0.0)
 
 
 def _before_cursor_execute(
-    conn: Any, cursor: Any, statement: str, parameters: Any, context: Any, executemany: bool
+    _conn: Any, _cursor: Any, _statement: str, _parameters: Any, _context: Any, _executemany: bool
 ) -> None:
     _query_start_ctx.set(time.monotonic())
 
 
 def _after_cursor_execute(
-    conn: Any, cursor: Any, statement: str, parameters: Any, context: Any, executemany: bool
+    _conn: Any, _cursor: Any, statement: str, parameters: Any, _context: Any, _executemany: bool
 ) -> None:
     elapsed_ms = round((time.monotonic() - _query_start_ctx.get()) * 1000, 2)
     threshold = settings.SLOW_SQL_THRESHOLD_MS

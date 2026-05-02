@@ -30,7 +30,7 @@ def list_audit_logs(
     end_date: str | None = None,
     keyword: str | None = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("audit:view")),
+    _current_user: User = Depends(require_permission("audit:view")),
 ):
     """查询操作日志列表"""
     query = db.query(AuditLog)
@@ -80,7 +80,7 @@ def list_audit_logs(
 @router.get("/actions")
 def list_audit_actions(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("audit:view")),
+    _current_user: User = Depends(require_permission("audit:view")),
 ):
     """获取所有操作类型列表（用于筛选）"""
     actions = db.query(AuditLog.action).distinct().order_by(AuditLog.action).all()

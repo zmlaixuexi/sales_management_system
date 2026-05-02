@@ -41,7 +41,7 @@ def list_movements(
     product_id: uuid.UUID | None = None,
     movement_type: str | None = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("inventory:list")),
+    _current_user: User = Depends(require_permission("inventory:list")),
 ):
     """库存流水"""
     query = db.query(InventoryMovement)
