@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百七十三轮·自动循环）
+
+### 文档：testing.md 测试计数和文件条目更新
+
+- 后端测试计数更新为 833（+1），测试文件更新为 42
+- 补充 5 个遗漏测试文件条目：test_middleware、test_slow_query、test_csv_import、test_file_service、test_export_helpers
+- README.md 后端测试计数同步更新
+
 ## 2026-05-02（第二百七十二轮·自动循环）
 
 ### 部署：备份脚本增加 gzip 完整性验证
