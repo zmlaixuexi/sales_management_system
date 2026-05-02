@@ -336,3 +336,18 @@ def test_23_login_disabled_user_403():
         "password": "testpass123",
     })
     assert resp.status_code == 403
+
+
+def test_24_login_sql_injection_safe():
+    """用户名含 SQL 注入字符不会导致异常"""
+    for malicious in [
+        "' OR '1'='1",
+        "admin'--",
+        "'; DROP TABLE users;--",
+        '" OR 1=1 --',
+    ]:
+        resp = client.post("/api/v1/auth/login", json={
+            "username": malicious,
+            "password": "anypass",
+        })
+        assert resp.status_code == 401, f"{malicious} should return 401"
