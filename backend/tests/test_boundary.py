@@ -1560,3 +1560,77 @@ def test_80_user_update_email_max_length_boundary():
     email_201 = "a" * 189 + "@example.com"
     resp = client.put(f"/api/v1/users/{uid}", json={"email": email_201}, headers=headers)
     assert resp.status_code == 422, f"201 字符邮箱应被拒绝: {resp.status_code}"
+
+
+def test_81_customer_create_remark_max_length_boundary():
+    """客户创建备注恰好 500 字符通过，501 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    resp = client.post(
+        "/api/v1/customers",
+        json={"name": "备注边界客户81", "phone": "13900818181", "remark": "备" * 500},
+        headers=headers,
+    )
+    assert resp.status_code == 200, f"500 字符备注应通过: {resp.json()}"
+
+    resp = client.post(
+        "/api/v1/customers",
+        json={"name": "备注边界客户81b", "phone": "13900828282", "remark": "备" * 501},
+        headers=headers,
+    )
+    assert resp.status_code == 422, f"501 字符备注应被拒绝: {resp.status_code}"
+
+
+def test_82_customer_update_remark_max_length_boundary():
+    """客户编辑备注恰好 500 字符通过，501 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post(
+        "/api/v1/customers",
+        json={"name": "备注编辑边界82", "phone": "13900838383"},
+        headers=headers,
+    )
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    resp = client.put(f"/api/v1/customers/{cid}", json={"remark": "编" * 500}, headers=headers)
+    assert resp.status_code == 200, f"500 字符备注应通过: {resp.json()}"
+
+    resp = client.put(f"/api/v1/customers/{cid}", json={"remark": "编" * 501}, headers=headers)
+    assert resp.status_code == 422, f"501 字符备注应被拒绝: {resp.status_code}"
+
+
+def test_83_product_create_remark_max_length_boundary():
+    """商品创建备注恰好 500 字符通过，501 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    resp = client.post(
+        "/api/v1/products",
+        json={"name": "备注边界商品83", "price": 10.00, "remark": "商" * 500},
+        headers=headers,
+    )
+    assert resp.status_code == 200, f"500 字符备注应通过: {resp.json()}"
+
+    resp = client.post(
+        "/api/v1/products",
+        json={"name": "备注边界商品83b", "price": 10.00, "remark": "商" * 501},
+        headers=headers,
+    )
+    assert resp.status_code == 422, f"501 字符备注应被拒绝: {resp.status_code}"
+
+
+def test_84_product_update_remark_max_length_boundary():
+    """商品编辑备注恰好 500 字符通过，501 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post(
+        "/api/v1/products",
+        json={"name": "备注编辑边界84", "price": 10.00},
+        headers=headers,
+    )
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    resp = client.put(f"/api/v1/products/{pid}", json={"remark": "编" * 500}, headers=headers)
+    assert resp.status_code == 200, f"500 字符备注应通过: {resp.json()}"
+
+    resp = client.put(f"/api/v1/products/{pid}", json={"remark": "编" * 501}, headers=headers)
+    assert resp.status_code == 422, f"501 字符备注应被拒绝: {resp.status_code}"
