@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-03（第三百九十六轮·自动循环）
+
+### 测试补强：收款创建审计日志 after_data 字段完整性验证
+
+- `test_audit_log.py`：新增 test_81（收款创建后 after_data 含 order_id/amount/method，before_data 为 None）
+- 后端测试：1079/1079 全绿，ruff clean
+
 ## 2026-05-03（第三百九十五轮·自动循环）
 
 ### 代码质量 + 测试补强：docs/testing.md 同步 + 审计日志 action 值域验证

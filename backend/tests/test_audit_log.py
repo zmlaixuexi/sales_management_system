@@ -2141,3 +2141,41 @@ def test_80_audit_log_action_values_are_known():
     items = resp.json()["data"]["items"]
     for log in items:
         assert log["action"] in known_actions, f"未知 action: {log['action']}"
+
+
+def test_81_payment_create_audit_log_after_data_completeness():
+    """收款创建审计日志 after_data 含 order_id/amount/method"""
+    headers = _admin_auth()
+    # 创建客户+商品+订单
+    resp = client.post("/api/v1/customers", json={"name": "收款审计客户", "phone": "13800818181"}, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/products", json={
+        "name": "收款审计商品", "sale_price": "200.00", "cost_price": "100.00", "stock_quantity": 50,
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cid,
+        "items": [{"product_id": pid, "quantity": 1, "unit_price": "200.00"}],
+    }, headers=headers)
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=headers)
+
+    # 登记收款
+    resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
+        "amount": "200.00", "payment_method": "transfer",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pay_id = resp.json()["data"]["id"]
+
+    resp = client.get("/api/v1/audit-logs?action=payment_create", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == pay_id)
+    assert log["after_data"]["order_id"] == oid
+    assert log["after_data"]["amount"] == "200.00"
+    assert log["after_data"]["method"] == "transfer"
+    assert log["before_data"] is None
+    assert log["resource_type"] == "payment"
