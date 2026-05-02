@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百四十五轮·自动循环）
+
+### 测试补强：客户 source/level/follow_status 无效枚举值 422 验证
+
+- `test_boundary.py`：新增 test_107-112（客户创建/编辑 source/level/follow_status 无效值 422）
+- `docs/testing.md`：更新后端测试总数 1156→1162、总计 1538→1544、test_boundary.py 106→112
+- 后端测试：1162/1162 全绿，ruff clean
+
 ## 2026-05-03（第四百四十四轮·自动循环）
 
 ### 测试补强：订单数量/收款金额/收款方式边界 422 验证
