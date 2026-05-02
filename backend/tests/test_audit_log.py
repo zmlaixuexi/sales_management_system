@@ -2594,3 +2594,24 @@ def test_97_order_create_audit_log_after_data_has_items():
     item_b = next(i for i in log_items if i["product_id"] == pid_b)
     assert item_b["quantity"] == 1
     assert item_b["unit_price"] == "200.00"
+
+
+def test_98_customer_delete_audit_log_after_data_has_deleted():
+    """客户删除审计日志 after_data 含 deleted=True 验证"""
+    headers = _admin_auth()
+    # 创建客户
+    resp = client.post("/api/v1/customers", json={"name": "待删除客户98", "phone": "13800989898"}, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    # 软删除
+    resp = client.delete(f"/api/v1/customers/{cid}", headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=customer_delete", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == cid)
+    assert log["after_data"] is not None
+    assert log["after_data"].get("deleted") is True, f"after_data.deleted 不是 True: {log['after_data']}"
+    assert log["resource_type"] == "customer"

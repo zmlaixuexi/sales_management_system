@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百一十二轮·自动循环）
+
+### 测试补强：客户删除审计日志 after_data 含 deleted=True 验证
+
+- `test_audit_log.py`：新增 test_98（客户删除 after_data 含 deleted=True，resource_type=customer）
+- `docs/testing.md`：更新后端测试总数 1095→1096、总计 1477→1478、test_audit_log.py 99→100
+- 后端测试：1096/1096 全绿，ruff clean
+
 ## 2026-05-03（第四百一十一轮·自动循环）
 
 ### 测试补强：订单创建审计日志 after_data 含 items 明细

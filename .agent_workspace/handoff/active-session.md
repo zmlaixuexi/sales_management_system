@@ -2,32 +2,32 @@
 
 最后更新时间：2026-05-03
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-411
-当前任务名称：订单创建审计日志 after_data 含 items 明细 + 客户删除 after_data 含 deleted=True
+当前任务编号：ROUND-412
+当前任务名称：客户删除 after_data 含 deleted=True 验证
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 411：订单创建 after_data 新增 items 明细（product_id/quantity/unit_price）+ test_97 验证，1095 后端测试全绿
-- Round 410：docs/testing.md 同步至 1094 + test_95 ip_address 非空 + test_96 商品删除 deleted=True
+- Round 412：test_98 客户删除 after_data 含 deleted=True 验证，1096 后端测试全绿
+- Round 411：订单创建 after_data 新增 items 明细 + test_97 验证，1095 后端测试全绿
 
 ## 最终验证状态
 
 | 门禁 | 结果 |
 |---|---|
-| 后端测试 | 1095/1095 ✓ |
+| 后端测试 | 1096/1096 ✓ |
 | 前端测试 | 382/382 ✓ |
 | ruff | 0 errors ✓ |
-| 总计 | 1477 tests |
+| 总计 | 1478 tests |
 
 ## 下一步第一动作
 
 继续 keep-going 模式。可选无阻塞方向：
-- 测试补强：客户删除 after_data 含 deleted=True 验证
 - 测试补强：审计日志 actor_name 与用户 display_name 一致性验证
 - 测试补强：订单确认 before_data 含 customer_id 验证
-- 测试补强：客户删除 before_data 含 deleted=True 不应出现
+- 测试补强：审计日志 user_agent 非空验证
+- 测试补强：收款创建 before_data 为 None 的独立性验证
 
 ## 阻塞问题
 
