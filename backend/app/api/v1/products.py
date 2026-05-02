@@ -208,7 +208,7 @@ def create_product(
 
     sku = data.sku or _generate_sku(db)
 
-    existing_sku = db.query(Product).filter(Product.sku == sku, Product.deleted_at.is_(None)).first()
+    existing_sku = active_query(db, Product).filter(Product.sku == sku).first()
     if existing_sku:
         raise HTTPException(status_code=400, detail={"code": "PRODUCT_SKU_DUPLICATED", "message": "商品编码已存在"})
 
@@ -401,8 +401,8 @@ def update_product(
 
     if data.sku is not None:
         new_sku = data.sku
-        existing = db.query(Product).filter(
-            Product.sku == new_sku, Product.id != product_id, Product.deleted_at.is_(None)
+        existing = active_query(db, Product).filter(
+            Product.sku == new_sku, Product.id != product_id,
         ).first()
         if existing:
             raise HTTPException(status_code=400, detail={"code": "PRODUCT_SKU_DUPLICATED", "message": "商品编码已存在"})

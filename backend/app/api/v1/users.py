@@ -88,7 +88,7 @@ def create_user(
             detail={"code": "AUTH_FORBIDDEN", "message": "无权限创建用户"},
         )
 
-    if db.query(User).filter(User.username == req.username, User.deleted_at.is_(None)).first():
+    if active_query(db, User).filter(User.username == req.username).first():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"code": "VALIDATION_FAILED", "message": "用户名已存在"},
@@ -138,7 +138,7 @@ def update_user(
             detail={"code": "AUTH_FORBIDDEN", "message": "无权限编辑用户"},
         )
 
-    user = db.query(User).filter(User.id == parse_uuid_or_400(user_id, "用户 ID"), User.deleted_at.is_(None)).first()
+    user = active_query(db, User).filter(User.id == parse_uuid_or_400(user_id, "用户 ID")).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
