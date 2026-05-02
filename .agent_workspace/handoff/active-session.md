@@ -2,15 +2,15 @@
 
 最后更新时间：2026-05-03
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-469
-当前任务名称：架构文档更新
+当前任务编号：ROUND-470
+当前任务名称：Schema/Model 字段长度不一致修复
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 470：修复 Schema/Model 字段长度不一致（Product.name/Customer.name/Customer.email/User.email max_length 200→100）
 - Round 469：architecture.md 路由表补充 6 个页面 + 覆盖率 100% + API 模块数 12
-- Round 468：全面回归验证通过（1571 tests，coverage 100%）
 
 ## 最终验证状态
 
@@ -29,7 +29,7 @@
 - 代码质量：后端异常处理统一化
 - 安全加固：开发工具依赖升级（pip/pygments/wheel）
 - 性能优化：前端 build 分析
-- 文档完善：数据库文档更新
+- 文档完善：数据库文档补充字段长度说明
 
 ## 阻塞问题
 

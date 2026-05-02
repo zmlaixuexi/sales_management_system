@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第四百七十轮·自动循环）
+
+### Bug 修复：Schema/Model 字段长度不一致
+
+- Product.name、Customer.name：Pydantic max_length=200 → 100（与 SQLAlchemy String(100) 一致）
+- Customer.email、UserCreate.email、UserUpdate.email：max_length=200 → 100（与 SQLAlchemy String(100) 一致）
+- 更新 6 个边界测试和 3 个 CRUD 测试中的长度断言（200/201 → 100/101）
+- 此 bug 在 SQLite 下不可见（不强制 VARCHAR），PostgreSQL 生产环境会触发 500
+
 ## 2026-05-03（第四百六十九轮·自动循环）
 
 ### 文档完善：架构文档更新

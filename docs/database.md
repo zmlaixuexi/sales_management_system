@@ -289,7 +289,7 @@ sales_orders ──< sales_order_items (CASCADE)
 
 - 默认管理员：`admin` / `admin123`（is_superuser=True）
 - 6 个角色：超级管理员、销售经理、销售员、财务、仓库、客服
-- 32 个权限码，覆盖 9 个模块
+- 33 个权限码，覆盖 9 个模块
 - 默认商品分类："未分类"
 
 ## 迁移
