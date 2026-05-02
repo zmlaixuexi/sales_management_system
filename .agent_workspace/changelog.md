@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第二百二十轮·自动循环）
+
+### 安全：nginx.conf HSTS 修复 + 验收标准全面验证
+
+- 移除 HTTP 配置中的 Strict-Transport-Security 头（无 HTTPS 时 HSTS 无效且可能阻断访问）
+- 新增注释掉的 HTTPS server 模板（TLS 1.2/1.3、HTTP→HTTPS 重定向）
+- 全面验收标准验证：登录认证 6/6 ✅、安全需求 6/6 ✅、数据库设计 3/3 ✅
+- JWT 黑名单和 HTTPS 非文档 MVP 要求，与规格一致
+- nginx -t 语法检查通过
+
 ## 2026-05-02（第二百一十九轮·自动循环）
 
 ### 测试：导出敏感字段 + 报表利润权限测试（6 项新增）

@@ -2,18 +2,18 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-219
-当前任务名称：测试补强 — 导出敏感字段 + 报表利润权限测试
+当前任务编号：ROUND-220
+当前任务名称：验收标准全面验证 + HSTS/HTTPS 修复
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 219：新增 6 项权限测试
-  - 导出商品 CSV 成本价列按 product:view_cost 权限过滤（test_11-12）
-  - 导出订单 CSV 成本/毛利列按 product:view_cost 权限过滤（test_13-14）
-  - 报表概览 total_cost/gross_profit 按 report:profit 权限过滤（test_15-16）
-- Round 218：list_orders 笛卡尔积修复 + 全面权限/导出/N+1 验证
+- Round 220：
+  - 全面验收标准验证：登录认证(6/6)、安全需求(6/6)、数据库设计(3/3) 全部满足
+  - JWT 黑名单和 HTTPS 非文档 MVP 要求，与规格一致
+  - 修复 nginx.conf HTTP 配置中的无效 HSTS 头，新增 HTTPS 配置模板
+- Round 219：导出敏感字段 + 报表利润权限测试（6 项新增）
 
 ## 最终验证状态
 
@@ -26,19 +26,31 @@
 | mypy | 0 errors ✓ |
 | ESLint | 0 errors ✓ |
 | TypeScript | 0 errors ✓ |
+| nginx -t | ✓ |
 | 总计 | 1154 tests |
+
+## 验收标准验证总结（Round 220）
+
+| 文档章节 | 验收标准 | 状态 |
+|---------|---------|------|
+| 6.1 登录认证 | 6 项（统一错误、刷新、禁用检查等） | ✅ 全部满足 |
+| 12 安全需求 | bcrypt、限流、CORS、权限、错误屏蔽 | ✅ 全部满足 |
+| 9 数据库设计 | 金额精度、外键约束、索引 | ✅ 全部满足 |
+| JWT 黑名单 | — | 文档未要求 |
+| HTTPS | — | 文档未要求，已添加配置模板 |
+| 密码强度 | ≥6位，含字母+数字 | ✅ 已实现 |
 
 ## 下一步第一动作
 
 继续 keep-going 模式。可选方向：
-- 安全加固（cookie 安全属性、CSRF）
 - 部署体验（回滚脚本）
-- 代码质量（lazy loading 策略统一、has_permission 缓存）
-- 测试补强（导出接口数据范围测试补强）
+- 代码质量（lazy loading 策略统一）
+- 文档完善（测试报告更新）
+- 安全加固（CSRF token、session binding）
 
 ## 阻塞问题
 
-TLS、token 撤销需用户提供产品决策。
+TLS 证书、token 撤销需用户提供产品决策。
 
 ## 恢复检查清单
 
