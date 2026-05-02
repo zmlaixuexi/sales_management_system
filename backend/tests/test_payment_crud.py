@@ -838,3 +838,46 @@ def test_31_payment_decimal_precision():
     resp = client.get(f"/api/v1/sales-orders/{order_id}", headers=_auth())
     assert resp.status_code == 200
     Decimal(resp.json()["data"]["paid_amount"])
+
+
+def test_32_payment_list_desc_order():
+    """收款列表按创建时间降序排列"""
+    # 创建并确认新订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    order_id = resp.json()["data"]["id"]
+
+    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
+    assert resp.status_code == 200
+
+    # 分两笔收款
+    resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
+        "amount": "10", "payment_method": "cash",
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
+        "amount": "10", "payment_method": "transfer",
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    # 验证列表降序
+    resp = client.get("/api/v1/payments", params={"order_id": order_id}, headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 2
+    from datetime import datetime
+    times = [datetime.fromisoformat(p["created_at"]) for p in items]
+    assert times == sorted(times, reverse=True)
+
+
+def test_33_payment_list_page_size_100():
+    """收款列表 page_size=100（最大值）正常返回"""
+    resp = client.get("/api/v1/payments", params={"page_size": 100}, headers=_auth())
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["page_size"] == 100
+    assert isinstance(data["items"], list)
