@@ -1,4 +1,4 @@
-.PHONY: help dev dev-backend dev-frontend install test test-unit test-integration test-backend test-frontend coverage coverage-frontend lint lint-fix lint-backend lint-frontend typecheck typecheck-backend quality ci build build-frontend db-migrate db-check db-seed db-backup db-restore docker-up docker-down deploy-check deploy-rollback clean
+.PHONY: help dev dev-backend dev-frontend install test test-unit test-integration test-backend test-frontend coverage coverage-frontend lint lint-fix lint-backend lint-frontend typecheck typecheck-backend quality ci build build-frontend db-migrate db-check db-seed db-backup db-restore docker-up docker-down docker-dev docker-dev-down docker-logs audit deploy-check deploy-rollback clean
 
 # 后端 Python：优先使用 venv，回退到系统 python
 PYTHON ?= $(shell [ -f backend/.venv/bin/python ] && echo ".venv/bin/python" || echo "python")
@@ -102,6 +102,21 @@ docker-up: ## 启动生产 Docker 环境
 
 docker-down: ## 停止 Docker 环境
 	docker compose -f deploy/docker-compose.prod.yml down
+
+docker-dev: ## 启动开发 Docker 环境
+	docker compose -f deploy/docker-compose.dev.yml up --build -d
+
+docker-dev-down: ## 停止开发 Docker 环境
+	docker compose -f deploy/docker-compose.dev.yml down -v
+
+docker-logs: ## 查看 Docker 容器日志（参数：SERVICE=backend）
+	docker compose -f deploy/docker-compose.prod.yml logs -f $${SERVICE:-}
+
+# ─── 安全 ──────────────────────────────────────────────────
+
+audit: ## 依赖安全审计（pip-audit + npm audit）
+	cd backend && $(PYTHON) -m pip_audit 2>&1 | grep -v "WARNING:cachecontrol" | grep -v "Dependency not found"
+	cd frontend && npm audit
 
 # ─── 部署 ──────────────────────────────────────────────────
 
