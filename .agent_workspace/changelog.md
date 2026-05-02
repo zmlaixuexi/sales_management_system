@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百二十轮·自动循环）
+
+### 测试补强：收款创建审计日志 before_data 为 None 独立性验证
+
+- `test_audit_log.py`：新增 test_106（收款创建 before_data 为 None 独立验证 + after_data 含 order_id/amount）
+- `docs/testing.md`：更新后端测试总数 1103→1104、总计 1485→1486、test_audit_log.py 107→108
+- 后端测试：1104/1104 全绿，ruff clean
+
 ## 2026-05-03（第四百一十九轮·自动循环）
 
 ### 测试补强：审计日志分页 total 字段准确性验证

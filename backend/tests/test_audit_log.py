@@ -2846,3 +2846,40 @@ def test_105_audit_log_pagination_total_field_accuracy():
             f"分页 total 不一致: {resp2.json()['data']['total']} != {total}"
         )
         assert len(resp2.json()["data"]["items"]) == 1
+
+
+def test_106_payment_create_audit_log_before_data_is_none():
+    """收款创建审计日志 before_data 为 None 的独立性验证"""
+    headers = _admin_auth()
+    # 创建客户+商品+订单+确认
+    resp = client.post("/api/v1/customers", json={"name": "收款None客户106", "phone": "13801060606"}, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/products", json={
+        "name": "收款None商品106", "sale_price": "99.00", "cost_price": "40.00", "stock_quantity": 10,
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cid,
+        "items": [{"product_id": pid, "quantity": 1, "unit_price": "99.00"}],
+    }, headers=headers)
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=headers)
+
+    # 登记收款
+    resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
+        "amount": "99.00", "payment_method": "cash",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pay_id = resp.json()["data"]["id"]
+
+    resp = client.get("/api/v1/audit-logs?action=payment_create", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == pay_id)
+    assert log["before_data"] is None, f"收款创建 before_data 应为 None: {log['before_data']}"
+    assert log["after_data"] is not None
+    assert log["after_data"]["order_id"] == oid
+    assert log["after_data"]["amount"] == "99.00"
