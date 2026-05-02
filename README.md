@@ -139,7 +139,7 @@ cd backend
 source .venv/bin/activate
 pytest tests/ -v
 
-# 前端测试（339 个）
+# 前端测试（378 个）
 cd frontend
 npm test
 
@@ -212,31 +212,31 @@ npm run build
 | 审计日志 | 11 | 渲染/筛选/表格/操作标签中文映射/资源类型中文/空值/列标题/fetchAuditActions 调用/空状态/错误状态+重试/loading 状态 |
 | 用户列表 | 14 | 渲染/搜索/表格数据/角色标签/超级管理员标记/新建按钮/空状态/loading 状态/错误重试/编辑弹窗/启用停用切换 |
 | 报表 API | 8 | fetchSalesSummary（含无参数）/Trend/ProductRanking/InventoryWarning（含无阈值）/CustomerRanking/SalespersonRanking |
-| 商品 API | 8 | fetchProducts/fetchProduct/create/update/delete/disable/uploadImage/priceHistory |
+| 商品 API | 16 | fetchProducts（筛选/排序/派生字段）/fetchProduct（完整详情+图片）/create（可选字段）/update（价格）/delete/disable/priceHistory/uploadImage（文件信息） |
 | 收款列表 | 12 | 渲染/筛选/表格数据/loading 状态/错误重试/收款 ID 截断/空备注显示 |
 | 库存列表 | 11 | 渲染/筛选/表格数据/loading 状态/错误重试/空备注显示 |
 | 报表中心 | 11 | 渲染标题/周期选择器/五个标签页/客户排行/销售排行数据/周期切换重载/API 默认周期 |
 | 客户详情 | 9 | 加载显示客户名称/返回按钮/loading 状态 |
 | 订单详情 | 9 | 加载显示订单号/返回按钮/loading 状态 |
 | Dashboard | 11 | 渲染看板标题/期间选择器/数据卡片/趋势汇总/库存预警数据/期间选项数/切换重载 |
-| 客户 API | 7 | fetchCustomers（含无参数）/fetchCustomer/create/update/delete/transfer |
+| 客户 API | 12 | fetchCustomers（完整数据）/fetchCustomer/create（可选字段）/update（联系方式）/delete/transfer（不同目标） |
 | 状态映射 | 10 | 商品/客户来源/客户等级/订单（含 partially_paid/completed）/收款状态映射完整性（导入共享常量） |
-| 订单 API | 6 | fetchOrders/fetchOrder/create/update/confirm/cancel |
+| 订单 API | 14 | fetchOrders（关键词/客户ID/分页/无参数）/fetchOrder（完整明细+收款）/create（多商品）/update（明细）/confirm/cancel |
 | downloadCsv | 9 | 成功下载、查询参数、过滤、错误、文件名提取、attachment 前缀、全空参数、全有效参数 |
 | useSubmit | 11 | 成功调用/提交中状态/错误提示/Ant Design 校验静默/防重/_toastDisplayed 跳过/默认 fallback/非 Error 异常/错误恢复/response.data.error.message/detail.message 提取 |
 | AppLayout | 8 | 用户加载/菜单导航/退出/失败/回退/系统标题/菜单项数/路径高亮 |
-| auth API | 5 | login/refresh/logout/getMe/changePassword 路径验证 |
-| 用户 API | 5 | fetchUsers/fetchUser/create/update/roles |
-| 审计日志 API | 5 | fetchAuditLogs/筛选/日期范围/数据解析/fetchAuditActions |
-| 收款 API | 5 | fetchPayments/筛选/createPayment/备注/reversePayment |
-| 库存 API | 5 | fetchInventory/adjust/筛选 |
+| auth API | 8 | login/refresh/logout/getMe（权限列表）/changePassword/token 返回 |
+| 用户 API | 11 | fetchUsers（分页/完整数据）/create（最少/完整参数）/update（角色）/fetchRoles |
+| 审计日志 API | 11 | fetchAuditLogs（筛选/日期/分页/关键词/完整条目/actor_id）/fetchAuditActions（空列表） |
+| 收款 API | 11 | fetchPayments（分页/完整记录）/createPayment（现金/微信/支付宝/备注）/reversePayment |
+| 库存 API | 10 | fetchInventory（分页/完整流水/无参数）/adjust（正负数/备注） |
 | request 封装 | 8 | get/post/put/del/upload 调用验证（含无参数 get、无 body post/put） |
 | ErrorBoundary | 5 | 正常渲染 + 错误捕获 + 重试恢复 + 路由重置 + 返回首页 |
 | ProtectedRoute | 5 | 无 token 重定向/加载中/已认证渲染/fetchUser 失败/异步重定向/Spin large 尺寸 |
 | 登录页 | 7 | 渲染标题/输入框/登录按钮/提交调用 login/登录失败错误提示/成功跳转首页/redirect 参数跳转 |
 | API client | 5 | baseURL、token 附加、无 token、timeout 15s、Content-Type |
 | NotFound | 3 | 404 渲染/返回首页按钮/按钮点击导航 |
-| **合计** | **339** | |
+| **合计** | **378** | |
 
 ## API 概览
 
