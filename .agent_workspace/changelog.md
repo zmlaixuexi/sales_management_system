@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第一百六十一轮·自动循环）
+
+### 验证：订单状态机 + 敏感字段 + 数据范围权限合规性全面验证
+
+- 订单状态机：验证 6 条流转路径（draft→confirmed→partially_paid→completed, draft→cancelled, confirmed→cancelled, partially_paid→cancelled）+ 4 条约束（确认不可编辑、完成不可删除、库存同事务、后端状态机控制）
+- 敏感字段过滤：商品/订单/报表/导出 4 层全面覆盖，cost_price/gross_profit/gross_margin 按 product:view_cost 和 report:profit 过滤
+- 数据范围权限：客户(owner_user_id)、订单(sales_user_id)、收款(JOIN sales_orders)、报表 均按 view_all 权限过滤
+- 所有检查均合规，无需代码修改
+
 ## 2026-05-02（第一百六十轮·自动循环）
 
 ### 安全：XSS 防护审计 — 修复库存备注 strip_html 缺失（+1 test，934→935）
