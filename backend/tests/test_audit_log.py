@@ -368,14 +368,8 @@ def test_17_audit_log_page_zero_422():
 
 
 def _admin_auth():
-    """直接生成 admin token，避免依赖登录状态"""
-    from app.core.security import create_access_token
-    db = TestSession()
-    try:
-        user = db.query(User).filter(User.username == "audit_tester").first()
-        return {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
-    finally:
-        db.close()
+    from helpers import admin_auth_header
+    return admin_auth_header(TestSession, "audit_tester")
 
 
 def test_18_audit_log_keyword_like_percent():

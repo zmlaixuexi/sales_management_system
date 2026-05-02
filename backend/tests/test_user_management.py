@@ -402,13 +402,8 @@ def test_25_create_user_phone_too_long_422():
 
 
 def _admin_auth():
-    """直接生成 admin token，避免依赖登录状态"""
-    db = TestSession()
-    try:
-        user = db.query(User).filter(User.username == "mgmt_admin").first()
-        return {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
-    finally:
-        db.close()
+    from helpers import admin_auth_header
+    return admin_auth_header(TestSession, "mgmt_admin")
 
 
 def test_26_update_user_invalid_uuid_400():

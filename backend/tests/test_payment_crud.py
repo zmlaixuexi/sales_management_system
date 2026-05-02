@@ -1069,3 +1069,47 @@ def test_41_create_payment_negative_amount_422():
         "amount": "-50", "payment_method": "cash",
     }, headers=headers)
     assert resp.status_code == 422
+
+
+def test_42_reverse_payment_non_owner_403():
+    """非归属用户冲正收款返回 403（无 order:view_all）"""
+    from helpers import admin_auth_header, make_user_with_perms
+
+    admin_headers = admin_auth_header(TestSession, "pay_tester")
+
+    # 创建新的已确认订单 + 收款
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "pay_tester").first()
+        cat = db.query(ProductCategory).first()
+        cust = db.query(Customer).first()
+        prod = db.query(Product).filter(Product.sku == "PAY-TEST-01").first()
+
+        uid = uuid.uuid4().hex[:8]
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=f"PAY-REV403-{uid}", customer_id=cust.id,
+            sales_user_id=user.id, status="confirmed",
+            total_amount=100, total_cost=60,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=prod.id,
+            product_name_snapshot=prod.name, cost_price_snapshot=60,
+            quantity=1, unit_price=100, subtotal_amount=100, subtotal_cost=60,
+        ))
+        payment = Payment(
+            id=uuid.uuid4(), order_id=order.id,
+            amount=Decimal("100"), payment_method="cash",
+            status="normal", operator_id=user.id,
+        )
+        db.add(payment)
+        db.commit()
+        pay_id = str(payment.id)
+    finally:
+        db.close()
+
+    # 非归属用户有 payment:reverse 但无 order:view_all → 403
+    token = make_user_with_perms(TestSession, "non_owner_reverse", ["payment:reverse"])
+    resp = client.post(f"/api/v1/payments/{pay_id}/reverse", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
