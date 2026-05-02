@@ -32,7 +32,7 @@ export default function CustomerForm() {
           }
         })
         .catch((e: unknown) => {
-          message.error(getApiErrorMessage(e, '加载客户信息失败'))
+          if (!(e as any)?._toastDisplayed) message.error(getApiErrorMessage(e, '加载客户信息失败'))
           navigate('/customers', { replace: true })
         })
         .finally(() => setLoading(false))

@@ -88,7 +88,7 @@ export default function OrderForm() {
           })))
         })
         .catch((e: unknown) => {
-          message.error(getApiErrorMessage(e, '加载订单信息失败'))
+          if (!(e as any)?._toastDisplayed) message.error(getApiErrorMessage(e, '加载订单信息失败'))
           navigate('/orders', { replace: true })
         })
         .finally(() => setLoading(false))

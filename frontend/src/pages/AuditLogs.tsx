@@ -67,8 +67,8 @@ export default function AuditLogs() {
       const data = await fetchAuditActions();
       setActions(data.actions || []);
       setResourceTypes(data.resource_types || []);
-    } catch {
-      message.error('加载筛选选项失败')
+    } catch (e: unknown) {
+      if (!(e as any)?._toastDisplayed) message.error('加载筛选选项失败')
     }
   }, []);
 
