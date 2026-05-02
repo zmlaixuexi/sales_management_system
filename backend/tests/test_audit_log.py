@@ -3176,3 +3176,39 @@ def test_117_audit_logs_filter_by_resource_id():
     resp3 = client.get("/api/v1/audit-logs?resource_id=00000000-0000-0000-0000-000000000000", headers=headers)
     assert resp3.status_code == 200
     assert resp3.json()["data"]["total"] == 0
+
+
+def test_118_audit_log_masks_sensitive_fields():
+    """客户编辑审计日志中 phone/email 字段被掩码为 ***"""
+    headers = _admin_auth()
+
+    # 创建客户
+    resp = client.post("/api/v1/customers", json={
+        "name": "掩码测试客户", "phone": "13800001111", "email": "mask@test.com",
+    }, headers=headers)
+    assert resp.status_code == 200
+    customer_id = resp.json()["data"]["id"]
+
+    # 编辑客户触发 customer_update 审计日志（after_data 含 phone）
+    resp = client.put(f"/api/v1/customers/{customer_id}", json={
+        "phone": "13900002222", "email": "new@test.com",
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get(f"/api/v1/audit-logs?action=customer_update&resource_id={customer_id}", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    log = items[0]
+    before = log["before_data"]
+    after = log["after_data"]
+
+    # before_data 和 after_data 中 phone 应被掩码
+    if before:
+        assert before.get("phone") == "***", f"before phone 应被掩码: {before}"
+
+    assert after is not None
+    assert after.get("phone") == "***", f"after phone 应被掩码: {after}"
+
+    # 非敏感字段不应被掩码
+    assert after.get("name") == "掩码测试客户", f"name 不应被掩码: {after}"
