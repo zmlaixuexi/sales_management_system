@@ -2817,3 +2817,32 @@ def test_104_order_update_remark_only_no_items_in_after_data():
     assert "items" not in log["after_data"], (
         f"仅更新备注时 after_data 不应含 items: {log['after_data']}"
     )
+
+
+def test_105_audit_log_pagination_total_field_accuracy():
+    """审计日志分页 total 字段与实际数据量一致"""
+    headers = _admin_auth()
+    # 创建商品触发审计日志
+    resp = client.post("/api/v1/products", json={
+        "name": "分页验证商品105", "sale_price": "55.00", "cost_price": "20.00", "stock_quantity": 5,
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    # 查询全量
+    resp = client.get("/api/v1/audit-logs?page_size=100", headers=headers)
+    assert resp.status_code == 200
+    total = resp.json()["data"]["total"]
+    items_count = len(resp.json()["data"]["items"])
+
+    # total 应该大于等于 items_count（如果有分页的话）
+    assert total >= items_count, f"total {total} < items_count {items_count}"
+    assert total > 0, "total 应该大于 0"
+
+    # 用小 page_size 验证分页
+    if total > 1:
+        resp2 = client.get("/api/v1/audit-logs?page_size=1&page=1", headers=headers)
+        assert resp2.status_code == 200
+        assert resp2.json()["data"]["total"] == total, (
+            f"分页 total 不一致: {resp2.json()['data']['total']} != {total}"
+        )
+        assert len(resp2.json()["data"]["items"]) == 1

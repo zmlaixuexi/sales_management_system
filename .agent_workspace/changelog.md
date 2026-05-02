@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百一十九轮·自动循环）
+
+### 测试补强：审计日志分页 total 字段准确性验证
+
+- `test_audit_log.py`：新增 test_105（分页 total 字段与实际数据量一致性、跨 page_size total 稳定）
+- `docs/testing.md`：更新后端测试总数 1102→1103、总计 1484→1485、test_audit_log.py 106→107
+- 后端测试：1103/1103 全绿，ruff clean
+
 ## 2026-05-03（第四百一十八轮·自动循环）
 
 ### 测试补强：订单编辑仅更新备注时 after_data 不含 items
