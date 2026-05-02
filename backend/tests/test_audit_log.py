@@ -2634,3 +2634,29 @@ def test_99_audit_log_user_agent_non_null():
         assert log["user_agent"] is not None, f"user_agent 为空: action={log['action']}"
         assert isinstance(log["user_agent"], str), f"user_agent 非字符串: {log['user_agent']}"
         assert len(log["user_agent"]) > 0, f"user_agent 为空字符串: action={log['action']}"
+
+
+def test_100_audit_log_actor_name_matches_display_name():
+    """审计日志 actor_name 与操作用户的 display_name 一致"""
+    headers = _admin_auth()
+    # 创建商品触发审计日志
+    resp = client.post("/api/v1/products", json={
+        "name": "actor验证商品100", "sale_price": "70.00", "cost_price": "30.00", "stock_quantity": 12,
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    # 获取当前用户信息
+    resp_user = client.get("/api/v1/users", headers=headers)
+    assert resp_user.status_code == 200
+    admin_user = next(u for u in resp_user.json()["data"]["items"] if u["is_superuser"])
+    expected_name = admin_user["display_name"]
+
+    resp = client.get("/api/v1/audit-logs?action=product_create&page_size=5", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) > 0
+    # 最新一条 product_create 应该是当前操作
+    latest = items[0]
+    assert latest["actor_name"] == expected_name, (
+        f"actor_name '{latest['actor_name']}' != display_name '{expected_name}'"
+    )

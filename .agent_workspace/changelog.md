@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百一十四轮·自动循环）
+
+### 测试补强：审计日志 actor_name 与用户 display_name 一致性验证
+
+- `test_audit_log.py`：新增 test_100（actor_name 与用户 display_name 一致性验证）
+- `docs/testing.md`：更新后端测试总数 1097→1098、总计 1479→1480、test_audit_log.py 101→102
+- 后端测试：1098/1098 全绿，ruff clean
+
 ## 2026-05-03（第四百一十三轮·自动循环）
 
 ### 测试补强：审计日志 user_agent 非空验证
