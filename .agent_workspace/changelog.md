@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百零一轮·自动循环）
+
+### 审计：全量安全审计和覆盖率验证
+
+- 安全审计：检查所有 POST/PUT/DELETE 端点认证依赖，全部通过
+- 覆盖率验证：99.79%，仅 6 行未覆盖（get_db 生成器 finally、orders.py 防御性分支）
+- 一致性检查：所有 API 响应统一使用 resp()/paginated_resp()，无 console.log、无 TODO/FIXME
+
 ## 2026-05-02（第二百轮·自动循环）
 
 ### 文档：补充 .env.example 和 README 中缺失的环境变量
