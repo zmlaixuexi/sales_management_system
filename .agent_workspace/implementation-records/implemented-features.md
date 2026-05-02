@@ -6,6 +6,61 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-173
+
+- 名称：部署回滚脚本
+- 轮次：Round 222（自动循环）
+- 描述：新增 rollback.sh — 指定 Git 版本后自动备份数据库、回退代码、重建容器并等待就绪
+- 涉及文件：deploy/rollback.sh
+- 验证：shell 语法检查通过
+
+## 功能编号：FEAT-20260502-172
+
+- 名称：nginx HTTPS 配置模板 + HSTS 修复
+- 轮次：Round 220（自动循环）
+- 描述：移除 HTTP 配置中的无效 Strict-Transport-Security 头，新增注释掉的 HTTPS server 模板（TLS 1.2/1.3、HTTP→HTTPS 重定向）
+- 涉及文件：deploy/nginx.conf
+- 验证：nginx -t 语法检查通过，774+380 测试全绿
+
+## 功能编号：FEAT-20260502-171
+
+- 名称：测试计数文档同步
+- 轮次：Round 221（自动循环）
+- 描述：testing.md 和 README.md 测试计数更新 767→774（+7 权限/上传测试），总计 1147→1154
+- 涉及文件：docs/testing.md、README.md
+
+## 功能编号：FEAT-20260502-170
+
+- 名称：导出敏感字段 + 报表利润权限测试
+- 轮次：Round 219（自动循环）
+- 描述：新增 test_permissions.py::test_11-16，验证导出商品/订单 CSV 成本价列按权限过滤、报表概览利润字段按权限过滤
+- 涉及文件：backend/tests/test_permissions.py
+- 验证：774 后端测试全绿
+
+## 功能编号：FEAT-20260502-169
+
+- 名称：list_orders 笛卡尔积修复
+- 轮次：Round 218（自动循环）
+- 描述：joinedload(items) + joinedload(payments) 改为 joinedload(items) + subqueryload(payments)，消除笛卡尔积
+- 涉及文件：backend/app/api/v1/orders.py
+- 验证：774 后端测试全绿
+
+## 功能编号：FEAT-20260502-168
+
+- 名称：前端敏感字段权限控制
+- 轮次：Round 217（自动循环）
+- 描述：Products/Orders/OrderDetail/Dashboard 根据 product:view_cost / report:profit 权限动态控制敏感字段列显示
+- 涉及文件：frontend/src/pages/Products.tsx、Orders.tsx、OrderDetail.tsx、Dashboard.tsx
+- 验证：380 前端测试全绿
+
+## 功能编号：FEAT-20260502-167
+
+- 名称：需求符合性修复（订单取消保护、状态机、排序、上传权限）
+- 轮次：Round 216（自动循环）
+- 描述：partially_paid 订单有收款时禁止取消、状态机补充 confirmed→partially_paid/partially_paid→partially_paid、商品默认排序改为复合排序、文件上传新增 product:create 权限码
+- 涉及文件：backend/app/api/v1/orders.py、products.py、files.py、backend/tests/test_boundary.py
+- 验证：767 后端测试全绿
+
 ## 功能编号：FEAT-20260502-166
 
 - 名称：前端商品和客户 API 测试扩展

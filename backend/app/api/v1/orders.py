@@ -5,7 +5,7 @@ import uuid
 from decimal import ROUND_HALF_UP, Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from sqlalchemy.orm import Session, joinedload, subqueryload
+from sqlalchemy.orm import Session
 
 from app.api.deps import (
     check_owner_or_forbid,
@@ -239,10 +239,7 @@ def list_orders(
         query = query.filter(SalesOrder.customer_id == customer_id)
 
     query = query.order_by(SalesOrder.created_at.desc())
-    orders, total = paginate(
-        query.options(joinedload(SalesOrder.items), subqueryload(SalesOrder.payments)),
-        page, page_size,
-    )
+    orders, total = paginate(query, page, page_size)
 
     items_out = []
     for o in orders:

@@ -6,7 +6,7 @@ from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile
 from sqlalchemy import func
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
 from app.api.deps import (
     generate_sequential_code,
@@ -147,7 +147,7 @@ def list_products(
         else:
             query = query.order_by(sort_col.desc(), Product.created_at.desc())
 
-    items, total = paginate(query.options(joinedload(Product.category)), page, page_size)
+    items, total = paginate(query, page, page_size)
 
     # 批量查询销售统计
     product_ids = [p.id for p in items]

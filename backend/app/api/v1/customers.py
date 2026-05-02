@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
 from app.api.deps import (
     check_owner_or_forbid,
@@ -87,7 +87,7 @@ def list_customers(
 
     query = query.order_by(Customer.created_at.desc())
 
-    items, total = paginate(query.options(joinedload(Customer.owner)), page, page_size)
+    items, total = paginate(query, page, page_size)
 
     result_items = [{
         "id": str(c.id),
