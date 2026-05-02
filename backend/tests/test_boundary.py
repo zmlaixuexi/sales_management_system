@@ -1423,11 +1423,19 @@ def test_73_product_create_sku_max_length_boundary():
     headers = _auth_for_user(_user_id)
 
     # 恰好 50 字符
-    resp = client.post("/api/v1/products", json={"name": "SKU边界商品73", "price": 10.00, "sku": "S" * 50}, headers=headers)
+    resp = client.post(
+        "/api/v1/products",
+        json={"name": "SKU边界商品73", "price": 10.00, "sku": "S" * 50},
+        headers=headers,
+    )
     assert resp.status_code == 200, f"50 字符 SKU 应通过: {resp.json()}"
 
     # 51 字符
-    resp = client.post("/api/v1/products", json={"name": "SKU边界商品73b", "price": 10.00, "sku": "S" * 51}, headers=headers)
+    resp = client.post(
+        "/api/v1/products",
+        json={"name": "SKU边界商品73b", "price": 10.00, "sku": "S" * 51},
+        headers=headers,
+    )
     assert resp.status_code == 422, f"51 字符 SKU 应被拒绝: {resp.status_code}"
 
 
