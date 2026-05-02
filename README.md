@@ -277,6 +277,12 @@ npm run build
 | `RATE_LIMIT_MAX` | API 速率限制（每窗口请求数） | `1000` |
 | `RATE_LIMIT_WINDOW` | 速率限制窗口（秒） | `60` |
 | `INVENTORY_WARNING_THRESHOLD` | 库存预警阈值 | `10` |
+| `SLOW_REQUEST_THRESHOLD_MS` | 慢请求阈值（毫秒） | `1000` |
+| `SLOW_SQL_THRESHOLD_MS` | 慢 SQL 阈值（毫秒） | `200` |
+| `MAX_CSV_IMPORT_ROWS` | CSV 导入行数上限 | `1000` |
+| `DB_POOL_SIZE` | 数据库连接池大小 | `5` |
+| `DB_MAX_OVERFLOW` | 连接池最大溢出 | `10` |
+| `DB_POOL_RECYCLE_SECONDS` | 连接回收时间（秒） | `1800` |
 
 ## License
 
