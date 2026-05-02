@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import (
     PaginationParams,
+    active_query,
     fmt_dt,
     get_db,
     paginate,
@@ -87,8 +88,8 @@ def adjust_inventory(
     if quantity_change == 0:
         raise HTTPException(status_code=400, detail={"code": "VALIDATION_FAILED", "message": "调整数量不能为 0"})
 
-    product = db.query(Product).filter(
-        Product.id == parse_uuid_or_400(product_id, "商品 ID"), Product.deleted_at.is_(None)
+    product = active_query(db, Product).filter(
+        Product.id == parse_uuid_or_400(product_id, "商品 ID")
     ).with_for_update().first()
     if not product:
         raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "商品不存在"})
