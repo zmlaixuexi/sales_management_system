@@ -120,7 +120,7 @@ JSON 日志格式示例：
 
 健康检查，无需认证。包含数据库连接探测和连接池状态。
 
-**响应**（正常）：`{"status": "ok", "database": "connected", "pool": {"size": N, "checked_in": N, "checked_out": N, "overflow": N}}`
+**响应**（正常）：`{"status": "ok", "database": "ok", "pool": {"size": N, "checked_in": N, "checked_out": N, "overflow": N}}`
 **响应**（数据库不可用）：`{"status": "degraded", "database": "error"}`
 
 ### GET /version
@@ -196,6 +196,7 @@ JSON 日志格式示例：
 ```
 
 **校验**：旧密码必须正确，新密码必须包含字母和数字。
+**错误码**：旧密码错误返回 400 `INVALID_PASSWORD`。
 ```
 
 ---
@@ -243,7 +244,7 @@ JSON 日志格式示例：
 
 上传图片，`multipart/form-data` 格式，字段名 `file`。
 
-**响应**：`{ "id": "uuid", "url": "/uploads/xxx.jpg" }`
+**响应**：`{ "id": "uuid", "url": "/uploads/xxx.jpg", "original_name": "文件名", "content_type": "image/jpeg", "size_bytes": 12345 }`
 
 ### GET /files/images/{file_id}
 
@@ -558,7 +559,7 @@ JSON 日志格式示例：
 
 **查询参数**：`period`（可选，默认 `30d`，可选值：`today`/`7d`/`30d`/`this_month`/`last_month`）
 
-**响应**：总销售额、总成本、毛利、毛利率、订单数。
+**响应**：总销售额、订单数。成本、毛利、毛利率需要 `report:profit` 权限。
 
 **权限**：`report:sales`
 
@@ -594,7 +595,7 @@ JSON 日志格式示例：
 
 **查询参数**：`period`（同上）、`limit`（可选，默认 10，最大 50）
 
-**响应字段**：每项含 `rank`、`customer_id`、`customer_name`、`order_count`、`total_sales`、`total_cost`、`gross_profit`。无 `order:view_cost` 权限时 `total_cost` 和 `gross_profit` 不返回。
+**响应字段**：每项含 `rank`、`customer_id`、`customer_name`、`order_count`、`total_sales`、`total_cost`、`gross_profit`。无 `report:profit` 权限时 `total_cost` 和 `gross_profit` 不返回。
 
 **数据范围**：无 `order:view_all` 权限时仅统计本人订单数据。
 
@@ -606,7 +607,7 @@ JSON 日志格式示例：
 
 **查询参数**：`period`（同上）、`limit`（可选，默认 10，最大 50）
 
-**响应字段**：每项含 `rank`、`name`（销售姓名）、`order_count`、`total_sales`、`total_cost`、`gross_profit`。无 `order:view_cost` 权限时 `total_cost` 和 `gross_profit` 不返回。
+**响应字段**：每项含 `rank`、`user_id`、`name`（销售姓名）、`order_count`、`total_sales`、`total_cost`、`gross_profit`。无 `report:profit` 权限时 `total_cost` 和 `gross_profit` 不返回。
 
 **数据范围**：无 `order:view_all` 权限时仅统计本人订单数据。
 
