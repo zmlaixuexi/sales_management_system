@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-05-03（第四百五十六轮·自动循环）
+
+### 部署体验：Docker 配置全面验证
+
+- 后端 Dockerfile 构建：成功（多阶段构建，python:3.13-slim + non-root 用户）
+- 前端 Dockerfile 构建：成功（node:24.12-alpine 多阶段构建，291ms build）
+- 前端 Dockerfile.dev 构建：开发热重载模式验证
+- docker-compose.dev.yml 验证：config 校验通过，3 服务全部 healthy（postgres/backend/frontend）
+- docker-compose.prod.yml 验证：config 校验通过，必需变量 POSTGRES_PASSWORD/JWT_SECRET_KEY 强制设置
+- nginx.conf 验证：gzip、安全头、SPA 路由、API 反向代理、静态资源缓存配置完整
+- .dockerignore 文件存在且合理
+- 集成测试：docker-compose up → 后端 health 返回 ok、前端页面正常返回 HTML
+
 ## 2026-05-03（第四百五十五轮·自动循环）
 
 ### 测试补强：订单编辑显式空 items 422 验证

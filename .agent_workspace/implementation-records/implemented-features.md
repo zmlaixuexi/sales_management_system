@@ -6,6 +6,14 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-201
+
+- 名称：Docker 部署配置全面验证
+- 轮次：Round 456（自动循环）
+- 描述：验证已有 Docker 部署配置完整性——后端 Dockerfile（多阶段构建、non-root 用户）、前端 Dockerfile（生产多阶段+开发热重载）、docker-compose.dev.yml（PostgreSQL+后端+前端开发环境）、docker-compose.prod.yml（PostgreSQL+后端+前端构建+Nginx 生产环境）、nginx.conf（gzip、安全头、SPA 路由、API 反代、静态资源缓存）、.dockerignore
+- 涉及文件：backend/Dockerfile、frontend/Dockerfile、frontend/Dockerfile.dev、deploy/docker-compose.dev.yml、deploy/docker-compose.prod.yml、deploy/nginx.conf
+- 验证：docker build 成功、docker-compose up 3 服务 healthy、health API 返回 ok
+
 ## 功能编号：FEAT-20260503-200
 
 - 名称：输入消毒（sanitize）全覆盖 + 效果验证
