@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百五十八轮·自动循环）
+
+### 重构：inventory.py 1 处 deleted_at 过滤替换 + 文档更新
+
+- inventory.py：adjust_inventory 商品查询替换为 active_query
+- docs/testing.md：更新测试计数为 816+382=1198
+- README.md：更新测试计数为 816+382
+- 816 后端测试全绿
+
 ## 2026-05-02（第二百五十七轮·自动循环）
 
 ### 安全：密码哈希 72 字节截断防御 + 7 项安全测试
