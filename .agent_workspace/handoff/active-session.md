@@ -2,19 +2,18 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-229
-当前任务名称：安全加固 — Pydantic schema 字符串长度限制补全
+当前任务编号：ROUND-230
+当前任务名称：全量门禁验证 + 继续推进
 当前 Agent：Claude
-任务状态：已完成
+任务状态：进行中
 
 ## 最近完成
 
-- Round 229：
-  - 审查全部 Pydantic schema 字符串字段长度限制
-  - 补全 PaymentCreate.remark 和 InventoryAdjust.remark 的 max_length=500
-  - 确认其余字段已有完整限制
+- Round 229：Pydantic schema remark 字段 max_length 补全
 - Round 228：软删除过滤测试（客户列表 + 支付列表）
-- Round 227：对象级权限 + SQL 注入搜索安全 + 分页边界测试
+- Round 227：对象级权限 + SQL 注入搜索安全 + 分页边界测试（17 项）
+- Round 226：API 文档错误格式修正和错误码补全
+- Round 225：部署前检查脚本 pre-deploy-check.sh
 
 ## 最终验证状态
 
@@ -33,8 +32,8 @@
 继续 keep-going 模式。可选方向：
 - 可观测性（慢查询告警通知）
 - 性能优化（API 响应缓存）
-- 测试补强（外键验证：订单更新不存在客户/商品）
 - 文档完善（部署指南补充）
+- 代码质量（重复代码提取）
 
 ## 阻塞问题
 
