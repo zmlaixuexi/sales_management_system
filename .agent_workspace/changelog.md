@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-03（第四百零四轮·自动循环）
+
+### 测试补强：客户转移审计日志 after_data 含 name 和 owner_user_id 完整性验证
+
+- `test_audit_log.py`：新增 test_89（客户转移审计日志 before_data/after_data 含 name 和 owner_user_id 变更）
+- 后端测试：1087/1087 全绿，ruff clean
+
 ## 2026-05-03（第四百零三轮·自动循环）
 
 ### 代码质量 + 测试补强：docs/testing.md 同步 + 审计日志 created_at ISO 8601 格式验证

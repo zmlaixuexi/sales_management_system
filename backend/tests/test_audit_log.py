@@ -2335,3 +2335,41 @@ def test_88_audit_log_created_at_iso8601_format():
         assert iso_pattern.match(log["created_at"]), (
             f"created_at 格式错误: {log['created_at']}"
         )
+
+
+def test_89_customer_transfer_audit_log_after_data_completeness():
+    """客户转移审计日志 before_data/after_data 含 name 和 owner_user_id"""
+    headers = _admin_auth()
+    # 创建目标用户
+    from app.models.user import User as UserModel
+    target = UserModel(
+        id=uuid.uuid4(), username="transfer_target_89",
+        hashed_password=hash_password("testpass123"),
+        display_name="转移目标89", is_active=True, is_superuser=False,
+    )
+    db = TestSession()
+    db.add(target)
+    db.commit()
+    target_uid = str(target.id)
+    db.close()
+
+    resp = client.post("/api/v1/customers", json={
+        "name": "转移审计客户", "phone": "13800898989",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    resp = client.post(f"/api/v1/customers/{cid}/transfer", json={
+        "owner_user_id": target_uid,
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=customer_transfer", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == cid)
+    assert log["before_data"]["name"] == "转移审计客户"
+    assert "owner_user_id" in log["before_data"]
+    assert log["after_data"]["name"] == "转移审计客户"
+    assert log["after_data"]["owner_user_id"] == target_uid
+    assert log["resource_type"] == "customer"
