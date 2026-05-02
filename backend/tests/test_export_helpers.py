@@ -1,9 +1,22 @@
-"""导出服务辅助函数单元测试 — _dec / _str / _dt"""
+"""导出服务辅助函数单元测试 — _dec / _str / _dt / 行构建函数"""
 
 from datetime import datetime
 from decimal import Decimal
+from unittest.mock import MagicMock
 
-from app.services.export_service import _dec, _dt, _str
+from app.services.export_service import (
+    ORDER_HEADERS,
+    ORDER_HEADERS_NO_COST,
+    PRODUCT_HEADERS,
+    PRODUCT_HEADERS_NO_COST,
+    _customer_row,
+    _dec,
+    _dt,
+    _order_row,
+    _payment_row,
+    _product_row,
+    _str,
+)
 
 # ─── _dec ──────────────────────────────────────────────────
 
@@ -68,3 +81,139 @@ def test_dt_already_formatted():
 def test_dt_short_string():
     result = _dt("2026-04-30")
     assert result == "2026-04-30"
+
+
+# ─── _product_row ───────────────────────────────────────────
+
+
+def _mock_product(**kwargs):
+    p = MagicMock(spec=[])
+    p.sku = kwargs.get("sku", "SKU-001")
+    p.name = kwargs.get("name", "测试商品")
+    p.sale_price = kwargs.get("sale_price", Decimal("100.00"))
+    p.cost_price = kwargs.get("cost_price", Decimal("60.00"))
+    p.stock_quantity = kwargs.get("stock_quantity", 10)
+    p.status = kwargs.get("status", "active")
+    p.category = kwargs.get("category", None)
+    p.remark = kwargs.get("remark", "")
+    p.created_at = kwargs.get("created_at", datetime(2026, 5, 1, 10, 0, 0))
+    return p
+
+
+def test_product_row_with_cost():
+    """有成本权限时包含成本价"""
+    row = _product_row(_mock_product(), can_view_cost=True)
+    assert row[3] == "60.00"  # 成本价
+    assert len(row) == len(PRODUCT_HEADERS)
+
+
+def test_product_row_without_cost():
+    """无成本权限时不含成本价"""
+    row = _product_row(_mock_product(), can_view_cost=False)
+    assert len(row) == len(PRODUCT_HEADERS_NO_COST)
+    # 确保成本价不在行中
+    assert "60.00" not in row
+
+
+def test_product_row_status_map():
+    """状态映射为中文"""
+    for status, label in [("active", "上架"), ("inactive", "下架"), ("disabled", "停用")]:
+        row = _product_row(_mock_product(status=status))
+        assert label in row
+
+
+# ─── _order_row ──────────────────────────────────────────────
+
+
+def _mock_order(**kwargs):
+    o = MagicMock(spec=[])
+    o.order_no = kwargs.get("order_no", "ORD20260501-0001")
+    o.customer_id = kwargs.get("customer_id", "cust-1")
+    o.status = kwargs.get("status", "confirmed")
+    o.total_amount = kwargs.get("total_amount", Decimal("500.00"))
+    o.total_cost = kwargs.get("total_cost", Decimal("300.00"))
+    o.gross_profit = kwargs.get("gross_profit", Decimal("200.00"))
+    o.gross_margin = kwargs.get("gross_margin", Decimal("0.4000"))
+    o.paid_amount = kwargs.get("paid_amount", Decimal("0"))
+    o.items = kwargs.get("items", [MagicMock()])
+    o.remark = kwargs.get("remark", "")
+    o.created_at = kwargs.get("created_at", datetime(2026, 5, 1, 10, 0, 0))
+    return o
+
+
+def test_order_row_with_cost():
+    """有成本权限时包含成本/毛利/毛利率"""
+    row = _order_row(_mock_order(), can_view_cost=True)
+    assert row[4] == "300.00"  # 成本
+    assert row[5] == "200.00"  # 毛利
+    assert len(row) == len(ORDER_HEADERS)
+
+
+def test_order_row_without_cost():
+    """无成本权限时不含成本/毛利/毛利率"""
+    row = _order_row(_mock_order(), can_view_cost=False)
+    assert len(row) == len(ORDER_HEADERS_NO_COST)
+    assert "300.00" not in row
+
+
+def test_order_row_status_map():
+    """订单状态映射"""
+    for status, label in [("draft", "草稿"), ("confirmed", "已确认"), ("cancelled", "已取消"),
+                          ("partially_paid", "部分收款"), ("completed", "已完成")]:
+        row = _order_row(_mock_order(status=status))
+        assert label in row
+
+
+# ─── _customer_row ──────────────────────────────────────────
+
+
+def test_customer_row_basic():
+    """客户行包含所有字段"""
+    c = MagicMock(spec=[])
+    c.name = "测试客户"
+    c.contact_name = "张三"
+    c.phone = "13800138000"
+    c.email = "test@example.com"
+    c.source = "线上"
+    c.level = "A"
+    c.owner = None
+    c.follow_status = "跟进中"
+    c.remark = ""
+    c.created_at = datetime(2026, 5, 1)
+    row = _customer_row(c)
+    assert row[0] == "测试客户"
+    assert row[2] == "13800138000"
+    assert row[6] == ""  # 无归属销售
+
+
+# ─── _payment_row ────────────────────────────────────────────
+
+
+def test_payment_row_normal_status():
+    # 正常收款状态显示"正常"
+    p = MagicMock(spec=[])
+    p.id = "pay-1"
+    p.order_id = "ord-1"
+    p.amount = Decimal("100.00")
+    p.payment_method = "微信"
+    p.status = "normal"
+    p.paid_at = None
+    p.remark = ""
+    p.created_at = datetime(2026, 5, 1)
+    row = _payment_row(p)
+    assert row[4] == "正常"
+
+
+def test_payment_row_reversed_status():
+    # 冲正状态显示"已冲正"
+    p = MagicMock(spec=[])
+    p.id = "pay-1"
+    p.order_id = "ord-1"
+    p.amount = Decimal("100.00")
+    p.payment_method = "微信"
+    p.status = "reversed"
+    p.paid_at = None
+    p.remark = ""
+    p.created_at = datetime(2026, 5, 1)
+    row = _payment_row(p)
+    assert row[4] == "已冲正"
