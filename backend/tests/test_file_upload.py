@@ -12,7 +12,7 @@ from app.api.deps import get_db
 from app.core.security import hash_password
 from app.db.session import Base
 from app.main import app
-from app.models.user import User
+from app.models.user import Permission, Role, User, UserRole
 
 TEST_DB_URL = "sqlite:///./test_file_upload.db"
 engine = create_engine(TEST_DB_URL, connect_args={"check_same_thread": False})
@@ -475,3 +475,48 @@ def test_24_delete_creates_audit_log():
         assert "delete_audit.png" in str(log.before_data)
     finally:
         db.close()
+
+
+def test_25_upload_requires_product_create_permission():
+    """无 product:create 权限的用户上传应被拒绝（403）"""
+    # 创建无 product:create 权限的用户（只有 customer:list）
+    no_perm_user = User(
+        id=uuid.uuid4(),
+        username="no_upload_perm",
+        hashed_password=hash_password("testpass123"),
+        display_name="无上传权限用户",
+        is_active=True,
+        is_superuser=False,
+    )
+    db = TestSession()
+    db.add(no_perm_user)
+    db.flush()
+    role = Role(id=uuid.uuid4(), name="role_no_upload", display_name="无上传角色")
+    db.add(role)
+    db.flush()
+    db.add(UserRole(user_id=no_perm_user.id, role_id=role.id))
+    perm = Permission(
+        id=uuid.uuid4(), code="customer:list", name="查看客户",
+        module="customer",
+    )
+    db.add(perm)
+    db.flush()
+    from app.models.user import RolePermission
+    db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+    db.commit()
+    db.close()
+
+    resp = client.post("/api/v1/auth/login", json={
+        "username": "no_upload_perm", "password": "testpass123",
+    })
+    assert resp.status_code == 200
+    token = resp.json()["data"]["access_token"]
+
+    png_bytes = _make_png_bytes()
+    resp = client.post(
+        "/api/v1/files/images",
+        files={"file": ("noperm.png", png_bytes, "image/png")},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code == 403
+    assert resp.json()["error"]["code"] == "AUTH_FORBIDDEN"

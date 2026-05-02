@@ -16,6 +16,10 @@ vi.mock('@/api/request', () => ({
   downloadCsv: vi.fn(),
 }))
 
+vi.mock('@/stores/auth', () => ({
+  useAuthStore: () => (code: string) => code === 'product:view_cost',
+}))
+
 const _paginatedListReturn = {
   data: [
     { id: 'o1', order_no: 'ORD-20260501-001', status: 'draft', item_count: 3, total_amount: '1000', paid_amount: '0', gross_profit: '400', gross_margin: '40', created_at: '2026-05-01T10:00:00Z' },

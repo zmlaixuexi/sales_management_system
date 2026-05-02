@@ -9,9 +9,11 @@ import { formatAmount, formatPercent } from '@/utils'
 import { downloadCsv } from '@/api/request'
 import { usePaginatedList } from '@/hooks/usePaginatedList'
 import { orderStatusMap as statusMap } from '@/constants/statusMaps'
+import { useAuthStore } from '@/stores/auth'
 
 export default function OrdersPage() {
   const navigate = useNavigate()
+  const canViewCost = useAuthStore(s => s.hasPermission('product:view_cost'))
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined)
 
   const { data, total, loading, error, page, pageSize, keyword, setPage, setKeyword, onPageChange, refresh } = usePaginatedList<Order>(
@@ -51,18 +53,20 @@ export default function OrdersPage() {
       width: 120,
       render: (v: string) => `¥${formatAmount(v)}`,
     },
-    {
-      title: '毛利',
-      dataIndex: 'gross_profit',
-      width: 100,
-      render: (v: string) => `¥${formatAmount(v)}`,
-    },
-    {
-      title: '毛利率',
-      dataIndex: 'gross_margin',
-      width: 90,
-      render: (v: string) => formatPercent(v),
-    },
+    ...(canViewCost ? [
+      {
+        title: '毛利',
+        dataIndex: 'gross_profit',
+        width: 100,
+        render: (v: string) => `¥${formatAmount(v)}`,
+      },
+      {
+        title: '毛利率',
+        dataIndex: 'gross_margin',
+        width: 90,
+        render: (v: string) => formatPercent(v),
+      },
+    ] : []),
     {
       title: '创建时间',
       dataIndex: 'created_at',

@@ -23,6 +23,10 @@ vi.mock('@/utils', () => ({
   formatPercent: (v: any) => `${v}%`,
 }))
 
+vi.mock('@/stores/auth', () => ({
+  useAuthStore: () => (code: string) => code === 'report:profit',
+}))
+
 vi.mock('antd', () => {
   function Statistic({ title, value, suffix }: any) {
     return <div data-testid="statistic" data-title={title} data-value={value} data-suffix={suffix} />

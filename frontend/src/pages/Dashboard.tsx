@@ -10,6 +10,7 @@ import {
 } from '@/api/reports'
 import type { ProductRankingItem, InventoryWarningItem, SalesTrendItem } from '@/api/reports'
 import { formatAmount } from '@/utils'
+import { useAuthStore } from '@/stores/auth'
 
 const periodOptions = [
   { label: '今日', value: 'today' },
@@ -20,6 +21,7 @@ const periodOptions = [
 ]
 
 export default function Dashboard() {
+  const canViewProfit = useAuthStore(s => s.hasPermission('report:profit'))
   const [period, setPeriod] = useState('30d')
   const [summary, setSummary] = useState<{
     total_amount: string; total_cost: string; gross_profit: string
@@ -135,17 +137,19 @@ export default function Dashboard() {
               />
             </Card>
           </Col>
-          <Col span={6}>
-            <Card>
-              <Statistic
-                title="毛利率"
-                value={summary ? parseFloat(summary.gross_margin) : 0}
-                precision={2}
-                suffix="%"
-                valueStyle={{ color: summary && parseFloat(summary.gross_margin) >= 0 ? '#3f8600' : '#cf1322' }}
-              />
-            </Card>
-          </Col>
+          {canViewProfit && (
+            <Col span={6}>
+              <Card>
+                <Statistic
+                  title="毛利率"
+                  value={summary ? parseFloat(summary.gross_margin) : 0}
+                  precision={2}
+                  suffix="%"
+                  valueStyle={{ color: summary && parseFloat(summary.gross_margin) >= 0 ? '#3f8600' : '#cf1322' }}
+                />
+              </Card>
+            </Col>
+          )}
         </Row>
 
         <Row gutter={16} style={{ marginBottom: 16 }}>

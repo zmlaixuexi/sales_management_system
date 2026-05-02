@@ -11,8 +11,10 @@ import type { OrderDetail as OrderDetailData, OrderItem, OrderPayment } from '@/
 import { createPayment, reversePayment } from '@/api/payments'
 import { formatAmount, formatPercent, getApiErrorMessage } from '@/utils'
 import { orderStatusMap as statusMap, paymentMethodMap as paymentMethodLabels } from '@/constants/statusMaps'
+import { useAuthStore } from '@/stores/auth'
 
 export default function OrderDetail() {
+  const canViewCost = useAuthStore(s => s.hasPermission('product:view_cost'))
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const [order, setOrder] = useState<OrderDetailData | null>(null)
@@ -226,9 +228,9 @@ export default function OrderDetail() {
           <Descriptions.Item label="订单金额">¥{formatAmount(order.total_amount)}</Descriptions.Item>
           <Descriptions.Item label="已收金额">¥{formatAmount(order.paid_amount)}</Descriptions.Item>
           <Descriptions.Item label="剩余应收">¥{formatAmount(remaining)}</Descriptions.Item>
-          <Descriptions.Item label="总成本">¥{formatAmount(order.total_cost)}</Descriptions.Item>
-          <Descriptions.Item label="毛利">¥{formatAmount(order.gross_profit)}</Descriptions.Item>
-          <Descriptions.Item label="毛利率">{formatPercent(order.gross_margin)}</Descriptions.Item>
+          {canViewCost && <Descriptions.Item label="总成本">¥{formatAmount(order.total_cost)}</Descriptions.Item>}
+          {canViewCost && <Descriptions.Item label="毛利">¥{formatAmount(order.gross_profit)}</Descriptions.Item>}
+          {canViewCost && <Descriptions.Item label="毛利率">{formatPercent(order.gross_margin)}</Descriptions.Item>}
           {order.remark && (
             <Descriptions.Item label="备注" span={3}>{order.remark}</Descriptions.Item>
           )}
