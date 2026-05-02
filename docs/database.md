@@ -25,9 +25,11 @@ products ──< product_images (CASCADE)
   └──< inventory_movements.product_id
 
 customers ──< sales_orders.customer_id
+          ├── created_by / updated_by → users
 
 sales_orders ──< sales_order_items (CASCADE)
             └──< payments
+            └── created_by / updated_by → users
 ```
 
 ## 数据表
@@ -47,6 +49,8 @@ sales_orders ──< sales_order_items (CASCADE)
 | created_at | DateTime(tz) | YES | 服务端 now() |
 | updated_at | DateTime(tz) | YES | onupdate now() |
 | deleted_at | DateTime(tz) | YES | 软删除标记 |
+
+**索引**：username (UNIQUE), deleted_at
 
 ### roles — 角色
 
@@ -118,7 +122,7 @@ sales_orders ──< sales_order_items (CASCADE)
 | updated_at | DateTime(tz) | YES | |
 | deleted_at | DateTime(tz) | YES | 软删除 |
 
-**索引**：sku (UNIQUE), name, category_id, status, 复合索引 (status, stock_quantity)
+**索引**：sku (UNIQUE), name, category_id, status
 
 ### files — 文件
 
@@ -179,7 +183,7 @@ sales_orders ──< sales_order_items (CASCADE)
 | updated_at | DateTime(tz) | YES | |
 | deleted_at | DateTime(tz) | YES | 软删除 |
 
-**索引**：name, phone, owner_user_id, 复合索引 (owner_user_id, created_at DESC)
+**索引**：name, phone, owner_user_id, deleted_at
 
 ### sales_orders — 销售订单
 
@@ -202,7 +206,7 @@ sales_orders ──< sales_order_items (CASCADE)
 | updated_at | DateTime(tz) | YES | |
 | deleted_at | DateTime(tz) | YES | 软删除 |
 
-**索引**：order_no (UNIQUE), customer_id, sales_user_id, status, created_at, 复合索引 (status, created_at DESC), (sales_user_id, created_at DESC)
+**索引**：order_no (UNIQUE), customer_id, sales_user_id, status, created_at, deleted_at
 
 **状态机**：draft → confirmed → completed（或 cancelled）
 
@@ -224,7 +228,7 @@ sales_orders ──< sales_order_items (CASCADE)
 | subtotal_amount | Numeric(12,2) | NO | 小计金额 |
 | subtotal_cost | Numeric(12,2) | NO | 小计成本 |
 
-**索引**：order_id, 复合索引 (product_id)
+**索引**：order_id
 
 ### inventory_movements — 库存流水
 
@@ -242,7 +246,7 @@ sales_orders ──< sales_order_items (CASCADE)
 | remark | Text | YES | 备注 |
 | created_at | DateTime(tz) | YES | |
 
-**索引**：product_id, 复合索引 (product_id, movement_type, created_at DESC), (created_at DESC)
+**索引**：product_id
 
 ### payments — 收款
 
@@ -258,7 +262,7 @@ sales_orders ──< sales_order_items (CASCADE)
 | remark | Text | YES | 备注 |
 | created_at | DateTime(tz) | YES | |
 
-**索引**：order_id, 复合索引 (status, order_id, created_at DESC)
+**索引**：order_id
 
 ### audit_logs — 审计日志
 
@@ -277,7 +281,7 @@ sales_orders ──< sales_order_items (CASCADE)
 | request_id | String(64) | YES | 请求追踪 ID |
 | created_at | DateTime(tz) | YES | |
 
-**索引**：actor_id, action, resource_type, created_at, 复合索引 (action, resource_type, created_at DESC), (actor_id, created_at DESC)
+**索引**：actor_id, action, resource_type, created_at, 复合索引 (action, resource_type)
 
 ## 种子数据
 
