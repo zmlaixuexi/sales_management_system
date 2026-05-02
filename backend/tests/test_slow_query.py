@@ -150,3 +150,71 @@ def test_slow_query_includes_request_id(caplog):
 
     assert len(captured_records) == 1
     assert captured_records[0].extra_fields["request_id"] == "test-req-123"
+
+
+def test_slow_query_parameters_truncated():
+    """超过 200 字符的参数被截断"""
+    import logging
+
+    from app.core.slow_query import _after_cursor_execute
+
+    captured_records: list[logging.LogRecord] = []
+    logger = logging.getLogger("app.slow_query")
+
+    original_handle = logger.handle
+
+    def capture_handle(record: logging.LogRecord) -> None:
+        captured_records.append(record)
+        original_handle(record)
+
+    with (
+        patch("app.core.slow_query.settings") as mock_settings,
+        patch("app.core.slow_query._query_start_ctx") as mock_ctx,
+        patch("app.core.slow_query.time") as mock_time,
+        patch.object(logger, "handle", capture_handle),
+    ):
+        mock_settings.SLOW_SQL_THRESHOLD_MS = 100
+        mock_ctx.get.return_value = 1000.0
+        mock_time.monotonic.return_value = 1100.0
+
+        long_params = {"key": "x" * 300}
+        _after_cursor_execute(None, None, "SELECT 1", long_params, None, None)
+
+    assert len(captured_records) == 1
+    params_val = captured_records[0].extra_fields["parameters"]
+    assert len(params_val) <= 200
+
+
+def test_slow_query_sql_exactly_500_not_truncated():
+    """SQL 恰好 500 字符时不截断（不加 ...）"""
+    import logging
+
+    from app.core.slow_query import _after_cursor_execute
+
+    captured_records: list[logging.LogRecord] = []
+    logger = logging.getLogger("app.slow_query")
+
+    original_handle = logger.handle
+
+    def capture_handle(record: logging.LogRecord) -> None:
+        captured_records.append(record)
+        original_handle(record)
+
+    with (
+        patch("app.core.slow_query.settings") as mock_settings,
+        patch("app.core.slow_query._query_start_ctx") as mock_ctx,
+        patch("app.core.slow_query.time") as mock_time,
+        patch.object(logger, "handle", capture_handle),
+    ):
+        mock_settings.SLOW_SQL_THRESHOLD_MS = 100
+        mock_ctx.get.return_value = 1000.0
+        mock_time.monotonic.return_value = 1100.0
+
+        exact_sql = "SELECT * FROM " + "a" * 486  # 总长度 = 14 + 486 = 500
+        assert len(exact_sql) == 500
+        _after_cursor_execute(None, None, exact_sql, None, None, None)
+
+    assert len(captured_records) == 1
+    sql_val = captured_records[0].extra_fields["sql"]
+    assert sql_val == exact_sql
+    assert not sql_val.endswith("...")

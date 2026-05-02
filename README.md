@@ -134,7 +134,7 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（899 个）
+# 后端测试（901 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
@@ -186,7 +186,7 @@ npm run build
 | Schema 校验器 | 23 | 全部 Pydantic field_validator：单价非负/金额正数/密码强度/strip_html XSS 防护 |
 | 安全模块 | 14 | hash_password bcrypt 哈希/盐值、verify_password 正确/错误/空密码、create_access_token 解码/type/exp/自定义过期、create_refresh_token 解码/type/exp/长于 access |
 | 报表辅助函数 | 11 | _date_range 全分支（today/7d/30d/this_month/last_month/跨月边界/跨年边界/月初/无效 period）、_apply_data_scope 管理员/销售 |
-| 慢查询 | 6 | 慢查询结构化日志记录、SQL 截断、阈值验证、request_id 关联 |
+| 慢查询 | 8 | 慢查询结构化日志记录、SQL 截断、阈值验证、request_id 关联、参数截断边界、SQL 恰好 500 字符不截断 |
 | 商品辅助函数 | 10 | _validate_category_id 存在/不存在，_get_default_category_id 已存在/自动创建，_batch_sales_stats 空列表/无订单/已确认/排除草稿取消/排除软删除/多订单汇总 |
 | 客户辅助函数 | 4 | _validate_owner_user 活跃/不存在/已禁用/软删除 |
 | 订单库存辅助函数 | 10 | _deduct_inventory 正常/库存不足/商品不存在/软删除/多明细/恰好等于需求，_restore_inventory 正常/不存在静默跳过/软删除跳过/多明细 |
@@ -199,7 +199,7 @@ npm run build
 | 边界条件 + 安全 | 6 | SQL 注入搜索安全（3 项）、分页边界 page=0/page_size=101/page_size=-1（3 项） |
 | 软删除过滤 | 2 | 客户列表排除已删除、支付列表排除已删除订单 |
 | 外键验证 | 4 | 客户 owner_user_id 无效/不存在、订单 customer_id 不存在、订单 items 含不存在商品 |
-| **合计** | **899** | |
+| **合计** | **901** | |
 
 ### 前端测试覆盖
 
