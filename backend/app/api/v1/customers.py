@@ -162,7 +162,11 @@ def create_customer(
         db, request, current_user,
         action="customer_create", resource_type="customer",
         resource_id=str(customer.id),
-        after_data={"name": name, "phone": phone},
+        after_data={
+            "name": name, "phone": phone,
+            "level": customer.level, "source": customer.source,
+            "contact_name": customer.contact_name,
+        },
     )
     db.commit()
 

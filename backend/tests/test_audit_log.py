@@ -2224,3 +2224,26 @@ def test_83_audit_log_resource_type_values_are_known():
         assert log["resource_type"] in known_resource_types, (
             f"未知 resource_type: {log['resource_type']}"
         )
+
+
+def test_84_customer_create_audit_log_after_data_completeness():
+    """客户创建审计日志 after_data 含 phone/level/source/contact_name"""
+    headers = _admin_auth()
+    resp = client.post("/api/v1/customers", json={
+        "name": "创建完整性客户", "phone": "13800848484",
+        "level": "vip", "source": "referral", "contact_name": "联系人李四",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    resp = client.get("/api/v1/audit-logs?action=customer_create", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == cid)
+    assert log["after_data"]["name"] == "创建完整性客户"
+    assert log["after_data"]["phone"] == "***"
+    assert log["after_data"]["level"] == "vip"
+    assert log["after_data"]["source"] == "referral"
+    assert log["after_data"]["contact_name"] == "联系人李四"
+    assert log["before_data"] is None
+    assert log["resource_type"] == "customer"

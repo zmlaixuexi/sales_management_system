@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第三百九十九轮·自动循环）
+
+### 测试补强：客户创建审计日志 after_data 含 phone/level/source/contact_name
+
+- `backend/app/api/v1/customers.py`：客户创建审计日志 after_data 新增 level/source/contact_name 字段
+- `test_audit_log.py`：新增 test_84（客户创建后 after_data 含 name/phone(脱敏)/level/source/contact_name）
+- 后端测试：1082/1082 全绿，ruff clean
+
 ## 2026-05-03（第三百九十八轮·自动循环）
 
 ### 测试补强：审计日志 resource_type 值域验证
