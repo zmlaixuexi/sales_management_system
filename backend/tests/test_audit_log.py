@@ -1706,3 +1706,42 @@ def test_66_inventory_decrease_audit_log():
     assert log["after_data"]["stock_quantity"] == 30
     assert log["after_data"]["change"] == -20
     assert log["resource_type"] == "product"
+
+
+def test_67_user_disable_audit_log_before_data():
+    """用户禁用/启用审计日志 before_data 含变更前 is_active"""
+    headers = _admin_auth()
+    # 创建用户
+    resp = client.post("/api/v1/users", json={
+        "username": "disable_audit_user",
+        "password": "password123",
+        "display_name": "禁用审计用户",
+    }, headers=headers)
+    assert resp.status_code == 200
+    uid = resp.json()["data"]["id"]
+
+    # 禁用用户
+    resp = client.put(f"/api/v1/users/{uid}", json={
+        "is_active": False,
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    # 重新启用
+    resp = client.put(f"/api/v1/users/{uid}", json={
+        "is_active": True,
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    # 验证审计日志：按 after_data.is_active 区分禁用和启用
+    resp = client.get("/api/v1/audit-logs?action=user_update", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    user_logs = [i for i in items if i["resource_id"] == uid]
+    assert len(user_logs) >= 2
+
+    disable_log = next(i for i in user_logs if i["after_data"]["is_active"] is False)
+    assert disable_log["before_data"]["is_active"] is True
+    assert disable_log["resource_type"] == "user"
+
+    enable_log = next(i for i in user_logs if i["after_data"]["is_active"] is True)
+    assert enable_log["before_data"]["is_active"] is False

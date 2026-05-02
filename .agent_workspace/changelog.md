@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百八十一轮·自动循环）
+
+### 测试补强：用户禁用/启用审计日志 before_data 验证
+
+- `test_audit_log.py`：新增 test_67（用户禁用 before_data is_active=True，启用 before_data is_active=False，使用 after_data.is_active 区分两条日志）
+- 修复：SQLite 同秒时间戳排序不稳定问题，改用 after_data.is_active 匹配而非依赖排序
+- 后端测试：1058/1058 全绿
+
 ## 2026-05-02（第三百八十轮·自动循环）
 
 ### 测试补强：库存减少审计日志 + 报表 API 边界验证
