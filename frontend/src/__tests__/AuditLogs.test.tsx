@@ -128,6 +128,11 @@ describe('AuditLogs', () => {
     const selects = screen.getAllByTestId('action-select')
     expect(selects.length).toBeGreaterThanOrEqual(2)
     expect(screen.getByTestId('date-range')).toBeInTheDocument()
+    const searchInputs = screen.getAllByTestId('search-input')
+    expect(searchInputs.length).toBe(2)
+    const placeholders = searchInputs.map((el) => el.getAttribute('placeholder'))
+    expect(placeholders).toContain('搜索操作人或资源ID')
+    expect(placeholders).toContain('资源ID精确筛选')
   })
 
   it('渲染审计日志表格', () => {
