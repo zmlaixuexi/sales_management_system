@@ -208,7 +208,7 @@ sales_orders ──< sales_order_items (CASCADE)
 
 **索引**：order_no (UNIQUE), customer_id, sales_user_id, status, created_at, deleted_at
 
-**状态机**：draft → confirmed → completed（或 cancelled）
+**状态机**：draft → confirmed → partially_paid → completed（或任意阶段 → cancelled，但有收款记录时需先冲正）
 
 ### sales_order_items — 订单明细
 
