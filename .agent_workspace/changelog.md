@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-02（第一百七十三轮·自动循环）
+
+### 文档：修正 database.md 索引和 ER 图与模型代码一致
+
+- 逐表对比 docs/database.md 与 SQLAlchemy 模型代码，发现并修复 14 处差异
+- 移除代码中不存在的复合索引（products/customers/sales_orders/inventory_movements/payments）
+- 补充缺失的 deleted_at 索引（users/customers/sales_orders）
+- 修正 audit_logs 复合索引列为实际代码定义 (action, resource_type)
+- 修正 sales_order_items 索引描述
+- 补充 ER 图中 customers 和 sales_orders 的 created_by/updated_by 外键关系
+
 ## 2026-05-02（第一百七十二轮·自动循环）
 
 ### 测试：补强导出行构建函数（成本字段过滤/状态映射/收款状态）
