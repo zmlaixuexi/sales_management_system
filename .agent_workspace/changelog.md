@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百八十一轮·自动循环）
+
+### 测试：报表响应结构完整性验证 3 项
+
+- 销售汇总：验证 total_amount/order_count/period/gross_margin 等字段
+- 商品排行：验证 items/product_name/total_quantity 结构
+- 销售趋势：验证 items/date/amount/order_count 结构
+- 836 后端测试全绿（+3）
+
 ## 2026-05-02（第二百七十九轮·自动循环）
 
 ### 代码质量：修复 3 处 ESLint useEffect 依赖警告
