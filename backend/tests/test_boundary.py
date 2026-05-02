@@ -1343,21 +1343,21 @@ def test_67_payment_remark_max_length_boundary():
 
 
 def test_68_customer_update_email_max_length_boundary():
-    """客户编辑邮箱恰好 200 字符通过，201 字符返回 422"""
+    """客户编辑邮箱恰好 100 字符通过，101 字符返回 422"""
     headers = _auth_for_user(_user_id)
     resp = client.post("/api/v1/customers", json={"name": "邮箱边界客户68", "phone": "13900686868"}, headers=headers)
     assert resp.status_code == 200
     cid = resp.json()["data"]["id"]
 
-    # 恰好 200 字符
-    email_ok = "a" * 188 + "@example.com"  # 188 + 12 = 200
+    # 恰好 100 字符
+    email_ok = "a" * 88 + "@example.com"  # 88 + 12 = 100
     resp = client.put(f"/api/v1/customers/{cid}", json={"email": email_ok}, headers=headers)
-    assert resp.status_code == 200, f"200 字符邮箱应通过: {resp.json()}"
+    assert resp.status_code == 200, f"100 字符邮箱应通过: {resp.json()}"
 
-    # 201 字符
-    email_long = "a" * 189 + "@example.com"  # 189 + 12 = 201
+    # 101 字符
+    email_long = "a" * 89 + "@example.com"  # 89 + 12 = 101
     resp = client.put(f"/api/v1/customers/{cid}", json={"email": email_long}, headers=headers)
-    assert resp.status_code == 422, f"201 字符邮箱应被拒绝: {resp.status_code}"
+    assert resp.status_code == 422, f"101 字符邮箱应被拒绝: {resp.status_code}"
 
 
 def test_69_customer_update_contact_name_max_length_boundary():
@@ -1377,45 +1377,45 @@ def test_69_customer_update_contact_name_max_length_boundary():
 
 
 def test_70_customer_create_name_max_length_boundary():
-    """客户创建名称恰好 200 字符通过，201 字符返回 422"""
+    """客户创建名称恰好 100 字符通过，101 字符返回 422"""
     headers = _auth_for_user(_user_id)
 
-    # 恰好 200 字符
-    resp = client.post("/api/v1/customers", json={"name": "客" * 200, "phone": "13900707070"}, headers=headers)
-    assert resp.status_code == 200, f"200 字符名称应通过: {resp.json()}"
+    # 恰好 100 字符
+    resp = client.post("/api/v1/customers", json={"name": "客" * 100, "phone": "13900707070"}, headers=headers)
+    assert resp.status_code == 200, f"100 字符名称应通过: {resp.json()}"
 
-    # 201 字符
-    resp = client.post("/api/v1/customers", json={"name": "客" * 201, "phone": "13900717171"}, headers=headers)
-    assert resp.status_code == 422, f"201 字符名称应被拒绝: {resp.status_code}"
+    # 101 字符
+    resp = client.post("/api/v1/customers", json={"name": "客" * 101, "phone": "13900717171"}, headers=headers)
+    assert resp.status_code == 422, f"101 字符名称应被拒绝: {resp.status_code}"
 
 
 def test_71_product_create_name_max_length_boundary():
-    """商品创建名称恰好 200 字符通过，201 字符返回 422"""
+    """商品创建名称恰好 100 字符通过，101 字符返回 422"""
     headers = _auth_for_user(_user_id)
 
-    # 恰好 200 字符
-    resp = client.post("/api/v1/products", json={"name": "商" * 200, "price": 10.00}, headers=headers)
-    assert resp.status_code == 200, f"200 字符名称应通过: {resp.json()}"
+    # 恰好 100 字符
+    resp = client.post("/api/v1/products", json={"name": "商" * 100, "price": 10.00}, headers=headers)
+    assert resp.status_code == 200, f"100 字符名称应通过: {resp.json()}"
 
-    # 201 字符
-    resp = client.post("/api/v1/products", json={"name": "商" * 201, "price": 10.00}, headers=headers)
-    assert resp.status_code == 422, f"201 字符名称应被拒绝: {resp.status_code}"
+    # 101 字符
+    resp = client.post("/api/v1/products", json={"name": "商" * 101, "price": 10.00}, headers=headers)
+    assert resp.status_code == 422, f"101 字符名称应被拒绝: {resp.status_code}"
 
 
 def test_72_product_update_name_max_length_boundary():
-    """商品编辑名称恰好 200 字符通过，201 字符返回 422"""
+    """商品编辑名称恰好 100 字符通过，101 字符返回 422"""
     headers = _auth_for_user(_user_id)
     resp = client.post("/api/v1/products", json={"name": "名称边界商品72", "price": 10.00}, headers=headers)
     assert resp.status_code == 200
     pid = resp.json()["data"]["id"]
 
-    # 恰好 200 字符
-    resp = client.put(f"/api/v1/products/{pid}", json={"name": "商" * 200}, headers=headers)
-    assert resp.status_code == 200, f"200 字符名称应通过: {resp.json()}"
+    # 恰好 100 字符
+    resp = client.put(f"/api/v1/products/{pid}", json={"name": "商" * 100}, headers=headers)
+    assert resp.status_code == 200, f"100 字符名称应通过: {resp.json()}"
 
-    # 201 字符
-    resp = client.put(f"/api/v1/products/{pid}", json={"name": "商" * 201}, headers=headers)
-    assert resp.status_code == 422, f"201 字符名称应被拒绝: {resp.status_code}"
+    # 101 字符
+    resp = client.put(f"/api/v1/products/{pid}", json={"name": "商" * 101}, headers=headers)
+    assert resp.status_code == 422, f"101 字符名称应被拒绝: {resp.status_code}"
 
 
 def test_73_product_create_sku_max_length_boundary():
@@ -1456,19 +1456,19 @@ def test_74_product_update_sku_max_length_boundary():
 
 
 def test_75_customer_update_name_max_length_boundary():
-    """客户编辑名称恰好 200 字符通过，201 字符返回 422"""
+    """客户编辑名称恰好 100 字符通过，101 字符返回 422"""
     headers = _auth_for_user(_user_id)
     resp = client.post("/api/v1/customers", json={"name": "名称编辑边界75", "phone": "13900757575"}, headers=headers)
     assert resp.status_code == 200
     cid = resp.json()["data"]["id"]
 
-    # 恰好 200 字符
-    resp = client.put(f"/api/v1/customers/{cid}", json={"name": "名" * 200}, headers=headers)
-    assert resp.status_code == 200, f"200 字符名称应通过: {resp.json()}"
+    # 恰好 100 字符
+    resp = client.put(f"/api/v1/customers/{cid}", json={"name": "名" * 100}, headers=headers)
+    assert resp.status_code == 200, f"100 字符名称应通过: {resp.json()}"
 
-    # 201 字符
-    resp = client.put(f"/api/v1/customers/{cid}", json={"name": "名" * 201}, headers=headers)
-    assert resp.status_code == 422, f"201 字符名称应被拒绝: {resp.status_code}"
+    # 101 字符
+    resp = client.put(f"/api/v1/customers/{cid}", json={"name": "名" * 101}, headers=headers)
+    assert resp.status_code == 422, f"101 字符名称应被拒绝: {resp.status_code}"
 
 
 def test_76_user_create_username_max_length_boundary():
@@ -1524,28 +1524,28 @@ def test_78_user_update_display_name_max_length_boundary():
 
 
 def test_79_user_create_email_max_length_boundary():
-    """用户创建 email 恰好 200 字符通过，201 字符返回 422"""
+    """用户创建 email 恰好 100 字符通过，101 字符返回 422"""
     headers = _auth_for_user(_user_id)
 
-    # 恰好 200 字符的邮箱：local 部分 + @ + domain
-    email_200 = "a" * 188 + "@example.com"  # 188 + 12 = 200
+    # 恰好 100 字符的邮箱：local 部分 + @ + domain
+    email_100 = "a" * 88 + "@example.com"  # 88 + 12 = 100
     resp = client.post("/api/v1/users", json={
         "username": "email_bnd_79", "password": "pass123456",
-        "email": email_200,
+        "email": email_100,
     }, headers=headers)
-    assert resp.status_code == 200, f"200 字符邮箱应通过: {resp.json()}"
+    assert resp.status_code == 200, f"100 字符邮箱应通过: {resp.json()}"
 
-    # 201 字符
-    email_201 = "a" * 189 + "@example.com"  # 189 + 12 = 201
+    # 101 字符
+    email_101 = "a" * 89 + "@example.com"  # 89 + 12 = 101
     resp = client.post("/api/v1/users", json={
         "username": "email_bnd_79b", "password": "pass123456",
-        "email": email_201,
+        "email": email_101,
     }, headers=headers)
-    assert resp.status_code == 422, f"201 字符邮箱应被拒绝: {resp.status_code}"
+    assert resp.status_code == 422, f"101 字符邮箱应被拒绝: {resp.status_code}"
 
 
 def test_80_user_update_email_max_length_boundary():
-    """用户编辑 email 恰好 200 字符通过，201 字符返回 422"""
+    """用户编辑 email 恰好 100 字符通过，101 字符返回 422"""
     headers = _auth_for_user(_user_id)
     resp = client.post("/api/v1/users", json={
         "username": "upd_email_bnd_80", "password": "pass123456",
@@ -1553,13 +1553,13 @@ def test_80_user_update_email_max_length_boundary():
     assert resp.status_code == 200
     uid = resp.json()["data"]["id"]
 
-    email_200 = "a" * 188 + "@example.com"
-    resp = client.put(f"/api/v1/users/{uid}", json={"email": email_200}, headers=headers)
-    assert resp.status_code == 200, f"200 字符邮箱应通过: {resp.json()}"
+    email_100 = "a" * 88 + "@example.com"
+    resp = client.put(f"/api/v1/users/{uid}", json={"email": email_100}, headers=headers)
+    assert resp.status_code == 200, f"100 字符邮箱应通过: {resp.json()}"
 
-    email_201 = "a" * 189 + "@example.com"
-    resp = client.put(f"/api/v1/users/{uid}", json={"email": email_201}, headers=headers)
-    assert resp.status_code == 422, f"201 字符邮箱应被拒绝: {resp.status_code}"
+    email_101 = "a" * 89 + "@example.com"
+    resp = client.put(f"/api/v1/users/{uid}", json={"email": email_101}, headers=headers)
+    assert resp.status_code == 422, f"101 字符邮箱应被拒绝: {resp.status_code}"
 
 
 def test_81_customer_create_remark_max_length_boundary():
@@ -1637,24 +1637,24 @@ def test_84_product_update_remark_max_length_boundary():
 
 
 def test_85_customer_create_email_max_length_boundary():
-    """客户创建 email 恰好 200 字符通过，201 字符返回 422"""
+    """客户创建 email 恰好 100 字符通过，101 字符返回 422"""
     headers = _auth_for_user(_user_id)
 
-    email_200 = "a" * 188 + "@example.com"
+    email_100 = "a" * 88 + "@example.com"
     resp = client.post(
         "/api/v1/customers",
-        json={"name": "邮箱边界客户85", "phone": "13900858585", "email": email_200},
+        json={"name": "邮箱边界客户85", "phone": "13900858585", "email": email_100},
         headers=headers,
     )
-    assert resp.status_code == 200, f"200 字符邮箱应通过: {resp.json()}"
+    assert resp.status_code == 200, f"100 字符邮箱应通过: {resp.json()}"
 
-    email_201 = "a" * 189 + "@example.com"
+    email_101 = "a" * 89 + "@example.com"
     resp = client.post(
         "/api/v1/customers",
-        json={"name": "邮箱边界客户85b", "phone": "13900868686", "email": email_201},
+        json={"name": "邮箱边界客户85b", "phone": "13900868686", "email": email_101},
         headers=headers,
     )
-    assert resp.status_code == 422, f"201 字符邮箱应被拒绝: {resp.status_code}"
+    assert resp.status_code == 422, f"101 字符邮箱应被拒绝: {resp.status_code}"
 
 
 def test_86_customer_create_contact_name_max_length_boundary():

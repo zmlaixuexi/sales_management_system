@@ -634,7 +634,7 @@ def test_24_update_product_stock_no_change_no_movement():
 def test_25_create_product_name_too_long_422():
     """商品名称超过 max_length 返回 422"""
     resp = client.post("/api/v1/products", json={
-        "name": "A" * 201, "sale_price": "10", "cost_price": "5",
+        "name": "A" * 101, "sale_price": "10", "cost_price": "5",
     }, headers=_auth())
     assert resp.status_code == 422
 

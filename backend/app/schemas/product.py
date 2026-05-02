@@ -8,7 +8,7 @@ ProductStatus = Literal["active", "inactive", "disabled"]
 
 
 class ProductCreate(BaseModel):
-    name: str = Field(..., min_length=1, max_length=200, description="商品名称")
+    name: str = Field(..., min_length=1, max_length=100, description="商品名称")
     sku: str | None = Field(None, max_length=50, description="商品编码，为空则自动生成")
     sale_price: str = Field("0", description="销售价")
     cost_price: str = Field("0", description="成本价")
@@ -26,7 +26,7 @@ class ProductCreate(BaseModel):
 
 
 class ProductUpdate(BaseModel):
-    name: str | None = Field(None, min_length=1, max_length=200)
+    name: str | None = Field(None, min_length=1, max_length=100)
     sku: str | None = Field(None, max_length=50)
     sale_price: str | None = None
     cost_price: str | None = None
