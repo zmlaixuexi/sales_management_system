@@ -2,15 +2,15 @@
 
 最后更新时间：2026-05-03
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-450
-当前任务名称：sanitize HTML 标签移除效果验证测试
+当前任务编号：ROUND-451
+当前任务名称：更新 implementation-records
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 451：更新 implemented-features.md（FEAT-197~200），覆盖 Rounds 402-450 关键实现
 - Round 450：test_sanitize.py 新增 9 个 HTML 标签移除验证测试，1185 后端测试全绿
-- Round 449：审计 sanitize 覆盖率，补全 auth.py username/phone 消毒
 
 ## 最终验证状态
 
@@ -26,10 +26,10 @@
 ## 下一步第一动作
 
 继续 keep-going 模式。可选无阻塞方向：
-- 文档完善：更新 implementation-records
 - 测试补强：商品 main_image_url 超长 422 验证
 - 代码质量：前端 lint 检查
 - 部署体验：Docker 健康检查验证
+- 安全加固：登录接口速率限制集成测试
 
 ## 阻塞问题
 
