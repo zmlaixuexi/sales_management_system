@@ -2,17 +2,16 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-233
-当前任务名称：Makefile 新增部署命令
+当前任务编号：ROUND-234
+当前任务名称：全量门禁验证（后端 + 前端）
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 233：Makefile 新增 `deploy-check` 和 `deploy-rollback` 命令
+- Round 234：全量门禁验证 — 793 后端测试、tsc 零错误、ESLint 零警告、ruff/mypy 零错误
+- Round 233：Makefile 新增 deploy-check 和 deploy-rollback 命令
 - Round 232：测试计数文档同步（774→793）
-- Round 231：部署指南补充
-- Round 230：Backlog P1/P2 状态确认
 
 ## 最终验证状态
 
@@ -22,6 +21,8 @@
 | 前端测试 | 380/380 ✓ |
 | ruff | 0 errors ✓ |
 | mypy | 0 errors ✓ |
+| tsc | 0 errors ✓ |
+| ESLint | 0 warnings ✓ |
 | 前端构建 | 263ms ✓ |
 | 迁移链 | 6 迁移，16 表，完整 ✓ |
 | 总计 | 1173 tests |
