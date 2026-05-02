@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百一十八轮·自动循环）
+
+### 测试补强：订单编辑仅更新备注时 after_data 不含 items
+
+- `test_audit_log.py`：新增 test_104（订单编辑仅更新备注时 after_data 不含 items，验证条件性字段逻辑）
+- `docs/testing.md`：更新后端测试总数 1101→1102、总计 1483→1484、test_audit_log.py 105→106
+- 后端测试：1102/1102 全绿，ruff clean
+
 ## 2026-05-03（第四百一十七轮·自动循环）
 
 ### 测试补强：订单编辑审计日志 after_data 含 items 明细

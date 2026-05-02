@@ -2,24 +2,24 @@
 
 最后更新时间：2026-05-03
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-417
-当前任务名称：订单编辑审计日志 after_data 含 items 明细
+当前任务编号：ROUND-418
+当前任务名称：订单编辑仅更新备注时 after_data 不含 items 验证
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 417：订单编辑 after_data 新增 items 明细（编辑含 items 时）+ test_103 验证，1101 后端测试全绿
-- Round 416：订单取消 before_data/after_data 新增 customer_id + test_102 验证，1100 后端测试全绿
+- Round 418：test_104 订单编辑仅更新备注时 after_data 不含 items 验证，1102 后端测试全绿
+- Round 417：订单编辑 after_data 新增 items 明细 + test_103 验证，1101 后端测试全绿
 
 ## 最终验证状态
 
 | 门禁 | 结果 |
 |---|---|
-| 后端测试 | 1101/1101 ✓ |
+| 后端测试 | 1102/1102 ✓ |
 | 前端测试 | 382/382 ✓ |
 | ruff | 0 errors ✓ |
-| 总计 | 1483 tests |
+| 总计 | 1484 tests |
 
 ## 下一步第一动作
 
@@ -27,7 +27,7 @@
 - 测试补强：收款创建 before_data 为 None 独立性验证
 - 测试补强：审计日志分页 total 字段准确性验证
 - 测试补强：审计日志 resource_id 与对应资源实际匹配验证
-- 测试补强：订单编辑仅更新备注时 after_data 不含 items
+- 测试补强：订单编辑仅更新备注 before_data 不含 items
 
 ## 阻塞问题
 

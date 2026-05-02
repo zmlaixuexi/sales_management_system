@@ -2784,3 +2784,36 @@ def test_103_order_update_audit_log_after_data_has_items():
     item_b = next(i for i in log_items if i["product_id"] == pid_b)
     assert item_b["quantity"] == 1
     assert item_b["unit_price"] == "150.00"
+
+
+def test_104_order_update_remark_only_no_items_in_after_data():
+    """订单编辑仅更新备注时 after_data 不含 items"""
+    headers = _admin_auth()
+    # 创建客户+商品+订单
+    resp = client.post("/api/v1/customers", json={"name": "备注编辑客户104", "phone": "13801040404"}, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/products", json={
+        "name": "备注编辑商品104", "sale_price": "60.00", "cost_price": "25.00", "stock_quantity": 15,
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cid,
+        "items": [{"product_id": pid, "quantity": 1, "unit_price": "60.00"}],
+    }, headers=headers)
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+
+    # 仅编辑备注
+    resp = client.put(f"/api/v1/sales-orders/{oid}", json={"remark": "仅更新备注"}, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=order_update", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == oid)
+    assert log["after_data"] is not None
+    assert "items" not in log["after_data"], (
+        f"仅更新备注时 after_data 不应含 items: {log['after_data']}"
+    )
