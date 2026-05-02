@@ -776,3 +776,45 @@ def test_42_update_customer_invalid_phone_422():
         "phone": "not-a-phone",
     }, headers=headers)
     assert resp.status_code == 422
+
+
+def test_43_customer_detail_non_owner_403():
+    """非归属用户查看客户详情返回 403（无 customer:view_all）"""
+    from app.core.security import create_access_token
+    from app.models.user import Permission, Role, RolePermission, UserRole
+
+    # 先用 admin 创建一个新客户（_customer_id 可能已被软删除）
+    db = TestSession()
+    try:
+        admin = db.query(User).filter(User.username == "crud_admin").first()
+        admin_headers = {"Authorization": f"Bearer {create_access_token(str(admin.id))}"}
+        resp = client.post("/api/v1/customers", json={
+            "name": "非归属测试客户", "phone": "13900005577",
+        }, headers=admin_headers)
+        assert resp.status_code == 200
+        cid = resp.json()["data"]["id"]
+
+        # 创建一个非归属非超管用户，有 customer:list 但无 customer:view_all
+        user = User(
+            id=uuid.uuid4(), username="non_owner_cust",
+            hashed_password=hash_password("testpass123"),
+            display_name="非归属用户", is_active=True, is_superuser=False,
+        )
+        db.add(user)
+        role = Role(id=uuid.uuid4(), name="non_owner_cust_role", display_name="非归属客户角色")
+        db.add(role)
+        db.flush()
+        perm = db.query(Permission).filter(Permission.code == "customer:list").first()
+        if not perm:
+            perm = Permission(id=uuid.uuid4(), code="customer:list", name="客户列表", module="customer")
+            db.add(perm)
+            db.flush()
+        db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+        db.add(UserRole(user_id=user.id, role_id=role.id))
+        db.commit()
+        token = create_access_token(str(user.id))
+    finally:
+        db.close()
+
+    resp = client.get(f"/api/v1/customers/{cid}", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403

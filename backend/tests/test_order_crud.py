@@ -1501,3 +1501,48 @@ def test_57_update_order_no_permission_403():
         "remark": "尝试编辑",
     }, headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 403
+
+
+def _make_non_owner_with_perms(username: str, perms: list[str]):
+    """创建一个拥有指定权限列表但不是超管、无 view_all 权限的用户"""
+    from app.models.user import Permission, Role, RolePermission, UserRole
+
+    db = TestSession()
+    try:
+        user = User(
+            id=uuid.uuid4(), username=username,
+            hashed_password=hash_password("testpass123"),
+            display_name=username, is_active=True, is_superuser=False,
+        )
+        db.add(user)
+        role = Role(id=uuid.uuid4(), name=f"{username}_role", display_name=username)
+        db.add(role)
+        db.flush()
+        for code in perms:
+            perm = db.query(Permission).filter(Permission.code == code).first()
+            if not perm:
+                perm = Permission(id=uuid.uuid4(), code=code, name=code, module="test")
+                db.add(perm)
+                db.flush()
+            db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+        db.add(UserRole(user_id=user.id, role_id=role.id))
+        db.commit()
+        return create_access_token(str(user.id))
+    finally:
+        db.close()
+
+
+def test_58_order_detail_non_owner_403():
+    """非归属用户查看订单详情返回 403（无 order:view_all）"""
+    oid, _ = _fresh_order_ids()
+    token = _make_non_owner_with_perms("non_owner_detail", ["order:list"])
+    resp = client.get(f"/api/v1/sales-orders/{oid}", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
+
+
+def test_59_order_logs_non_owner_403():
+    """非归属用户查看订单日志返回 403（无 order:view_all）"""
+    oid, _ = _fresh_order_ids()
+    token = _make_non_owner_with_perms("non_owner_logs", ["order:view"])
+    resp = client.get(f"/api/v1/sales-orders/{oid}/logs", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
