@@ -866,3 +866,64 @@ def test_40_export_payments_audit_log_fields():
     assert log["action"] == "export_payments"
     assert log["resource_type"] == "payment"
     assert "order_id" in log["after_data"]
+
+
+def test_41_customer_delete_audit_log_fields():
+    """客户软删除审计日志 before_data 含 name/phone，after_data 含 deleted=True"""
+    headers = _admin_auth()
+    # 创建客户（无订单关联，可删除）
+    resp = client.post("/api/v1/customers", json={
+        "name": "软删除审计客户",
+        "phone": "13700001111",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    # 软删除
+    resp = client.delete(f"/api/v1/customers/{cid}", headers=headers)
+    assert resp.status_code == 200
+
+    # 验证审计日志
+    resp = client.get("/api/v1/audit-logs?action=customer_delete", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == cid)
+    assert log["before_data"]["name"] == "软删除审计客户"
+    assert "phone" in log["before_data"]  # phone 字段存在（可能被脱敏为 ***）
+    assert log["after_data"]["name"] == "软删除审计客户"
+    assert log["after_data"]["deleted"] is True
+    assert log["resource_type"] == "customer"
+
+
+def test_42_customer_delete_has_orders_blocked():
+    """有订单关联的客户无法删除，不产生审计日志"""
+    headers = _admin_auth()
+    # 创建商品 + 客户
+    resp = client.post("/api/v1/products", json={
+        "name": "删除阻断商品",
+        "cost_price": "10.00",
+        "sale_price": "20.00",
+        "stock_quantity": 10,
+        "status": "active",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    resp = client.post("/api/v1/customers", json={
+        "name": "有订单客户",
+        "phone": "13700002222",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    # 创建订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cid,
+        "items": [{"product_id": pid, "quantity": 1}],
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    # 尝试删除客户，应返回 400
+    resp = client.delete(f"/api/v1/customers/{cid}", headers=headers)
+    assert resp.status_code == 400
+    assert "订单" in resp.json()["error"]["message"]

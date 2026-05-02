@@ -305,13 +305,15 @@ def delete_customer(
             detail={"code": "CUSTOMER_HAS_ORDERS", "message": "该客户有未删除的订单，无法删除"},
         )
 
+    before_snapshot = {"name": customer.name, "phone": customer.phone}
     customer.deleted_at = datetime.now()
     customer.updated_by = current_user.id
     log_user_action(
         db, request, current_user,
         action="customer_delete", resource_type="customer",
         resource_id=str(customer.id),
-        before_data={"name": customer.name, "phone": customer.phone},
+        before_data=before_snapshot,
+        after_data={"name": customer.name, "deleted": True},
     )
     db.commit()
 

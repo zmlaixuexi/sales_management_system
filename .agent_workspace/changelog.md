@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百五十六轮·自动循环）
+
+### 测试补强：客户软删除审计日志字段验证
+
+- `customers.py`：补充 `customer_delete` 审计日志的 `after_data`（含 name + deleted=True）
+- `test_audit_log.py`：新增 test_41（客户软删除 before_data/after_data 字段验证）、test_42（有订单客户删除阻断返回 400）
+- 后端测试：1014/1014 全绿
+
 ## 2026-05-02（第三百五十五轮·自动循环）
 
 ### 安全加固：JWT token 过期边界验证
