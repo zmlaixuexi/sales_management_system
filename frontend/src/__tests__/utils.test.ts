@@ -21,6 +21,20 @@ describe('formatAmount', () => {
   it('处理无效字符串', () => {
     expect(formatAmount('abc')).toBe('--')
   })
+
+  it('处理负数', () => {
+    expect(formatAmount(-50)).toBe('-50.00')
+    expect(formatAmount('-99.9')).toBe('-99.90')
+  })
+
+  it('处理大数', () => {
+    expect(formatAmount(9999999.99)).toBe('9999999.99')
+    expect(formatAmount('1234567.89')).toBe('1234567.89')
+  })
+
+  it('处理空字符串', () => {
+    expect(formatAmount('')).toBe('--')
+  })
 })
 
 describe('formatPercent', () => {
@@ -41,6 +55,20 @@ describe('formatPercent', () => {
 
   it('处理无效字符串', () => {
     expect(formatPercent('abc')).toBe('--')
+  })
+
+  it('处理负数百分比', () => {
+    expect(formatPercent(-0.1)).toBe('-10.00%')
+  })
+
+  it('处理超过 100% 的值', () => {
+    expect(formatPercent(1.5)).toBe('150.00%')
+    expect(formatPercent(2)).toBe('200.00%')
+  })
+
+  it('处理零', () => {
+    expect(formatPercent(0)).toBe('0.00%')
+    expect(formatPercent('0')).toBe('0.00%')
   })
 })
 
