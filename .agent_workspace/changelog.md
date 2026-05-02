@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-05-02（第二百四十六轮·自动循环）
+
+### 测试：密码安全单元测试 7 项新增，verify_password AttributeError 防御
+
+- test_verify_password_invalid_hash_returns_false：无效哈希格式不抛异常
+- test_verify_password_empty_hash_returns_false：空字符串哈希安全返回 False
+- test_verify_password_none_hash_returns_false：None 哈希安全返回 False（发现并修复 AttributeError）
+- test_access_token_has_iat / test_refresh_token_has_iat：验证 iat 字段存在
+- test_access_token_has_jti / test_refresh_token_has_jti：验证 jti UUID 格式
+- test_tokens_have_unique_jti：每次生成 token jti 不同
+- verify_password 异常捕获新增 AttributeError
+- 后端 809 测试全绿（+8），总计 1189
+
 ## 2026-05-02（第二百四十五轮·自动循环）
 
 ### 安全：bcrypt 显式 rounds=12，verify_password 异常防御，JWT 添加 iat/jti 字段
