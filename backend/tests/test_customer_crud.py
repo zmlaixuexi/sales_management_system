@@ -669,32 +669,8 @@ def test_35_delete_customer_no_permission_403():
 
 
 def _make_user_without_perm(username: str, keep_perm: str):
-    """创建一个只有 keep_perm 权限但没有 customer:xxx 操作权限的用户"""
-    from app.core.security import create_access_token
-    from app.models.user import Permission, Role, RolePermission, UserRole
-
-    db = TestSession()
-    try:
-        user = User(
-            id=uuid.uuid4(), username=username,
-            hashed_password=hash_password("testpass123"),
-            display_name=username, is_active=True, is_superuser=False,
-        )
-        db.add(user)
-        perm = db.query(Permission).filter(Permission.code == keep_perm).first()
-        if not perm:
-            perm = Permission(id=uuid.uuid4(), code=keep_perm, name=keep_perm, module="test")
-            db.add(perm)
-            db.flush()
-        role = Role(id=uuid.uuid4(), name=f"{username}_role", display_name=username)
-        db.add(role)
-        db.flush()
-        db.add(RolePermission(role_id=role.id, permission_id=perm.id))
-        db.add(UserRole(user_id=user.id, role_id=role.id))
-        db.commit()
-        return create_access_token(str(user.id))
-    finally:
-        db.close()
+    from helpers import make_user_with_perms
+    return make_user_with_perms(TestSession, username, [keep_perm])
 
 
 def test_38_list_customers_no_permission_403():
@@ -715,14 +691,9 @@ def test_39_create_customer_no_permission_403():
 
 def test_40_update_customer_no_permission_403():
     """无 customer:update 权限用户编辑客户返回 403"""
-    from app.core.security import create_access_token
+    from helpers import admin_auth_header
 
-    db = TestSession()
-    try:
-        user = db.query(User).filter(User.username == "crud_admin").first()
-        admin_headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
-    finally:
-        db.close()
+    admin_headers = admin_auth_header(TestSession, "crud_admin")
 
     # 先用 admin 创建客户
     resp = client.post("/api/v1/customers", json={
@@ -739,14 +710,9 @@ def test_40_update_customer_no_permission_403():
 
 def test_41_create_customer_invalid_phone_422():
     """创建客户手机号格式不正确返回 422"""
-    from app.core.security import create_access_token
+    from helpers import admin_auth_header
 
-    db = TestSession()
-    try:
-        user = db.query(User).filter(User.username == "crud_admin").first()
-        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
-    finally:
-        db.close()
+    headers = admin_auth_header(TestSession, "crud_admin")
 
     for bad_phone in ["12345", "abc12345678", "10012345678", "12345678901"]:
         resp = client.post("/api/v1/customers", json={
@@ -757,14 +723,9 @@ def test_41_create_customer_invalid_phone_422():
 
 def test_42_update_customer_invalid_phone_422():
     """更新客户手机号格式不正确返回 422"""
-    from app.core.security import create_access_token
+    from helpers import admin_auth_header
 
-    db = TestSession()
-    try:
-        user = db.query(User).filter(User.username == "crud_admin").first()
-        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
-    finally:
-        db.close()
+    headers = admin_auth_header(TestSession, "crud_admin")
 
     resp = client.post("/api/v1/customers", json={
         "name": "手机编辑客户", "phone": "13900001111",
@@ -780,41 +741,18 @@ def test_42_update_customer_invalid_phone_422():
 
 def test_43_customer_detail_non_owner_403():
     """非归属用户查看客户详情返回 403（无 customer:view_all）"""
-    from app.core.security import create_access_token
-    from app.models.user import Permission, Role, RolePermission, UserRole
+    from helpers import admin_auth_header, make_user_with_perms
 
     # 先用 admin 创建一个新客户（_customer_id 可能已被软删除）
-    db = TestSession()
-    try:
-        admin = db.query(User).filter(User.username == "crud_admin").first()
-        admin_headers = {"Authorization": f"Bearer {create_access_token(str(admin.id))}"}
-        resp = client.post("/api/v1/customers", json={
-            "name": "非归属测试客户", "phone": "13900005577",
-        }, headers=admin_headers)
-        assert resp.status_code == 200
-        cid = resp.json()["data"]["id"]
+    admin_headers = admin_auth_header(TestSession, "crud_admin")
+    resp = client.post("/api/v1/customers", json={
+        "name": "非归属测试客户", "phone": "13900005577",
+    }, headers=admin_headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
 
-        # 创建一个非归属非超管用户，有 customer:list 但无 customer:view_all
-        user = User(
-            id=uuid.uuid4(), username="non_owner_cust",
-            hashed_password=hash_password("testpass123"),
-            display_name="非归属用户", is_active=True, is_superuser=False,
-        )
-        db.add(user)
-        role = Role(id=uuid.uuid4(), name="non_owner_cust_role", display_name="非归属客户角色")
-        db.add(role)
-        db.flush()
-        perm = db.query(Permission).filter(Permission.code == "customer:list").first()
-        if not perm:
-            perm = Permission(id=uuid.uuid4(), code="customer:list", name="客户列表", module="customer")
-            db.add(perm)
-            db.flush()
-        db.add(RolePermission(role_id=role.id, permission_id=perm.id))
-        db.add(UserRole(user_id=user.id, role_id=role.id))
-        db.commit()
-        token = create_access_token(str(user.id))
-    finally:
-        db.close()
+    # 创建一个非归属非超管用户，有 customer:list 但无 customer:view_all
+    token = make_user_with_perms(TestSession, "non_owner_cust", ["customer:list"])
 
     resp = client.get(f"/api/v1/customers/{cid}", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 403

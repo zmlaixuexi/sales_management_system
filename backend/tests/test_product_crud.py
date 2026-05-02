@@ -865,32 +865,8 @@ def test_35_delete_product_no_permission_403():
 
 
 def _make_user_without_perm(username: str, keep_perm: str):
-    """创建一个只有 keep_perm 权限但无商品操作权限的用户"""
-    from app.core.security import create_access_token
-    from app.models.user import Permission, Role, RolePermission, UserRole
-
-    db = TestSession()
-    try:
-        user = User(
-            id=uuid.uuid4(), username=username,
-            hashed_password=hash_password("testpass123"),
-            display_name=username, is_active=True, is_superuser=False,
-        )
-        db.add(user)
-        perm = db.query(Permission).filter(Permission.code == keep_perm).first()
-        if not perm:
-            perm = Permission(id=uuid.uuid4(), code=keep_perm, name=keep_perm, module="test")
-            db.add(perm)
-            db.flush()
-        role = Role(id=uuid.uuid4(), name=f"{username}_role", display_name=username)
-        db.add(role)
-        db.flush()
-        db.add(RolePermission(role_id=role.id, permission_id=perm.id))
-        db.add(UserRole(user_id=user.id, role_id=role.id))
-        db.commit()
-        return create_access_token(str(user.id))
-    finally:
-        db.close()
+    from helpers import make_user_with_perms
+    return make_user_with_perms(TestSession, username, [keep_perm])
 
 
 def test_36_list_products_no_permission_403():

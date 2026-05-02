@@ -1396,31 +1396,8 @@ def test_52_order_update_audit_log():
 
 
 def _make_user_without_perm(username: str, keep_perm: str):
-    """创建一个只有 keep_perm 权限但无订单操作权限的用户"""
-    from app.models.user import Permission, Role, RolePermission, UserRole
-
-    db = TestSession()
-    try:
-        user = User(
-            id=uuid.uuid4(), username=username,
-            hashed_password=hash_password("testpass123"),
-            display_name=username, is_active=True, is_superuser=False,
-        )
-        db.add(user)
-        perm = db.query(Permission).filter(Permission.code == keep_perm).first()
-        if not perm:
-            perm = Permission(id=uuid.uuid4(), code=keep_perm, name=keep_perm, module="test")
-            db.add(perm)
-            db.flush()
-        role = Role(id=uuid.uuid4(), name=f"{username}_role", display_name=username)
-        db.add(role)
-        db.flush()
-        db.add(RolePermission(role_id=role.id, permission_id=perm.id))
-        db.add(UserRole(user_id=user.id, role_id=role.id))
-        db.commit()
-        return create_access_token(str(user.id))
-    finally:
-        db.close()
+    from helpers import make_user_with_perms
+    return make_user_with_perms(TestSession, username, [keep_perm])
 
 
 def _fresh_order_ids():
@@ -1504,32 +1481,8 @@ def test_57_update_order_no_permission_403():
 
 
 def _make_non_owner_with_perms(username: str, perms: list[str]):
-    """创建一个拥有指定权限列表但不是超管、无 view_all 权限的用户"""
-    from app.models.user import Permission, Role, RolePermission, UserRole
-
-    db = TestSession()
-    try:
-        user = User(
-            id=uuid.uuid4(), username=username,
-            hashed_password=hash_password("testpass123"),
-            display_name=username, is_active=True, is_superuser=False,
-        )
-        db.add(user)
-        role = Role(id=uuid.uuid4(), name=f"{username}_role", display_name=username)
-        db.add(role)
-        db.flush()
-        for code in perms:
-            perm = db.query(Permission).filter(Permission.code == code).first()
-            if not perm:
-                perm = Permission(id=uuid.uuid4(), code=code, name=code, module="test")
-                db.add(perm)
-                db.flush()
-            db.add(RolePermission(role_id=role.id, permission_id=perm.id))
-        db.add(UserRole(user_id=user.id, role_id=role.id))
-        db.commit()
-        return create_access_token(str(user.id))
-    finally:
-        db.close()
+    from helpers import make_user_with_perms
+    return make_user_with_perms(TestSession, username, perms)
 
 
 def test_58_order_detail_non_owner_403():

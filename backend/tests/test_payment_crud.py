@@ -958,44 +958,16 @@ def test_36_reverse_payment_audit_log():
 
 def test_37_list_payments_no_permission_403():
     """无 payment:list 权限用户获取收款列表返回 403"""
-    from app.core.security import create_access_token
-    from app.models.user import Permission, Role, RolePermission, UserRole
+    from helpers import make_user_with_perms
 
-    db = TestSession()
-    try:
-        user = User(
-            id=uuid.uuid4(), username="no_payment_list",
-            hashed_password=hash_password("testpass123"),
-            display_name="无收款列表权限", is_active=True, is_superuser=False,
-        )
-        db.add(user)
-        perm = db.query(Permission).filter(Permission.code == "payment:create").first()
-        if not perm:
-            perm = Permission(id=uuid.uuid4(), code="payment:create", name="收款创建", module="payment")
-            db.add(perm)
-            db.flush()
-        role = Role(id=uuid.uuid4(), name="no_pay_list_role", display_name="无收款列表角色")
-        db.add(role)
-        db.flush()
-        db.add(RolePermission(role_id=role.id, permission_id=perm.id))
-        db.add(UserRole(user_id=user.id, role_id=role.id))
-        db.commit()
-        token = create_access_token(str(user.id))
-    finally:
-        db.close()
-
+    token = make_user_with_perms(TestSession, "no_payment_list", ["payment:create"])
     resp = client.get("/api/v1/payments", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 403
 
 
 def _admin_auth():
-    """直接生成 admin token"""
-    db = TestSession()
-    try:
-        user = db.query(User).filter(User.username == "pay_tester").first()
-        return {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
-    finally:
-        db.close()
+    from helpers import admin_auth_header
+    return admin_auth_header(TestSession, "pay_tester")
 
 
 def test_38_reverse_payment_draft_order_400():
@@ -1083,13 +1055,7 @@ def test_39_reverse_payment_cancelled_order_400():
 
 def test_40_create_payment_zero_amount_422():
     """收款金额为零返回 422"""
-    db = TestSession()
-    try:
-        user = db.query(User).filter(User.username == "pay_tester").first()
-        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
-    finally:
-        db.close()
-
+    headers = _admin_auth()
     resp = client.post(f"/api/v1/payments/orders/{_confirmed_order_id}/payments", json={
         "amount": "0", "payment_method": "cash",
     }, headers=headers)
@@ -1098,13 +1064,7 @@ def test_40_create_payment_zero_amount_422():
 
 def test_41_create_payment_negative_amount_422():
     """收款金额为负数返回 422"""
-    db = TestSession()
-    try:
-        user = db.query(User).filter(User.username == "pay_tester").first()
-        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
-    finally:
-        db.close()
-
+    headers = _admin_auth()
     resp = client.post(f"/api/v1/payments/orders/{_confirmed_order_id}/payments", json={
         "amount": "-50", "payment_method": "cash",
     }, headers=headers)
