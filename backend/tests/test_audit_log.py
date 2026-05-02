@@ -2179,3 +2179,32 @@ def test_81_payment_create_audit_log_after_data_completeness():
     assert log["after_data"]["method"] == "transfer"
     assert log["before_data"] is None
     assert log["resource_type"] == "payment"
+
+
+def test_82_user_update_audit_log_before_after_data_completeness():
+    """用户编辑审计日志 before_data/after_data 含 username/display_name"""
+    headers = _admin_auth()
+    # 创建用户
+    resp = client.post("/api/v1/users", json={
+        "username": "update_audit_user", "password": "Test@1234",
+        "display_name": "编辑前名称",
+    }, headers=headers)
+    assert resp.status_code == 200
+    uid = resp.json()["data"]["id"]
+
+    # 编辑用户 display_name
+    resp = client.put(f"/api/v1/users/{uid}", json={
+        "display_name": "编辑后名称",
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=user_update", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == uid)
+    assert log["before_data"]["username"] == "update_audit_user"
+    assert log["before_data"]["display_name"] == "编辑前名称"
+    assert log["before_data"]["is_active"] is True
+    assert log["after_data"]["username"] == "update_audit_user"
+    assert log["after_data"]["display_name"] == "编辑后名称"
+    assert log["resource_type"] == "user"
