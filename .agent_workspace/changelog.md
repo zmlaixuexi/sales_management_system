@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-05-02（第三百四十八轮·自动循环）
+
+### 测试：商品 SKU 超长 422 + 备注 HTML 清理验证
+
+- `test_product_crud.py`：新增 test_39（SKU 超长 422）、test_40（备注 HTML 清理）
+- 后端测试：966/966 全绿
+
+## 2026-05-02（第三百四十七轮·自动循环）
+
+### 测试：收款冲正非归属用户 403 + 扩展公共 helper
+
+- `test_payment_crud.py`：新增 test_42（冲正收款非归属用户 403）
+- `test_audit_log.py`、`test_user_management.py`：`_admin_auth` 改用公共 helper
+- 后端测试：964/964 全绿
+
 ## 2026-05-02（第三百四十六轮·自动循环）
 
 ### 工程：提取测试公共 helper（make_user_with_perms / admin_auth_header）
