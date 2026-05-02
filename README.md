@@ -134,7 +134,7 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（767 个）
+# 后端测试（774 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
@@ -193,7 +193,9 @@ npm run build
 | 订单明细校验 | 10 | _validate_and_prepare_items 单个/多商品/不存在/软删除/停用/禁用/自定义单价/空列表/无效 UUID/混合 |
 | 收款登记服务 | 10 | register_payment 部分/全额/分次收款，订单不存在/草稿/取消/完成拒绝，超额/恰好剩余，操作人记录 |
 | 请求体大小限制 | 7 | GET/OPTIONS 不受限，正常 POST 通过，超限返回 413，multipart 豁免，恰好等于限制通过 |
-| **合计** | **767** | |
+| 文件上传权限 | 1 | 无 product:create 权限用户上传返回 403 |
+| 导出敏感字段 + 报表利润权限 | 6 | 导出商品/订单 CSV 成本价列权限过滤，报表概览利润字段权限过滤 |
+| **合计** | **774** | |
 
 ### 前端测试覆盖
 
