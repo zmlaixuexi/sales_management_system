@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第一百六十六轮·自动循环）
+
+### 安全：收款冲正状态回退边界测试（+2 tests，937→939）
+
+- `backend/tests/test_payment_crud.py`：新增 2 个测试
+  - test_26：冲正部分金额后 completed → partially_paid
+  - test_27：冲正全部金额后 completed → confirmed，paid_amount 回到 0
+- 并发安全验证：所有财务操作均使用 `with_for_update()` 行锁
+
 ## 2026-05-02（第一百六十五轮·自动循环）
 
 ### 代码质量：mypy 类型错误修复 + 全量代码整洁度验证
