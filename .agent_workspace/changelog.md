@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第三百九十三轮·自动循环）
+
+### 测试补强：商品更新审计日志 before_data/after_data 字段完整性
+
+- `backend/app/api/v1/products.py`：商品更新审计日志 before_data/after_data 新增 sku、stock_quantity 字段
+- `test_audit_log.py`：新增 test_78（商品更新后验证 before_data 含原 name/sku/stock_quantity/sale_price，after_data 含新值）
+- 后端测试：1076/1076 全绿，ruff clean
+
 ## 2026-05-03（第三百九十二轮·自动循环）
 
 ### 测试补强：订单编辑审计日志 before_data/after_data 含 customer_id 变更

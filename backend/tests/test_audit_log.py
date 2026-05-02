@@ -2057,3 +2057,37 @@ def test_77_order_update_audit_log_customer_id_change():
     assert log["before_data"]["customer_id"] == cid_a
     assert log["after_data"]["customer_id"] == cid_b
     assert log["resource_type"] == "order"
+
+
+def test_78_product_update_audit_log_before_after_data_completeness():
+    """商品更新审计日志 before_data/after_data 含 sku/stock_quantity/sale_price"""
+    headers = _admin_auth()
+    # 创建商品
+    resp = client.post("/api/v1/products", json={
+        "name": "更新审计商品", "sale_price": "100.00", "cost_price": "60.00",
+        "stock_quantity": 50, "sku": "AUDIT-UPD-001",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    # 更新商品名称和售价
+    resp = client.put(f"/api/v1/products/{pid}", json={
+        "name": "更新审计商品改名", "sale_price": "120.00",
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=product_update", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == pid)
+    # before_data 含原值
+    assert log["before_data"]["name"] == "更新审计商品"
+    assert log["before_data"]["sale_price"] == "100.00"
+    assert log["before_data"]["sku"] == "AUDIT-UPD-001"
+    assert log["before_data"]["stock_quantity"] == 50
+    # after_data 含新值
+    assert log["after_data"]["name"] == "更新审计商品改名"
+    assert log["after_data"]["sale_price"] == "120.00"
+    assert log["after_data"]["sku"] == "AUDIT-UPD-001"
+    assert log["after_data"]["stock_quantity"] == 50
+    assert log["resource_type"] == "product"

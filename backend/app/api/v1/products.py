@@ -345,6 +345,8 @@ def update_product(
     old_sale_price = product.sale_price
     old_cost_price = product.cost_price
     old_name = product.name
+    old_stock = product.stock_quantity
+    old_sku = product.sku
 
     if data.name is not None:
         name = data.name.strip()
@@ -430,8 +432,16 @@ def update_product(
         db, request, current_user,
         action="product_update", resource_type="product",
         resource_id=str(product.id),
-        before_data={"name": old_name, "sale_price": str(old_sale_price), "cost_price": str(old_cost_price)},
-        after_data={"name": product.name, "sale_price": str(product.sale_price), "cost_price": str(product.cost_price)},
+        before_data={
+            "name": old_name, "sku": old_sku,
+            "sale_price": str(old_sale_price), "cost_price": str(old_cost_price),
+            "stock_quantity": old_stock,
+        },
+        after_data={
+            "name": product.name, "sku": product.sku,
+            "sale_price": str(product.sale_price), "cost_price": str(product.cost_price),
+            "stock_quantity": product.stock_quantity,
+        },
     )
     db.commit()
 
