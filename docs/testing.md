@@ -4,11 +4,11 @@
 
 | 指标 | 值 |
 |---|---|
-| 后端测试总数 | 850 |
+| 后端测试总数 | 860 |
 | 后端测试文件 | 42 |
 | 前端测试总数 | 382 |
 | 前端测试文件 | 37 |
-| 测试总计 | 1232 |
+| 测试总计 | 1242 |
 | 后端覆盖率 | 99.79% |
 | 覆盖模块 | 认证、商品、客户、订单、库存、收款、报表（含客户/销售人员排行）、审计日志（含手机号/邮箱脱敏）、数据导出（含权限/数据范围/敏感字段边界）、批量导入（含负价格/非法格式/英文表头/批量内去重）、权限校验（含导出敏感字段过滤、报表利润权限）、速率限制、SQL 注入防护、XSS 防护、请求 ID 中间件、CORS 验证、日志格式器（JSON/文本/setup_logging）、金额计算、文件服务（含 FILE_TOO_LARGE/FILE_NOT_BOUND 错误码、上传权限 403）、密码强度、订单操作日志、支付路径（含已取消/已完成订单拒绝、无权限 403）、派生销售字段、响应体 request_id、报表 period 参数校验、CSV 导入校验（含行数上限+XSS 消毒+commit 回滚）、客户 source/level 枚举校验、生产环境 OpenAPI 禁用、SQL 慢查询日志、用户管理（含角色列表 API 和权限边界）、安全模块（bcrypt 72 字节截断/JWT token 篡改/过期/错误密钥/iat/jti）、报表辅助函数（_date_range/_apply_data_scope）、导出 API 辅助函数（_csv_filename）、登录速率限制辅助函数（_check_login_rate_limit/_record_login_fail）、商品辅助函数（_batch_sales_stats/_validate_category_id/_get_default_category_id）、客户辅助函数（_validate_owner_user）、订单库存辅助函数（_deduct_inventory/_restore_inventory）、订单明细校验（_validate_and_prepare_items）、收款登记服务（register_payment）、请求体大小限制中间件（BodyLimitMiddleware）、外键验证边界（含无效 UUID/不存在用户/不存在客户/不存在商品）、导出服务软删除过滤（商品/客户/订单/收款排除已删除记录）、中间件（BodyLimit 请求体限制/RequestLog 日志记录） |
 
@@ -117,13 +117,13 @@ pytest -m "not slow"  # 排除慢速测试
 | import | 导入功能 | 42 |
 | report | 报表和审计日志 | 77 |
 | integration | 集成测试 | 52 |
-| infra | 基础设施（健康检查/中间件/日志） | 36 |
+| infra | 基础设施（健康检查/中间件/日志） | 45 |
 
 ---
 
 ## 后端测试文件详解
 
-### test_health.py（18 个测试）
+### test_health.py（25 个测试）
 
 健康检查、版本接口、中间件验证、异常处理、CORS 和生产环境安全检查，无需认证。
 
@@ -141,6 +141,13 @@ pytest -m "not slow"  # 排除慢速测试
 | test_unhandled_exception_returns_json | 未处理异常返回一致 JSON 格式 |
 | test_cors_allowed_origin | 允许的 Origin 返回 CORS 响应头 |
 | test_cors_disallowed_origin | 不允许的 Origin 不返回 CORS 响应头 |
+| test_cors_preflight_credentials | 预检请求返回 access-control-allow-credentials: true |
+| test_cors_preflight_allowed_methods | 预检请求返回允许的方法列表（GET/POST/PUT/DELETE） |
+| test_cors_preflight_disallowed_method | PATCH 不在允许方法列表中 |
+| test_cors_preflight_allowed_headers | Authorization/Content-Type/X-Request-ID 通过预检 |
+| test_cors_preflight_disallowed_header | X-Custom-Forbidden 不在允许头列表中 |
+| test_cors_empty_origin | 空 Origin 不返回 CORS 头 |
+| test_cors_null_origin | null Origin 不返回 CORS 头 |
 | test_request_id_in_response_body | 响应体包含 request_id 字段 |
 | test_request_id_in_response_body_passthrough | 响应体透传请求中的 request_id |
 | test_openapi_disabled_in_production | 生产环境 OpenAPI 文档端点配置为 None |
@@ -227,9 +234,9 @@ refresh_token 异常、价格/库存/名称校验、CSV 边界、用户列表、
 
 用户管理 CRUD + 角色列表：列表/搜索、创建（含重复用户名）、编辑、禁用切换、角色变更、编辑时无效角色 ID 返回 400、403 权限校验、分页参数、未认证 401、弱密码 422、创建时无效角色 ID 400、角色列表 GET /users/roles（正常返回/非管理员 403/未认证 401）、管理员不能停用自身账号、非管理员查看用户列表 403。
 
-### test_customer_crud.py（28 个测试）
+### test_customer_crud.py（32 个测试）
 
-客户 CRUD 成功路径 + 认证边界：详情获取、编辑验证、归属转移、软删除验证、列表按来源/关键词/归属筛选、手机号更新/重复检测、CSV 导入编码/空表头、未认证获取/编辑/删除 401、无效 UUID 422。
+客户 CRUD 成功路径 + 认证边界 + XSS/邮箱边界：详情获取、编辑验证、归属转移、软删除验证、列表按来源/关键词/归属筛选、手机号更新/重复检测、CSV 导入编码/空表头、未认证获取/编辑/删除 401、无效 UUID 422、备注 HTML 标签自动移除（strip_html）、转移不存在用户返回 404、邮箱重复更新边界检查。
 
 ### test_product_crud.py（44 个测试）
 
@@ -283,9 +290,9 @@ CSV 导入校验共享函数测试：文件扩展名验证、BOM 检测、UTF-8 
 
 Schema 校验器单元测试，覆盖全部 Pydantic field_validator：OrderItemInput 单价非负，OrderCreate/Update 备注 strip_html，PaymentCreate 金额正数+备注 strip_html，InventoryAdjust 备注 strip_html，ProductCreate/Update 名称+备注 strip_html，CustomerCreate/Update 名称/邮箱/联系人 strip_html，UserCreate 密码强度+邮箱 strip_html，UserUpdate 显示名 strip_html，ChangePasswordRequest 密码强度+长度。
 
-### test_slow_query.py（5 个测试）
+### test_slow_query.py（6 个测试）
 
-SQL 慢查询日志测试：监听器注册（超过阈值时日志记录）、低于阈值不记录、禁用时不注册监听器、模拟慢查询完整日志路径（含 request_id 关联）、长 SQL 截断。
+SQL 慢查询日志测试：监听器注册（超过阈值时日志记录）、低于阈值不记录、禁用时不注册监听器、模拟慢查询完整日志路径（含 request_id 关联）、长 SQL 截断、request_id 在 extra_fields 中验证。
 
 ### test_security.py（14 个测试）
 
