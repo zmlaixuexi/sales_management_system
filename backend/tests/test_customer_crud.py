@@ -508,3 +508,20 @@ def test_30_list_customers_keyword_like_underscore():
     items = resp.json()["data"]["items"]
     # 客户名不含字面量下划线，应返回空或极少
     assert all("_" not in c.get("name", "") for c in items)
+
+
+def test_31_list_customers_page_size_100():
+    """客户列表 page_size=100（最大值）正常返回"""
+    from app.core.security import create_access_token
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "crud_admin").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/customers", params={"page_size": 100}, headers=headers)
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["page_size"] == 100
+    assert isinstance(data["items"], list)

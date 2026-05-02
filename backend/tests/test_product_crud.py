@@ -779,3 +779,12 @@ def test_30_list_products_keyword_like_underscore():
     assert resp.status_code == 200
     items = resp.json()["data"]["items"]
     assert all("_" in p.get("name", "") or "_" in p.get("sku", "") for p in items)
+
+
+def test_31_list_products_page_size_100():
+    """商品列表 page_size=100（最大值）正常返回"""
+    resp = client.get("/api/v1/products", params={"page_size": 100}, headers=_admin_auth())
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["page_size"] == 100
+    assert isinstance(data["items"], list)

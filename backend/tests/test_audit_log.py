@@ -392,3 +392,12 @@ def test_19_audit_log_keyword_like_underscore():
     assert resp.status_code == 200
     items = resp.json()["data"]["items"]
     assert all("_" in log.get("actor_name", "") for log in items)
+
+
+def test_20_audit_log_page_size_100():
+    """审计日志列表 page_size=100（最大值）正常返回"""
+    resp = client.get("/api/v1/audit-logs", params={"page_size": 100}, headers=_admin_auth())
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["page_size"] == 100
+    assert isinstance(data["items"], list)
