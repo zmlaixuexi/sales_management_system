@@ -6,6 +6,14 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-206
+
+- 名称：依赖安全漏洞扫描和修复
+- 轮次：Round 461（自动循环）
+- 描述：npm audit 0 漏洞；pip-audit 扫描并升级 5 个运行时依赖修复 CVE（cryptography/requests/urllib3/pyjwt/python-dotenv），剩余 4 个漏洞仅涉及开发工具（pip/pygments/wheel）
+- 涉及文件：无代码变更，仅依赖升级
+- 验证：1188 后端测试全绿、coverage 100%、ruff clean
+
 ## 功能编号：FEAT-20260503-205
 
 - 名称：前端 ESLint 规则收紧

@@ -2,15 +2,15 @@
 
 最后更新时间：2026-05-03
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-460
-当前任务名称：前端 ESLint 规则收紧
+当前任务编号：ROUND-461
+当前任务名称：依赖安全漏洞扫描和修复
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 460：前端 ESLint 新增 5 条规则（no-console/eqeqeq/no-throw-literal/prefer-const/no-var），0 错误通过
-- Round 459：deployment.md + backend/.env.example 补全 MAX_JSON_BODY_MB
+- Round 461：npm audit 0 漏洞 + pip-audit 修复 5 个运行时依赖 CVE（cryptography/requests/urllib3/pyjwt/python-dotenv）
+- Round 460：前端 ESLint 5 条新规则收紧
 
 ## 最终验证状态
 
@@ -19,7 +19,8 @@
 | 后端测试 | 1188/1188 ✓ |
 | 后端 coverage | **100.00%** ✓ |
 | 前端测试 | 382/382 ✓ |
-| 前端 ESLint | 0 errors (收紧后) ✓ |
+| npm audit | 0 vulnerabilities ✓ |
+| pip-audit（运行时） | 0 vulnerabilities ✓ |
 | ruff | 0 errors ✓ |
 | mypy | 0 errors (54 files) ✓ |
 | 总计 | 1570 tests |
@@ -27,10 +28,10 @@
 ## 下一步第一动作
 
 继续 keep-going 模式。可选无阻塞方向：
-- 可观测性：审计已完善，request_id/user_id/结构化日志/慢SQL 已全覆盖
-- 代码质量：后端 ruff 规则收紧（如flake8-bugbear、flake8-comprehensions）
-- 安全加固：依赖漏洞扫描（pip audit / npm audit）
-- 性能优化：前端 bundle 分析、懒加载
+- 性能优化：前端 bundle 分析、路由懒加载
+- 代码质量：后端 ruff 规则收紧
+- 安全加固：开发工具依赖升级（pip/pygments/wheel）
+- 文档完善：API 文档更新、架构文档
 
 ## 阻塞问题
 

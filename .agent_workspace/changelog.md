@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第四百六十一轮·自动循环）
+
+### 安全加固：依赖漏洞扫描和修复
+
+- npm audit：前端 0 漏洞 ✓
+- pip-audit（项目 Python 3.13）：从 11 漏洞降至 4（仅剩 pip/pygments/wheel 开发工具漏洞）
+- 升级运行时依赖：cryptography 46.0.3→47.0.0、requests 2.32.5→2.33.1、urllib3 2.6.1→2.6.3、pyjwt 2.10.1→2.12.1、python-dotenv 1.1.0→1.2.2
+- 后端测试 1188/1188 全绿，coverage 100%，ruff clean
+
 ## 2026-05-03（第四百六十轮·自动循环）
 
 ### 代码质量：前端 ESLint 规则收紧
