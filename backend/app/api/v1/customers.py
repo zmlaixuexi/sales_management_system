@@ -454,8 +454,8 @@ async def import_customers_csv(
     except Exception:
         db.rollback()
         raise HTTPException(
-            status_code=500,
-            detail={"code": "IMPORT_FAILED", "message": "导入失败，请检查数据后重试"},
+            status_code=400,
+            detail={"code": "IMPORT_FAILED", "message": "导入失败，部分数据可能违反唯一性约束"},
         ) from None
 
     log_user_action(db, request, current_user,

@@ -209,7 +209,7 @@ def test_11_import_strips_html():
 
 
 def test_12_import_commit_failure():
-    """db.commit 失败返回 500 IMPORT_FAILED"""
+    """db.commit 失败返回 400 IMPORT_FAILED"""
     from unittest.mock import patch
 
     from sqlalchemy.orm import Session
@@ -225,7 +225,7 @@ def test_12_import_commit_failure():
             files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
             headers=_auth(),
         )
-    assert resp.status_code == 500
+    assert resp.status_code == 400
     assert resp.json()["error"]["code"] == "IMPORT_FAILED"
 
 

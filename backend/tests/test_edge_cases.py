@@ -127,7 +127,7 @@ def test_04_product_create_duplicate_sku():
         "name": "重复SKU", "sku": "SPU-EDGE-001",
         "sale_price": "10", "cost_price": "5",
     }, headers=_auth())
-    assert resp.status_code == 400
+    assert resp.status_code == 409
     assert resp.json()["error"]["code"] == "PRODUCT_SKU_DUPLICATED"
 
 
