@@ -5,7 +5,15 @@ import uuid
 import pytest
 from fastapi import HTTPException
 
-from app.api.deps import _get_user_permissions, check_owner_or_forbid, has_permission
+from app.api.deps import (
+    _get_user_permissions,
+    check_owner_or_forbid,
+    get_or_404,
+    has_permission,
+    paginated_resp,
+    parse_uuid_or_400,
+    resp,
+)
 from app.models.user import User
 
 
@@ -102,3 +110,58 @@ def test_check_owner_or_forbid_forbidden():
         check_owner_or_forbid(user, other_id, "order:view_all", "订单")
     assert exc_info.value.status_code == 403
     assert "无权访问此订单" in exc_info.value.detail["message"]
+
+
+# ---- parse_uuid_or_400 ----
+
+
+def test_parse_uuid_valid():
+    """有效 UUID 正常返回"""
+    uid = uuid.uuid4()
+    assert parse_uuid_or_400(str(uid), "订单") == uid
+
+
+def test_parse_uuid_invalid():
+    """无效 UUID 抛 400"""
+    with pytest.raises(HTTPException) as exc_info:
+        parse_uuid_or_400("not-a-uuid", "订单")
+    assert exc_info.value.status_code == 400
+    assert "订单格式无效" in exc_info.value.detail["message"]
+
+
+# ---- resp ----
+
+
+def test_resp_default():
+    """默认消息为 操作成功"""
+    result = resp()
+    assert result == {"success": True, "data": None, "message": "操作成功"}
+
+
+def test_resp_with_data_and_message():
+    """传入 data 和 message 正确返回"""
+    result = resp(data={"id": 1}, message="创建成功")
+    assert result["success"] is True
+    assert result["data"] == {"id": 1}
+    assert result["message"] == "创建成功"
+
+
+# ---- paginated_resp ----
+
+
+def test_paginated_resp():
+    """分页响应结构正确"""
+    items = [{"id": 1}, {"id": 2}]
+    result = paginated_resp(items, page=2, page_size=10, total=25)
+    data = result["data"]
+    assert data["items"] == items
+    assert data["page"] == 2
+    assert data["page_size"] == 10
+    assert data["total"] == 25
+    assert result["message"] == "查询成功"
+
+
+def test_paginated_resp_custom_message():
+    """自定义分页消息"""
+    result = paginated_resp([], page=1, page_size=20, total=0, message="无数据")
+    assert result["message"] == "无数据"

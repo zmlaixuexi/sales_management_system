@@ -79,4 +79,56 @@ describe('useSubmit', () => {
 
     expect(message.error).not.toHaveBeenCalled()
   })
+
+  it('无自定义 fallbackError 时使用默认 "操作失败"', async () => {
+    const onSubmit = vi.fn().mockRejectedValue(new Error('any'))
+    const { result } = renderHook(() => useSubmit(onSubmit))
+
+    await act(async () => { await result.current.handleSubmit('values') })
+
+    expect(message.error).toHaveBeenCalledWith('操作失败')
+  })
+
+  it('抛出非 Error 对象时使用 fallback 消息', async () => {
+    const onSubmit = vi.fn().mockRejectedValue('字符串异常')
+    const { result } = renderHook(() => useSubmit(onSubmit, '兜底'))
+
+    await act(async () => { await result.current.handleSubmit('values') })
+
+    expect(message.error).toHaveBeenCalledWith('兜底')
+  })
+
+  it('错误后 submitting 重置可再次提交', async () => {
+    const onSubmit = vi.fn()
+      .mockRejectedValueOnce(new Error('fail'))
+      .mockResolvedValueOnce(undefined)
+    const { result } = renderHook(() => useSubmit(onSubmit))
+
+    await act(async () => { await result.current.handleSubmit('a') })
+    expect(result.current.submitting).toBe(false)
+
+    await act(async () => { await result.current.handleSubmit('b') })
+    expect(onSubmit).toHaveBeenCalledTimes(2)
+    expect(onSubmit).toHaveBeenLastCalledWith('b')
+  })
+
+  it('提取 response.data.error.message 作为错误消息', async () => {
+    const error = { response: { data: { error: { message: '库存不足' } } } }
+    const onSubmit = vi.fn().mockRejectedValue(error)
+    const { result } = renderHook(() => useSubmit(onSubmit, '兜底'))
+
+    await act(async () => { await result.current.handleSubmit('values') })
+
+    expect(message.error).toHaveBeenCalledWith('库存不足')
+  })
+
+  it('提取 response.data.detail.message 作为错误消息', async () => {
+    const error = { response: { data: { detail: { message: '权限不足' } } } }
+    const onSubmit = vi.fn().mockRejectedValue(error)
+    const { result } = renderHook(() => useSubmit(onSubmit, '兜底'))
+
+    await act(async () => { await result.current.handleSubmit('values') })
+
+    expect(message.error).toHaveBeenCalledWith('权限不足')
+  })
 })
