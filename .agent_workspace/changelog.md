@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百五十七轮·自动循环）
+
+### 安全：密码哈希 72 字节截断防御 + 7 项安全测试
+
+- hash_password / verify_password 添加 `[:72]` 截断，防止 bcrypt 对超长密码抛 ValueError
+- 新增测试 7 项：token 篡改检测、错误密钥拒绝、过期 token 拒绝、bcrypt 12 轮验证、Unicode 密码、72 字节密码、超 72 字节截断
+- 816 后端测试全绿（+7），ruff 0 errors
+
 ## 2026-05-02（第二百五十六轮·自动循环）
 
 ### 重构：4 处手动 deleted_at 过滤替换为 active_query
