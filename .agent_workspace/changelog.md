@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第二百六十七轮·自动循环）
+
+### 测试：安全响应头中间件测试 3 项
+
+- SecurityHeadersMiddleware：API 响应安全头、非 API 路径安全头、Referrer-Policy/Permissions-Policy
+- 832 后端测试全绿
+
 ## 2026-05-02（第二百六十六轮·自动循环）
 
 ### 文档 + 测试：密码强度校验测试 6 项 + 测试计数更新
