@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第三百八十七轮·自动循环）
+
+### 测试补强：收款冲正审计日志链路验证
+
+- `test_audit_log.py`：新增 test_72（收款冲正后 payment_reverse 审计日志 before_data 含 status=normal/order_id，after_data 含 status=reversed/order_id）
+- 后端测试：1070/1070 全绿
+
 ## 2026-05-02（第三百八十六轮·自动循环）
 
 ### 测试补强：用户创建审计日志 + 空收款 CSV 导出验证
