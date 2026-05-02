@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百五十五轮·自动循环）
+
+### 测试补强：订单编辑显式空 items 422 验证
+
+- `test_boundary.py`：新增 test_129（订单编辑显式传空 items 返回 422）
+- `docs/testing.md`：更新后端测试总数 1187→1188、test_boundary.py 128→129
+- 后端测试：1188/1188 全绿，coverage 99.65%，ruff clean
+
 ## 2026-05-03（第四百五十四轮·自动循环）
 
 ### 代码质量：coverage 覆盖率验证
