@@ -2,16 +2,16 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-281
+当前任务编号：ROUND-282
 当前任务名称：自动循环验证
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 282：数据库索引覆盖验证（单列 + 复合 + 软删除 + 排序索引全覆盖）
 - Round 281：报表响应结构完整性验证 3 项，836 后端测试全绿
 - Round 279：修复 3 处 useEffect navigate 依赖，ESLint 0/0
-- Round 278：消除 23 个 ESLint no-explicit-any 错误
 
 ## 最终验证状态
 
