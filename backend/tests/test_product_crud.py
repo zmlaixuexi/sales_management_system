@@ -646,3 +646,48 @@ def test_26_create_product_remark_too_long_422():
         "remark": "R" * 501,
     }, headers=_auth())
     assert resp.status_code == 422
+
+
+def test_27_product_list_cost_fields_hidden_for_non_privileged():
+    """非特权用户查看商品列表时成本字段不返回"""
+    from app.core.security import create_access_token
+    from app.models.user import Permission, Role, RolePermission, UserRole
+
+    db = TestSession()
+    try:
+        # 创建非特权用户（有 product:list 但无 product:view_cost）
+        viewer = User(
+            id=uuid.uuid4(), username="product_viewer",
+            hashed_password=hash_password("testpass123"),
+            display_name="商品查看者",
+            is_active=True, is_superuser=False,
+        )
+        db.add(viewer)
+        db.flush()
+
+        role = Role(id=uuid.uuid4(), name="product_viewer_role", display_name="商品查看角色")
+        db.add(role)
+        db.flush()
+        db.add(UserRole(user_id=viewer.id, role_id=role.id))
+
+        perm = Permission(id=uuid.uuid4(), code="product:list", name="商品列表", module="product")
+        db.add(perm)
+        db.flush()
+        db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+
+        db.commit()
+        viewer_token = create_access_token(str(viewer.id))
+    finally:
+        db.close()
+
+    viewer_headers = {"Authorization": f"Bearer {viewer_token}"}
+
+    resp = client.get("/api/v1/products", headers=viewer_headers)
+    assert resp.status_code == 200
+
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    for item in items:
+        assert "cost_price" not in item
+        assert "unit_profit" not in item
+        assert "gross_margin" not in item
