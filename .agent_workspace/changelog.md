@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第一百八十三轮·自动循环）
+
+### 测试：补强 auth store 边界测试（login success:false / fetchUser success:false / 空权限 3 项）
+
+- 扩展 `auth-store.test.ts`（11→14 项）
+- login API 返回 success:false 时不存储 token、不设置 user
+- fetchUser API 返回 success:false 时不设置 user
+- hasPermission 普通用户空权限数组返回 false
+- 前端 318→321，总计 1029 tests
+
 ## 2026-05-02（第一百八十二轮·自动循环）
 
 ### 测试：新增 _TextFormatter 和 setup_logging 单元测试（6 项）

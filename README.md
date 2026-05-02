@@ -139,7 +139,7 @@ cd backend
 source .venv/bin/activate
 pytest tests/ -v
 
-# 前端测试（318 个）
+# 前端测试（321 个）
 cd frontend
 npm test
 
@@ -197,7 +197,7 @@ npm run build
 | 客户表单 | 12 | 新增模式标题/字段/提交/编辑模式（标题/fetchCustomer/数据填充/保存修改） |
 | usePaginatedList | 11 | 初始加载、错误处理、筛选、分页切换、刷新、空结果、_toastDisplayed 跳过 |
 | 订单表单 | 11 | 新增模式标题/字段/提交/编辑模式（标题/fetchOrder/保存修改） |
-| auth store | 11 | login/logout/fetchUser/hasPermission/loading 状态 |
+| auth store | 14 | login/logout/fetchUser/hasPermission/loading 状态、login success:false 不存 token、fetchUser success:false 不设 user、空权限数组 |
 | 商品列表 | 11 | 渲染/搜索/筛选/新增按钮/表格数据/空状态/错误状态+重试/loading 状态 |
 | 客户列表 | 11 | 渲染/搜索/筛选/新增按钮/表格数据/空状态/错误状态+重试/loading 状态 |
 | 订单列表 | 11 | 渲染/搜索/筛选/新建按钮/表格数据/空状态/错误状态+重试/loading 状态 |
@@ -228,7 +228,7 @@ npm run build
 | 登录页 | 7 | 渲染标题/输入框/登录按钮/提交调用 login/登录失败错误提示/成功跳转首页/redirect 参数跳转 |
 | API client | 3 | baseURL、token 附加、无 token |
 | NotFound | 3 | 404 渲染/返回首页按钮/按钮点击导航 |
-| **合计** | **318** | |
+| **合计** | **321** | |
 
 ## API 概览
 
