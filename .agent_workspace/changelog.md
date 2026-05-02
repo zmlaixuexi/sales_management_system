@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百五十四轮·自动循环）
+
+### 代码质量：coverage 覆盖率验证
+
+- 后端 coverage 99.65%（2546 行仅 9 行未覆盖），超过 fail_under=99 门槛
+- 未覆盖行均为异常/fallback 路径：deps.py:27-31、health.py:19-20、orders.py:286/610、reports.py:97
+- 无代码变更，纯验证轮
+
 ## 2026-05-03（第四百五十三轮·自动循环）
 
 ### 测试补强：商品 main_image_url 超长 422 边界验证
