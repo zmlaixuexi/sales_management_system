@@ -161,4 +161,43 @@ describe('useAuthStore', () => {
       expect(useAuthStore.getState().hasPermission('any:permission')).toBe(true)
     })
   })
+
+  describe('login API 返回 success:false', () => {
+    it('不存储 token', async () => {
+      mockLogin.mockResolvedValueOnce({
+        data: { success: false, data: { access_token: '', refresh_token: '', token_type: 'bearer' }, message: 'fail' },
+      })
+
+      await useAuthStore.getState().login('admin', 'password')
+
+      expect(localStorage.getItem('access_token')).toBeNull()
+      expect(useAuthStore.getState().token).toBeNull()
+      expect(useAuthStore.getState().user).toBeNull()
+      expect(useAuthStore.getState().loading).toBe(false)
+    })
+  })
+
+  describe('fetchUser API 返回 success:false', () => {
+    it('不设置 user', async () => {
+      useAuthStore.setState({ token: 'test-token' })
+      mockGetMe.mockResolvedValueOnce({
+        data: { success: false, data: null, message: 'token expired' },
+      })
+
+      await useAuthStore.getState().fetchUser()
+
+      expect(useAuthStore.getState().user).toBeNull()
+    })
+  })
+
+  describe('hasPermission 普通用户空权限', () => {
+    it('空权限数组返回 false', () => {
+      const noPermUser: CurrentUser = {
+        ...fakeUser,
+        permissions: [],
+      }
+      useAuthStore.setState({ user: noPermUser })
+      expect(useAuthStore.getState().hasPermission('product:list')).toBe(false)
+    })
+  })
 })
