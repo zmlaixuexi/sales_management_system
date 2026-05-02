@@ -887,3 +887,25 @@ def test_53_salesperson_ranking_zero_data():
     data = resp.json()["data"]
     assert data["items"] == []
     assert data["period"] == "30d"
+
+
+def test_54_inventory_warning_no_permission_403():
+    """无 report:sales 权限用户访问库存预警返回 403"""
+    from helpers import make_user_with_perms
+
+    token = make_user_with_perms(TestSession, "no_inv_warning", ["report:profit"])
+    resp = client.get("/api/v1/reports/inventory-warning", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
+
+
+def test_55_inventory_warning_high_threshold_empty():
+    """极高阈值（999999）返回正确结构（items 为空或非空皆可，关键是结构正确）"""
+    token = create_access_token(subject=_user_id)
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = client.get("/api/v1/reports/inventory-warning?threshold=999999", headers=headers)
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert "items" in data
+    assert isinstance(data["items"], list)
+    assert data["threshold"] == 999999
+    assert "total" in data
