@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-02（第一百九十轮·自动循环）
+
+### 测试：补强 downloadCsv 边界测试 + 全量 CI 验证
+
+- 全量 CI 门禁验证：后端 711、前端 336、ruff 0、ESLint 0、tsc 0、build ✓
+- 扩展 `downloadCsv.test.ts`（6→9 项）
+- Content-Disposition 带 attachment 前缀时正确提取文件名
+- 全部 undefined 参数仍正常请求
+- 所有有效参数均传递
+- 前端 333→336，总计 1047 tests
+
 ## 2026-05-02（第一百八十九轮·自动循环）
 
 ### 测试：重写 statusMaps 测试导入共享常量，补全订单 5 状态和收款状态（6→10 项）
