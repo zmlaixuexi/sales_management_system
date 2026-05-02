@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百二十七轮·自动循环）
+
+### 测试：对象级权限 + SQL 注入搜索安全 + 分页边界测试（17 项新增）
+
+- test_permissions: 11 项对象级权限测试 — 验证客户/订单 detail/update/delete/transfer 非 owner 返回 403
+- test_boundary: 3 项 SQL 注入搜索安全测试 — 验证客户/商品/订单搜索关键词无法绕过过滤
+- test_boundary: 3 项分页边界测试 — 验证 page=0、page_size>100、page_size<1 返回 422
+- 后端 791 测试全绿（+17），总计 1171
+
 ## 2026-05-02（第二百二十六轮·自动循环）
 
 ### 文档：修正 API 文档错误响应格式 + 补全遗漏错误码
