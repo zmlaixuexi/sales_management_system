@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-05-02（第三百四十四轮·自动循环）
+
+### 测试：收款金额零/负数 422 验证
+
+- `test_payment_crud.py`：新增 test_40（零金额 422）、test_41（负金额 422）
+- 后端测试：960/960 全绿
+
+## 2026-05-02（第三百四十三轮·自动循环）
+
+### 安全：客户手机号格式校验（Pydantic validator）
+
+- `backend/app/schemas/customer.py`：添加 `_PHONE_RE` 正则（`^1[3-9]\d{9}$`），`CustomerCreate` 和 `CustomerUpdate` 增加 `validate_phone` 字段验证器
+- `backend/tests/test_customer_crud.py`：新增 test_41（创建无效手机号 422）、test_42（更新无效手机号 422）
+- 后端测试：958/958 全绿
+
 ## 2026-05-02（第三百四十二轮·自动循环）
 
 ### 测试：冲正草稿/已取消订单收款 400 边界验证
