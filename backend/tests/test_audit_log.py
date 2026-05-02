@@ -365,3 +365,30 @@ def test_17_audit_log_page_zero_422():
     """page=0 返回 422"""
     resp = client.get("/api/v1/audit-logs?page=0", headers=_auth())
     assert resp.status_code == 422
+
+
+def _admin_auth():
+    """直接生成 admin token，避免依赖登录状态"""
+    from app.core.security import create_access_token
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "audit_tester").first()
+        return {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+
+def test_18_audit_log_keyword_like_percent():
+    """关键字搜索含 % 不应匹配全部审计日志"""
+    resp = client.get("/api/v1/audit-logs", params={"keyword": "%"}, headers=_admin_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert all("%" not in log.get("actor_name", "") for log in items)
+
+
+def test_19_audit_log_keyword_like_underscore():
+    """关键字搜索含 _ 只匹配实际含 _ 的 actor_name"""
+    resp = client.get("/api/v1/audit-logs", params={"keyword": "_"}, headers=_admin_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert all("_" in log.get("actor_name", "") for log in items)
