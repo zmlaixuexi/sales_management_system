@@ -497,3 +497,59 @@ def test_34_list_users_page_size_over_max_422():
     """用户列表 page_size=101 超出上限返回 422"""
     resp = client.get("/api/v1/users", params={"page_size": 101}, headers=_admin_auth())
     assert resp.status_code == 422
+
+
+def test_35_create_user_password_too_short_422():
+    """密码少于 6 位返回 422"""
+    resp = client.post("/api/v1/users", json={
+        "username": "shortpwuser",
+        "password": "a1b2",
+        "display_name": "短密码用户",
+    }, headers=_admin_auth())
+    assert resp.status_code == 422
+
+
+def test_36_create_user_password_only_special_chars_422():
+    """密码仅含特殊字符无字母数字返回 422"""
+    resp = client.post("/api/v1/users", json={
+        "username": "specialcharsuser",
+        "password": "!@#$%^",
+        "display_name": "特殊字符密码用户",
+    }, headers=_admin_auth())
+    assert resp.status_code == 422
+
+
+def test_37_create_user_password_letters_and_special_no_digits_422():
+    """密码含字母和特殊字符但无数字返回 422"""
+    resp = client.post("/api/v1/users", json={
+        "username": "nodigituser2",
+        "password": "abc!@#$",
+        "display_name": "无数字密码用户",
+    }, headers=_admin_auth())
+    assert resp.status_code == 422
+    assert "数字" in str(resp.json())
+
+
+def test_38_create_user_password_digits_and_special_no_letters_422():
+    """密码含数字和特殊字符但无字母返回 422"""
+    resp = client.post("/api/v1/users", json={
+        "username": "noletteruser",
+        "password": "123!@#$",
+        "display_name": "无字母密码用户",
+    }, headers=_admin_auth())
+    assert resp.status_code == 422
+    assert "字母" in str(resp.json())
+
+
+def test_39_change_password_special_only_422():
+    """修改密码为纯特殊字符返回 422"""
+    login_resp = client.post("/api/v1/auth/login", json={
+        "username": "mgmt_admin", "password": "admin123",
+    })
+    token = login_resp.json()["data"]["access_token"]
+
+    resp = client.post("/api/v1/auth/change-password", json={
+        "old_password": "admin123",
+        "new_password": "!@#$%^",
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 422
