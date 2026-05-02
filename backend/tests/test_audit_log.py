@@ -1038,3 +1038,39 @@ def test_45_user_update_audit_log_before_data():
     assert log["before_data"]["username"] == "before_data_user"
     assert log["after_data"]["display_name"] == "编辑后名称"
     assert log["resource_type"] == "user"
+
+
+def test_46_product_update_audit_log_change_comparison():
+    """商品编辑审计日志 before_data/after_data 可对比 name 和 sale_price 的变更"""
+    headers = _admin_auth()
+    # 创建商品
+    resp = client.post("/api/v1/products", json={
+        "name": "变更前商品",
+        "cost_price": "50.00",
+        "sale_price": "100.00",
+        "stock_quantity": 10,
+        "status": "active",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    # 同时编辑 name 和 sale_price
+    resp = client.put(f"/api/v1/products/{pid}", json={
+        "name": "变更后商品",
+        "sale_price": "120.00",
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=product_update", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == pid)
+    # before_data 记录变更前
+    assert log["before_data"]["name"] == "变更前商品"
+    assert log["before_data"]["sale_price"] == "100.00"
+    assert log["before_data"]["cost_price"] == "50.00"
+    # after_data 记录变更后
+    assert log["after_data"]["name"] == "变更后商品"
+    assert log["after_data"]["sale_price"] == "120.00"
+    assert log["after_data"]["cost_price"] == "50.00"  # 未变更字段保持原值
+    assert log["resource_type"] == "product"

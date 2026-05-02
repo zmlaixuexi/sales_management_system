@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百六十六轮·自动循环）
+
+### 测试补强：商品更新审计日志 before_data 修复与变更对比验证
+
+- `products.py`：修复商品更新审计日志 before_data 的 name 字段（保存 old_name 快照，避免记录修改后的值）
+- `test_audit_log.py`：新增 test_46（同时变更 name 和 sale_price，验证 before_data 含变更前值，after_data 含变更后值）
+- 后端测试：1033/1033 全绿
+
 ## 2026-05-02（第三百六十五轮·自动循环）
 
 ### 测试补强：用户编辑审计日志 before_data 字段验证

@@ -340,6 +340,7 @@ def update_product(
     # 检查价格变更，记录价格历史
     old_sale_price = product.sale_price
     old_cost_price = product.cost_price
+    old_name = product.name
 
     if data.name is not None:
         name = data.name.strip()
@@ -425,7 +426,7 @@ def update_product(
         db, request, current_user,
         action="product_update", resource_type="product",
         resource_id=str(product.id),
-        before_data={"name": product.name, "sale_price": str(old_sale_price), "cost_price": str(old_cost_price)},
+        before_data={"name": old_name, "sale_price": str(old_sale_price), "cost_price": str(old_cost_price)},
         after_data={"name": product.name, "sale_price": str(product.sale_price), "cost_price": str(product.cost_price)},
     )
     db.commit()
