@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百三十一轮·自动循环）
+
+### 文档：部署指南补充部署前检查、更新部署、回滚和 HTTPS 配置
+
+- 新增 pre-deploy-check.sh 使用说明
+- 新增更新部署流程（git pull + check + rebuild）
+- 新增 rollback.sh 回滚流程说明
+- 新增 HTTPS/TLS 配置步骤
+
 ## 2026-05-02（第二百三十轮·自动循环）
 
 ### 自动循环：Backlog P1/P2 状态确认 + 进度提交
