@@ -2247,3 +2247,28 @@ def test_84_customer_create_audit_log_after_data_completeness():
     assert log["after_data"]["contact_name"] == "联系人李四"
     assert log["before_data"] is None
     assert log["resource_type"] == "customer"
+
+
+def test_85_product_disable_audit_log_before_after_data_completeness():
+    """商品停用审计日志 before_data 含 name/sku/status，after_data 含 status=disabled"""
+    headers = _admin_auth()
+    resp = client.post("/api/v1/products", json={
+        "name": "停用审计商品", "sale_price": "30.00", "cost_price": "15.00",
+        "stock_quantity": 10, "sku": "DISABLE-85",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    resp = client.post(f"/api/v1/products/{pid}/disable", headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=product_disable", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == pid)
+    assert log["before_data"]["name"] == "停用审计商品"
+    assert log["before_data"]["sku"] == "DISABLE-85"
+    assert log["before_data"]["status"] == "active"
+    assert log["after_data"]["status"] == "disabled"
+    assert log["after_data"]["name"] == "停用审计商品"
+    assert log["resource_type"] == "product"

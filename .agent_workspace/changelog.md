@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百轮·自动循环）
+
+### 代码质量 + 测试补强：docs/testing.md 同步 + 商品停用审计日志完整性验证
+
+- `docs/testing.md`：更新后端测试总数 1077→1082、总计 1459→1464、test_audit_log.py 79→84，更新覆盖描述
+- `test_audit_log.py`：新增 test_85（商品停用 before_data 含 name/sku/status=active，after_data 含 status=disabled）
+- 后端测试：1083/1083 全绿，ruff clean
+
 ## 2026-05-03（第三百九十九轮·自动循环）
 
 ### 测试补强：客户创建审计日志 after_data 含 phone/level/source/contact_name
