@@ -603,3 +603,73 @@ def test_36_disabled_user_refresh_token_immediately_invalid():
         db.commit()
     finally:
         db.close()
+
+
+# ─── 密码修改后 token 行为验证 ───
+
+
+def test_37_password_change_old_access_token_still_works():
+    """修改密码后旧 access token 仍可用（无状态 JWT 无黑名单）"""
+    # 登录获取 token
+    login_resp = client.post("/api/v1/auth/login", json={
+        "username": "testuser", "password": "testpass123",
+    })
+    assert login_resp.status_code == 200
+    old_token = login_resp.json()["data"]["access_token"]
+
+    # 验证 token 有效
+    resp = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {old_token}"})
+    assert resp.status_code == 200
+
+    # 修改密码
+    resp = client.post("/api/v1/auth/change-password", json={
+        "old_password": "testpass123",
+        "new_password": "newpass789",
+    }, headers={"Authorization": f"Bearer {old_token}"})
+    assert resp.status_code == 200
+
+    # 旧 token 仍可用（无状态 JWT，无 token 黑名单机制）
+    resp = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {old_token}"})
+    assert resp.status_code == 200
+
+    # 改回原密码
+    login2 = client.post("/api/v1/auth/login", json={
+        "username": "testuser", "password": "newpass789",
+    })
+    token2 = login2.json()["data"]["access_token"]
+    client.post("/api/v1/auth/change-password", json={
+        "old_password": "newpass789",
+        "new_password": "testpass123",
+    }, headers={"Authorization": f"Bearer {token2}"})
+
+
+def test_38_password_change_old_refresh_token_still_works():
+    """修改密码后旧 refresh token 仍可用"""
+    login_resp = client.post("/api/v1/auth/login", json={
+        "username": "testuser", "password": "testpass123",
+    })
+    assert login_resp.status_code == 200
+    old_refresh = login_resp.json()["data"]["refresh_token"]
+    access = login_resp.json()["data"]["access_token"]
+
+    # 修改密码
+    resp = client.post("/api/v1/auth/change-password", json={
+        "old_password": "testpass123",
+        "new_password": "newpass999",
+    }, headers={"Authorization": f"Bearer {access}"})
+    assert resp.status_code == 200
+
+    # 旧 refresh token 仍可刷新（无状态 JWT）
+    resp = client.post("/api/v1/auth/refresh", json={"refresh_token": old_refresh})
+    assert resp.status_code == 200
+    assert "access_token" in resp.json()["data"]
+
+    # 改回原密码
+    login2 = client.post("/api/v1/auth/login", json={
+        "username": "testuser", "password": "newpass999",
+    })
+    token2 = login2.json()["data"]["access_token"]
+    client.post("/api/v1/auth/change-password", json={
+        "old_password": "newpass999",
+        "new_password": "testpass123",
+    }, headers={"Authorization": f"Bearer {token2}"})
