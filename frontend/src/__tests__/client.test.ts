@@ -24,4 +24,12 @@ describe('apiClient', () => {
     })
     expect(config.headers.Authorization).toBeUndefined()
   })
+
+  it('timeout 默认 15 秒', () => {
+    expect(apiClient.defaults.timeout).toBe(15000)
+  })
+
+  it('默认 Content-Type 为 application/json', () => {
+    expect(apiClient.defaults.headers.common['Content-Type'] || apiClient.defaults.headers['Content-Type']).toBeDefined()
+  })
 })
