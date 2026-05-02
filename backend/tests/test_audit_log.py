@@ -717,3 +717,49 @@ def test_33_login_failed_audit_log_fields():
     assert log["resource_type"] == "user"
     assert log["actor_name"] == "audit_tester"
     assert log["ip_address"] is not None
+
+
+def test_34_user_create_audit_log_fields():
+    """用户创建审计日志 after_data 含 username 和 display_name"""
+    headers = _admin_auth()
+    resp = client.post("/api/v1/users", json={
+        "username": "audit_create_user",
+        "password": "password123",
+        "display_name": "审计创建用户",
+    }, headers=headers)
+    assert resp.status_code == 200
+    uid = resp.json()["data"]["id"]
+
+    resp = client.get("/api/v1/audit-logs?action=user_create", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == uid)
+    assert log["after_data"]["username"] == "audit_create_user"
+    assert log["after_data"]["display_name"] == "审计创建用户"
+    assert log["resource_type"] == "user"
+
+
+def test_35_user_update_audit_log_fields():
+    """用户编辑审计日志 after_data 含变更字段"""
+    headers = _admin_auth()
+    # 创建用户
+    resp = client.post("/api/v1/users", json={
+        "username": "audit_update_user",
+        "password": "password123",
+        "display_name": "更新前名称",
+    }, headers=headers)
+    assert resp.status_code == 200
+    uid = resp.json()["data"]["id"]
+
+    # 编辑用户
+    resp = client.put(f"/api/v1/users/{uid}", json={
+        "display_name": "更新后名称",
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=user_update", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == uid)
+    assert log["after_data"]["display_name"] == "更新后名称"
+    assert log["resource_type"] == "user"

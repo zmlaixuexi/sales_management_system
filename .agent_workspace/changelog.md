@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百五十轮·自动循环）🎉 后端测试突破 1000
+
+### 测试：用户创建/编辑审计日志字段验证 + 1000 里程碑
+
+- `test_audit_log.py`：新增 test_34（user_create after_data 含 username/display_name）、test_35（user_update after_data 含变更字段）
+- **后端测试：1001/1001 全绿 — 突破 1000 大关**
+- 审计日志测试文件从 22 个增长到 37 个，覆盖全部核心操作的 before_data/after_data 字段完整性
+
 ## 2026-05-02（第三百四十九轮·自动循环）
 
 ### 测试：登录成功/失败审计日志字段验证
