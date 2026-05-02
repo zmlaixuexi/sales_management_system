@@ -2,16 +2,16 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-212
-当前任务名称：可观测性 — 版本端点新增 git revision
+当前任务编号：ROUND-213
+当前任务名称：文档计数修正 + 全量 CI 验证
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 212：/health 和 /version 端点新增 git commit revision 字段，启动时通过 git rev-parse --short HEAD 获取
-- Round 211：前端 API client 自动生成 X-Request-ID（UUID v4）
-- Round 210：全量 CI 验证 + 文档更新
+- Round 213：修正 testing.md 和 README 前端测试计数（378→380），总计 1147
+- Round 212：健康检查和版本端点新增 git commit revision
+- Round 211：前端 API client 自动生成 X-Request-ID
 
 ## 最终验证状态
 
