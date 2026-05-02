@@ -2,16 +2,16 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-247
+当前任务编号：ROUND-248
 当前任务名称：自动循环验证
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 247：全量门禁验证通过（809 后端 + 380 前端 + ruff 0 + tsc 0 + 构建 266ms）
+- Round 248：提取 active_query() 辅助函数，4 处列表查询软删除过滤统一（809 测试全绿）
+- Round 247：全量门禁验证通过（809+380+ruff 0+tsc 0+266ms）
 - Round 246：密码安全单元测试 7 项 + verify_password AttributeError 防御（809 测试全绿）
-- Round 245：安全加固——bcrypt 显式 rounds、JWT 添加 iat/jti（801 测试全绿）
 
 ## 最终验证状态
 

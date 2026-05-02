@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百四十八轮·自动循环）
+
+### 重构：提取 active_query() 辅助函数，4 处列表查询软删除过滤统一
+
+- deps.py 新增 `active_query(db, Model)`：自动过滤 deleted_at 的查询构造器
+- 4 个 router（customers、orders、products、users）的列表查询使用 active_query 替代手写 filter
+- 剩余 20+ 处混合条件用法可逐步替换
+- 809 测试全绿，ruff 0 errors
+
 ## 2026-05-02（第二百四十七轮·自动循环）
 
 ### 验证：全量门禁通过
