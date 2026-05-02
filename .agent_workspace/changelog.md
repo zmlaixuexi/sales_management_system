@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百轮·自动循环）
+
+### 文档：补充 .env.example 和 README 中缺失的环境变量
+
+- .env.example 新增 5 个环境变量：SLOW_SQL_THRESHOLD_MS、MAX_CSV_IMPORT_ROWS、DB_POOL_SIZE、DB_MAX_OVERFLOW、DB_POOL_RECYCLE_SECONDS
+- README 环境变量表同步更新
+- 全量 CI 验证通过（ruff 0 + mypy 0 + 760 + ESLint 0 + tsc 0 + 339 + build ✓ = 1099）
+
 ## 2026-05-02（第一百九十九轮·自动循环）
 
 ### 代码质量：修复 ratelimit.py mypy 类型错误
