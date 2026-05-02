@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第四百四十四轮·自动循环）
+
+### 修复 + 文档：phone Schema/Model 一致性 + database.md 字段约束
+
+- phone 字段 max_length 20→30，对齐 SQLAlchemy String(30)，支持国际号码
+- database.md 新增"字段约束"章节：一致/安全差异/验证规则三张表
+- npm audit: 0 vulnerabilities
+- 1189 后端测试全绿
+
 ## 2026-05-03（第四百四十三轮·自动循环）
 
 ### 安全加固：开发工具依赖升级
