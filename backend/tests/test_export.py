@@ -787,3 +787,81 @@ def test_43_export_payments_data_scope_filtered():
     lines = [line for line in resp.text.strip().split("\n") if line.strip()]
     data_lines = [ln for ln in lines if "收款ID" not in ln]
     assert len(data_lines) == 0
+
+
+def test_44_export_customers_audit_log():
+    """客户导出产生审计日志"""
+    from app.core.security import create_access_token
+    from app.models.audit import AuditLog
+
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "export_tester").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/exports/customers", headers=headers)
+    assert resp.status_code == 200
+
+    db = TestSession()
+    try:
+        log = db.query(AuditLog).filter(
+            AuditLog.action == "export_customers",
+        ).first()
+        assert log is not None
+        assert log.resource_type == "customer"
+    finally:
+        db.close()
+
+
+def test_45_export_orders_audit_log():
+    """订单导出产生审计日志"""
+    from app.core.security import create_access_token
+    from app.models.audit import AuditLog
+
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "export_tester").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/exports/orders", headers=headers)
+    assert resp.status_code == 200
+
+    db = TestSession()
+    try:
+        log = db.query(AuditLog).filter(
+            AuditLog.action == "export_orders",
+        ).first()
+        assert log is not None
+        assert log.resource_type == "order"
+    finally:
+        db.close()
+
+
+def test_46_export_payments_audit_log():
+    """收款导出产生审计日志"""
+    from app.core.security import create_access_token
+    from app.models.audit import AuditLog
+
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "export_tester").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/exports/payments", headers=headers)
+    assert resp.status_code == 200
+
+    db = TestSession()
+    try:
+        log = db.query(AuditLog).filter(
+            AuditLog.action == "export_payments",
+        ).first()
+        assert log is not None
+        assert log.resource_type == "payment"
+    finally:
+        db.close()

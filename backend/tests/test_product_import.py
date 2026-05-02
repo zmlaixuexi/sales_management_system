@@ -317,3 +317,34 @@ def test_18_import_requires_create_permission():
         headers={"Authorization": f"Bearer {token}"},
     )
     assert resp.status_code == 403
+
+
+def test_19_import_creates_audit_log():
+    """商品导入产生审计日志"""
+    from app.core.security import create_access_token
+    from app.models.audit import AuditLog
+
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "import_tester").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+    csv_content = "商品名称,销售价\n审计导入商品,99.00"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=headers,
+    )
+    assert resp.status_code == 200
+
+    db = TestSession()
+    try:
+        log = db.query(AuditLog).filter(
+            AuditLog.action == "product_import",
+        ).first()
+        assert log is not None
+        assert log.resource_type == "product"
+    finally:
+        db.close()

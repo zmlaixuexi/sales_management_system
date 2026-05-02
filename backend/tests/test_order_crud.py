@@ -1328,3 +1328,61 @@ def test_51_order_cancel_audit_log():
         assert log.resource_type == "order"
     finally:
         db.close()
+
+
+def test_52_order_update_audit_log():
+    """编辑订单产生审计日志"""
+    from app.models.audit import AuditLog
+
+    db = TestSession()
+    try:
+        user = db.query(User).first()
+        cat = db.query(ProductCategory).first()
+        prod = Product(
+            id=uuid.uuid4(), name="更新审计商品", sku="ORD-UPD-AUDIT",
+            sale_price=100, cost_price=60, stock_quantity=10,
+            status="active", category_id=cat.id,
+        )
+        db.add(prod)
+        cust = Customer(
+            id=uuid.uuid4(), name="更新审计客户", phone="13800000775",
+            owner_user_id=user.id, created_by=user.id,
+        )
+        db.add(cust)
+        db.flush()
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no="ORD-UPD-AUDIT",
+            customer_id=cust.id, sales_user_id=user.id,
+            status="draft", total_amount=100, total_cost=60,
+            gross_profit=40, gross_margin=0.4, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=prod.id,
+            product_name_snapshot=prod.name, cost_price_snapshot=60,
+            quantity=1, unit_price=100, subtotal_amount=100, subtotal_cost=60,
+        ))
+        db.commit()
+        oid = str(order.id)
+    finally:
+        db.close()
+
+    # 编辑订单备注
+    resp = client.put(f"/api/v1/sales-orders/{oid}", json={
+        "remark": "审计测试备注",
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    # 直接查询数据库验证审计日志
+    db = TestSession()
+    try:
+        log = db.query(AuditLog).filter(
+            AuditLog.action == "order_update",
+            AuditLog.resource_id == oid,
+        ).first()
+        assert log is not None
+        assert log.resource_type == "order"
+    finally:
+        db.close()

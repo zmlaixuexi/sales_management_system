@@ -305,3 +305,34 @@ def test_17_import_requires_create_permission():
         headers={"Authorization": f"Bearer {token}"},
     )
     assert resp.status_code == 403
+
+
+def test_18_import_creates_audit_log():
+    """客户导入产生审计日志"""
+    from app.core.security import create_access_token
+    from app.models.audit import AuditLog
+
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "customer_importer").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+    csv_content = "客户名称,电话\n审计导入客户,13800004444"
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=headers,
+    )
+    assert resp.status_code == 200
+
+    db = TestSession()
+    try:
+        log = db.query(AuditLog).filter(
+            AuditLog.action == "customer_import",
+        ).first()
+        assert log is not None
+        assert log.resource_type == "customer"
+    finally:
+        db.close()

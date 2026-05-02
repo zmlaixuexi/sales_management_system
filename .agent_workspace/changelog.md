@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-05-02（第三百三十五轮·自动循环）
+
+### 测试：审计日志全覆盖 — 补强 6 个缺口
+
+- 客户导入产生 customer_import 审计日志验证（test_customer_import test_18）
+- 商品导入产生 product_import 审计日志验证（test_product_import test_19）
+- 订单编辑产生 order_update 审计日志验证（test_order_crud test_52）
+- 客户导出产生 export_customers 审计日志验证（test_export test_44）
+- 订单导出产生 export_orders 审计日志验证（test_export test_45）
+- 收款导出产生 export_payments 审计日志验证（test_export test_46）
+- 全部 29 个审计日志操作现已 100% 覆盖
+- 文档更新至 934 后端 / 382 前端
+- 934 后端测试全绿（+6）
+
 ## 2026-05-02（第三百三十四轮·自动循环）
 
 ### 测试：商品软删除审计日志验证 + page_size=101 超限
