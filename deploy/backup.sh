@@ -37,7 +37,13 @@ else
 fi
 
 FILE_SIZE=$(du -h "${DB_BACKUP}" | cut -f1)
-echo "[$(date)] 数据库备份完成: ${DB_BACKUP} (${FILE_SIZE})"
+
+# 验证备份文件完整性
+if gzip -t "${DB_BACKUP}" 2>/dev/null; then
+    echo "[$(date)] 数据库备份完成: ${DB_BACKUP} (${FILE_SIZE}) ✓"
+else
+    echo "[$(date)] 警告：数据库备份文件可能损坏: ${DB_BACKUP}" >&2
+fi
 
 # 备份上传文件目录
 echo "[$(date)] 开始备份上传文件..."
