@@ -472,7 +472,7 @@ def test_28_update_customer_email_duplicate():
         "name": "邮箱客户A", "email": "dup_a@test.com",
     }, headers=headers)
     assert resp.status_code == 200
-    cid_a = resp.json()["data"]["id"]
+    _ = resp.json()["data"]["id"]
 
     resp = client.post("/api/v1/customers", json={
         "name": "邮箱客户B", "email": "dup_b@test.com",

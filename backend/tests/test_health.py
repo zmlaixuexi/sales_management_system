@@ -198,6 +198,101 @@ def test_cors_disallowed_origin():
     assert "access-control-allow-origin" not in response.headers
 
 
+def test_cors_preflight_credentials():
+    """允许的 Origin 预检请求应包含 credentials 头"""
+    response = client.options(
+        "/api/v1/health",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+    assert response.headers.get("access-control-allow-credentials") == "true"
+
+
+def test_cors_preflight_allowed_methods():
+    """预检请求返回允许的方法列表"""
+    response = client.options(
+        "/api/v1/health",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "POST",
+        },
+    )
+    allow_methods = response.headers.get("access-control-allow-methods", "")
+    assert "POST" in allow_methods
+    assert "GET" in allow_methods
+    assert "PUT" in allow_methods
+    assert "DELETE" in allow_methods
+
+
+def test_cors_preflight_disallowed_method():
+    """不在允许列表的方法（PATCH）不应通过预检"""
+    response = client.options(
+        "/api/v1/health",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "PATCH",
+        },
+    )
+    # FastAPI CORSMiddleware 对不在 allow_methods 的请求仍可能返回 CORS 头
+    # 但 allow-methods 列表中不应包含 PATCH
+    allow_methods = response.headers.get("access-control-allow-methods", "")
+    assert "PATCH" not in allow_methods
+
+
+def test_cors_preflight_allowed_headers():
+    """预检请求应返回允许的自定义头"""
+    response = client.options(
+        "/api/v1/health",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "Authorization,Content-Type,X-Request-ID",
+        },
+    )
+    assert response.status_code == 200
+
+
+def test_cors_preflight_disallowed_header():
+    """预检请求中不在允许列表的头应被拒绝"""
+    response = client.options(
+        "/api/v1/health",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "X-Custom-Forbidden",
+        },
+    )
+    # FastAPI CORSMiddleware 会拒绝不在 allow_headers 的自定义头
+    assert "access-control-allow-headers" not in response.headers or \
+        "X-Custom-Forbidden" not in response.headers.get("access-control-allow-headers", "")
+
+
+def test_cors_empty_origin():
+    """空 Origin 不应返回 CORS 头"""
+    response = client.options(
+        "/api/v1/health",
+        headers={
+            "Origin": "",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+    assert "access-control-allow-origin" not in response.headers
+
+
+def test_cors_null_origin():
+    """null Origin 不应返回 CORS 头"""
+    response = client.options(
+        "/api/v1/health",
+        headers={
+            "Origin": "null",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+    assert "access-control-allow-origin" not in response.headers
+
+
 def test_response_time_header():
     """所有 API 响应应包含 X-Response-Time 头"""
     response = client.get("/api/v1/health")
