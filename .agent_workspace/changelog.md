@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第一百九十八轮·自动循环）
+
+### 文档：更新测试文档和 README 反映最新测试状态（760+339=1099）
+
+- testing.md：后端总数 711→760，新增 6 个测试文件详解条目
+- testing.md：更新 marker 计数（crud 204→248, security 84→89）
+- testing.md：修正前端测试计数（statusMaps 6→10, request 5→8, AppLayout 6→8, downloadCsv 6→9）
+- README.md：后端测试 716→760，新增 5 个测试模块行
+- conftest.py：为新增测试文件注册 marker 分类（test_auth_rate_limit, test_product_helpers 等）
+
 ## 2026-05-02（第一百九十七轮·自动循环）
 
 ### 测试：新增收款登记服务单元测试（10 项）
