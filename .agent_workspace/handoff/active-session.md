@@ -2,16 +2,16 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-192
-当前任务名称：测试补强 — 登录速率限制辅助函数单元测试
+当前任务编号：ROUND-193
+当前任务名称：代码质量 — 提取 paymentMethodMap 共享常量，修复 OrderDetail 收款方式标签 bug
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 192：新增 test_auth_rate_limit.py（5 项）— _check_login_rate_limit 阈值/独立 IP/过期清理 + _record_login_fail 时间戳
+- Round 193：提取 paymentMethodMap 到 statusMaps.ts 共享常量，修复 OrderDetail.tsx 中 bank_transfer→transfer bug，更新 Payments.tsx 和测试 mock 数据
+- Round 192：新增 test_auth_rate_limit.py（5 项）
 - Round 191：扩展 request.test.ts（+3 项）
-- Round 190：全量 CI 验证 + downloadCsv 边界测试（+3 项）
 
 ## 最终验证状态
 

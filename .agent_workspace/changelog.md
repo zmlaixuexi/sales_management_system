@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第一百九十三轮·自动循环）
+
+### 代码质量：提取 paymentMethodMap 共享常量，修复 OrderDetail 收款方式标签 bug
+
+- 在 `statusMaps.ts` 新增 `paymentMethodMap`（cash/transfer/wechat/alipay/other）
+- 修复 `OrderDetail.tsx` 中 `bank_transfer`→`transfer` 的 bug（与后端 schema 对齐）
+- `Payments.tsx` 和 `OrderDetail.tsx` 均改为从共享常量导入，消除重复定义
+- 同步修复 `payments-api.test.ts` 中 mock 数据使用 `bank_transfer` 的问题
+- 全量 CI 验证通过：716 + 339 = 1055 tests
+
 ## 2026-05-02（第一百九十二轮·自动循环）
 
 ### 测试：新增登录速率限制辅助函数单元测试（_check_login_rate_limit/_record_login_fail 5 项）
