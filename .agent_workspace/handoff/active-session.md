@@ -2,16 +2,16 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-278
+当前任务编号：ROUND-279
 当前任务名称：自动循环验证
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 278：消除 ESLint 23 个 no-explicit-any 错误（(e as any) → Record<string, boolean>）
+- Round 279：修复 3 处 useEffect 缺少 navigate 依赖，ESLint 现在 0 errors 0 warnings
+- Round 278：消除 ESLint 23 个 no-explicit-any 错误
 - Round 277：健康检查脚本增加数据库状态和版本信息
-- Round 276：移除未使用的 App.tsx 空壳组件
 
 ## 最终验证状态
 

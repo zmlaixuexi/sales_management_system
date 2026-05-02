@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百七十九轮·自动循环）
+
+### 代码质量：修复 3 处 ESLint useEffect 依赖警告
+
+- CustomerForm、OrderForm、ProductForm 的 useEffect 补充 navigate 依赖
+- ESLint 现为 0 errors、0 warnings
+- 382 前端测试全绿
+
 ## 2026-05-02（第二百七十八轮·自动循环）
 
 ### 代码质量：消除 ESLint 23 个 no-explicit-any 错误
