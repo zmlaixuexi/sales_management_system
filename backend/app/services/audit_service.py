@@ -51,7 +51,7 @@ def log_action(
     ip_address: str | None = None,
     user_agent: str | None = None,
     request_id: str | None = None,
-) -> AuditLog:
+) -> AuditLog | None:
     """记录操作日志"""
     try:
         entry = AuditLog(
@@ -77,7 +77,7 @@ def log_action(
         return entry
     except Exception:
         logger.exception("写入操作日志失败: action=%s resource_type=%s", action, resource_type)
-        return None  # type: ignore[return-value]
+        return None
 
 
 def log_user_action(
@@ -90,7 +90,7 @@ def log_user_action(
     resource_id: str | None = None,
     before_data: dict | None = None,
     after_data: dict | None = None,
-) -> AuditLog:
+) -> AuditLog | None:
     """记录操作日志（自动填充 actor_id、actor_name 和请求元数据）"""
     return log_action(
         db,

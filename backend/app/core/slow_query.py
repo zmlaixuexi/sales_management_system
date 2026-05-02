@@ -3,8 +3,10 @@
 import logging
 import time
 from contextvars import ContextVar
+from typing import Any
 
 from sqlalchemy import event
+from sqlalchemy.engine import Engine
 
 from app.core.config import settings
 
@@ -13,11 +15,15 @@ logger = logging.getLogger("app.slow_query")
 _query_start_ctx: ContextVar[float] = ContextVar("sql_query_start", default=0.0)
 
 
-def _before_cursor_execute(conn, cursor, statement, parameters, context, executemany):  # type: ignore[no-untyped-def]
+def _before_cursor_execute(
+    conn: Any, cursor: Any, statement: str, parameters: Any, context: Any, executemany: bool
+) -> None:
     _query_start_ctx.set(time.monotonic())
 
 
-def _after_cursor_execute(conn, cursor, statement, parameters, context, executemany):  # type: ignore[no-untyped-def]
+def _after_cursor_execute(
+    conn: Any, cursor: Any, statement: str, parameters: Any, context: Any, executemany: bool
+) -> None:
     elapsed_ms = round((time.monotonic() - _query_start_ctx.get()) * 1000, 2)
     threshold = settings.SLOW_SQL_THRESHOLD_MS
     if elapsed_ms >= threshold:
@@ -39,7 +45,7 @@ def _after_cursor_execute(conn, cursor, statement, parameters, context, executem
         logger.handle(record)
 
 
-def register_slow_query_listener(engine):  # type: ignore[no-untyped-def]
+def register_slow_query_listener(engine: Engine) -> None:
     if settings.SLOW_SQL_THRESHOLD_MS > 0:
         event.listen(engine, "before_cursor_execute", _before_cursor_execute)
         event.listen(engine, "after_cursor_execute", _after_cursor_execute)
