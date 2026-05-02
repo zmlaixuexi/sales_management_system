@@ -93,7 +93,7 @@ export default function OrderForm() {
         })
         .finally(() => setLoading(false))
     }
-  }, [id, form])
+  }, [id, form, navigate])
 
   const addProduct = (product: Product) => {
     const existing = lines.find((l) => l.product_id === product.id)

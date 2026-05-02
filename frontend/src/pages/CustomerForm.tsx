@@ -37,7 +37,7 @@ export default function CustomerForm() {
         })
         .finally(() => setLoading(false))
     }
-  }, [id, form])
+  }, [id, form, navigate])
 
   const { submitting, handleSubmit } = useSubmit(async (values: Record<string, unknown>) => {
     if (isEdit && id) {

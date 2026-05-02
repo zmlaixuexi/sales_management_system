@@ -44,7 +44,7 @@ export default function ProductForm() {
         })
         .finally(() => setLoading(false))
     }
-  }, [id, form])
+  }, [id, form, navigate])
 
   const handleImageUpload = async (file: File) => {
     setImageUploading(true)
