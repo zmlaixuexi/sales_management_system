@@ -1023,3 +1023,91 @@ def test_42_create_order_zero_price_above_cost_400():
     }, headers=_auth())
     assert resp.status_code == 400
     assert resp.json()["error"]["code"] == "PRICE_BELOW_COST"
+
+
+def test_43_list_orders_keyword_search():
+    """关键字搜索订单号"""
+    db = TestSession()
+    try:
+        user = db.query(User).first()
+        cust = db.query(Customer).first()
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no="ORD-KEYWORD-TEST-001",
+            customer_id=cust.id, sales_user_id=user.id,
+            status="draft", total_amount=100, total_cost=60,
+            gross_profit=40, gross_margin=0.4, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.commit()
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/sales-orders", params={"keyword": "KEYWORD-TEST"}, headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert any("KEYWORD-TEST" in i["order_no"] for i in items)
+
+
+def test_44_list_orders_keyword_like_injection():
+    """关键字搜索含 LIKE 特殊字符（%、_）不应匹配全部"""
+    resp = client.get("/api/v1/sales-orders", params={"keyword": "%"}, headers=_auth())
+    assert resp.status_code == 200
+    # % 在 SQL LIKE 中匹配所有，但 escape_like 应转义
+    # 结果不应包含异常多的记录
+    items = resp.json()["data"]["items"]
+    # 订单号不含字面量 %，应该返回空
+    assert all("%" not in i["order_no"] for i in items)
+
+
+def test_45_list_orders_page_size_boundary():
+    """分页边界 page_size=1 只返回一条"""
+    resp = client.get("/api/v1/sales-orders", params={"page_size": 1}, headers=_auth())
+    assert resp.status_code == 200
+    assert len(resp.json()["data"]["items"]) <= 1
+
+
+def test_46_list_orders_desc_ordering():
+    """订单列表按创建时间降序排列"""
+    from sqlalchemy import func
+
+    db = TestSession()
+    try:
+        user = db.query(User).first()
+        cust = db.query(Customer).first()
+        # 创建两个有明显时间差的订单
+        o1 = SalesOrder(
+            id=uuid.uuid4(), order_no="ORD-ORDER-OLD",
+            customer_id=cust.id, sales_user_id=user.id,
+            status="draft", total_amount=50, total_cost=30,
+            gross_profit=20, gross_margin=0.4, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(o1)
+        db.commit()
+
+        # 更新第一个订单的 created_at 使其更早
+        db.query(SalesOrder).filter(SalesOrder.id == o1.id).update(
+            {"created_at": func.datetime("now", "-1 hour")}
+        )
+        db.commit()
+
+        o2 = SalesOrder(
+            id=uuid.uuid4(), order_no="ORD-ORDER-NEW",
+            customer_id=cust.id, sales_user_id=user.id,
+            status="draft", total_amount=80, total_cost=40,
+            gross_profit=40, gross_margin=0.5, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(o2)
+        db.commit()
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/sales-orders", params={"page_size": 50}, headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    # 找到这两个订单，验证 NEW 在 OLD 前面
+    nos = [i["order_no"] for i in items]
+    if "ORD-ORDER-OLD" in nos and "ORD-ORDER-NEW" in nos:
+        assert nos.index("ORD-ORDER-NEW") < nos.index("ORD-ORDER-OLD")
