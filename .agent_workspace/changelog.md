@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第三百四十六轮·自动循环）
+
+### 测试：收款登记审计日志字段验证
+
+- `test_audit_log.py`：新增 test_29（payment_create after_data 含 order_id/amount/method）
+- 后端测试：995/995 全绿
+
 ## 2026-05-02（第三百四十五轮·自动循环）
 
 ### 测试：商品创建/编辑审计日志字段验证
