@@ -1307,3 +1307,36 @@ def test_66_order_update_remark_max_length_boundary():
     # 501 字符
     resp = client.put(f"/api/v1/sales-orders/{oid}", json={"remark": "U" * 501}, headers=headers)
     assert resp.status_code == 422, f"编辑备注 501 字符应被拒绝: {resp.status_code}"
+
+
+def test_67_payment_remark_max_length_boundary():
+    """收款备注恰好 500 字符通过，501 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+    # 创建客户+商品+订单+确认
+    resp = client.post("/api/v1/customers", json={"name": "收款备注边界客户", "phone": "13900676767"}, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/products", json={
+        "name": "收款备注边界商品", "sale_price": "100.00", "cost_price": "40.00", "stock_quantity": 10,
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cid,
+        "items": [{"product_id": pid, "quantity": 1, "unit_price": "100.00"}],
+    }, headers=headers)
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=headers)
+
+    # 恰好 500 字符
+    resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
+        "amount": "100.00", "payment_method": "cash", "remark": "P" * 500,
+    }, headers=headers)
+    assert resp.status_code == 200, f"500 字符备注应通过: {resp.json()}"
+
+    # 501 字符
+    resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
+        "amount": "50.00", "payment_method": "transfer", "remark": "P" * 501,
+    }, headers=headers)
+    assert resp.status_code == 422, f"501 字符备注应被拒绝: {resp.status_code}"
