@@ -180,3 +180,80 @@ def test_tokens_have_unique_jti():
     p1 = jwt.decode(t1, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
     p2 = jwt.decode(t2, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
     assert p1["jti"] != p2["jti"]
+
+
+# ─── Token 篡改检测 ──────────────────────────────────────────
+
+
+def test_tampered_token_rejected():
+    """被篡改的 token 解码失败"""
+    token = create_access_token("user-1")
+    # 修改 token 最后一个字符
+    tampered = token[:-2] + ("aa" if token[-2:] != "aa" else "bb")
+    from jose.exceptions import JWTError
+    try:
+        jwt.decode(tampered, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        assert False, "篡改的 token 不应解码成功"
+    except JWTError:
+        pass
+
+
+def test_token_wrong_secret_rejected():
+    """用错误密钥解码 token 失败"""
+    token = create_access_token("user-1")
+    from jose.exceptions import JWTError
+    try:
+        jwt.decode(token, "wrong-secret-key", algorithms=[settings.JWT_ALGORITHM])
+        assert False, "错误密钥不应解码成功"
+    except JWTError:
+        pass
+
+
+def test_expired_token_rejected():
+    """已过期的 token 解码失败"""
+    token = create_access_token("user-1", expires_delta=timedelta(seconds=-1))
+    from jose.exceptions import ExpiredSignatureError
+    try:
+        jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        assert False, "过期 token 不应解码成功"
+    except ExpiredSignatureError:
+        pass
+
+
+# ─── bcrypt 安全参数 ────────────────────────────────────────
+
+
+def test_bcrypt_rounds_12():
+    """bcrypt 使用 12 轮加密"""
+    h = hash_password("test1234")
+    # bcrypt 哈希格式: $2b$12$...
+    parts = h.split("$")
+    assert parts[1] == "2b"
+    assert parts[2] == "12"
+
+
+# ─── 密码特殊字符 ────────────────────────────────────────────
+
+
+def test_unicode_password():
+    """Unicode 密码可以正确哈希和验证"""
+    pwd = "密码测试🔐abc"
+    h = hash_password(pwd)
+    assert verify_password(pwd, h) is True
+    assert verify_password("密码测试🔓abc", h) is False
+
+
+def test_long_password():
+    """长密码（72 字节内）可以正确验证"""
+    pwd = "a" * 72
+    h = hash_password(pwd)
+    assert verify_password(pwd, h) is True
+
+
+def test_password_beyond_72_bytes():
+    """超过 72 字节的密码被截断（bcrypt 特性）"""
+    pwd72 = "a" * 72
+    pwd73 = "a" * 73
+    h = hash_password(pwd73)
+    # bcrypt 截断到 72 字节，所以 73 字节和 72 字节密码验证结果相同
+    assert verify_password(pwd72, h) is True
