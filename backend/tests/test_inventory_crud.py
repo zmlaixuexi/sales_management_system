@@ -342,3 +342,49 @@ def test_21_adjust_remark_strips_html():
     )
     assert "<script>" not in item.remark
     assert "正常备注" in item.remark
+
+
+def test_22_movements_filter_product_and_type():
+    """同时按 product_id 和 movement_type 筛选"""
+    # 先增加一笔调整，确保有 manual_adjust 类型的流水
+    resp = client.post("/api/v1/inventory/adjustments", json={
+        "product_id": _product_id, "quantity_change": 2,
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    # 同时过滤 product + type
+    resp = client.get(
+        f"/api/v1/inventory/movements?product_id={_product_id}&movement_type=manual_adjust",
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    for m in items:
+        assert m["product_id"] == _product_id
+        assert m["movement_type"] == "manual_adjust"
+
+
+def test_23_adjust_fractional_quantity_rejected():
+    """库存调整数量为小数应被拒绝（数量必须为整数）"""
+    resp = client.post("/api/v1/inventory/adjustments", json={
+        "product_id": _product_id, "quantity_change": 1.5,
+    }, headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_24_adjust_remark_max_length_boundary():
+    """备注恰好 500 字符通过，501 字符被拒绝"""
+    ok_remark = "x" * 500
+    resp = client.post("/api/v1/inventory/adjustments", json={
+        "product_id": _product_id, "quantity_change": 1,
+        "remark": ok_remark,
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    long_remark = "x" * 501
+    resp = client.post("/api/v1/inventory/adjustments", json={
+        "product_id": _product_id, "quantity_change": 1,
+        "remark": long_remark,
+    }, headers=_auth())
+    assert resp.status_code == 422
