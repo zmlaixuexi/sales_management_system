@@ -1,11 +1,11 @@
 """deps.py 辅助函数单元测试"""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 from fastapi import HTTPException
-from sqlalchemy import String, create_engine, DateTime, func
+from sqlalchemy import DateTime, String, create_engine
 from sqlalchemy.orm import Mapped, Session, mapped_column, sessionmaker
 
 from app.api.deps import (
@@ -240,7 +240,7 @@ def test_get_or_404_invalid_uuid(db: Session):
 
 def test_get_or_404_soft_deleted(db: Session):
     """软删除记录返回 404"""
-    obj = _FakeModel(name="已删除", deleted_at=datetime.now(timezone.utc))
+    obj = _FakeModel(name="已删除", deleted_at=datetime.now(UTC))
     db.add(obj)
     db.commit()
     with pytest.raises(HTTPException) as exc_info:

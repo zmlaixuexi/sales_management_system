@@ -94,7 +94,7 @@ def _mock_product(**kwargs):
     p.cost_price = kwargs.get("cost_price", Decimal("60.00"))
     p.stock_quantity = kwargs.get("stock_quantity", 10)
     p.status = kwargs.get("status", "active")
-    p.category = kwargs.get("category", None)
+    p.category = kwargs.get("category")
     p.remark = kwargs.get("remark", "")
     p.created_at = kwargs.get("created_at", datetime(2026, 5, 1, 10, 0, 0))
     return p
