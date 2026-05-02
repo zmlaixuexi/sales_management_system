@@ -24,12 +24,3 @@ export interface PaginatedData<T> {
   page_size: number
   total: number
 }
-
-// 分页参数
-export interface PaginationParams {
-  page?: number
-  page_size?: number
-  sort_by?: string
-  sort_order?: 'asc' | 'desc'
-  keyword?: string
-}
