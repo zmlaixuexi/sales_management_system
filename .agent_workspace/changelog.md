@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第一百八十一轮·自动循环）
+
+### 测试：新增报表辅助函数单元测试（_date_range/_apply_data_scope 11 项）
+
+- 新建 `test_reports_helpers.py`，11 个测试覆盖 reports.py 私有辅助函数
+- _date_range：全分支覆盖（today/7d/30d/this_month/last_month/无效 period）+ 边界（跨月/跨年/月初）
+- _apply_data_scope：管理员不过滤、销售只看自己
+- 后端 691→702，总计 1020 tests
+
 ## 2026-05-02（第一百八十轮·自动循环）
 
 ### 测试：新增安全模块单元测试（hash/verify/token 14 项）
