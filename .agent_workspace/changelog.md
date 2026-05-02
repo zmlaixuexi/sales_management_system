@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百二十七轮·自动循环）
+
+### 测试补强：审计日志 created_at 时间降序验证
+
+- `test_audit_log.py`：新增 test_114（审计日志 created_at 降序排列验证）
+- `docs/testing.md`：更新后端测试总数 1111→1112、总计 1493→1494、test_audit_log.py 115→116
+- 后端测试：1112/1112 全绿，ruff clean
+
 ## 2026-05-03（第四百二十六轮·自动循环）
 
 ### 测试补强：文件上传/删除审计日志 after_data/before_data 含文件信息验证

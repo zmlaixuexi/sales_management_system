@@ -3076,3 +3076,23 @@ def test_113_file_delete_audit_log_before_data_has_file_info():
     assert log["before_data"]["original_name"] == "test_delete_audit.png"
     assert "object_key" in log["before_data"], f"before_data 缺少 object_key: {log['before_data']}"
     assert log["resource_type"] == "file"
+
+
+def test_114_audit_log_created_at_chronological_order():
+    """审计日志 created_at 降序排列验证（后创建的排在前面）"""
+    headers = _admin_auth()
+    # 创建商品确保有数据
+    resp = client.post("/api/v1/products", json={
+        "name": "顺序验证商品114", "sale_price": "30.00", "cost_price": "10.00", "stock_quantity": 5,
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=product_create&page_size=10", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) > 0
+    # 验证 created_at 降序（允许相同时间戳）
+    for i in range(len(items) - 1):
+        assert items[i]["created_at"] >= items[i + 1]["created_at"], (
+            f"created_at 非降序: {items[i]['created_at']} < {items[i+1]['created_at']}"
+        )
