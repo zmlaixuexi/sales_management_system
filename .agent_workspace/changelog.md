@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-02（第一百八十七轮·自动循环）
+
+### 文档：更新 docs/testing.md 与实际测试输出对齐（992→1040）
+
+- 概览表：后端 677→711、前端 315→329、总计 992→1040、文件 31→33
+- 覆盖模块描述：新增安全模块/报表辅助函数/导出 API 辅助函数
+- 测试标记计数：export 59→62、infra 28→34
+- 新增 3 个后端测试文件条目：test_security.py（14）、test_reports_helpers.py（11）、test_exports_api.py（3）
+- 更新 test_logging.py 10→16
+- 更新 14 个前端测试模块计数与描述
+- 更新 ProtectedRoute Spin large 尺寸描述
+
 ## 2026-05-02（第一百八十六轮·自动循环）
 
 ### 测试：补强 API client 配置测试（timeout/Content-Type 2 项）
