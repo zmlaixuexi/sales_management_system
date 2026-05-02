@@ -488,7 +488,11 @@ def confirm_order(
     current_user: User = Depends(require_permission("order:confirm")),
 ):
     """确认订单 — 扣减库存"""
-    order = get_or_404(db, SalesOrder, order_id, "订单")
+    order = active_query(db, SalesOrder).filter(
+        SalesOrder.id == order_id,
+    ).with_for_update().first()
+    if not order:
+        raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "订单不存在"})
 
     check_owner_or_forbid(current_user, order.sales_user_id, "order:view_all", "订单")
 
@@ -526,7 +530,11 @@ def cancel_order(
     current_user: User = Depends(require_permission("order:cancel")),
 ):
     """取消订单 — 回滚库存"""
-    order = get_or_404(db, SalesOrder, order_id, "订单")
+    order = active_query(db, SalesOrder).filter(
+        SalesOrder.id == order_id,
+    ).with_for_update().first()
+    if not order:
+        raise HTTPException(status_code=404, detail={"code": "RESOURCE_NOT_FOUND", "message": "订单不存在"})
 
     check_owner_or_forbid(current_user, order.sales_user_id, "order:view_all", "订单")
 

@@ -1512,3 +1512,100 @@ def test_60_order_list_data_scope_non_owner():
     assert resp.status_code == 200
     items = resp.json()["data"]["items"]
     assert len(items) == 0, "非归属用户不应看到其他人的订单"
+
+
+def test_61_double_confirm_second_fails():
+    """同一订单确认两次：第一次成功，第二次返回 400"""
+    # 创建新鲜数据避免依赖被前序测试软删除的共享数据
+    db = TestSession()
+    try:
+        user = db.query(User).first()
+        cat = ProductCategory(id=uuid.uuid4(), name="双确认测试分类")
+        db.add(cat)
+        db.flush()
+        prod = Product(
+            id=uuid.uuid4(), name="双确认测试商品", sku=f"CONF-{uuid.uuid4().hex[:6]}",
+            sale_price=100, cost_price=50, stock_quantity=100,
+            status="active", category_id=cat.id,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(prod)
+        db.flush()
+        cust = Customer(id=uuid.uuid4(), name="双确认测试客户", owner_user_id=user.id, created_by=user.id)
+        db.add(cust)
+        db.commit()
+        prod_id = str(prod.id)
+        cust_id = str(cust.id)
+    finally:
+        db.close()
+
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cust_id,
+        "items": [{"product_id": prod_id, "quantity": 1}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    order_id = resp.json()["data"]["id"]
+
+    # 第一次确认成功
+    resp1 = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
+    assert resp1.status_code == 200
+    assert resp1.json()["data"]["status"] == "confirmed"
+
+    # 第二次确认返回 400（状态已不是 draft，行锁保证不会双重扣减）
+    resp2 = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
+    assert resp2.status_code == 400
+
+
+def test_62_cancel_confirmed_order_restores_stock():
+    """取消已确认订单库存正确回滚"""
+    db = TestSession()
+    try:
+        user = db.query(User).first()
+        cat = ProductCategory(id=uuid.uuid4(), name="取消回滚测试分类")
+        db.add(cat)
+        db.flush()
+        prod = Product(
+            id=uuid.uuid4(), name="取消回滚测试商品", sku=f"CANCEL-{uuid.uuid4().hex[:6]}",
+            sale_price=100, cost_price=50, stock_quantity=50,
+            status="active", category_id=cat.id,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(prod)
+        db.flush()
+        cust = Customer(id=uuid.uuid4(), name="取消回滚测试客户", owner_user_id=user.id, created_by=user.id)
+        db.add(cust)
+        db.commit()
+        prod_id = str(prod.id)
+        cust_id = str(cust.id)
+        stock_before = 50
+    finally:
+        db.close()
+
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cust_id,
+        "items": [{"product_id": prod_id, "quantity": 3}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    order_id = resp.json()["data"]["id"]
+
+    # 确认 → 扣减库存
+    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
+    assert resp.status_code == 200
+
+    db = TestSession()
+    try:
+        prod = db.query(Product).filter(Product.id == uuid.UUID(prod_id)).first()
+        assert prod.stock_quantity == stock_before - 3
+    finally:
+        db.close()
+
+    # 取消 → 回滚库存
+    resp = client.post(f"/api/v1/sales-orders/{order_id}/cancel", headers=_auth())
+    assert resp.status_code == 200
+
+    db = TestSession()
+    try:
+        prod = db.query(Product).filter(Product.id == uuid.UUID(prod_id)).first()
+        assert prod.stock_quantity == stock_before
+    finally:
+        db.close()
