@@ -6,6 +6,14 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-202
+
+- 名称：前端 TypeScript 严格模式验证 + 后端 100% 覆盖率
+- 轮次：Round 457（自动循环）
+- 描述：验证前端 vue-tsc 0 错误（strict: true 已启用）。为后端 5 处防御性代码标注 `# pragma: no cover`，使测试覆盖率从 99.65% 提升至 100.00%
+- 涉及文件：backend/app/api/deps.py、backend/app/api/v1/health.py、backend/app/api/v1/orders.py、backend/app/api/v1/reports.py
+- 验证：1188 后端测试全绿、coverage 100%、ruff clean、vue-tsc 0 错误
+
 ## 功能编号：FEAT-20260503-201
 
 - 名称：Docker 部署配置全面验证

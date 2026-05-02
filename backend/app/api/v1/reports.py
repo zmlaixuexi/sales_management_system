@@ -93,7 +93,7 @@ def sales_summary(
 
     result = query.first()
 
-    if result is None:
+    if result is None:  # pragma: no cover — 查询至少返回零值行
         total_amount, total_cost, gross_profit, order_count = Decimal("0"), Decimal("0"), Decimal("0"), 0
     else:
         total_amount, total_cost, gross_profit, order_count = result

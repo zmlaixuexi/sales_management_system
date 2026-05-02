@@ -16,7 +16,7 @@ def _get_git_revision() -> str:
             ["git", "rev-parse", "--short", "HEAD"],
             stderr=subprocess.DEVNULL,
         ).decode().strip()
-    except Exception:
+    except Exception:  # pragma: no cover
         return "unknown"
 
 

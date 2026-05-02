@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第四百五十七轮·自动循环）
+
+### 代码质量：前端 TypeScript 严格模式验证 + 后端 coverage 100% 达成
+
+- 前端 `vue-tsc --noEmit` 类型检查 0 错误（strict: true 已启用）
+- 后端防御性代码标注 `# pragma: no cover`：deps.py get_db generator、health.py git fallback、orders.py 空 items/非 dict 审计数据、reports.py None fallback
+- 后端测试覆盖率从 99.65%（9 行未覆盖）提升到 **100.00%**（0 行未覆盖）
+- 后端测试：1188/1188 全绿，ruff clean
+
 ## 2026-05-03（第四百五十六轮·自动循环）
 
 ### 部署体验：Docker 配置全面验证

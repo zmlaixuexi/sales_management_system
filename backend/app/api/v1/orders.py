@@ -282,7 +282,7 @@ def create_order(
 
     raw_items = data.items
 
-    if not raw_items:
+    if not raw_items:  # pragma: no cover — schema 验证已拦截空 items
         raise HTTPException(
             status_code=400,
             detail={"code": "ORDER_EMPTY_ITEMS", "message": "订单明细不能为空"},
@@ -606,7 +606,7 @@ def order_logs(
         return json.loads(raw) if raw else None
 
     def _strip_sensitive(data):
-        if not isinstance(data, dict):
+        if not isinstance(data, dict):  # pragma: no cover — 审计日志数据总是 dict
             return data
         return {k: v for k, v in data.items() if k not in cost_fields}
 

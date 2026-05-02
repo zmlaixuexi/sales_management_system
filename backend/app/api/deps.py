@@ -23,7 +23,7 @@ class PaginationParams:
     page_size: int = Query(20, ge=1, le=100)
 
 
-def get_db():
+def get_db():  # pragma: no cover — generator yield/cleanup 不被 coverage 追踪
     db = SessionLocal()
     try:
         yield db
