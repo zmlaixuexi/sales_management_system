@@ -134,7 +134,7 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（774 个）
+# 后端测试（793 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
@@ -195,7 +195,10 @@ npm run build
 | 请求体大小限制 | 7 | GET/OPTIONS 不受限，正常 POST 通过，超限返回 413，multipart 豁免，恰好等于限制通过 |
 | 文件上传权限 | 1 | 无 product:create 权限用户上传返回 403 |
 | 导出敏感字段 + 报表利润权限 | 6 | 导出商品/订单 CSV 成本价列权限过滤，报表概览利润字段权限过滤 |
-| **合计** | **774** | |
+| 对象级权限 | 11 | 客户/订单 detail/update/delete/transfer 非 owner 返回 403，管理员绕过 |
+| 边界条件 + 安全 | 6 | SQL 注入搜索安全（3 项）、分页边界 page=0/page_size=101/page_size=-1（3 项） |
+| 软删除过滤 | 2 | 客户列表排除已删除、支付列表排除已删除订单 |
+| **合计** | **793** | |
 
 ### 前端测试覆盖
 
