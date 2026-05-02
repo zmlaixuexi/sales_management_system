@@ -291,3 +291,29 @@ def test_17_import_invalid_cost_price_format():
     assert resp.status_code == 200
     assert resp.json()["data"]["created"] == 0
     assert any("成本价格式错误" in e["message"] for e in resp.json()["data"]["errors"])
+
+
+def test_18_import_requires_create_permission():
+    """无 product:create 权限用户返回 403"""
+    from app.core.security import create_access_token
+
+    db = TestSession()
+    try:
+        nop = User(
+            id=uuid.uuid4(), username="no_prod_import_perm",
+            hashed_password=hash_password("testpass123"),
+            display_name="无商品导入权限", is_active=True, is_superuser=False,
+        )
+        db.add(nop)
+        db.commit()
+        token = create_access_token(str(nop.id))
+    finally:
+        db.close()
+
+    csv_content = "商品名称,销售价\n权限测试,100"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code == 403

@@ -279,3 +279,29 @@ def test_16_import_no_phone():
     )
     assert resp.status_code == 200
     assert resp.json()["data"]["created"] == 1
+
+
+def test_17_import_requires_create_permission():
+    """无 customer:create 权限用户返回 403"""
+    from app.core.security import create_access_token
+
+    db = TestSession()
+    try:
+        nop = User(
+            id=uuid.uuid4(), username="no_import_perm",
+            hashed_password=hash_password("testpass123"),
+            display_name="无导入权限", is_active=True, is_superuser=False,
+        )
+        db.add(nop)
+        db.commit()
+        token = create_access_token(str(nop.id))
+    finally:
+        db.close()
+
+    csv_content = "客户名称,电话\n权限测试,13800005555"
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert resp.status_code == 403
