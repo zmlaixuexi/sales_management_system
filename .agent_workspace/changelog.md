@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第二百零二轮·自动循环）
+
+### 工程：Makefile 新增 lint-fix 命令
+
+- 添加 `make lint-fix` 命令，自动修复前后端 lint 问题（ruff check --fix + eslint --fix）
+- 更新 .PHONY 声明
+
 ## 2026-05-02（第二百零一轮·自动循环）
 
 ### 审计：全量安全审计和覆盖率验证

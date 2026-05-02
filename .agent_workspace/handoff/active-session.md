@@ -2,16 +2,16 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-201
-当前任务名称：审计 — 安全审计和覆盖率验证
+当前任务编号：ROUND-202
+当前任务名称：工程 — Makefile 新增 lint-fix 命令
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 201：全量安全审计（所有写入端点需认证 ✓）+ 覆盖率验证（99.79%，仅 6 行未覆盖）
-- Round 200：补充 .env.example 和 README 中 5 个缺失环境变量
-- Round 199：修复 ratelimit.py mypy 类型错误
+- Round 202：Makefile 新增 `make lint-fix` 命令（ruff --fix + eslint --fix）
+- Round 201：全量安全审计 + 覆盖率验证（99.79%）
+- Round 200：补充 .env.example 和 README 缺失环境变量
 
 ## 最终验证状态
 
@@ -24,15 +24,7 @@
 | ESLint | 0 errors ✓ |
 | TypeScript | 0 errors ✓ |
 | 构建 | ✓ |
-| 覆盖率 | 99.79% ✓ |
 | 总计 | 1099 tests |
-
-## 安全审计结果
-
-- 所有 POST/PUT/DELETE 端点均有 `Depends(get_current_user)` 或 `Depends(require_permission(...))` ✓
-- 仅 `/auth/login` 和 `/auth/refresh` 允许未认证访问（符合预期）
-- 文件操作有所有权检查 ✓
-- 500 错误仅出现在 CSV 导入 commit 回滚（符合预期）✓
 
 ## 下一步第一动作
 
