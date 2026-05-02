@@ -678,3 +678,42 @@ def test_31_product_disable_audit_log_fields():
     assert log["before_data"]["status"] == "active"
     assert log["after_data"]["status"] == "disabled"
     assert log["resource_type"] == "product"
+
+
+def test_32_login_success_audit_log_fields():
+    """登录成功审计日志含 resource_type=user、actor_name、ip_address"""
+    headers = _admin_auth()
+    resp = client.post("/api/v1/auth/login", json={
+        "username": "audit_tester",
+        "password": "testpass123",
+    })
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=login_success", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    log = items[0]
+    assert log["action"] == "login_success"
+    assert log["resource_type"] == "user"
+    assert log["actor_name"] == "审计测试员"
+    assert log["ip_address"] is not None
+
+
+def test_33_login_failed_audit_log_fields():
+    """登录失败审计日志含 resource_type=user、actor_name 为用户名"""
+    headers = _admin_auth()
+    client.post("/api/v1/auth/login", json={
+        "username": "audit_tester",
+        "password": "wrong_password",
+    })
+
+    resp = client.get("/api/v1/audit-logs?action=login_failed", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    log = items[0]
+    assert log["action"] == "login_failed"
+    assert log["resource_type"] == "user"
+    assert log["actor_name"] == "audit_tester"
+    assert log["ip_address"] is not None

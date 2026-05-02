@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第三百四十九轮·自动循环）
+
+### 测试：登录成功/失败审计日志字段验证
+
+- `test_audit_log.py`：新增 test_32（login_success 含 resource_type/actor_name/ip_address）、test_33（login_failed 含 resource_type/actor_name/ip_address）
+- 后端测试：999/999 全绿
+
 ## 2026-05-02（第三百四十八轮·自动循环）
 
 ### 测试：商品停用审计日志字段验证
