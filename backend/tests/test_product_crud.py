@@ -670,9 +670,11 @@ def test_27_product_list_cost_fields_hidden_for_non_privileged():
         db.flush()
         db.add(UserRole(user_id=viewer.id, role_id=role.id))
 
-        perm = Permission(id=uuid.uuid4(), code="product:list", name="商品列表", module="product")
-        db.add(perm)
-        db.flush()
+        perm = db.query(Permission).filter(Permission.code == "product:list").first()
+        if not perm:
+            perm = Permission(id=uuid.uuid4(), code="product:list", name="商品列表", module="product")
+            db.add(perm)
+            db.flush()
         db.add(RolePermission(role_id=role.id, permission_id=perm.id))
 
         db.commit()
@@ -691,3 +693,62 @@ def test_27_product_list_cost_fields_hidden_for_non_privileged():
         assert "cost_price" not in item
         assert "unit_profit" not in item
         assert "gross_margin" not in item
+
+
+def test_28_product_detail_cost_fields_hidden_for_non_privileged():
+    """非特权用户查看商品详情时成本字段不返回"""
+    from app.core.security import create_access_token
+    from app.models.user import Permission, Role, RolePermission, UserRole
+
+    db = TestSession()
+    try:
+        viewer = User(
+            id=uuid.uuid4(), username="product_detail_viewer",
+            hashed_password=hash_password("testpass123"),
+            display_name="商品详情查看者",
+            is_active=True, is_superuser=False,
+        )
+        db.add(viewer)
+        db.flush()
+
+        role = Role(id=uuid.uuid4(), name="product_detail_viewer_role", display_name="详情查看角色")
+        db.add(role)
+        db.flush()
+        db.add(UserRole(user_id=viewer.id, role_id=role.id))
+
+        perm = db.query(Permission).filter(Permission.code == "product:list").first()
+        if not perm:
+            perm = Permission(id=uuid.uuid4(), code="product:list", name="商品列表", module="product")
+            db.add(perm)
+            db.flush()
+        db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+
+        db.commit()
+        viewer_token = create_access_token(str(viewer.id))
+    finally:
+        db.close()
+
+    viewer_headers = {"Authorization": f"Bearer {viewer_token}"}
+
+    # 创建独立商品（_product_id 可能已被删除测试删除）
+    db2 = TestSession()
+    try:
+        cat = db2.query(ProductCategory).first()
+        test_prod = Product(
+            id=uuid.uuid4(), name="详情权限测试商品", sku="PRIV-DETAIL-TEST",
+            sale_price=100, cost_price=60, stock_quantity=10,
+            status="active", category_id=cat.id,
+        )
+        db2.add(test_prod)
+        db2.commit()
+        test_pid = str(test_prod.id)
+    finally:
+        db2.close()
+
+    resp = client.get(f"/api/v1/products/{test_pid}", headers=viewer_headers)
+    assert resp.status_code == 200
+
+    data = resp.json()["data"]
+    assert data.get("cost_price") is None
+    assert data.get("unit_profit") is None
+    assert data.get("gross_margin") is None

@@ -95,9 +95,9 @@ class ProductDetail(BaseModel):
     category_id: str | None = None
     category_name: str | None = None
     sale_price: str
-    cost_price: str
-    unit_profit: str
-    gross_margin: str
+    cost_price: str | None = None
+    unit_profit: str | None = None
+    gross_margin: str | None = None
     stock_quantity: int
     status: str
     sort_weight: int
