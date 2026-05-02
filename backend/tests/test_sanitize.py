@@ -79,3 +79,79 @@ def test_user_schema_sanitizes_email():
     from app.schemas.auth import UserCreate
     u = UserCreate(username="testuser", password="pass123", email="<script>x</script>@evil.com")
     assert u.email == "x@evil.com"
+
+
+def test_sanitize_product_name_strips_html():
+    """商品名称中的 HTML 标签被移除"""
+    from app.schemas.product import ProductCreate
+    data = ProductCreate(name="<script>alert(1)</script>正常商品", sale_price="10")
+    assert "<script>" not in data.name
+    assert "正常商品" in data.name
+
+
+def test_sanitize_product_remark_strips_html():
+    """商品备注中的 HTML 标签被移除"""
+    from app.schemas.product import ProductCreate
+    data = ProductCreate(name="test", sale_price="10", remark="<b>粗体</b>备注")
+    assert "<b>" not in data.remark
+    assert "粗体备注" in data.remark
+
+
+def test_sanitize_customer_name_strips_html():
+    """客户名称中的 HTML 标签被移除"""
+    from app.schemas.customer import CustomerCreate
+    data = CustomerCreate(name="<img src=x>客户名")
+    assert "<img" not in data.name
+    assert "客户名" in data.name
+
+
+def test_sanitize_customer_contact_name_strips_html():
+    """客户联系人中的 HTML 标签被移除"""
+    from app.schemas.customer import CustomerCreate
+    data = CustomerCreate(name="测试客户", contact_name="<i>张三</i>")
+    assert "<i>" not in data.contact_name
+    assert "张三" in data.contact_name
+
+
+def test_sanitize_customer_remark_strips_html():
+    """客户备注中的 HTML 标签被移除"""
+    from app.schemas.customer import CustomerCreate
+    data = CustomerCreate(name="测试客户", remark="<script>xss</script>正常备注")
+    assert "<script>" not in data.remark
+    assert "正常备注" in data.remark
+
+
+def test_sanitize_user_username_strips_html():
+    """用户名中的 HTML 标签被移除"""
+    from app.schemas.auth import UserCreate
+    data = UserCreate(username="<b>admin</b>", password="pass123456")
+    assert "<b>" not in data.username
+    assert "admin" in data.username
+
+
+def test_sanitize_user_display_name_strips_html():
+    """用户显示名称中的 HTML 标签被移除"""
+    from app.schemas.auth import UserCreate
+    data = UserCreate(username="testuser", password="pass123456", display_name="<script>x</script>管理员")
+    assert "<script>" not in data.display_name
+    assert "管理员" in data.display_name
+
+
+def test_sanitize_order_remark_strips_html():
+    """订单备注中的 HTML 标签被移除"""
+    from app.schemas.order import OrderCreate
+    data = OrderCreate(
+        customer_id="fake-id",
+        items=[{"product_id": "fake-id", "quantity": 1}],
+        remark="<b>重要</b>订单",
+    )
+    assert "<b>" not in data.remark
+    assert "重要订单" in data.remark
+
+
+def test_sanitize_payment_remark_strips_html():
+    """收款备注中的 HTML 标签被移除"""
+    from app.schemas.payment import PaymentCreate
+    data = PaymentCreate(amount="100", payment_method="cash", remark="<script>alert(1)</script>收款")
+    assert "<script>" not in data.remark
+    assert "收款" in data.remark
