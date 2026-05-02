@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百二十八轮·自动循环）
+
+### 测试：软删除过滤测试（客户列表 + 支付列表）
+
+- test_customer_crud: 验证已删除客户不出现在客户列表（test_09b_list_excludes_deleted）
+- test_payment_crud: 验证已删除订单的收款不出现在收款列表（test_28_payment_list_excludes_deleted_order）
+- 后端 793 测试全绿（+2），总计 1173
+
 ## 2026-05-02（第二百二十七轮·自动循环）
 
 ### 测试：对象级权限 + SQL 注入搜索安全 + 分页边界测试（17 项新增）
