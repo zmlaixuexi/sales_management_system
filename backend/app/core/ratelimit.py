@@ -45,6 +45,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         self.window = float(window_seconds)
         self._buckets: dict[str, _SlidingWindow] = defaultdict(_SlidingWindow)
         self._lock = Lock()
+        _set_shared_buckets(self._buckets)
 
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
@@ -89,3 +90,18 @@ def add_rate_limit(app: FastAPI) -> None:
             max_requests=max_requests,
             window_seconds=window_seconds,
         )
+
+
+# 模块级引用，供测试清理
+_shared_buckets: dict[str, _SlidingWindow] | None = None
+
+
+def _set_shared_buckets(buckets: dict[str, _SlidingWindow]) -> None:
+    global _shared_buckets
+    _shared_buckets = buckets
+
+
+def clear_rate_limit() -> None:
+    """清空全局速率限制计数器（仅供测试使用）"""
+    if _shared_buckets is not None:
+        _shared_buckets.clear()

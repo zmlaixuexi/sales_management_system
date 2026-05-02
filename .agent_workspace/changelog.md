@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第三百五十二轮·自动循环）
+
+### 测试 + 基础设施：修改密码审计日志字段验证 + 修复全量测试速率限制干扰
+
+- `test_audit_log.py`：新增 test_36（password_change 含 resource_type/actor_name/ip_address）
+- `ratelimit.py`：新增 `clear_rate_limit()` 函数，暴露模块级 buckets 引用
+- `conftest.py`：在测试模块切换时调用 `clear_rate_limit()` 防止速率限制累积干扰全量测试
+- 后端测试：1002/1002 全绿（含 test_ratelimit 正常通过）
+
 ## 2026-05-02（第三百五十一轮·自动循环）
 
 ### 文档：更新 docs/testing.md 最终计数至 1001

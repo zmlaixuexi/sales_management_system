@@ -1,6 +1,21 @@
 """pytest 配置：确保速率限制测试最后运行 + 自动标记分类"""
 
 
+_prev_module = None
+
+
+def pytest_runtest_setup(item):
+    """每个测试模块切换时清空全局速率限制计数器（ratelimit 测试除外）"""
+    global _prev_module
+    if "test_ratelimit" in item.nodeid:
+        return
+    mod = item.module
+    if mod is not _prev_module:
+        _prev_module = mod
+        from app.core.ratelimit import clear_rate_limit
+        clear_rate_limit()
+
+
 
 def pytest_collection_modifyitems(items):
     """将 test_ratelimit.py 的测试移到末尾，并根据文件名自动添加标记"""

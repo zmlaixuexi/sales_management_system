@@ -763,3 +763,40 @@ def test_35_user_update_audit_log_fields():
     log = next(i for i in items if i["resource_id"] == uid)
     assert log["after_data"]["display_name"] == "更新后名称"
     assert log["resource_type"] == "user"
+
+
+def test_36_password_change_audit_log_fields():
+    """修改密码审计日志含 resource_type=user、actor_name、ip_address"""
+    headers = _admin_auth()
+    # 修改密码
+    resp = client.post("/api/v1/auth/change-password", json={
+        "old_password": "testpass123",
+        "new_password": "auditpass123",
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    # 查询审计日志
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "audit_tester").first()
+        user_id = str(user.id)
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/audit-logs?action=password_change", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == user_id)
+    assert log["resource_type"] == "user"
+    assert log["actor_name"] == "审计测试员"
+    assert log["ip_address"] is not None
+
+    # 改回原密码
+    login2 = client.post("/api/v1/auth/login", json={
+        "username": "audit_tester", "password": "auditpass123",
+    })
+    token2 = login2.json()["data"]["access_token"]
+    client.post("/api/v1/auth/change-password", json={
+        "old_password": "auditpass123",
+        "new_password": "testpass123",
+    }, headers={"Authorization": f"Bearer {token2}"})
