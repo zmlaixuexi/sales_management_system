@@ -48,6 +48,15 @@ export async function downloadCsv(path: string, params: Record<string, string | 
   })
 
   const blob = resp.data as Blob
+
+  // 后端返回 JSON 错误时 blob type 为 application/json，需解析错误消息
+  if (blob.type && blob.type.includes('application/json')) {
+    const text = await blob.text()
+    const json = JSON.parse(text)
+    const msg = json?.error?.message || json?.message || '导出失败'
+    throw new Error(msg)
+  }
+
   const disposition = resp.headers['content-disposition'] || ''
   const match = disposition.match(/filename=(.+)/)
   const filename = match ? match[1] : 'export.csv'
