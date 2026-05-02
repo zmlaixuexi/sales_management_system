@@ -180,7 +180,7 @@ make docker-down
 - 上传文件代理到后端（`/uploads/` → `http://backend`）
 - 健康检查代理（`/health` → `/api/v1/health`）
 - 静态资源 7 天缓存（js/css/图片/字体等）
-- Gzip 压缩
+- Gzip 压缩（级别 6，16×8K buffer）
 - 安全响应头（CSP、X-Frame-Options、X-Content-Type-Options 等）
 - 隐藏文件拒绝访问（`.env`、`.git` 等）
 - 请求体大小限制 20MB（`client_max_body_size`，为后端 `MAX_IMAGE_SIZE_MB`/`MAX_CSV_IMPORT_SIZE_MB` 的上限）
