@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百四十五轮·自动循环）
+
+### 安全：bcrypt 显式 rounds=12，verify_password 异常防御，JWT 添加 iat/jti 字段
+
+- bcrypt.gensalt() → bcrypt.gensalt(rounds=12)：显式指定 cost factor
+- verify_password 捕获 ValueError/TypeError：防止异常 hash 导致 500
+- JWT payload 新增 iat（签发时间）和 jti（唯一标识）：为 Token 追踪和未来黑名单做准备
+- 801 测试全绿，ruff 0 errors
+
 ## 2026-05-02（第二百四十四轮·自动循环）
 
 ### 工程：修复 ruff lint 错误，移除未使用 Query import，整理长行
