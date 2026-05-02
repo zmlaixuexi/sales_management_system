@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百四十一轮·自动循环）
+
+### 测试：库存调整审计日志字段完整性验证
+
+- `test_inventory_crud.py`：新增 test_27（验证 before_data/after_data 含正确库存量和变化量）
+- 前端质量门禁确认：ESLint 0 errors、TypeScript 0 errors、构建 263ms
+- 后端测试：988/988 全绿
+
 ## 2026-05-02（第三百四十轮·自动循环）
 
 ### 代码质量：修复 ruff 发现的 5 个代码质量问题

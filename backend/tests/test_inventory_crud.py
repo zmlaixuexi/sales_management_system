@@ -403,3 +403,34 @@ def test_26_movements_page_size_over_max_422():
     """库存流水 page_size=101 超出上限返回 422"""
     resp = client.get("/api/v1/inventory/movements", params={"page_size": 101}, headers=_auth())
     assert resp.status_code == 422
+
+
+def test_27_adjust_audit_log_fields():
+    """库存调整审计日志 before_data/after_data 字段完整"""
+    # 先查询当前库存
+    resp = client.get(f"/api/v1/products/{_product_id}", headers=_auth())
+    assert resp.status_code == 200
+    stock_before = resp.json()["data"]["stock_quantity"]
+
+    # 执行调整
+    resp = client.post("/api/v1/inventory/adjustments", json={
+        "product_id": _product_id,
+        "quantity_change": 3,
+        "remark": "审计字段验证",
+    }, headers=_auth())
+    assert resp.status_code == 200
+
+    # 查询审计日志（按时间降序，第一条应为本轮调整）
+    resp = client.get("/api/v1/audit-logs?action=inventory_adjust", headers=_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    # 用唯一 remark 匹配本轮调整
+    log = next(i for i in items if i["resource_id"] == _product_id and i["before_data"].get("stock_quantity") == stock_before)
+
+    # before_data 应包含调整前库存
+    assert log["before_data"]["stock_quantity"] == stock_before
+    # after_data 应包含调整后库存和变化量
+    assert log["after_data"]["stock_quantity"] == stock_before + 3
+    assert log["after_data"]["change"] == 3
+    # resource_type
+    assert log["resource_type"] == "product"
