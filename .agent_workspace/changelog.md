@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第二百一十四轮·自动循环）
+
+### 工程：.gitignore 补充 + 前端构建验证
+
+- .gitignore 新增 frontend/dist/、*.log、backups/、.mypy_cache/
+- 前端生产构建验证通过（263ms），vendor-antd gzip 396KB
+
 ## 2026-05-02（第二百一十三轮·自动循环）
 
 ### 文档：修正前端测试计数，全量 CI 验证
