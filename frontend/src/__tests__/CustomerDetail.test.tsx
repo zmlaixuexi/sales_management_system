@@ -191,7 +191,7 @@ describe('CustomerDetail', () => {
   })
 
   it('加载中显示加载提示', async () => {
-    let resolveFn: (v: any) => void
+    let resolveFn: (_v: any) => void
     _customerMocks.fetchCustomer.mockReturnValue(new Promise((r) => { resolveFn = r }))
     renderCustomerDetail()
     await waitFor(() => {

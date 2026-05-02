@@ -192,7 +192,7 @@ describe('OrderDetail', () => {
   })
 
   it('加载中显示加载提示', async () => {
-    let resolveFn: (v: any) => void
+    let resolveFn: (_v: any) => void
     _orderMocks.fetchOrder.mockReturnValue(new Promise((r) => { resolveFn = r }))
     renderOrderDetail()
     await waitFor(() => {

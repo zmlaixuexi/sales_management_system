@@ -7,7 +7,7 @@ interface PaginatedResult<T> {
 }
 
 export function usePaginatedList<T>(
-  fetchFn: (params: Record<string, unknown>) => Promise<PaginatedResult<T>>,
+  fetchFn: (_params: Record<string, unknown>) => Promise<PaginatedResult<T>>,
   filters: Record<string, unknown> = {},
   errorMessage = '加载数据失败',
 ) {
