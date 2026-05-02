@@ -2,16 +2,16 @@
 
 最后更新时间：2026-05-03
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-485
-当前任务名称：自动循环：完成第 485 轮开发推进
+当前任务编号：ROUND-486
+当前任务名称：自动循环：完成第 486 轮开发推进
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 485：Login.tsx 统一 import 路径为 @/ 别名
-- Round 484：移除 Login.test.tsx 因 @/stores/auth 全局 mock 干扰其他测试
-- Round 483：testing.md 同步前端测试计数和 OrderDetail 模块描述
+- Round 486：统一 auth.ts 和 ProtectedRoute.tsx 的 import 路径为 @/ 别名 + 全回归验证
+- Round 485：Login.tsx 统一 import 路径
+- Round 484：移除 Login.test.tsx 因 mock 干扰
 
 ## 最终验证状态
 
@@ -28,7 +28,7 @@
 继续 keep-going 模式。可选无阻塞方向：
 - 测试补强：AuditLogs 筛选交互、CustomerDetail 删除确认
 - 功能补全：前端其他孤立端点对接
-- 代码质量：检查其他文件是否还有相对路径 import
+- 代码质量：统一测试文件相对路径 import 为 @/ 别名
 
 ## 阻塞问题
 

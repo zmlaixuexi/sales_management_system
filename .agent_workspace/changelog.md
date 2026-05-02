@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百八十六轮·自动循环）
+
+### 工程：统一 auth.ts 和 ProtectedRoute.tsx 的 import 路径为 @/ 别名 + 全回归验证
+
+- auth.ts: `../api/auth` → `@/api/auth`
+- ProtectedRoute.tsx: `../stores/auth` → `@/stores/auth`
+- 全回归：ruff 0 + tsc 0 + 1219 后端 + 425 前端 = 1644 测试全绿
+
 ## 2026-05-03（第四百八十五轮·自动循环）
 
 ### 工程：Login.tsx 统一 import 路径为 @/ 别名
