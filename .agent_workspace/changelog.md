@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百六十轮·自动循环）
+
+### 代码质量：前端 ESLint 规则收紧
+
+- eslint.config.js 新增 5 条规则：no-console（warn）、eqeqeq（always）、no-throw-literal、prefer-const、no-var
+- ESLint 0 错误，前端 382 测试全通过
+- 审计可观测性基础设施：request_id 贯穿请求日志/审计日志/慢 SQL、user_id 上下文、结构化 JSON 日志——已完善无需改进
+
 ## 2026-05-03（第四百五十九轮·自动循环）
 
 ### 文档完善：部署文档和 .env.example 补全

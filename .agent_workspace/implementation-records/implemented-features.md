@@ -6,6 +6,14 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-205
+
+- 名称：前端 ESLint 规则收紧
+- 轮次：Round 460（自动循环）
+- 描述：新增 5 条 ESLint 规则提升代码质量——no-console(warn)、eqeqeq(always)、no-throw-literal、prefer-const、no-var
+- 涉及文件：frontend/eslint.config.js
+- 验证：ESLint 0 错误、382 前端测试全通过
+
 ## 功能编号：FEAT-20260503-204
 
 - 名称：部署文档和 .env.example 补全

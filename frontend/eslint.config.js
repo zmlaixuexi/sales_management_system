@@ -25,6 +25,11 @@ export default defineConfig([
       }],
       'react-hooks/set-state-in-effect': 'off',
       'react-hooks/preserve-manual-memoization': 'off',
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'eqeqeq': ['error', 'always'],
+      'no-throw-literal': 'error',
+      'prefer-const': 'error',
+      'no-var': 'error',
     },
   },
   {
