@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { Spin } from 'antd';
-import { useAuthStore } from '../stores/auth';
+import { useAuthStore } from '@/stores/auth';
 
 export default function ProtectedRoute({ children }: { children: ReactNode }) {
   const { token, user, fetchUser } = useAuthStore();
