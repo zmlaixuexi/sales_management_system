@@ -134,7 +134,7 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（874 个）
+# 后端测试（876 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
@@ -178,7 +178,7 @@ npm run build
 | 订单金额计算 | 10 | _calc_order_totals 金额/零值/精度，_prepare_item 价格/折扣/快照/低于成本价阻止 |
 | 商品利润计算 | 6 | _calc_profit 基本利润/除零保护/亏损/零利润/精度/高毛利率 |
 | 审计服务函数 | 11 | _mask_sensitive 脱敏（含手机号/邮箱），model_to_dict 模型转换，get_request_meta |
-| 日志格式器 | 16 | _JsonFormatter JSON 输出/异常/extra_fields，log_action 容错，request_id/user_id contextvar 注入/空值/优先级，_TextFormatter 文本格式/日期格式，setup_logging 级别/第三方抑制/格式器选择 |
+| 日志格式器 | 18 | _JsonFormatter JSON 输出/异常/extra_fields，log_action 容错，request_id/user_id contextvar 注入/空值/优先级，_TextFormatter 文本格式/日期格式，setup_logging 级别/第三方抑制/格式器选择/无效级别回退/handler 清理 |
 | 导出辅助函数 | 22 | _dec/_str/_dt CSV 格式化，_product_row/_order_row 成本字段过滤，状态映射，_customer_row/_payment_row |
 | 导出 API 辅助函数 | 3 | _csv_filename 文件名格式/前缀/后缀 |
 | 文件服务 | 13 | 扩展名/MIME/大小/正常/webp/大写扩展名/扩展名与 MIME 独立校验/边界大小/魔数字节校验 |
@@ -199,7 +199,7 @@ npm run build
 | 边界条件 + 安全 | 6 | SQL 注入搜索安全（3 项）、分页边界 page=0/page_size=101/page_size=-1（3 项） |
 | 软删除过滤 | 2 | 客户列表排除已删除、支付列表排除已删除订单 |
 | 外键验证 | 4 | 客户 owner_user_id 无效/不存在、订单 customer_id 不存在、订单 items 含不存在商品 |
-| **合计** | **874** | |
+| **合计** | **876** | |
 
 ### 前端测试覆盖
 
