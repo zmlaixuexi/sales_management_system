@@ -10,15 +10,7 @@ import { fetchOrder, confirmOrder, cancelOrder } from '@/api/orders'
 import type { OrderDetail as OrderDetailData, OrderItem, OrderPayment } from '@/api/orders'
 import { createPayment, reversePayment } from '@/api/payments'
 import { formatAmount, formatPercent, getApiErrorMessage } from '@/utils'
-import { orderStatusMap as statusMap } from '@/constants/statusMaps'
-
-const paymentMethodLabels: Record<string, string> = {
-  cash: '现金',
-  bank_transfer: '银行转账',
-  wechat: '微信',
-  alipay: '支付宝',
-  other: '其他',
-}
+import { orderStatusMap as statusMap, paymentMethodMap as paymentMethodLabels } from '@/constants/statusMaps'
 
 export default function OrderDetail() {
   const navigate = useNavigate()

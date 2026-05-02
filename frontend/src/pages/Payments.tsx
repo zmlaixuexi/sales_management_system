@@ -5,15 +5,7 @@ import { fetchPayments } from '@/api/payments'
 import type { Payment } from '@/api/payments'
 import { formatAmount } from '@/utils'
 import { usePaginatedList } from '@/hooks/usePaginatedList'
-import { paymentStatusMap as statusMap } from '@/constants/statusMaps'
-
-const paymentMethodMap: Record<string, string> = {
-  cash: '现金',
-  transfer: '银行转账',
-  wechat: '微信',
-  alipay: '支付宝',
-  other: '其他',
-}
+import { paymentStatusMap as statusMap, paymentMethodMap } from '@/constants/statusMaps'
 
 export default function PaymentsPage() {
   const navigate = useNavigate()

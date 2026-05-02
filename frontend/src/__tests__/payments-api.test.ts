@@ -47,11 +47,11 @@ describe('收款 API', () => {
   it('createPayment 支持备注', async () => {
     mockPost.mockResolvedValueOnce(ok({
       id: 'pay2', order_id: 'o1',
-      amount: '200', payment_method: 'bank_transfer', order_status: 'completed',
+      amount: '200', payment_method: 'transfer', order_status: 'completed',
     }))
-    await createPayment('o1', { amount: '200', payment_method: 'bank_transfer', remark: '尾款' })
+    await createPayment('o1', { amount: '200', payment_method: 'transfer', remark: '尾款' })
     expect(mockPost).toHaveBeenCalledWith('/sales-orders/o1/payments', {
-      amount: '200', payment_method: 'bank_transfer', remark: '尾款',
+      amount: '200', payment_method: 'transfer', remark: '尾款',
     })
   })
 

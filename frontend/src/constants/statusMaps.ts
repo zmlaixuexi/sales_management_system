@@ -40,3 +40,12 @@ export const customerLevelMap: Record<string, StatusInfo> = {
   normal: { color: 'default', label: '普通' },
   potential: { color: 'green', label: '潜在' },
 }
+
+// 收款方式
+export const paymentMethodMap: Record<string, string> = {
+  cash: '现金',
+  transfer: '银行转账',
+  wechat: '微信',
+  alipay: '支付宝',
+  other: '其他',
+}
