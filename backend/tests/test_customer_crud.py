@@ -777,3 +777,22 @@ def test_44_transfer_customer_non_owner_403():
         "owner_user_id": str(uuid.uuid4()),
     }, headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 403
+
+
+def test_45_customer_list_data_scope_non_owner():
+    """无 customer:view_all 用户客户列表只返回本人客户（数据范围过滤）"""
+    from helpers import admin_auth_header, make_user_with_perms
+
+    # 先用 admin 创建一个客户（归属于 admin）
+    admin_headers = admin_auth_header(TestSession, "crud_admin")
+    resp = client.post("/api/v1/customers", json={
+        "name": "数据范围客户", "phone": "13900007788",
+    }, headers=admin_headers)
+    assert resp.status_code == 200
+
+    # 非归属用户只能看到自己的客户（应为空列表）
+    token = make_user_with_perms(TestSession, "non_owner_cust_scope", ["customer:list"])
+    resp = client.get("/api/v1/customers", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) == 0, "非归属用户不应看到其他人的客户"
