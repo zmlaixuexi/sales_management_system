@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-03（第四百七十二轮·自动循环）
+
+### 工程：代码质量门禁验证 + ruff import 排序修复
+
+- ruff 发现 1 个 import 排序错误（test_product_crud.py InventoryMovement 导入位置），自动修复
+- 全部门禁验证通过：ruff 0 errors、tsc 0 errors、后端 1219 测试、前端 409 测试
+
 ## 2026-05-03（第四百七十一轮·自动循环）
 
 ### 文档：testing.md 更新最新测试计数
