@@ -109,10 +109,10 @@ JSON 日志格式示例：
 
 ### GET /health
 
-健康检查，无需认证。包含数据库连接探测。
+健康检查，无需认证。包含数据库连接探测和连接池状态。
 
-**响应**（正常）：`{"status": "ok"}`
-**响应**（数据库不可用）：`{"status": "degraded"}`
+**响应**（正常）：`{"status": "ok", "database": "connected", "pool": {"size": N, "checked_in": N, "checked_out": N, "overflow": N}}`
+**响应**（数据库不可用）：`{"status": "degraded", "database": "error"}`
 
 ### GET /version
 
@@ -617,7 +617,7 @@ JSON 日志格式示例：
 
 **权限**：`audit:view`
 
-**操作类型**：`login_success`/`login_failed`/`product_create`/`product_update`/`product_delete`/`product_disable`/`product_import`/`customer_create`/`customer_update`/`customer_delete`/`customer_transfer`/`customer_import`/`order_create`/`order_update`/`order_confirm`/`order_cancel`/`payment_create`/`payment_reverse`/`inventory_adjust`/`export_products`/`export_customers`/`export_orders`/`export_payments`
+**操作类型**：`login_success`/`login_failed`/`password_change`/`user_create`/`user_update`/`product_create`/`product_update`/`product_delete`/`product_disable`/`product_import`/`customer_create`/`customer_update`/`customer_delete`/`customer_transfer`/`customer_import`/`order_create`/`order_update`/`order_confirm`/`order_cancel`/`payment_create`/`payment_reverse`/`inventory_adjust`/`file_upload`/`file_delete`/`export_products`/`export_customers`/`export_orders`/`export_payments`
 
 ### GET /audit-logs/actions
 
@@ -717,6 +717,10 @@ JSON 日志格式示例：
 | `MAX_CSV_IMPORT_SIZE_MB` | `10` | CSV 导入文件大小限制 |
 | `MAX_CSV_IMPORT_ROWS` | `1000` | CSV 导入行数上限 |
 | `SLOW_REQUEST_THRESHOLD_MS` | `1000` | 慢请求阈值（毫秒） |
+| `SLOW_SQL_THRESHOLD_MS` | `200` | 慢 SQL 阈值（毫秒） |
 | `INVENTORY_WARNING_THRESHOLD` | `10` | 库存预警默认阈值 |
 | `RATE_LIMIT_MAX` | `1000` | API 速率限制（每窗口请求数） |
 | `RATE_LIMIT_WINDOW` | `60` | 速率限制窗口（秒） |
+| `DB_POOL_SIZE` | `10` | 数据库连接池大小 |
+| `DB_MAX_OVERFLOW` | `20` | 连接池最大溢出 |
+| `DB_POOL_RECYCLE_SECONDS` | `1800` | 连接回收时间（秒） |

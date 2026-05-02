@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第一百六十八轮·自动循环）
+
+### 文档：docs/api.md 与实际实现对齐
+
+- 审计操作类型新增 5 项：`password_change`、`user_create`、`user_update`、`file_upload`、`file_delete`
+- 健康检查响应格式更新：包含 `pool` 连接池状态字段（size/checked_in/checked_out/overflow）
+- 环境变量新增 4 项：`SLOW_SQL_THRESHOLD_MS`、`DB_POOL_SIZE`、`DB_MAX_OVERFLOW`、`DB_POOL_RECYCLE_SECONDS`
+
 ## 2026-05-02（第一百六十七轮·自动循环）
 
 ### 文档：docs/testing.md 与实际测试输出对齐
