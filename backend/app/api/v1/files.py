@@ -9,7 +9,7 @@ from app.api.deps import get_current_user, get_db, require_permission, resp
 from app.models.product import File, ProductImage
 from app.models.user import User
 from app.services.audit_service import log_user_action
-from app.services.file_service import FileSizeExceededError, FileTypeError, delete_file, upload_image
+from app.services.file_service import delete_file, upload_image
 
 router = APIRouter(
     prefix="/files", tags=["文件管理"],
@@ -30,25 +30,14 @@ async def upload_image_api(
     current_user: User = Depends(require_permission("product:create")),
 ):
     """上传图片，返回文件 ID 和访问 URL"""
-    try:
-        file_record = await upload_image(db, file, current_user.id)
-        log_user_action(
-            db, request, current_user,
-            action="file_upload", resource_type="file",
-            resource_id=str(file_record.id),
-            after_data={"original_name": file_record.original_name, "size_bytes": file_record.size_bytes},
-        )
-        db.commit()
-    except FileSizeExceededError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"code": "FILE_TOO_LARGE", "message": str(e)},
-        ) from e
-    except FileTypeError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"code": "FILE_INVALID_TYPE", "message": str(e)},
-        ) from e
+    file_record = await upload_image(db, file, current_user.id)
+    log_user_action(
+        db, request, current_user,
+        action="file_upload", resource_type="file",
+        resource_id=str(file_record.id),
+        after_data={"original_name": file_record.original_name, "size_bytes": file_record.size_bytes},
+    )
+    db.commit()
 
     return resp({
         "id": str(file_record.id),

@@ -296,14 +296,19 @@ def test_14_delete_other_user_file_forbidden():
     assert resp.json()["error"]["code"] == "AUTH_FORBIDDEN"
 
 
-def test_15_delete_file_service_returns_false_for_missing():
-    """file_service.delete_file 对不存在的文件返回 False"""
+def test_15_delete_file_service_raises_for_missing():
+    """file_service.delete_file 对不存在的文件抛出 HTTPException"""
+    import pytest
+    from fastapi import HTTPException
+
     from app.services.file_service import delete_file
 
     db = TestSession()
     try:
-        result = delete_file(db, uuid.uuid4())
-        assert result is False
+        with pytest.raises(HTTPException) as exc_info:
+            delete_file(db, uuid.uuid4())
+        assert exc_info.value.status_code == 404
+        assert exc_info.value.detail["code"] == "FILE_NOT_FOUND"
     finally:
         db.close()
 

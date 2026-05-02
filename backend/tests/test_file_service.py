@@ -1,22 +1,23 @@
 """文件服务校验函数单元测试"""
 
 import pytest
+from fastapi import HTTPException
 
 from app.services.file_service import _validate_image
 
 
 def test_validate_image_bad_extension():
-    with pytest.raises(ValueError, match="不支持的图片类型"):
+    with pytest.raises(HTTPException, match="不支持的图片类型"):
         _validate_image("file.gif", "image/gif", 100)
 
 
 def test_validate_image_bad_mime():
-    with pytest.raises(ValueError, match="不支持的 MIME 类型"):
+    with pytest.raises(HTTPException, match="不支持的 MIME 类型"):
         _validate_image("file.jpg", "application/pdf", 100)
 
 
 def test_validate_image_too_large():
-    with pytest.raises(ValueError, match="图片大小超过限制"):
+    with pytest.raises(HTTPException, match="图片大小超过限制"):
         _validate_image("file.jpg", "image/jpeg", 100 * 1024 * 1024)
 
 
@@ -48,7 +49,7 @@ def test_validate_image_one_byte_over_limit():
     """文件大小超限 1 字节应拒绝"""
     from app.services.file_service import MAX_SIZE_BYTES
 
-    with pytest.raises(ValueError, match="超过限制"):
+    with pytest.raises(HTTPException, match="超过限制"):
         _validate_image("file.jpg", "image/jpeg", MAX_SIZE_BYTES + 1)
 
 
@@ -71,12 +72,12 @@ def test_validate_magic_bytes_valid_png():
 def test_validate_magic_bytes_invalid():
     from app.services.file_service import _validate_magic_bytes
 
-    with pytest.raises(ValueError, match="不匹配"):
+    with pytest.raises(HTTPException, match="不匹配"):
         _validate_magic_bytes(b"GIF89a" + b"\x00" * 100, "image/jpeg")
 
 
 def test_validate_magic_bytes_empty():
     from app.services.file_service import _validate_magic_bytes
 
-    with pytest.raises(ValueError, match="为空"):
+    with pytest.raises(HTTPException, match="为空"):
         _validate_magic_bytes(b"", "image/jpeg")

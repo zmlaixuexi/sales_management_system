@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 
 import aiofiles  # type: ignore[import-untyped]
-from fastapi import UploadFile
+from fastapi import HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -14,14 +14,6 @@ from app.models.product import File
 ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp"}
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 MAX_SIZE_BYTES = settings.MAX_IMAGE_SIZE_MB * 1024 * 1024
-
-
-class FileSizeExceededError(ValueError):
-    """文件大小超过限制"""
-
-
-class FileTypeError(ValueError):
-    """文件类型不支持"""
 
 # 文件头魔数字节映射
 MAGIC_SIGNATURES: dict[str, list[bytes]] = {
@@ -35,21 +27,38 @@ def _validate_image(filename: str, content_type: str, size: int) -> None:
     """校验图片类型和大小"""
     ext = Path(filename).suffix.lower()
     if ext not in ALLOWED_EXTENSIONS:
-        raise FileTypeError(f"不支持的图片类型: {ext}，仅支持 jpg/jpeg/png/webp")
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "FILE_INVALID_TYPE", "message": f"不支持的图片类型: {ext}，仅支持 jpg/jpeg/png/webp"},
+        )
     if content_type not in ALLOWED_TYPES:
-        raise FileTypeError(f"不支持的 MIME 类型: {content_type}")
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "FILE_INVALID_TYPE", "message": f"不支持的 MIME 类型: {content_type}"},
+        )
     if size > MAX_SIZE_BYTES:
-        raise FileSizeExceededError(f"图片大小超过限制: {size / 1024 / 1024:.1f}MB > {settings.MAX_IMAGE_SIZE_MB}MB")
+        size_mb = size / 1024 / 1024
+        limit_mb = settings.MAX_IMAGE_SIZE_MB
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "FILE_TOO_LARGE", "message": f"图片大小超过限制: {size_mb:.1f}MB > {limit_mb}MB"},
+        )
 
 
 def _validate_magic_bytes(content: bytes, content_type: str) -> None:
     """校验文件头魔数字节，防止伪装扩展名上传"""
     if not content:
-        raise FileTypeError("文件内容为空")
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "FILE_INVALID_TYPE", "message": "文件内容为空"},
+        )
     for sig in MAGIC_SIGNATURES[content_type]:
         if content.startswith(sig):
             return
-    raise FileTypeError(f"文件内容与声明的类型 {content_type} 不匹配")
+    raise HTTPException(
+        status_code=400,
+        detail={"code": "FILE_INVALID_TYPE", "message": f"文件内容与声明的类型 {content_type} 不匹配"},
+    )
 
 
 async def upload_image(db: Session, file: UploadFile, user_id: uuid.UUID | None = None) -> File:
@@ -94,7 +103,10 @@ def delete_file(db: Session, file_id: uuid.UUID) -> bool:
     """删除文件记录和物理文件"""
     file_record = db.query(File).filter(File.id == file_id).first()
     if not file_record:
-        return False
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "FILE_NOT_FOUND", "message": "文件不存在"},
+        )
 
     if file_record.object_key:
         full_path = Path(settings.UPLOAD_DIR) / file_record.object_key
