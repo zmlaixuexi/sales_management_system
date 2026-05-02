@@ -26,6 +26,18 @@ describe('authApi', () => {
     })
   })
 
+  it('login 返回 token 数据', async () => {
+    mockPost.mockResolvedValueOnce({
+      data: {
+        success: true,
+        data: { access_token: 'acc', refresh_token: 'ref', token_type: 'bearer' },
+      },
+    })
+    const res = await authApi.login({ username: 'admin', password: '123' })
+    expect(res.data.data.access_token).toBe('acc')
+    expect(res.data.data.refresh_token).toBe('ref')
+  })
+
   it('refresh 调用 POST /auth/refresh 携带 refresh_token', async () => {
     await authApi.refresh('token123')
     expect(mockPost).toHaveBeenCalledWith('/auth/refresh', {
@@ -41,6 +53,23 @@ describe('authApi', () => {
   it('getMe 调用 GET /auth/me', async () => {
     await authApi.getMe()
     expect(mockGet).toHaveBeenCalledWith('/auth/me')
+  })
+
+  it('getMe 返回用户权限列表', async () => {
+    mockGet.mockResolvedValueOnce({
+      data: {
+        success: true,
+        data: {
+          id: 'u1', username: 'admin', display_name: '管理员',
+          is_active: true, is_superuser: false,
+          roles: [{ id: 'r1', name: 'admin', display_name: '管理员' }],
+          permissions: ['product:list', 'order:create'],
+        },
+      },
+    })
+    const res = await authApi.getMe()
+    expect(res.data.data.permissions).toContain('order:create')
+    expect(res.data.data.roles[0].name).toBe('admin')
   })
 
   it('changePassword 调用 POST /auth/change-password', async () => {

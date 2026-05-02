@@ -57,6 +57,48 @@ describe('审计日志 API', () => {
     expect(data.items[0].action).toBe('login_success')
   })
 
+  it('fetchAuditLogs 按 actor_id 筛选', async () => {
+    mockGet.mockResolvedValueOnce(apiOk({
+      items: [], page: 1, page_size: 20, total: 0,
+    }))
+    await fetchAuditLogs({ actor_id: 'user-uuid-123' })
+    expect(mockGet).toHaveBeenCalledWith('/audit-logs', {
+      actor_id: 'user-uuid-123',
+    })
+  })
+
+  it('fetchAuditLogs 返回完整审计条目含请求元数据', async () => {
+    const items = [{
+      id: 'a1', actor_id: 'u1', actor_name: '管理员',
+      action: 'order_create', resource_type: 'sales_order', resource_id: 'o1',
+      before_data: null, after_data: { order_no: 'ORD-001' },
+      ip_address: '192.168.1.100', user_agent: 'Mozilla/5.0',
+      request_id: 'req-abc', created_at: '2026-05-01T10:00:00Z',
+    }]
+    mockGet.mockResolvedValueOnce(apiOk({ items, page: 1, page_size: 20, total: 1 }))
+    const data = await fetchAuditLogs({})
+    expect(data.items[0].ip_address).toBe('192.168.1.100')
+    expect(data.items[0].request_id).toBe('req-abc')
+    expect(data.items[0].after_data.order_no).toBe('ORD-001')
+  })
+
+  it('fetchAuditLogs 支持分页', async () => {
+    mockGet.mockResolvedValueOnce(apiOk({
+      items: [], page: 5, page_size: 10, total: 50,
+    }))
+    const data = await fetchAuditLogs({ page: 5, page_size: 10 })
+    expect(mockGet).toHaveBeenCalledWith('/audit-logs', { page: 5, page_size: 10 })
+    expect(data.total).toBe(50)
+  })
+
+  it('fetchAuditLogs 按关键词搜索', async () => {
+    mockGet.mockResolvedValueOnce(apiOk({
+      items: [], page: 1, page_size: 20, total: 0,
+    }))
+    await fetchAuditLogs({ keyword: '管理员' })
+    expect(mockGet).toHaveBeenCalledWith('/audit-logs', { keyword: '管理员' })
+  })
+
   it('fetchAuditActions 调用 GET /audit-logs/actions', async () => {
     mockGet.mockResolvedValueOnce(apiOk({
       actions: ['login_success', 'product_create'],
@@ -66,5 +108,12 @@ describe('审计日志 API', () => {
     expect(mockGet).toHaveBeenCalledWith('/audit-logs/actions')
     expect(data.actions).toContain('product_create')
     expect(data.resource_types).toContain('user')
+  })
+
+  it('fetchAuditActions 返回空列表', async () => {
+    mockGet.mockResolvedValueOnce(apiOk({ actions: [], resource_types: [] }))
+    const data = await fetchAuditActions()
+    expect(data.actions).toHaveLength(0)
+    expect(data.resource_types).toHaveLength(0)
   })
 })
