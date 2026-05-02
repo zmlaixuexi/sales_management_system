@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第一百七十二轮·自动循环）
+
+### 测试：补强导出行构建函数（成本字段过滤/状态映射/收款状态）
+
+- `test_export_helpers.py`：+9 测试（_product_row 有/无成本权限、状态映射，_order_row 有/无成本权限、订单状态映射，_customer_row 基础，_payment_row 正常/冲正状态）
+- 后端 645→654，总计 969 tests
+
 ## 2026-05-02（第一百七十一轮·自动循环）
 
 ### 测试：补强 deps DB 依赖函数（get_or_404/generate_sequential_code/paginate）

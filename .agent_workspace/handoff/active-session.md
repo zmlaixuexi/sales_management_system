@@ -2,28 +2,28 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-171
-当前任务名称：测试补强 — deps DB 函数（get_or_404/generate_sequential_code/paginate）
+当前任务编号：ROUND-172
+当前任务名称：测试补强 — 导出行构建函数（成本字段过滤/状态映射）
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 171：deps +10 测试（get_or_404 5 个、generate_sequential_code 2 个、paginate 3 个），后端 635→645
-- Round 170：useSubmit +5、deps +6（纯函数），后端 629→635、前端 310→315
-- Round 169：全量 CI 验证 939 tests 通过 + README 对齐
+- Round 172：导出行函数 +9 测试（_product_row/_order_row 成本过滤、状态映射、_customer_row、_payment_row），后端 645→654
+- Round 171：deps +10（get_or_404/generate_sequential_code/paginate），后端 635→645
+- Round 170：useSubmit +5、deps +6，后端 629→635、前端 310→315
 
 ## 最终验证状态
 
 | 门禁 | 结果 |
 |---|---|
-| 后端测试 | 645/645 ✓ |
+| 后端测试 | 654/654 ✓ |
 | 前端测试 | 315/315 ✓ |
 | ruff | 0 errors ✓ |
 | ESLint | 0 errors ✓ |
 | TypeScript | 0 errors ✓ |
 | 构建 | ✓ |
-| 总计 | 960 tests |
+| 总计 | 969 tests |
 
 ## 下一步第一动作
 
