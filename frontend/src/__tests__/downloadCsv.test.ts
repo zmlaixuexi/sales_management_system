@@ -94,4 +94,44 @@ describe('downloadCsv', () => {
     const anchor = document.createElement('a') as unknown as { download: string }
     expect(anchor.download).toBe('export.csv')
   })
+
+  it('Content-Disposition 带 attachment 前缀时正确提取文件名', async () => {
+    mockGet.mockResolvedValueOnce({
+      data: new Blob(),
+      headers: { 'content-disposition': 'attachment; filename=orders_20260502.csv' },
+    })
+
+    await downloadCsv('/exports/orders')
+
+    const anchor = document.createElement('a') as unknown as { download: string }
+    expect(anchor.download).toBe('orders_20260502.csv')
+  })
+
+  it('多个参数中过滤 undefined/null/空字符串后无参数仍正常请求', async () => {
+    mockGet.mockResolvedValueOnce({
+      data: new Blob(),
+      headers: {},
+    })
+
+    await downloadCsv('/exports/products', { keyword: undefined, status: undefined, category_id: undefined })
+
+    expect(mockGet).toHaveBeenCalledWith('/exports/products', {
+      params: {},
+      responseType: 'blob',
+    })
+  })
+
+  it('所有有效参数均传递', async () => {
+    mockGet.mockResolvedValueOnce({
+      data: new Blob(),
+      headers: {},
+    })
+
+    await downloadCsv('/exports/products', { keyword: '手机', status: 'active', category_id: 'cat-1' })
+
+    expect(mockGet).toHaveBeenCalledWith('/exports/products', {
+      params: { keyword: '手机', status: 'active', category_id: 'cat-1' },
+      responseType: 'blob',
+    })
+  })
 })
