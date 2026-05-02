@@ -10,9 +10,9 @@ from app.api.deps import get_db
 from app.core.security import hash_password
 from app.db.session import Base
 from app.main import app
+from app.models.order import InventoryMovement
 from app.models.product import Product, ProductCategory
 from app.models.user import User
-from app.models.order import InventoryMovement
 
 TEST_DB_URL = "sqlite:///./test_product_crud.db"
 engine = create_engine(TEST_DB_URL, connect_args={"check_same_thread": False})
