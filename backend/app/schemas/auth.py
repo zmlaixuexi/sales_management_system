@@ -73,6 +73,16 @@ class UserCreate(BaseModel):
     def sanitize_text(cls, v: str | None) -> str | None:
         return _sanitize(v)
 
+    @field_validator("username")
+    @classmethod
+    def sanitize_username(cls, v: str) -> str:
+        return _sanitize(v) or v
+
+    @field_validator("phone")
+    @classmethod
+    def sanitize_phone(cls, v: str | None) -> str | None:
+        return _sanitize(v)
+
 
 class UserUpdate(BaseModel):
     display_name: str | None = Field(None, max_length=100)
@@ -81,7 +91,7 @@ class UserUpdate(BaseModel):
     is_active: bool | None = None
     role_ids: list[str] | None = None
 
-    @field_validator("display_name", "email")
+    @field_validator("display_name", "email", "phone")
     @classmethod
     def sanitize_text(cls, v: str | None) -> str | None:
         return _sanitize(v)
