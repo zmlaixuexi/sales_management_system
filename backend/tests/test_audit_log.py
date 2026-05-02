@@ -2694,3 +2694,37 @@ def test_101_order_confirm_audit_log_before_data_has_customer_id():
     assert log["before_data"]["customer_id"] == cid
     assert "customer_id" in log["after_data"], f"after_data 缺少 customer_id: {log['after_data']}"
     assert log["after_data"]["customer_id"] == cid
+
+
+def test_102_order_cancel_audit_log_before_data_has_customer_id():
+    """订单取消审计日志 before_data 含 customer_id"""
+    headers = _admin_auth()
+    # 创建客户+商品+订单
+    resp = client.post("/api/v1/customers", json={"name": "取消审计客户102", "phone": "13801020202"}, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/products", json={
+        "name": "取消审计商品102", "sale_price": "90.00", "cost_price": "40.00", "stock_quantity": 10,
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cid,
+        "items": [{"product_id": pid, "quantity": 1, "unit_price": "90.00"}],
+    }, headers=headers)
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+
+    # 取消
+    resp = client.post(f"/api/v1/sales-orders/{oid}/cancel", headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=order_cancel", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == oid)
+    assert log["before_data"] is not None
+    assert "customer_id" in log["before_data"], f"before_data 缺少 customer_id: {log['before_data']}"
+    assert log["before_data"]["customer_id"] == cid
+    assert "customer_id" in log["after_data"], f"after_data 缺少 customer_id: {log['after_data']}"
+    assert log["after_data"]["customer_id"] == cid

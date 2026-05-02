@@ -558,8 +558,14 @@ def cancel_order(
         db, request, current_user,
         action="order_cancel", resource_type="order",
         resource_id=str(order.id),
-        before_data={"order_no": order.order_no, "status": old_status, "total_amount": str(order.total_amount)},
-        after_data={"order_no": order.order_no, "status": "cancelled", "total_amount": str(order.total_amount)},
+        before_data={
+            "order_no": order.order_no, "status": old_status,
+            "total_amount": str(order.total_amount), "customer_id": str(order.customer_id),
+        },
+        after_data={
+            "order_no": order.order_no, "status": "cancelled",
+            "total_amount": str(order.total_amount), "customer_id": str(order.customer_id),
+        },
     )
     db.commit()
 
