@@ -49,6 +49,8 @@ Authorization: Bearer <access_token>
 }
 ```
 
+通用分页参数：`page`（默认 1）、`page_size`（默认 20，最大 100）。
+
 ## 错误码
 
 | HTTP 状态码 | code | 说明 |
@@ -68,6 +70,11 @@ Authorization: Bearer <access_token>
 | 404 | RESOURCE_NOT_FOUND | 资源不存在 |
 | 409 | CUSTOMER_DUPLICATED_WARNING | 客户手机号重复 |
 | 409 | PRODUCT_IN_USE | 商品已被订单引用，无法删除 |
+| 400 | FILE_TOO_LARGE | 文件超过大小限制 |
+| 400 | FILE_INVALID_TYPE | 文件格式不支持 |
+| 404 | FILE_NOT_FOUND | 文件不存在 |
+| 400 | FILE_NOT_BOUND | 文件已绑定商品，无法删除 |
+| 400 | INVALID_PASSWORD | 旧密码不正确 |
 | 422 | VALIDATION_FAILED | 请求参数格式错误（FastAPI 校验） |
 | 429 | RATE_LIMIT_EXCEEDED | 请求过于频繁，请稍后再试 |
 | 500 | SYSTEM_INTERNAL_ERROR | 服务器内部错误 |
@@ -79,6 +86,7 @@ Authorization: Bearer <access_token>
 - 默认限制：1000 请求 / 60 秒（可通过 `RATE_LIMIT_MAX` 和 `RATE_LIMIT_WINDOW` 环境变量配置）
 - 正常响应头：`X-RateLimit-Limit`（窗口上限）、`X-RateLimit-Remaining`（剩余次数）
 - 超限返回 429 + `RATE_LIMIT_EXCEEDED` 错误码
+- 登录接口额外限制：同一 IP 连续登录失败 10 次 / 15 分钟后触发 429
 
 ## 安全响应头
 
@@ -120,14 +128,14 @@ JSON 日志格式示例：
 
 健康检查，无需认证。包含数据库连接探测和连接池状态。
 
-**响应**（正常）：`{"status": "ok", "database": "ok", "pool": {"size": N, "checked_in": N, "checked_out": N, "overflow": N}}`
-**响应**（数据库不可用）：`{"status": "degraded", "database": "error"}`
+**响应**（正常）：`{"status": "ok", "version": "0.1.0", "revision": "abc1234", "database": "ok", "pool": {"size": N, "checked_in": N, "checked_out": N, "overflow": N}}`
+**响应**（数据库不可用）：`{"status": "degraded", "version": "0.1.0", "revision": "abc1234", "database": "error"}`
 
 ### GET /version
 
 查询系统版本号，无需认证。
 
-**响应**：`{"version": "0.1.0"}`
+**响应**：`{"version": "0.1.0", "revision": "abc1234"}`
 
 ---
 
@@ -211,6 +219,8 @@ JSON 日志格式示例：
 
 **查询参数**：`page`, `page_size`, `keyword`
 
+**响应字段**：每项含 `id`、`username`、`display_name`、`phone`、`email`、`is_active`、`is_superuser`、`roles`（含 `id`/`name`/`display_name`）、`created_at`、`updated_at`。
+
 ### POST /users
 
 新增用户。
@@ -222,6 +232,7 @@ JSON 日志格式示例：
   "password": "password123",
   "display_name": "销售员A",
   "phone": "13800000001",
+  "email": "sale@example.com",
   "role_ids": ["uuid"]
 }
 ```
@@ -229,6 +240,8 @@ JSON 日志格式示例：
 ### PUT /users/{user_id}
 
 编辑用户信息。
+
+**请求体**（均可选）：`display_name`、`phone`、`email`、`is_active`、`role_ids`
 
 ### GET /users/roles
 
@@ -266,6 +279,8 @@ JSON 日志格式示例：
 
 **排序字段**：`name`、`sku`、`sale_price`、`cost_price`、`stock_quantity`、`status`、`sort_weight`、`created_at`、`updated_at`、`sales_quantity`、`sales_amount`
 
+**默认排序**：`sort_weight` DESC + `created_at` DESC + `updated_at` DESC
+
 **响应**：每个商品包含 `sales_quantity`（累计销售数量）和 `sales_amount`（累计销售额）。
 
 **权限**：`product:list`。无 `product:view_cost` 权限时不返回 cost_price、unit_profit、gross_margin。
@@ -278,13 +293,19 @@ JSON 日志格式示例：
 ```json
 {
   "name": "商品A",
+  "sku": "SPU-20260503-0001",
   "cost_price": "50.00",
   "sale_price": "100.00",
   "stock_quantity": 100,
   "category_id": "uuid",
-  "status": "active"
+  "main_image_url": "/uploads/xxx.jpg",
+  "status": "active",
+  "sort_weight": 0,
+  "remark": ""
 }
 ```
+
+`sku` 可选，为空时自动按 `SPU-YYYYMMDD-XXXX` 格式生成。`status` 默认 `active`，`stock_quantity` 默认 0。
 
 **权限**：`product:create`
 
@@ -297,6 +318,8 @@ JSON 日志格式示例：
 ### PUT /products/{product_id}
 
 编辑商品。价格变更时自动记录价格历史。
+
+**请求体**（均可选）：`name`、`sku`、`sale_price`、`cost_price`、`stock_quantity`、`category_id`、`main_image_url`、`status`、`sort_weight`、`remark`
 
 **权限**：`product:update`
 
@@ -324,7 +347,7 @@ JSON 日志格式示例：
 
 **请求**：`multipart/form-data`，字段 `file` 为 CSV 文件。大小限制 `MAX_CSV_IMPORT_SIZE_MB`（默认 10MB）。
 
-**CSV 表头**（支持中英文）：`商品名称` / `name`（必填）、`销售价` / `sale_price`、`成本价` / `cost_price`、`库存数量` / `stock_quantity`。
+**CSV 表头**（支持中英文）：`商品名称` / `name`（必填）、`销售价` / `sale_price`、`成本价` / `cost_price`、`库存数量` / `stock_quantity`、`SKU` / `sku`（可选，为空时自动生成）。
 
 **响应**：
 
@@ -362,11 +385,16 @@ JSON 日志格式示例：
   "name": "客户A",
   "contact_name": "张三",
   "phone": "13800000001",
+  "email": "customer@example.com",
   "source": "referral",
   "level": "vip",
-  "owner_user_id": "uuid"
+  "owner_user_id": "uuid",
+  "follow_status": "new",
+  "remark": ""
 }
 ```
+
+`follow_status` 默认 `new`，`level` 默认 `normal`。
 
 **权限**：`customer:create`
 
@@ -428,7 +456,7 @@ JSON 日志格式示例：
 
 **查询参数**：`page`, `page_size`, `keyword`, `status`, `customer_id`
 
-**权限**：`order:list`。无 `order:view_all` 权限时只返回本人订单。
+**权限**：`order:list`。无 `order:view_all` 权限时只返回本人订单。有 `product:view_cost` 权限时额外返回 `total_cost`、`gross_profit`、`gross_margin`。
 
 ### POST /sales-orders
 
@@ -445,11 +473,13 @@ JSON 日志格式示例：
 }
 ```
 
+`unit_price` 可选，为空时使用商品售价。
+
 **权限**：`order:create`
 
 ### GET /sales-orders/{order_id}
 
-订单详情，含明细和收款记录。
+订单详情，含明细和收款记录。响应包含 `status` 和 `status_label`（中文状态名）。
 
 **权限**：`order:list`
 
@@ -461,13 +491,13 @@ JSON 日志格式示例：
 
 ### POST /sales-orders/{order_id}/confirm
 
-确认订单，自动扣减库存。
+确认订单（仅 draft 状态），自动扣减库存。
 
 **权限**：`order:confirm`
 
 ### POST /sales-orders/{order_id}/cancel
 
-取消订单。已确认订单自动回滚库存。
+取消订单。已确认/部分收款订单自动回滚库存。`partially_paid` 订单需先冲正所有收款。
 
 **权限**：`order:cancel`
 
@@ -532,6 +562,8 @@ JSON 日志格式示例：
 
 **查询参数**：`page`, `page_size`, `product_id`, `movement_type`
 
+**响应字段**：每项含 `id`、`product_id`、`movement_type`（order_confirm/order_cancel/manual_adjust）、`quantity_before`、`quantity_change`、`quantity_after`、`related_type`、`related_id`、`remark`、`created_at`。
+
 **权限**：`inventory:list`
 
 ### POST /inventory/adjustments
@@ -547,6 +579,8 @@ JSON 日志格式示例：
 }
 ```
 
+**响应**：`{ "product_id": "uuid", "quantity_before": 100, "quantity_change": 10, "quantity_after": 110 }`
+
 **权限**：`inventory:adjust`
 
 ---
@@ -559,7 +593,7 @@ JSON 日志格式示例：
 
 **查询参数**：`period`（可选，默认 `30d`，可选值：`today`/`7d`/`30d`/`this_month`/`last_month`）
 
-**响应**：总销售额、订单数。成本、毛利、毛利率需要 `report:profit` 权限。
+**响应**：`total_amount`（总销售额）、`order_count`（订单数）、`period`、`start_date`、`end_date`。成本、毛利、毛利率需要 `report:profit` 权限。
 
 **权限**：`report:sales`
 
@@ -569,6 +603,8 @@ JSON 日志格式示例：
 
 **查询参数**：`period`（同上）
 
+**响应**：`{ "items": [{"date": "2026-05-01", "amount": "1000.00", "order_count": 3}], "period": "30d" }`
+
 **权限**：`report:sales`
 
 ### GET /reports/product-ranking
@@ -576,6 +612,8 @@ JSON 日志格式示例：
 商品销售排行（按销售额降序）。
 
 **查询参数**：`period`（同上）、`limit`（可选，默认 10，最大 50）
+
+**响应字段**：每项含 `rank`、`product_id`、`product_name`、`sku`、`total_sales`、`total_quantity`。有 `report:profit` 权限时额外返回 `total_cost`。
 
 **权限**：`report:sales`
 
@@ -632,6 +670,8 @@ JSON 日志格式示例：
 ### GET /audit-logs/actions
 
 获取所有操作类型和资源类型列表（用于筛选下拉框）。
+
+**响应**：`{ "actions": ["product_create", ...], "resource_types": ["product", ...] }`
 
 **权限**：`audit:view`
 
