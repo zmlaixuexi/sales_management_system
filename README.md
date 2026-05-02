@@ -139,7 +139,7 @@ cd backend
 source .venv/bin/activate
 pytest tests/ -v
 
-# 前端测试（321 个）
+# 前端测试（327 个）
 cd frontend
 npm test
 
@@ -192,7 +192,7 @@ npm run build
 | 模块 | 测试数 | 覆盖内容 |
 |---|---|---|
 | 拦截器 | 14 | 401 刷新重试、401 无 refresh 跳转、403/404/500 错误提示、网络错误、429 重试、_toastDisplayed 标记 |
-| utils | 13 | formatAmount / formatPercent / getApiErrorMessage 纯函数 |
+| utils | 19 | formatAmount / formatPercent / getApiErrorMessage 纯函数（含负数/大数/零/空字符串边界） |
 | 商品表单 | 12 | 新增模式标题/字段/提交/取消/上传/编辑模式（标题/fetchProduct/数据填充/保存修改） |
 | 客户表单 | 12 | 新增模式标题/字段/提交/编辑模式（标题/fetchCustomer/数据填充/保存修改） |
 | usePaginatedList | 11 | 初始加载、错误处理、筛选、分页切换、刷新、空结果、_toastDisplayed 跳过 |
@@ -228,7 +228,7 @@ npm run build
 | 登录页 | 7 | 渲染标题/输入框/登录按钮/提交调用 login/登录失败错误提示/成功跳转首页/redirect 参数跳转 |
 | API client | 3 | baseURL、token 附加、无 token |
 | NotFound | 3 | 404 渲染/返回首页按钮/按钮点击导航 |
-| **合计** | **321** | |
+| **合计** | **327** | |
 
 ## API 概览
 

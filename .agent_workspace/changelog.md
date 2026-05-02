@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第一百八十四轮·自动循环）
+
+### 测试：补强 formatAmount/formatPercent 边界测试（负数/大数/零/空字符串 6 项）
+
+- 扩展 `utils.test.ts`（13→19 项）
+- formatAmount：负数、大数、空字符串
+- formatPercent：负数百分比、超过 100%、零值
+- 前端 321→327，总计 1035 tests
+
 ## 2026-05-02（第一百八十三轮·自动循环）
 
 ### 测试：补强 auth store 边界测试（login success:false / fetchUser success:false / 空权限 3 项）
