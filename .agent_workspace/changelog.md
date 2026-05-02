@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百一十七轮·自动循环）
+
+### 安全：敏感字段前端权限控制 + 测试补强
+
+- 前端 Products/Orders/OrderDetail/Dashboard 根据 product:view_cost / report:profit 权限动态控制敏感字段列显示
+- 无权限用户不再看到成本价、利润、毛利率的列头和数据（此前仅后端隐藏数据，列头仍可见）
+- 新增 test_file_upload::test_25 验证无权限用户上传图片返回 403
+- 后端 768 + 前端 380 = 1148 tests 全绿，mypy/ruff/ESLint/tsc 0 errors
+
 ## 2026-05-02（第二百一十六轮·自动循环）
 
 ### 修复：需求符合性验证 + 关键问题修复
