@@ -116,7 +116,7 @@ def create_user(
     log_user_action(
         db, request, current_user,
         action="user_create", resource_type="user", resource_id=str(user.id),
-        after_data={"username": user.username, "display_name": user.display_name},
+        after_data={"username": user.username, "display_name": user.display_name, "is_active": user.is_active},
     )
     db.commit()
 

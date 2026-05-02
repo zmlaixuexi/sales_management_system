@@ -2390,3 +2390,24 @@ def test_90_audit_log_id_is_valid_uuid():
         # UUID() 会抛 ValueError 如果格式无效
         parsed = uuid.UUID(log["id"])
         assert str(parsed) == log["id"]
+
+
+def test_91_user_create_audit_log_after_data_has_is_active():
+    """用户创建审计日志 after_data 含 is_active 字段"""
+    headers = _admin_auth()
+    resp = client.post("/api/v1/users", json={
+        "username": "is_active_test91", "password": "Test@1234",
+        "display_name": "活跃用户91",
+    }, headers=headers)
+    assert resp.status_code == 200
+    uid = resp.json()["data"]["id"]
+
+    resp = client.get("/api/v1/audit-logs?action=user_create", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == uid)
+    assert log["after_data"]["username"] == "is_active_test91"
+    assert log["after_data"]["display_name"] == "活跃用户91"
+    assert log["after_data"]["is_active"] is True
+    assert log["before_data"] is None
+    assert log["resource_type"] == "user"

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百零六轮·自动循环）
+
+### 测试补强：用户创建审计日志 after_data 含 is_active 字段
+
+- `backend/app/api/v1/users.py`：用户创建审计日志 after_data 新增 is_active 字段
+- `test_audit_log.py`：新增 test_91（用户创建后 after_data 含 username/display_name/is_active=True）
+- 后端测试：1089/1089 全绿，ruff clean
+
 ## 2026-05-03（第四百零五轮·自动循环）
 
 ### 代码质量 + 测试补强：docs/testing.md 同步 + 审计日志 id 有效 UUID 验证
