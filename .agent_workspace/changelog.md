@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第一百八十二轮·自动循环）
+
+### 测试：新增 _TextFormatter 和 setup_logging 单元测试（6 项）
+
+- 扩展 `test_logging.py`（10→16 项）
+- _TextFormatter：文本格式输出验证、ISO 日期格式
+- setup_logging：root logger 级别设置、第三方库抑制（uvicorn/sqlalchemy → WARNING）、json/text 格式器选择
+- 后端 702→708，总计 1026 tests
+
 ## 2026-05-02（第一百八十一轮·自动循环）
 
 ### 测试：新增报表辅助函数单元测试（_date_range/_apply_data_scope 11 项）
