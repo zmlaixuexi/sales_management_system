@@ -75,6 +75,7 @@ backend/
       config.py          # 配置（pydantic BaseSettings）
       security.py        # 密码哈希、JWT 生成
       security_headers.py # 安全响应头中间件
+      body_limit.py      # 请求体大小限制中间件
       request_log.py     # 请求日志中间件
       ratelimit.py       # 速率限制中间件
       slow_query.py      # SQL 慢查询日志
@@ -100,14 +101,28 @@ backend/
 请求经过以下中间件（注册顺序，实际执行为反向）：
 
 1. **CORSMiddleware** — 跨域请求处理
-2. **SecurityHeadersMiddleware** — 添加 X-Content-Type-Options、X-Frame-Options、CSP 等安全头
-3. **RequestIDMiddleware** — 生成/透传 X-Request-ID，关联日志和审计
+2. **BodyLimitMiddleware** — 请求体大小限制（默认 10MB，`MAX_JSON_BODY_MB` 配置）
+3. **SecurityHeadersMiddleware** — 添加 X-Content-Type-Options、X-Frame-Options、CSP 等安全头
 4. **RequestLogMiddleware** — 记录 /api/ 请求的方法、路径、状态码、耗时、X-Response-Time
-5. **RateLimitMiddleware** — 基于 IP 的滑动窗口速率限制
+5. **RequestIDMiddleware** — 生成/透传 X-Request-ID，关联日志和审计
+6. **RateLimitMiddleware** — 基于 IP 的滑动窗口速率限制（注册在路由之后，最先执行）
+
+### 异常处理
+
+三个全局异常处理器确保所有响应格式一致（`{success, error, request_id}`）：
+
+1. **HTTPException** — 业务异常统一为标准错误格式
+2. **RequestValidationError** — 422 参数校验错误转换为中文友好提示
+3. **Exception** — 未处理异常返回 500，隐藏内部详情，记录 ERROR 日志
+
+### 生命周期
+
+- **启动**：创建上传目录、检查 JWT 密钥安全性（生产环境拒绝默认值）、打印配置摘要
+- **关闭**：释放数据库连接池
 
 ### API 路由
 
-所有 API 端点以 `/api/v1` 为前缀，共 12 个功能模块（健康检查不计入）：
+所有 API 端点以 `/api/v1` 为前缀，共 11 个功能模块（健康检查不计入）：
 
 | 模块 | 路径前缀 | 说明 |
 |---|---|---|
