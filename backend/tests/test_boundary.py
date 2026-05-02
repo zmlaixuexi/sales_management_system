@@ -1019,3 +1019,73 @@ def test_52_order_list_negative_page_size_422():
 
     resp = client.get("/api/v1/sales-orders?page_size=-1", headers=_auth())
     assert resp.status_code == 422
+
+
+# --- 外键验证边界条件 ---
+
+
+def _ensure_login():
+    if not _tokens.get("access"):
+        resp = client.post("/api/v1/auth/login", json={
+            "username": "boundary_admin", "password": "pass123456",
+        })
+        assert resp.status_code == 200
+        _tokens["access"] = resp.json()["data"]["access_token"]
+
+
+def test_53_customer_create_invalid_owner_user_id_400():
+    """创建客户时 owner_user_id 为无效 UUID 格式返回 400"""
+    _ensure_login()
+    resp = client.post("/api/v1/customers", json={
+        "name": "外键测试客户", "owner_user_id": "not-a-uuid",
+    }, headers=_auth())
+    assert resp.status_code == 400
+    assert resp.json()["error"]["code"] == "VALIDATION_FAILED"
+
+
+def test_54_customer_create_nonexistent_owner_user_id_400():
+    """创建客户时 owner_user_id 指向不存在的用户返回 400"""
+    _ensure_login()
+    resp = client.post("/api/v1/customers", json={
+        "name": "外键测试客户", "owner_user_id": str(uuid.uuid4()),
+    }, headers=_auth())
+    assert resp.status_code == 400
+    assert "归属用户不存在" in resp.json()["error"]["message"]
+
+
+def test_55_order_update_nonexistent_customer_404():
+    """更新草稿订单 customer_id 为不存在的客户返回 404"""
+    _ensure_login()
+    # 创建草稿订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    order_id = resp.json()["data"]["id"]
+
+    # 更新为不存在的客户
+    resp = client.put(f"/api/v1/sales-orders/{order_id}", json={
+        "customer_id": str(uuid.uuid4()),
+    }, headers=_auth())
+    assert resp.status_code == 404
+    assert resp.json()["error"]["code"] == "RESOURCE_NOT_FOUND"
+
+
+def test_56_order_update_nonexistent_product_in_items_404():
+    """更新草稿订单 items 含不存在的商品返回 404"""
+    _ensure_login()
+    # 创建草稿订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    order_id = resp.json()["data"]["id"]
+
+    # 更新为不存在的商品
+    resp = client.put(f"/api/v1/sales-orders/{order_id}", json={
+        "items": [{"product_id": str(uuid.uuid4()), "quantity": 1}],
+    }, headers=_auth())
+    assert resp.status_code == 404
+    assert resp.json()["error"]["code"] == "RESOURCE_NOT_FOUND"
