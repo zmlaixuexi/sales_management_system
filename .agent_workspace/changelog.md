@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第二百四十四轮·自动循环）
+
+### 工程：修复 ruff lint 错误，移除未使用 Query import，整理长行
+
+- 重构 PaginationParams/fmt_dt 后遗留 5 个未使用的 Query import（customers/orders/payments/inventory/users）
+- inventory.py/users.py import 行超 120 字符，拆分为多行
+- 后端 801 测试全绿，ruff 0 errors
+
 ## 2026-05-02（第二百四十三轮·自动循环）
 
 ### 测试：补充导出服务软删除过滤测试 4 项
