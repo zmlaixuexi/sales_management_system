@@ -2,7 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-from app.core.sanitize import strip_html
+from app.core.sanitize import sanitize_text as _sanitize
 
 CustomerSource = Literal["referral", "online", "offline", "ad", "other"]
 CustomerLevel = Literal["vip", "important", "normal", "potential"]
@@ -23,7 +23,7 @@ class CustomerCreate(BaseModel):
     @field_validator("name", "contact_name", "email", "remark")
     @classmethod
     def sanitize_text(cls, v: str | None) -> str | None:
-        return strip_html(v) if v else v
+        return _sanitize(v)
 
 
 class CustomerUpdate(BaseModel):
@@ -40,7 +40,7 @@ class CustomerUpdate(BaseModel):
     @field_validator("name", "contact_name", "email", "remark")
     @classmethod
     def sanitize_text(cls, v: str | None) -> str | None:
-        return strip_html(v) if v else v
+        return _sanitize(v)
 
 
 class CustomerTransfer(BaseModel):

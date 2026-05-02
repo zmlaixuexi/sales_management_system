@@ -2,7 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-from app.core.sanitize import strip_html
+from app.core.sanitize import sanitize_text as _sanitize
 
 ProductStatus = Literal["active", "inactive", "disabled"]
 
@@ -22,7 +22,7 @@ class ProductCreate(BaseModel):
     @field_validator("name", "remark")
     @classmethod
     def sanitize_text(cls, v: str | None) -> str | None:
-        return strip_html(v) if v else v
+        return _sanitize(v)
 
 
 class ProductUpdate(BaseModel):
@@ -40,7 +40,7 @@ class ProductUpdate(BaseModel):
     @field_validator("name", "remark")
     @classmethod
     def sanitize_text(cls, v: str | None) -> str | None:
-        return strip_html(v) if v else v
+        return _sanitize(v)
 
 
 # ── 响应模型 ──

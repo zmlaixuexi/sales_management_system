@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel, Field, field_validator
 
-from app.core.sanitize import strip_html
+from app.core.sanitize import sanitize_text as _sanitize
 
 
 class OrderItemInput(BaseModel):
@@ -26,7 +26,7 @@ class OrderCreate(BaseModel):
     @field_validator("remark")
     @classmethod
     def sanitize_text(cls, v: str | None) -> str | None:
-        return strip_html(v) if v else v
+        return _sanitize(v)
 
 
 class OrderUpdate(BaseModel):
@@ -37,7 +37,7 @@ class OrderUpdate(BaseModel):
     @field_validator("remark")
     @classmethod
     def sanitize_text(cls, v: str | None) -> str | None:
-        return strip_html(v) if v else v
+        return _sanitize(v)
 
 
 # ── 响应模型 ──

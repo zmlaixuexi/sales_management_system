@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-from app.core.sanitize import strip_html
+from app.core.sanitize import sanitize_text as _sanitize
 
 VALID_PAYMENT_METHODS = ("cash", "transfer", "wechat", "alipay", "other")
 
@@ -25,7 +25,7 @@ class PaymentCreate(BaseModel):
     @field_validator("remark")
     @classmethod
     def sanitize_text(cls, v: str | None) -> str | None:
-        return strip_html(v) if v else v
+        return _sanitize(v)
 
 
 # ── 响应模型 ──
