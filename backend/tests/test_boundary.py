@@ -1998,3 +1998,53 @@ def test_112_customer_update_invalid_follow_status():
 
     resp = client.put(f"/api/v1/customers/{cid}", json={"follow_status": "frozen"}, headers=headers)
     assert resp.status_code == 422, f"无效 follow_status 应返回 422: {resp.status_code}"
+
+
+def test_113_product_create_invalid_status():
+    """商品创建无效 status 返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/products", json={
+        "name": "无效状态商品113", "sale_price": "10", "status": "deleted",
+    }, headers=headers)
+    assert resp.status_code == 422, f"无效 status 应返回 422: {resp.status_code}"
+
+
+def test_114_product_update_invalid_status():
+    """商品编辑无效 status 返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/products", json={
+        "name": "状态编辑商品114", "sale_price": "10",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    resp = client.put(f"/api/v1/products/{pid}", json={"status": "archived"}, headers=headers)
+    assert resp.status_code == 422, f"无效 status 应返回 422: {resp.status_code}"
+
+
+def test_115_invalid_uuid_path_product():
+    """无效 UUID 路径参数访问商品返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.get("/api/v1/products/not-a-uuid", headers=headers)
+    assert resp.status_code == 422, f"无效 UUID 应返回 422: {resp.status_code}"
+
+
+def test_116_invalid_uuid_path_customer():
+    """无效 UUID 路径参数访问客户返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.get("/api/v1/customers/not-a-uuid", headers=headers)
+    assert resp.status_code == 422, f"无效 UUID 应返回 422: {resp.status_code}"
+
+
+def test_117_invalid_uuid_path_order():
+    """无效 UUID 路径参数访问订单返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.get("/api/v1/sales-orders/not-a-uuid", headers=headers)
+    assert resp.status_code == 422, f"无效 UUID 应返回 422: {resp.status_code}"
+
+
+def test_118_invalid_uuid_path_user():
+    """无效 UUID 路径参数编辑用户返回 400/422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.put("/api/v1/users/not-a-uuid", json={"display_name": "test"}, headers=headers)
+    assert resp.status_code in (400, 422), f"无效 UUID 应返回 400/422: {resp.status_code}"
