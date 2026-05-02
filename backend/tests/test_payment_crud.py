@@ -1079,3 +1079,33 @@ def test_39_reverse_payment_cancelled_order_400():
     resp = client.post(f"/api/v1/payments/{pay_id}/reverse", headers=headers)
     assert resp.status_code == 400
     assert resp.json()["error"]["code"] == "ORDER_INVALID_STATUS"
+
+
+def test_40_create_payment_zero_amount_422():
+    """收款金额为零返回 422"""
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "pay_tester").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+    resp = client.post(f"/api/v1/payments/orders/{_confirmed_order_id}/payments", json={
+        "amount": "0", "payment_method": "cash",
+    }, headers=headers)
+    assert resp.status_code == 422
+
+
+def test_41_create_payment_negative_amount_422():
+    """收款金额为负数返回 422"""
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "pay_tester").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+    resp = client.post(f"/api/v1/payments/orders/{_confirmed_order_id}/payments", json={
+        "amount": "-50", "payment_method": "cash",
+    }, headers=headers)
+    assert resp.status_code == 422
