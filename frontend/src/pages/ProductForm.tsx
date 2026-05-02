@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { fetchProduct, createProduct, updateProduct, uploadImage } from '@/api/products'
 import type { ProductDetail } from '@/api/products'
 import { useSubmit } from '@/hooks/useSubmit'
+import { getApiErrorMessage } from '@/utils'
 
 export default function ProductForm() {
   const navigate = useNavigate()
@@ -36,6 +37,10 @@ export default function ProductForm() {
               remark: res.data.remark,
             })
           }
+        })
+        .catch((e: unknown) => {
+          message.error(getApiErrorMessage(e, '加载商品信息失败'))
+          navigate('/products', { replace: true })
         })
         .finally(() => setLoading(false))
     }

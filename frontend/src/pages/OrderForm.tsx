@@ -12,7 +12,7 @@ import { fetchCustomers } from '@/api/customers'
 import type { Customer } from '@/api/customers'
 import { fetchProducts } from '@/api/products'
 import type { Product } from '@/api/products'
-import { formatAmount } from '@/utils'
+import { formatAmount, getApiErrorMessage } from '@/utils'
 
 interface OrderLine {
   key: string
@@ -86,6 +86,10 @@ export default function OrderForm() {
             unit_price: parseFloat(item.unit_price),
             subtotal: parseFloat(item.subtotal_amount),
           })))
+        })
+        .catch((e: unknown) => {
+          message.error(getApiErrorMessage(e, '加载订单信息失败'))
+          navigate('/orders', { replace: true })
         })
         .finally(() => setLoading(false))
     }

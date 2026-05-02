@@ -4,6 +4,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import { fetchCustomer, createCustomer, updateCustomer } from '@/api/customers'
 import { useSubmit } from '@/hooks/useSubmit'
+import { getApiErrorMessage } from '@/utils'
 
 export default function CustomerForm() {
   const navigate = useNavigate()
@@ -29,6 +30,10 @@ export default function CustomerForm() {
               remark: res.data.remark,
             })
           }
+        })
+        .catch((e: unknown) => {
+          message.error(getApiErrorMessage(e, '加载客户信息失败'))
+          navigate('/customers', { replace: true })
         })
         .finally(() => setLoading(false))
     }
