@@ -12,12 +12,7 @@ import { formatAmount, formatPercent } from '@/utils'
 import { downloadCsv } from '@/api/request'
 import apiClient from '@/api/client'
 import { usePaginatedList } from '@/hooks/usePaginatedList'
-
-const statusMap: Record<string, { color: string; label: string }> = {
-  active: { color: 'green', label: '上架' },
-  inactive: { color: 'orange', label: '下架' },
-  disabled: { color: 'red', label: '停用' },
-}
+import { productStatusMap as statusMap } from '@/constants/statusMaps'
 
 export default function ProductsPage() {
   const navigate = useNavigate()

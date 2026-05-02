@@ -10,29 +10,7 @@ import type { Customer } from '@/api/customers'
 import { fetchOrders } from '@/api/orders'
 import type { Order } from '@/api/orders'
 import { formatAmount, getApiErrorMessage } from '@/utils'
-
-const sourceMap: Record<string, string> = {
-  referral: '转介绍',
-  online: '线上',
-  offline: '线下',
-  ad: '广告',
-  other: '其他',
-}
-
-const levelMap: Record<string, { color: string; label: string }> = {
-  vip: { color: 'gold', label: 'VIP' },
-  important: { color: 'blue', label: '重要' },
-  normal: { color: 'default', label: '普通' },
-  potential: { color: 'green', label: '潜在' },
-}
-
-const orderStatusMap: Record<string, { color: string; label: string }> = {
-  draft: { color: 'default', label: '草稿' },
-  confirmed: { color: 'blue', label: '已确认' },
-  cancelled: { color: 'red', label: '已取消' },
-  partially_paid: { color: 'orange', label: '部分收款' },
-  completed: { color: 'green', label: '已完成' },
-}
+import { customerSourceMap as sourceMap, customerLevelMap as levelMap, orderStatusMap } from '@/constants/statusMaps'
 
 export default function CustomerDetail() {
   const navigate = useNavigate()

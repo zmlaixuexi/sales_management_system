@@ -10,14 +10,7 @@ import { fetchOrder, confirmOrder, cancelOrder } from '@/api/orders'
 import type { OrderDetail as OrderDetailData, OrderItem, OrderPayment } from '@/api/orders'
 import { createPayment, reversePayment } from '@/api/payments'
 import { formatAmount, formatPercent, getApiErrorMessage } from '@/utils'
-
-const statusMap: Record<string, { color: string; label: string }> = {
-  draft: { color: 'default', label: '草稿' },
-  confirmed: { color: 'blue', label: '已确认' },
-  cancelled: { color: 'red', label: '已取消' },
-  partially_paid: { color: 'orange', label: '部分收款' },
-  completed: { color: 'green', label: '已完成' },
-}
+import { orderStatusMap as statusMap } from '@/constants/statusMaps'
 
 const paymentMethodLabels: Record<string, string> = {
   cash: '现金',

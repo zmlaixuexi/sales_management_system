@@ -9,21 +9,7 @@ import { getApiErrorMessage } from '@/utils'
 import { downloadCsv } from '@/api/request'
 import apiClient from '@/api/client'
 import { usePaginatedList } from '@/hooks/usePaginatedList'
-
-const sourceMap: Record<string, string> = {
-  referral: '转介绍',
-  online: '线上',
-  offline: '线下',
-  ad: '广告',
-  other: '其他',
-}
-
-const levelMap: Record<string, { color: string; label: string }> = {
-  vip: { color: 'gold', label: 'VIP' },
-  important: { color: 'blue', label: '重要' },
-  normal: { color: 'default', label: '普通' },
-  potential: { color: 'green', label: '潜在' },
-}
+import { customerSourceMap as sourceMap, customerLevelMap as levelMap } from '@/constants/statusMaps'
 
 export default function CustomersPage() {
   const navigate = useNavigate()

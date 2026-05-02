@@ -5,6 +5,7 @@ import { fetchPayments } from '@/api/payments'
 import type { Payment } from '@/api/payments'
 import { formatAmount } from '@/utils'
 import { usePaginatedList } from '@/hooks/usePaginatedList'
+import { paymentStatusMap as statusMap } from '@/constants/statusMaps'
 
 const paymentMethodMap: Record<string, string> = {
   cash: '现金',
@@ -12,11 +13,6 @@ const paymentMethodMap: Record<string, string> = {
   wechat: '微信',
   alipay: '支付宝',
   other: '其他',
-}
-
-const statusMap: Record<string, { color: string; label: string }> = {
-  normal: { color: 'green', label: '正常' },
-  reversed: { color: 'red', label: '已冲正' },
 }
 
 export default function PaymentsPage() {
