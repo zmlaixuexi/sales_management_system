@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第一百七十六轮·自动循环）
+
+### 测试：新增 ProtectedRoute Spin 尺寸验证测试
+
+- `ProtectedRoute.test.tsx`：+1 测试验证加载状态 Spin 使用 large 尺寸
+- 前端 315→316，总计 993 tests
+
 ## 2026-05-02（第一百七十五轮·自动循环）
 
 ### 文档：更新 docs/testing.md 与实际测试输出对齐

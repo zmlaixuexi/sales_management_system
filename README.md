@@ -139,7 +139,7 @@ cd backend
 source .venv/bin/activate
 pytest tests/ -v
 
-# 前端测试（315 个）
+# 前端测试（316 个）
 cd frontend
 npm test
 
@@ -222,11 +222,11 @@ npm run build
 | 库存 API | 5 | fetchInventory/adjust/筛选 |
 | request 封装 | 5 | get/post/put/del/upload 调用验证 |
 | ErrorBoundary | 5 | 正常渲染 + 错误捕获 + 重试恢复 + 路由重置 + 返回首页 |
-| ProtectedRoute | 4 | 无 token 重定向/加载中/已认证渲染/fetchUser 失败/异步重定向 |
+| ProtectedRoute | 5 | 无 token 重定向/加载中/已认证渲染/fetchUser 失败/异步重定向/Spin large 尺寸 |
 | 登录页 | 5 | 渲染标题/输入框/登录按钮/提交调用 login/登录失败错误提示 |
 | API client | 3 | baseURL、token 附加、无 token |
 | NotFound | 3 | 404 渲染/返回首页按钮/按钮点击导航 |
-| **合计** | **315** | |
+| **合计** | **316** | |
 
 ## API 概览
 
