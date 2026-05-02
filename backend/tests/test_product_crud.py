@@ -12,6 +12,7 @@ from app.db.session import Base
 from app.main import app
 from app.models.product import Product, ProductCategory
 from app.models.user import User
+from app.models.order import InventoryMovement
 
 TEST_DB_URL = "sqlite:///./test_product_crud.db"
 engine = create_engine(TEST_DB_URL, connect_args={"check_same_thread": False})
@@ -923,3 +924,125 @@ def test_40_create_product_remark_strips_html():
     remark = resp.json()["data"].get("remark", "")
     assert "<script>" not in remark
     assert "正常备注" in remark
+
+
+def test_41_update_stock_creates_inventory_movement():
+    """编辑商品库存变更加应记录库存流水"""
+    headers = _admin_auth()
+    # 创建新商品，避免依赖共享数据
+    db = TestSession()
+    try:
+        user = db.query(User).first()
+        cat = ProductCategory(id=uuid.uuid4(), name="库存变更测试分类")
+        db.add(cat)
+        db.flush()
+        prod = Product(
+            id=uuid.uuid4(), name="库存变更测试商品", sku=f"STK-{uuid.uuid4().hex[:6]}",
+            sale_price=100, cost_price=50, stock_quantity=20,
+            status="active", category_id=cat.id,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(prod)
+        db.commit()
+        pid = str(prod.id)
+    finally:
+        db.close()
+
+    # 更新库存从 20 到 15
+    resp = client.put(f"/api/v1/products/{pid}", json={
+        "stock_quantity": 15,
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    # 验证库存流水记录
+    db = TestSession()
+    try:
+        movement = db.query(InventoryMovement).filter(
+            InventoryMovement.product_id == uuid.UUID(pid),
+            InventoryMovement.movement_type == "product_update",
+        ).first()
+        assert movement is not None
+        assert movement.quantity_before == 20
+        assert movement.quantity_change == -5
+        assert movement.quantity_after == 15
+    finally:
+        db.close()
+
+
+def test_42_update_stock_no_change_no_movement():
+    """库存数量不变时不产生库存流水"""
+    headers = _admin_auth()
+    db = TestSession()
+    try:
+        user = db.query(User).first()
+        cat = ProductCategory(id=uuid.uuid4(), name="库存不变测试分类")
+        db.add(cat)
+        db.flush()
+        prod = Product(
+            id=uuid.uuid4(), name="库存不变测试商品", sku=f"STKNC-{uuid.uuid4().hex[:6]}",
+            sale_price=100, cost_price=50, stock_quantity=10,
+            status="active", category_id=cat.id,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(prod)
+        db.commit()
+        pid = str(prod.id)
+        # 清除已有流水
+        db.query(InventoryMovement).filter(
+            InventoryMovement.product_id == prod.id,
+        ).delete()
+        db.commit()
+    finally:
+        db.close()
+
+    # 更新库存为相同值
+    resp = client.put(f"/api/v1/products/{pid}", json={
+        "stock_quantity": 10,
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    # 不应有新的库存流水
+    db = TestSession()
+    try:
+        count = db.query(InventoryMovement).filter(
+            InventoryMovement.product_id == uuid.UUID(pid),
+            InventoryMovement.movement_type == "product_update",
+        ).count()
+        assert count == 0
+    finally:
+        db.close()
+
+
+def test_43_update_without_stock_uses_plain_query():
+    """不涉及库存变更的编辑不使用行锁（正常路径）"""
+    headers = _admin_auth()
+    db = TestSession()
+    try:
+        user = db.query(User).first()
+        cat = ProductCategory(id=uuid.uuid4(), name="名称变更测试分类")
+        db.add(cat)
+        db.flush()
+        prod = Product(
+            id=uuid.uuid4(), name="名称变更测试商品", sku=f"NAME-{uuid.uuid4().hex[:6]}",
+            sale_price=100, cost_price=50, stock_quantity=10,
+            status="active", category_id=cat.id,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(prod)
+        db.commit()
+        pid = str(prod.id)
+    finally:
+        db.close()
+
+    # 只更新名称，不涉及库存
+    resp = client.put(f"/api/v1/products/{pid}", json={
+        "name": "更新后的名称",
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    db = TestSession()
+    try:
+        prod = db.query(Product).filter(Product.id == uuid.UUID(pid)).first()
+        assert prod.name == "更新后的名称"
+    finally:
+        db.close()
