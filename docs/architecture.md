@@ -107,7 +107,7 @@ backend/
 
 ### API 路由
 
-所有 API 端点以 `/api/v1` 为前缀，共 11 个功能模块：
+所有 API 端点以 `/api/v1` 为前缀，共 12 个功能模块（健康检查不计入）：
 
 | 模块 | 路径前缀 | 说明 |
 |---|---|---|
@@ -194,6 +194,11 @@ frontend/src/
 | `/orders/:id` | OrderDetail | 订单详情 |
 | `/orders/:id/edit` | OrderForm | 编辑订单 |
 | `/audit-logs` | AuditLogs | 审计日志 |
+| `/customers/:id` | CustomerDetail | 客户详情 |
+| `/reports` | ReportsCenter | 报表中心 |
+| `/users` | Users | 用户管理 |
+| `/inventory` | Inventory | 库存管理 |
+| `/payments` | Payments | 收款记录 |
 
 ### API 客户端
 
@@ -342,7 +347,7 @@ Docker Compose 启动 3 个容器（无 Nginx）：
 | mypy | Python 静态类型检查（含 SQLAlchemy plugin） |
 | ESLint | 前端 lint |
 | tsc | 前端 TypeScript 类型检查 |
-| pytest | 后端测试（8 类标记自动分类，覆盖率 99%+） |
+| pytest | 后端测试（8 类标记自动分类，覆盖率 100%） |
 | vitest | 前端测试 |
 | pip-audit | Python 依赖漏洞扫描 |
 | npm audit | 前端依赖漏洞扫描 |
