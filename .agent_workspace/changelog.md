@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百八十二轮·自动循环）
+
+### 测试：OrderDetail 补强确认/取消订单交互、冲正弹窗和已确认状态按钮测试
+
+- OrderDetail：新增确认订单点击调用 confirmOrder、取消订单点击调用 cancelOrder、冲正按钮存在、确认失败错误提示、已确认状态显示登记收款按钮测试
+- Popconfirm mock 更新支持 onClick 触发 onConfirm
+- 前端测试 427→432，总计 1651 测试全绿
+
 ## 2026-05-03（第四百八十一轮·自动循环）
 
 ### 文档：testing.md 同步前端测试计数和模块描述
