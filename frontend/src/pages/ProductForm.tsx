@@ -39,7 +39,7 @@ export default function ProductForm() {
           }
         })
         .catch((e: unknown) => {
-          message.error(getApiErrorMessage(e, '加载商品信息失败'))
+          if (!(e as any)?._toastDisplayed) message.error(getApiErrorMessage(e, '加载商品信息失败'))
           navigate('/products', { replace: true })
         })
         .finally(() => setLoading(false))
@@ -54,8 +54,8 @@ export default function ProductForm() {
         setMainImageUrl(res.data.url)
         message.success('图片上传成功')
       }
-    } catch {
-      message.error('图片上传失败')
+    } catch (e: unknown) {
+      if (!(e as any)?._toastDisplayed) message.error('图片上传失败')
     } finally {
       setImageUploading(false)
     }

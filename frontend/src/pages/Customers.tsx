@@ -45,7 +45,7 @@ export default function CustomersPage() {
       message.success('删除成功')
       loadData()
     } catch (e: unknown) {
-      message.error(getApiErrorMessage(e, '删除失败'))
+      if (!(e as any)?._toastDisplayed) message.error(getApiErrorMessage(e, '删除失败'))
     }
   }
 
