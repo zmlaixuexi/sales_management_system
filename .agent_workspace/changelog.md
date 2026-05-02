@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第三百八十八轮·自动循环）
+
+### 测试补强：库存调整归零审计日志验证
+
+- `test_audit_log.py`：新增 test_73（库存归零 before_data stock_quantity=10，after_data stock_quantity=0/change=-10）
+- 后端测试：1071/1071 全绿
+
 ## 2026-05-02（第三百八十七轮·自动循环）
 
 ### 测试补强：收款冲正审计日志链路验证

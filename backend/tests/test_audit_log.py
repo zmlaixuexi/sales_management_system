@@ -1915,3 +1915,37 @@ def test_72_payment_reverse_order_status_audit_chain():
     assert pay_log["after_data"]["status"] == "reversed"
     assert pay_log["before_data"]["order_id"] == oid
     assert pay_log["resource_type"] == "payment"
+
+
+def test_73_inventory_adjust_to_zero_audit_log():
+    """库存调整归零审计日志 before_data/after_data 含 name 和正确的 stock_quantity"""
+    headers = _admin_auth()
+    # 创建商品（库存 10）
+    resp = client.post("/api/v1/products", json={
+        "name": "归零审计商品",
+        "cost_price": "10.00",
+        "sale_price": "20.00",
+        "stock_quantity": 10,
+        "status": "active",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    # 减少库存归零
+    resp = client.post("/api/v1/inventory/adjustments", json={
+        "product_id": pid,
+        "quantity_change": -10,
+        "remark": "归零测试",
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=inventory_adjust", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == pid and i["after_data"]["change"] == -10)
+    assert log["before_data"]["name"] == "归零审计商品"
+    assert log["before_data"]["stock_quantity"] == 10
+    assert log["after_data"]["name"] == "归零审计商品"
+    assert log["after_data"]["stock_quantity"] == 0
+    assert log["after_data"]["change"] == -10
+    assert log["resource_type"] == "product"
