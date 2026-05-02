@@ -2,28 +2,28 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-176
-当前任务名称：测试补强 — ProtectedRoute Spin 尺寸验证
+当前任务编号：ROUND-177
+当前任务名称：测试补强 — Login 页面跳转和 redirect 参数
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 176：ProtectedRoute +1 测试（Spin large 尺寸验证），前端 315→316
+- Round 177：Login +2 测试（成功跳转首页/redirect 参数跳转），前端 316→318
+- Round 176：ProtectedRoute +1 测试，前端 315→316
 - Round 175：docs/testing.md 一致性对齐
-- Round 174：Schema 校验器全覆盖 23 tests
 
 ## 最终验证状态
 
 | 门禁 | 结果 |
 |---|---|
 | 后端测试 | 677/677 ✓ |
-| 前端测试 | 316/316 ✓ |
+| 前端测试 | 318/318 ✓ |
 | ruff | 0 errors ✓ |
 | ESLint | 0 errors ✓ |
 | TypeScript | 0 errors ✓ |
 | 构建 | ✓ |
-| 总计 | 993 tests |
+| 总计 | 995 tests |
 
 ## 下一步第一动作
 
