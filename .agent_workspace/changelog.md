@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百六十五轮·自动循环）
+
+### 可观测性：审计日志前端 resource_id 筛选 UI
+
+- auditLogs.ts：fetchAuditLogs 参数新增 resource_id
+- AuditLogs.tsx：筛选栏新增"资源ID精确筛选"输入框，支持搜索和清除
+- 前端测试：382/382 全通过，ESLint 0 错误，vue-tsc 0 错误
+
 ## 2026-05-03（第四百六十四轮·自动循环）
 
 ### 文档完善：testing.md 更新测试总数和审计日志描述
