@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百四十九轮·自动循环）
+
+### 修复：Login/Products 页面硬编码错误消息改用 getApiErrorMessage
+
+- 前端错误处理一致性审查，发现 16 项问题（确认 ErrorBoundary 已集成）
+- Login.tsx：`message.error('用户名或密码错误')` → `getApiErrorMessage(e, '用户名或密码错误')`
+- Products.tsx：handleDisable 硬编码 `'停用失败'` → `getApiErrorMessage(e, '停用失败')`
+- 380 前端测试全绿，构建 263ms
+
 ## 2026-05-02（第二百四十八轮·自动循环）
 
 ### 重构：提取 active_query() 辅助函数，4 处列表查询软删除过滤统一
