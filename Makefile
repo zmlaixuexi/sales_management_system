@@ -1,4 +1,4 @@
-.PHONY: help dev dev-backend dev-frontend install test test-unit test-integration test-backend test-frontend coverage coverage-frontend lint lint-fix lint-backend lint-frontend typecheck typecheck-backend quality ci build build-frontend db-migrate db-check db-seed db-backup db-restore docker-up docker-down clean
+.PHONY: help dev dev-backend dev-frontend install test test-unit test-integration test-backend test-frontend coverage coverage-frontend lint lint-fix lint-backend lint-frontend typecheck typecheck-backend quality ci build build-frontend db-migrate db-check db-seed db-backup db-restore docker-up docker-down deploy-check deploy-rollback clean
 
 # 后端 Python：优先使用 venv，回退到系统 python
 PYTHON ?= $(shell [ -f backend/.venv/bin/python ] && echo ".venv/bin/python" || echo "python")
@@ -102,6 +102,14 @@ docker-up: ## 启动生产 Docker 环境
 
 docker-down: ## 停止 Docker 环境
 	docker compose -f deploy/docker-compose.prod.yml down
+
+# ─── 部署 ──────────────────────────────────────────────────
+
+deploy-check: ## 部署前检查（文件/环境/Docker/代码质量/构建/迁移）
+	bash deploy/pre-deploy-check.sh
+
+deploy-rollback: ## 回滚到指定版本（参数：TARGET=v1.0.0）
+	bash deploy/rollback.sh $${TARGET:-HEAD~1}
 
 # ─── 清理 ─────────────────────────────────────────────────
 
