@@ -2728,3 +2728,59 @@ def test_102_order_cancel_audit_log_before_data_has_customer_id():
     assert log["before_data"]["customer_id"] == cid
     assert "customer_id" in log["after_data"], f"after_data 缺少 customer_id: {log['after_data']}"
     assert log["after_data"]["customer_id"] == cid
+
+
+def test_103_order_update_audit_log_after_data_has_items():
+    """订单编辑审计日志 after_data 含 items 明细"""
+    headers = _admin_auth()
+    # 创建客户+商品
+    resp = client.post("/api/v1/customers", json={"name": "编辑明细审计客户", "phone": "13801030303"}, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/products", json={
+        "name": "编辑明细审计商品A", "sale_price": "80.00", "cost_price": "30.00", "stock_quantity": 20,
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid_a = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/products", json={
+        "name": "编辑明细审计商品B", "sale_price": "150.00", "cost_price": "70.00", "stock_quantity": 10,
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid_b = resp.json()["data"]["id"]
+
+    # 创建订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cid,
+        "items": [{"product_id": pid_a, "quantity": 1, "unit_price": "80.00"}],
+    }, headers=headers)
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+
+    # 编辑订单（改明细）
+    resp = client.put(f"/api/v1/sales-orders/{oid}", json={
+        "items": [
+            {"product_id": pid_a, "quantity": 2, "unit_price": "80.00"},
+            {"product_id": pid_b, "quantity": 1, "unit_price": "150.00"},
+        ],
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=order_update", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == oid)
+    assert log["after_data"] is not None
+    assert "items" in log["after_data"], f"after_data 缺少 items 字段: {log['after_data']}"
+    log_items = log["after_data"]["items"]
+    assert len(log_items) == 2
+    # 验证字段完整性
+    for item in log_items:
+        assert "product_id" in item, f"item 缺少 product_id: {item}"
+        assert "quantity" in item, f"item 缺少 quantity: {item}"
+        assert "unit_price" in item, f"item 缺少 unit_price: {item}"
+    item_a = next(i for i in log_items if i["product_id"] == pid_a)
+    assert item_a["quantity"] == 2
+    assert item_a["unit_price"] == "80.00"
+    item_b = next(i for i in log_items if i["product_id"] == pid_b)
+    assert item_b["quantity"] == 1
+    assert item_b["unit_price"] == "150.00"

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第四百一十七轮·自动循环）
+
+### 测试补强：订单编辑审计日志 after_data 含 items 明细
+
+- `backend/app/api/v1/orders.py`：订单编辑审计日志 after_data 在含 items 变更时新增 items 数组（product_id/quantity/unit_price）
+- `test_audit_log.py`：新增 test_103（订单编辑 after_data 含 items 明细，验证多商品明细字段完整性）
+- `docs/testing.md`：更新后端测试总数 1100→1101、总计 1482→1483、test_audit_log.py 104→105
+- 后端测试：1101/1101 全绿，ruff clean
+
 ## 2026-05-03（第四百一十六轮·自动循环）
 
 ### 测试补强：订单取消审计日志 before_data/after_data 含 customer_id

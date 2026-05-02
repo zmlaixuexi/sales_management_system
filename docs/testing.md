@@ -4,11 +4,11 @@
 
 | 指标 | 值 |
 |---|---|
-| 后端测试总数 | 1100 |
+| 后端测试总数 | 1101 |
 | 后端测试文件 | 42 |
 | 前端测试总数 | 382 |
 | 前端测试文件 | 37 |
-| 测试总计 | 1482 |
+| 测试总计 | 1483 |
 | 后端覆盖率 | 99.79% |
 | 覆盖模块 | 认证、商品、客户、订单、库存、收款、报表（含客户/销售人员排行）、审计日志（含手机号/邮箱脱敏、全操作 before_data/after_data 字段完整性验证）、数据导出（含权限/数据范围/敏感字段边界）、批量导入（含负价格/非法格式/英文表头/批量内去重）、权限校验（含导出敏感字段过滤、报表利润权限）、速率限制、SQL 注入防护、XSS 防护、请求 ID 中间件、CORS 验证、日志格式器（JSON/文本/setup_logging）、金额计算、文件服务（含 FILE_TOO_LARGE/FILE_NOT_BOUND 错误码、上传权限 403）、密码强度（含注册/修改密码边界验证：过短/纯特殊字符/无数字/无字母）、订单操作日志、支付路径（含已取消/已完成订单拒绝、无权限 403）、派生销售字段、响应体 request_id、报表 period 参数校验、CSV 导入校验（含行数上限+XSS 消毒+commit 回滚）、客户 source/level 枚举校验、生产环境 OpenAPI 禁用、SQL 慢查询日志、用户管理（含角色列表 API 和权限边界）、安全模块（bcrypt 72 字节截断/JWT token 篡改/过期/错误密钥/iat/jti）、JWT token 边界验证（过期 token/错误签名/缺少 type 字段/错误 type/软删除用户/不存在用户均返回 401）、报表辅助函数（_date_range/_apply_data_scope）、导出 API 辅助函数（_csv_filename）、登录速率限制辅助函数（_check_login_rate_limit/_record_login_fail）、商品辅助函数（_batch_sales_stats/_validate_category_id/_get_default_category_id）、客户辅助函数（_validate_owner_user）、订单库存辅助函数（_deduct_inventory/_restore_inventory）、订单明细校验（_validate_and_prepare_items）、收款登记服务（register_payment）、请求体大小限制中间件（BodyLimitMiddleware）、外键验证边界（含无效 UUID/不存在用户/不存在客户/不存在商品）、导出服务软删除过滤（商品/客户/订单/收款排除已删除记录）、中间件（BodyLimit 请求体限制/RequestLog 日志记录）、CRUD 403 权限全覆盖（客户/商品/订单/收款/认证）、对象级权限验证（客户详情/编辑/删除/转移、订单详情/编辑/确认/取消/日志）、数据范围过滤（客户列表、订单列表、收款列表）、输入格式校验（邮箱/手机号 Pydantic validator、商品 SKU 超长、收款金额零/负数）、冲正边界（草稿/已取消订单收款 400）、报表零数据验证（汇总零值/趋势日期填充/排行空列表/库存预警权限与结构）、审计日志字段完整性（登录成功/失败、商品创建/编辑/停用、客户创建/编辑/转移/软删除、订单确认/取消、收款登记/冲正、库存调整、用户创建/编辑）、JWT refresh token 边界验证（过期/错误签名/不存在用户/缺少 type）、订单状态机完整性（重复确认/确认已取消/重复取消/编辑已确认/编辑已取消）、用户禁用后 token 立即失效（access/refresh）、收款冲正后订单状态回退（partially_paid→confirmed、completed→partially_paid）、密码修改后 token 行为验证（无状态 JWT 旧 token 在过期前仍可用）、审计日志横断完整性验证（所有日志含 actor_name/ip_address/resource_type/created_at）、审计日志 before_data 完整性补强（客户编辑/用户编辑/商品更新/商品停用/收款冲正/客户删除 before_data 含变更前值） |
 
@@ -115,7 +115,7 @@ pytest -m "not slow"  # 排除慢速测试
 | security | 认证/权限/速率限制/XSS 防护 | 144 |
 | export | 导出功能 | 71 |
 | import | 导入功能 | 46 |
-| report | 报表和审计日志 | 182 |
+| report | 报表和审计日志 | 183 |
 | integration | 集成测试 | 53 |
 | infra | 基础设施（健康检查/中间件/日志） | 43 |
 
@@ -208,9 +208,9 @@ pytest -m "not slow"  # 排除慢速测试
 | TestReport | 4 | 销售汇总、趋势、商品排行、库存预警 |
 | TestOrderLogs | 3 | 订单日志查询、分页、404 |
 
-### test_audit_log.py（104 个测试）
+### test_audit_log.py（105 个测试）
 
-审计日志验证。每个测试先执行业务操作，再查询审计日志确认记录正确。覆盖：登录成功/失败、商品 CRUD（创建/编辑/停用）、客户 CRUD（创建/编辑/转移/软删除）、订单操作（创建/确认/取消/编辑）、收款登记/冲正、库存调整、用户创建/编辑/禁用启用。全操作 before_data/after_data 字段完整性验证（含变更前后值对比）。搜索/过滤结果完整性（日期范围/关键字/组合筛选/resource_id 部分匹配/不存在条件空列表）。分页验证（第2页去重）。API 响应字段完整性（user_agent/request_id 非空、resource_id 有效 UUID）。created_at 降序排列。创建操作 before_data 为 None。横断完整性（所有日志含 actor_name/ip_address）。客户删除含订单保护。收款冲正含 order_id。密码修改 after_data 含 username/action。订单创建 after_data 含 status/customer_id/items 明细。订单确认/取消 before_data 含原 status/total_amount/customer_id。订单编辑 before_data 含编辑前 total_amount 和 customer_id 变更。客户转移 before_data 含原 owner。用户禁用/启用 before_data 含 is_active 变更。库存调整归零 before_data/after_data 验证。客户编辑 before_data 含 phone 字段。导出操作类型筛选。收款冲正审计链验证。商品创建 after_data 含 stock_quantity。非 login_failed 操作 actor_id 非空验证。商品更新 before_data/after_data 含 sku/stock_quantity。客户删除 before_data 含完整客户信息（level/contact_name/owner_user_id）。action 值域验证。resource_type 值域验证。收款创建 after_data 含 order_id/amount/method。用户编辑 before_data/after_data 含 username/display_name。客户创建 after_data 含 phone/level/source/contact_name。商品停用 before_data 含 name/sku/status，after_data 含 status=disabled。客户编辑 level/contact_name 变更验证。created_at ISO 8601 格式验证。客户转移 after_data 含 owner_user_id/name。所有审计日志 id 为有效 UUID。用户创建 after_data 含 is_active=True。所有审计日志 request_id 非空。订单取消 after_data 含 status=cancelled/customer_id。收款冲正 before_data 含 amount/status/order_id。所有审计日志 ip_address 非空验证。商品删除 after_data 含 deleted=True 验证。订单创建 after_data 含 items 明细（product_id/quantity/unit_price）。客户删除 after_data 含 deleted=True 验证。所有审计日志 user_agent 非空验证。actor_name 与用户 display_name 一致性验证。
+审计日志验证。每个测试先执行业务操作，再查询审计日志确认记录正确。覆盖：登录成功/失败、商品 CRUD（创建/编辑/停用）、客户 CRUD（创建/编辑/转移/软删除）、订单操作（创建/确认/取消/编辑）、收款登记/冲正、库存调整、用户创建/编辑/禁用启用。全操作 before_data/after_data 字段完整性验证（含变更前后值对比）。搜索/过滤结果完整性（日期范围/关键字/组合筛选/resource_id 部分匹配/不存在条件空列表）。分页验证（第2页去重）。API 响应字段完整性（user_agent/request_id 非空、resource_id 有效 UUID）。created_at 降序排列。创建操作 before_data 为 None。横断完整性（所有日志含 actor_name/ip_address）。客户删除含订单保护。收款冲正含 order_id。密码修改 after_data 含 username/action。订单创建 after_data 含 status/customer_id/items 明细。订单确认/取消 before_data 含原 status/total_amount/customer_id。订单编辑 before_data 含编辑前 total_amount 和 customer_id 变更，after_data 含 items 明细。客户转移 before_data 含原 owner。用户禁用/启用 before_data 含 is_active 变更。库存调整归零 before_data/after_data 验证。客户编辑 before_data 含 phone 字段。导出操作类型筛选。收款冲正审计链验证。商品创建 after_data 含 stock_quantity。非 login_failed 操作 actor_id 非空验证。商品更新 before_data/after_data 含 sku/stock_quantity。客户删除 before_data 含完整客户信息（level/contact_name/owner_user_id）。action 值域验证。resource_type 值域验证。收款创建 after_data 含 order_id/amount/method。用户编辑 before_data/after_data 含 username/display_name。客户创建 after_data 含 phone/level/source/contact_name。商品停用 before_data 含 name/sku/status，after_data 含 status=disabled。客户编辑 level/contact_name 变更验证。created_at ISO 8601 格式验证。客户转移 after_data 含 owner_user_id/name。所有审计日志 id 为有效 UUID。用户创建 after_data 含 is_active=True。所有审计日志 request_id 非空。订单取消 after_data 含 status=cancelled/customer_id。收款冲正 before_data 含 amount/status/order_id。所有审计日志 ip_address 非空验证。商品删除 after_data 含 deleted=True 验证。订单创建 after_data 含 items 明细（product_id/quantity/unit_price）。客户删除 after_data 含 deleted=True 验证。所有审计日志 user_agent 非空验证。actor_name 与用户 display_name 一致性验证。
 
 ### test_export.py（41 个测试）
 

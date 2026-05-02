@@ -459,15 +459,21 @@ def update_order(
         order.customer_id = new_cid
 
     order.updated_by = current_user.id
+    after_payload: dict = {
+        "order_no": order.order_no, "status": order.status,
+        "total_amount": str(order.total_amount), "customer_id": str(order.customer_id),
+    }
+    if raw_items is not None:
+        after_payload["items"] = [
+            {"product_id": str(pi["product_id"]), "quantity": pi["quantity"], "unit_price": str(pi["unit_price"])}
+            for pi in prepared_items
+        ]
     log_user_action(
         db, request, current_user,
         action="order_update", resource_type="order",
         resource_id=str(order.id),
         before_data=before_snapshot,
-        after_data={
-            "order_no": order.order_no, "status": order.status,
-            "total_amount": str(order.total_amount), "customer_id": str(order.customer_id),
-        },
+        after_data=after_payload,
     )
     db.commit()
 
