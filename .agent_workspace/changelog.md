@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-02（第二百五十轮·自动循环）
+
+### 验证：全量门禁通过（里程碑轮次）
+
+- 后端测试 809/809 ✓
+- 前端测试 380/380 ✓
+- ruff 0 errors ✓
+- TypeScript tsc --noEmit 0 errors ✓
+- 前端构建 260ms ✓
+- 总计 1189 tests
+- 所有质量门禁绿色，无回归
+
 ## 2026-05-02（第二百四十九轮·自动循环）
 
 ### 修复：Login/Products 页面硬编码错误消息改用 getApiErrorMessage
