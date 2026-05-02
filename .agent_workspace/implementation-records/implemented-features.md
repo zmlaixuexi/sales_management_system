@@ -6,6 +6,13 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-156
+
+- 名称：商品和客户辅助函数单元测试
+- 轮次：Round 194（自动循环）
+- 描述：新增 test_product_helpers.py（10 项）和 test_customer_helpers.py（4 项），覆盖 _batch_sales_stats、_validate_category_id、_get_default_category_id、_validate_owner_user 四个私有辅助函数
+- 验证：后端 730 tests 全部通过，ruff 0 errors
+
 ## 功能编号：FEAT-20260502-144
 
 ## 功能编号：FEAT-20260502-152

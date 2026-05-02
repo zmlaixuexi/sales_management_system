@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-05-02（第一百九十四轮·自动循环）
+
+### 测试：新增商品和客户辅助函数单元测试（14 项）
+
+- 新建 `test_product_helpers.py`，10 个测试覆盖 products.py 私有辅助函数
+  - _validate_category_id：存在/不存在
+  - _get_default_category_id：已存在/自动创建
+  - _batch_sales_stats：空列表/无订单/已确认订单/排除草稿和已取消/排除软删除/多订单汇总
+- 新建 `test_customer_helpers.py`，4 个测试覆盖 customers.py 私有辅助函数
+  - _validate_owner_user：活跃通过/不存在/已禁用/软删除
+- 每个测试使用独立内存 SQLite（fixture 隔离）
+- 后端 716→730，总计 1069 tests
+
 ## 2026-05-02（第一百九十三轮·自动循环）
 
 ### 代码质量：提取 paymentMethodMap 共享常量，修复 OrderDetail 收款方式标签 bug
