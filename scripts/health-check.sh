@@ -30,6 +30,18 @@ echo ""
 echo "后端 API:"
 check "健康检查" "$BASE_URL/api/v1/health"
 
+# 检查数据库和版本状态
+HEALTH_BODY=$(curl -s --max-time "$TIMEOUT" "$BASE_URL/api/v1/health" 2>/dev/null || echo '{}')
+DB_STATUS=$(echo "$HEALTH_BODY" | grep -o '"database":"[^"]*"' | head -1 | cut -d'"' -f4)
+VERSION=$(echo "$HEALTH_BODY" | grep -o '"version":"[^"]*"' | head -1 | cut -d'"' -f4)
+if [ "$DB_STATUS" = "ok" ]; then
+  echo "  ✓ 数据库连接正常"
+else
+  echo "  ✗ 数据库状态: ${DB_STATUS:-未知}"
+  ((FAIL++))
+fi
+echo "  版本: ${VERSION:-未知}"
+
 echo ""
 echo "前端静态资源:"
 check "前端首页" "$BASE_URL/" "200"
