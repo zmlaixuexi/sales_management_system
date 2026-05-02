@@ -205,4 +205,28 @@ describe('OrdersPage', () => {
     _paginatedListReturn.total = 3
     _paginatedListReturn.loading = false
   })
+
+  it('导出按钮点击调用 downloadCsv', async () => {
+    const { downloadCsv } = await import('@/api/request')
+    renderOrders()
+    const buttons = screen.getAllByTestId('button')
+    const exportBtn = buttons.find((b) => b.textContent?.includes('导出'))
+    expect(exportBtn).toBeTruthy()
+    exportBtn!.click()
+    expect(downloadCsv).toHaveBeenCalledWith('/exports/orders', expect.objectContaining({}))
+  })
+
+  it('详情按钮存在于操作列', () => {
+    renderOrders()
+    const buttons = screen.getAllByTestId('button')
+    const detailBtns = buttons.filter((b) => b.textContent?.includes('详情'))
+    expect(detailBtns.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('订单号可点击跳转详情', () => {
+    renderOrders()
+    const buttons = screen.getAllByTestId('button')
+    const orderLink = buttons.find((b) => b.textContent?.includes('ORD-20260501'))
+    expect(orderLink).toBeTruthy()
+  })
 })
