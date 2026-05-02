@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百零一轮·自动循环）
+
+### 测试补强：客户编辑审计日志 before_data/after_data 含 level/contact_name 变更
+
+- `backend/app/api/v1/customers.py`：客户编辑审计日志 before_snapshot 新增 level/contact_name，after_data 新增 level/contact_name
+- `test_audit_log.py`：新增 test_86（客户编辑 level normal→vip、contact_name 旧→新，审计日志 before_data/after_data 完整记录）
+- 后端测试：1084/1084 全绿，ruff clean
+
 ## 2026-05-03（第四百轮·自动循环）
 
 ### 代码质量 + 测试补强：docs/testing.md 同步 + 商品停用审计日志完整性验证

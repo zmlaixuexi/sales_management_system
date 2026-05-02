@@ -230,7 +230,10 @@ def update_customer(
 
     check_owner_or_forbid(current_user, customer.owner_user_id, "customer:view_all", "客户")
 
-    before_snapshot = {"name": customer.name, "phone": customer.phone}
+    before_snapshot = {
+        "name": customer.name, "phone": customer.phone,
+        "level": customer.level, "contact_name": customer.contact_name,
+    }
 
     if data.name is not None:
         name = data.name.strip()
@@ -274,7 +277,10 @@ def update_customer(
         action="customer_update", resource_type="customer",
         resource_id=str(customer.id),
         before_data=before_snapshot,
-        after_data={"name": customer.name, "phone": customer.phone},
+        after_data={
+            "name": customer.name, "phone": customer.phone,
+            "level": customer.level, "contact_name": customer.contact_name,
+        },
     )
     db.commit()
 

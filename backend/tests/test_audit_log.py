@@ -2272,3 +2272,29 @@ def test_85_product_disable_audit_log_before_after_data_completeness():
     assert log["after_data"]["status"] == "disabled"
     assert log["after_data"]["name"] == "停用审计商品"
     assert log["resource_type"] == "product"
+
+
+def test_86_customer_update_audit_log_level_contact_name_change():
+    """客户编辑审计日志 before_data/after_data 含 level/contact_name 变更"""
+    headers = _admin_auth()
+    resp = client.post("/api/v1/customers", json={
+        "name": "编辑Level客户", "phone": "13800868686",
+        "level": "normal", "contact_name": "旧联系人",
+    }, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+
+    resp = client.put(f"/api/v1/customers/{cid}", json={
+        "level": "vip", "contact_name": "新联系人",
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=customer_update", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == cid)
+    assert log["before_data"]["level"] == "normal"
+    assert log["before_data"]["contact_name"] == "旧联系人"
+    assert log["after_data"]["level"] == "vip"
+    assert log["after_data"]["contact_name"] == "新联系人"
+    assert log["resource_type"] == "customer"
