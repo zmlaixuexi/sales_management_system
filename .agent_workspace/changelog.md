@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百二十八轮·自动循环）
+
+### 测试补强：密码修改审计日志 + 全类型导出审计日志 before_data 验证
+
+- `test_audit_log.py`：新增 test_115（密码修改 after_data 含 username/action）、test_116（全类型导出 before_data 为 None 验证）
+- `docs/testing.md`：更新后端测试总数 1112→1114、总计 1494→1496、test_audit_log.py 116→118
+- 后端测试：1114/1114 全绿，ruff clean
+
 ## 2026-05-03（第四百二十七轮·自动循环）
 
 ### 测试补强：审计日志 created_at 时间降序验证

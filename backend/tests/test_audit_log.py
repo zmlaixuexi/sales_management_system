@@ -3096,3 +3096,50 @@ def test_114_audit_log_created_at_chronological_order():
         assert items[i]["created_at"] >= items[i + 1]["created_at"], (
             f"created_at 非降序: {items[i]['created_at']} < {items[i+1]['created_at']}"
         )
+
+
+def test_115_password_change_audit_log_after_data_has_username():
+    """密码修改审计日志 after_data 含 username 和 action"""
+    headers = _admin_auth()
+    # 修改密码
+    resp = client.post("/api/v1/auth/change-password", json={
+        "old_password": "testpass123",
+        "new_password": "Newpass456!",
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=password_change", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) > 0
+    log = items[0]
+    assert log["after_data"] is not None
+    assert "username" in log["after_data"], f"after_data 缺少 username: {log['after_data']}"
+    assert "action" in log["after_data"], f"after_data 缺少 action: {log['after_data']}"
+    assert log["after_data"]["action"] == "password_change"
+
+    # 恢复密码以便后续测试
+    client.post("/api/v1/auth/change-password", json={
+        "old_password": "Newpass456!",
+        "new_password": "testpass123",
+    }, headers=headers)
+
+
+def test_116_export_audit_logs_all_types_before_data_none():
+    """所有导出操作审计日志 before_data 为 None"""
+    headers = _admin_auth()
+    # 触发各类型导出
+    client.get("/api/v1/exports/products?format=csv", headers=headers)
+    client.get("/api/v1/exports/customers?format=csv", headers=headers)
+    client.get("/api/v1/exports/orders?format=csv", headers=headers)
+    client.get("/api/v1/exports/payments?format=csv", headers=headers)
+
+    for action in ["export_products", "export_customers", "export_orders", "export_payments"]:
+        resp = client.get(f"/api/v1/audit-logs?action={action}&page_size=5", headers=headers)
+        assert resp.status_code == 200
+        items = resp.json()["data"]["items"]
+        if len(items) > 0:
+            log = items[0]
+            assert log["before_data"] is None, (
+                f"{action} before_data 应为 None: {log['before_data']}"
+            )
