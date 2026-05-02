@@ -652,3 +652,29 @@ def test_30_customer_transfer_audit_log_fields():
     log = next(i for i in items if i["resource_id"] == cid)
     assert log["after_data"]["owner_user_id"] == target_id
     assert log["resource_type"] == "customer"
+
+
+def test_31_product_disable_audit_log_fields():
+    """商品停用审计日志 before_data/after_data 含 status 变化"""
+    headers = _admin_auth()
+    resp = client.post("/api/v1/products", json={
+        "name": "停用审计商品",
+        "cost_price": "10.00",
+        "sale_price": "20.00",
+        "stock_quantity": 5,
+        "status": "active",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    # 停用
+    resp = client.post(f"/api/v1/products/{pid}/disable", headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=product_disable", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == pid)
+    assert log["before_data"]["status"] == "active"
+    assert log["after_data"]["status"] == "disabled"
+    assert log["resource_type"] == "product"

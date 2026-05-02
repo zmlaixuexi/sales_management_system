@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第三百四十八轮·自动循环）
+
+### 测试：商品停用审计日志字段验证
+
+- `test_audit_log.py`：新增 test_31（product_disable before_data=active, after_data=disabled）
+- 后端测试：997/997 全绿
+
 ## 2026-05-02（第三百四十七轮·自动循环）
 
 ### 测试：客户转移审计日志字段验证
