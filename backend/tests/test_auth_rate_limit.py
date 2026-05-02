@@ -66,3 +66,35 @@ def test_check_rate_limit_expired_entries_cleaned():
     old_time = time.monotonic() - 1000  # 超过 15 分钟窗口
     mod._login_fail_counts["3.3.3.3"] = [old_time] * 10
     _check_login_rate_limit("3.3.3.3")  # 旧记录被清理，不抛异常
+
+
+def test_check_rate_limit_mixed_expired_and_fresh_passes():
+    """5 条过期 + 5 条新鲜 → 仅 5 条有效，不触发"""
+    import app.api.v1.auth as mod
+
+    now = time.monotonic()
+    old_time = now - 1000
+    mod._login_fail_counts["4.4.4.4"] = [old_time] * 5 + [now] * 5
+    _check_login_rate_limit("4.4.4.4")  # 5 条有效，不抛异常
+
+
+def test_check_rate_limit_mixed_expired_and_fresh_blocks():
+    """5 条过期 + 10 条新鲜 → 10 条有效，触发 429"""
+    import app.api.v1.auth as mod
+
+    now = time.monotonic()
+    old_time = now - 1000
+    mod._login_fail_counts["5.5.5.5"] = [old_time] * 5 + [now] * 10
+    with pytest.raises(HTTPException) as exc_info:
+        _check_login_rate_limit("5.5.5.5")
+    assert exc_info.value.status_code == 429
+
+
+def test_check_rate_limit_error_code():
+    """速率限制错误包含 RATE_LIMIT_EXCEEDED 错误码"""
+    for _ in range(10):
+        _record_login_fail("6.6.6.6")
+    with pytest.raises(HTTPException) as exc_info:
+        _check_login_rate_limit("6.6.6.6")
+    detail = exc_info.value.detail
+    assert detail["code"] == "RATE_LIMIT_EXCEEDED"
