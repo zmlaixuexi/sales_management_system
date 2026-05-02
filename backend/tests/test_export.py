@@ -571,3 +571,140 @@ def test_37_export_payments_invalid_order_id_422():
     """收款导出无效 order_id 格式返回 422"""
     resp = client.get("/api/v1/exports/payments?order_id=not-a-uuid", headers=_auth())
     assert resp.status_code == 422
+
+
+# ── 软删除记录排除测试 ──────────────────────────────────────────
+
+
+def test_38_export_products_excludes_deleted():
+    """已删除商品不出现在导出结果中"""
+    from app.models.product import Product
+    from datetime import datetime, timezone
+
+    # 创建一个新商品
+    resp = client.post("/api/v1/products", json={
+        "name": "待删除导出商品",
+        "cost_price": "10.00",
+        "sale_price": "20.00",
+        "stock_quantity": 5,
+        "status": "active",
+    }, headers=_auth())
+    assert resp.status_code == 200
+    del_pid = resp.json()["data"]["id"]
+
+    # 直接在数据库软删除
+    db = TestSession()
+    try:
+        db.query(Product).filter(Product.id == uuid.UUID(del_pid)).update(
+            {"deleted_at": datetime.now(timezone.utc)}
+        )
+        db.commit()
+    finally:
+        db.close()
+
+    # 导出应不含该商品
+    resp = client.get("/api/v1/exports/products", headers=_auth())
+    assert resp.status_code == 200
+    assert "待删除导出商品" not in resp.text
+
+
+def test_39_export_customers_excludes_deleted():
+    """已删除客户不出现在导出结果中"""
+    from app.models.customer import Customer
+    from datetime import datetime, timezone
+
+    # 创建一个新客户
+    resp = client.post("/api/v1/customers", json={
+        "name": "待删除导出客户",
+        "phone": "13800000001",
+    }, headers=_auth())
+    assert resp.status_code == 200
+    del_cid = resp.json()["data"]["id"]
+
+    # 直接在数据库软删除
+    db = TestSession()
+    try:
+        db.query(Customer).filter(Customer.id == uuid.UUID(del_cid)).update(
+            {"deleted_at": datetime.now(timezone.utc)}
+        )
+        db.commit()
+    finally:
+        db.close()
+
+    # 导出应不含该客户
+    resp = client.get("/api/v1/exports/customers", headers=_auth())
+    assert resp.status_code == 200
+    assert "待删除导出客户" not in resp.text
+
+
+def test_40_export_orders_excludes_deleted():
+    """已删除订单不出现在导出结果中"""
+    from app.models.order import SalesOrder
+    from datetime import datetime, timezone
+
+    # 创建一个新订单
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    del_oid = resp.json()["data"]["id"]
+
+    # 直接在数据库软删除
+    db = TestSession()
+    try:
+        db.query(SalesOrder).filter(SalesOrder.id == uuid.UUID(del_oid)).update(
+            {"deleted_at": datetime.now(timezone.utc)}
+        )
+        db.commit()
+    finally:
+        db.close()
+
+    # 导出应不含该订单号
+    db = TestSession()
+    try:
+        order = db.query(SalesOrder).filter(SalesOrder.id == uuid.UUID(del_oid)).first()
+        order_no = order.order_no if order else None
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/exports/orders", headers=_auth())
+    assert resp.status_code == 200
+    if order_no:
+        assert order_no not in resp.text
+
+
+def test_41_export_payments_excludes_deleted_order():
+    """已删除订单关联的收款不出现在导出结果中"""
+    from app.models.order import SalesOrder
+    from datetime import datetime, timezone
+
+    # 创建订单 + 确认 + 收款
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 2}],
+    }, headers=_auth())
+    assert resp.status_code == 200
+    del_oid = resp.json()["data"]["id"]
+    client.post(f"/api/v1/sales-orders/{del_oid}/confirm", headers=_auth())
+    pay_resp = client.post(f"/api/v1/payments/orders/{del_oid}/payments", json={
+        "amount": "200.00",
+        "payment_method": "transfer",
+    }, headers=_auth())
+    assert pay_resp.status_code == 200
+    payment_id = pay_resp.json()["data"]["id"]
+
+    # 软删除订单
+    db = TestSession()
+    try:
+        db.query(SalesOrder).filter(SalesOrder.id == uuid.UUID(del_oid)).update(
+            {"deleted_at": datetime.now(timezone.utc)}
+        )
+        db.commit()
+    finally:
+        db.close()
+
+    # 导出收款应不含该笔
+    resp = client.get("/api/v1/exports/payments", headers=_auth())
+    assert resp.status_code == 200
+    assert payment_id not in resp.text
