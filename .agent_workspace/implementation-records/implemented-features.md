@@ -6,6 +6,14 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-207
+
+- 名称：审计日志 resource_id 精确筛选
+- 轮次：Round 463（自动循环）
+- 描述：审计日志查询 API 新增 `resource_id` 精确筛选参数，支持按资源 ID 查询完整操作历史，可组合 `resource_type` 使用
+- 涉及文件：backend/app/api/v1/audit_logs.py、backend/tests/test_audit_log.py、docs/api.md
+- 验证：1189 后端测试全绿、coverage 100%、ruff clean
+
 ## 功能编号：FEAT-20260503-206
 
 - 名称：依赖安全漏洞扫描和修复

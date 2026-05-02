@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第四百六十三轮·自动循环）
+
+### 功能增强：审计日志查询新增 resource_id 精确筛选
+
+- audit_logs.py：list_audit_logs 新增 `resource_id` 查询参数，精确匹配资源 ID
+- test_audit_log.py：新增 test_117（resource_id 精确查询/组合查询/不存在返回空列表）
+- docs/api.md：审计日志查询参数列表补充 resource_id
+- 后端测试：1189/1189 全绿（新增 1），coverage 100%，ruff clean
+
 ## 2026-05-03（第四百六十二轮·自动循环）
 
 ### 质量审计：前端/后端全面验证
