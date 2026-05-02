@@ -43,8 +43,8 @@ export default function ReportsCenter() {
     try {
       const res = await fetchSalesSummary(p)
       if (res.success) setSummary(res.data)
-    } catch {
-      message.error('加载销售概览失败')
+    } catch (e: unknown) {
+      if (!(e as any)?._toastDisplayed) message.error('加载销售概览失败')
     } finally {
       setLoading(null)
     }
@@ -55,8 +55,8 @@ export default function ReportsCenter() {
     try {
       const res = await fetchSalesTrend(p)
       if (res.success) setTrendItems(res.data.items)
-    } catch {
-      message.error('加载销售趋势失败')
+    } catch (e: unknown) {
+      if (!(e as any)?._toastDisplayed) message.error('加载销售趋势失败')
     } finally {
       setLoading(null)
     }
@@ -67,8 +67,8 @@ export default function ReportsCenter() {
     try {
       const res = await fetchProductRanking({ period: p, limit: 20 })
       if (res.success) setProducts(res.data.items)
-    } catch {
-      message.error('加载商品排行失败')
+    } catch (e: unknown) {
+      if (!(e as any)?._toastDisplayed) message.error('加载商品排行失败')
     } finally {
       setLoading(null)
     }
@@ -79,8 +79,8 @@ export default function ReportsCenter() {
     try {
       const res = await fetchCustomerRanking({ period: p, limit: 20 })
       if (res.success) setCustomers(res.data.items)
-    } catch {
-      message.error('加载客户排行失败')
+    } catch (e: unknown) {
+      if (!(e as any)?._toastDisplayed) message.error('加载客户排行失败')
     } finally {
       setLoading(null)
     }
@@ -91,8 +91,8 @@ export default function ReportsCenter() {
     try {
       const res = await fetchSalespersonRanking({ period: p, limit: 20 })
       if (res.success) setSalespersons(res.data.items)
-    } catch {
-      message.error('加载销售排行失败')
+    } catch (e: unknown) {
+      if (!(e as any)?._toastDisplayed) message.error('加载销售排行失败')
     } finally {
       setLoading(null)
     }
@@ -106,8 +106,8 @@ export default function ReportsCenter() {
         setInventory(res.data.items)
         setInventoryTotal(res.data.total)
       }
-    } catch {
-      message.error('加载库存预警失败')
+    } catch (e: unknown) {
+      if (!(e as any)?._toastDisplayed) message.error('加载库存预警失败')
     } finally {
       setLoading(null)
     }

@@ -49,8 +49,8 @@ export default function Dashboard() {
         setWarnings(warnRes.data.items)
         setWarningThreshold(warnRes.data.threshold)
       }
-    } catch {
-      message.error('加载看板数据失败，请稍后重试')
+    } catch (e: unknown) {
+      if (!(e as any)?._toastDisplayed) message.error('加载看板数据失败，请稍后重试')
     } finally {
       setLoading(false)
     }
