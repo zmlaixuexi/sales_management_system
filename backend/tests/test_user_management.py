@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.api.deps import get_db
-from app.core.security import hash_password
+from app.core.security import create_access_token, hash_password
 from app.db.session import Base
 from app.main import app
 from app.models.user import Role, User
@@ -398,4 +398,75 @@ def test_25_create_user_phone_too_long_422():
         "password": "password123",
         "phone": "1" * 21,
     }, headers=_auth())
+    assert resp.status_code == 422
+
+
+def _admin_auth():
+    """直接生成 admin token，避免依赖登录状态"""
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "mgmt_admin").first()
+        return {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+
+def test_26_update_user_invalid_uuid_400():
+    """无效 UUID 编辑用户返回 400"""
+    resp = client.put("/api/v1/users/not-a-uuid", json={
+        "display_name": "无效测试",
+    }, headers=_admin_auth())
+    assert resp.status_code == 400
+    assert "格式无效" in resp.json()["error"]["message"]
+
+
+def test_27_create_user_malformed_role_ids_400():
+    """创建用户时 role_ids 含非 UUID 字符串返回 400"""
+    resp = client.post("/api/v1/users", json={
+        "username": "badroleuser",
+        "password": "password123",
+        "role_ids": ["not-a-uuid"],
+    }, headers=_admin_auth())
+    assert resp.status_code == 400
+    assert "格式无效" in resp.json()["error"]["message"]
+
+
+def test_28_update_user_empty_role_ids():
+    """编辑用户 role_ids 为空列表清除所有角色"""
+    resp = client.post("/api/v1/users", json={
+        "username": "emptyroleuser",
+        "password": "password123",
+        "role_ids": [_role_id],
+    }, headers=_admin_auth())
+    assert resp.status_code == 200
+    uid = resp.json()["data"]["id"]
+
+    # 清空角色
+    resp = client.put(f"/api/v1/users/{uid}", json={
+        "role_ids": [],
+    }, headers=_admin_auth())
+    assert resp.status_code == 200
+
+    # 通过列表确认角色已清空
+    resp = client.get("/api/v1/users", params={"keyword": "emptyroleuser"}, headers=_admin_auth())
+    items = resp.json()["data"]["items"]
+    user = next(u for u in items if u["username"] == "emptyroleuser")
+    assert user["roles"] == []
+
+
+def test_29_create_user_password_no_digits_422():
+    """创建用户密码仅含字母无数字返回 422"""
+    resp = client.post("/api/v1/users", json={
+        "username": "nodigituser",
+        "password": "abcdefgh",
+    }, headers=_admin_auth())
+    assert resp.status_code == 422
+
+
+def test_30_update_user_display_name_too_long_422():
+    """编辑用户 display_name 超过 max_length 返回 422"""
+    uid = resp_id_from_list("newuser")
+    resp = client.put(f"/api/v1/users/{uid}", json={
+        "display_name": "X" * 101,
+    }, headers=_admin_auth())
     assert resp.status_code == 422
