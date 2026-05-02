@@ -210,22 +210,22 @@ export default function UsersPage() {
         <Form form={form} layout="vertical">
           {!editingUser && (
             <>
-              <Form.Item name="username" label="用户名" rules={[{ required: true, message: '请输入用户名' }]}>
-                <Input />
+              <Form.Item name="username" label="用户名" rules={[{ required: true, message: '请输入用户名' }, { min: 2, message: '用户名至少 2 个字符' }, { max: 50, message: '用户名最多 50 个字符' }]}>
+                <Input maxLength={50} />
               </Form.Item>
-              <Form.Item name="password" label="密码" rules={[{ required: true, message: '请输入密码' }]}>
-                <Input.Password />
+              <Form.Item name="password" label="密码" rules={[{ required: true, message: '请输入密码' }, { min: 6, message: '密码至少 6 个字符' }, { max: 100, message: '密码最多 100 个字符' }, { pattern: /^(?=.*[a-zA-Z])(?=.*\d)/, message: '密码必须包含字母和数字' }]}>
+                <Input.Password maxLength={100} />
               </Form.Item>
             </>
           )}
           <Form.Item name="display_name" label="显示名">
             <Input />
           </Form.Item>
-          <Form.Item name="phone" label="手机号">
-            <Input />
+          <Form.Item name="phone" label="手机号" rules={[{ pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号' }]}>
+            <Input maxLength={30} />
           </Form.Item>
-          <Form.Item name="email" label="邮箱">
-            <Input />
+          <Form.Item name="email" label="邮箱" rules={[{ type: 'email', message: '请输入正确的邮箱地址' }, { max: 100, message: '邮箱最多 100 个字符' }]}>
+            <Input maxLength={100} />
           </Form.Item>
           {editingUser && (
             <Form.Item name="is_active" label="启用状态" valuePropName="checked">

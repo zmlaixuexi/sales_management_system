@@ -76,12 +76,12 @@ export default function CustomerForm() {
             <Form.Item label="联系人" name="contact_name">
               <Input placeholder="联系人姓名" maxLength={100} style={{ width: 250 }} />
             </Form.Item>
-            <Form.Item label="电话" name="phone">
+            <Form.Item label="电话" name="phone" rules={[{ pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号' }]}>
               <Input placeholder="联系电话" maxLength={30} style={{ width: 250 }} />
             </Form.Item>
           </Space>
 
-          <Form.Item label="邮箱" name="email">
+          <Form.Item label="邮箱" name="email" rules={[{ type: 'email', message: '请输入正确的邮箱地址' }]}>
             <Input placeholder="邮箱地址" maxLength={100} />
           </Form.Item>
 

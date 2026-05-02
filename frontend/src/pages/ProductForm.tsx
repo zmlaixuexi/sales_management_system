@@ -139,7 +139,7 @@ export default function ProductForm() {
           {showAdvanced && (
             <>
               <Form.Item label="SKU（留空自动生成）" name="sku">
-                <Input placeholder="留空自动生成" maxLength={64} disabled={isEdit} />
+                <Input placeholder="留空自动生成" maxLength={50} disabled={isEdit} />
               </Form.Item>
               <Space size="large">
                 <Form.Item label="库存数量" name="stock_quantity">
