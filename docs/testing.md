@@ -4,11 +4,11 @@
 
 | 指标 | 值 |
 |---|---|
-| 后端测试总数 | 833 |
+| 后端测试总数 | 844 |
 | 后端测试文件 | 42 |
 | 前端测试总数 | 382 |
 | 前端测试文件 | 37 |
-| 测试总计 | 1215 |
+| 测试总计 | 1226 |
 | 后端覆盖率 | 99.79% |
 | 覆盖模块 | 认证、商品、客户、订单、库存、收款、报表（含客户/销售人员排行）、审计日志（含手机号/邮箱脱敏）、数据导出（含权限/数据范围/敏感字段边界）、批量导入（含负价格/非法格式/英文表头/批量内去重）、权限校验（含导出敏感字段过滤、报表利润权限）、速率限制、SQL 注入防护、XSS 防护、请求 ID 中间件、CORS 验证、日志格式器（JSON/文本/setup_logging）、金额计算、文件服务（含 FILE_TOO_LARGE/FILE_NOT_BOUND 错误码、上传权限 403）、密码强度、订单操作日志、支付路径（含已取消/已完成订单拒绝、无权限 403）、派生销售字段、响应体 request_id、报表 period 参数校验、CSV 导入校验（含行数上限+XSS 消毒+commit 回滚）、客户 source/level 枚举校验、生产环境 OpenAPI 禁用、SQL 慢查询日志、用户管理（含角色列表 API 和权限边界）、安全模块（bcrypt 72 字节截断/JWT token 篡改/过期/错误密钥/iat/jti）、报表辅助函数（_date_range/_apply_data_scope）、导出 API 辅助函数（_csv_filename）、登录速率限制辅助函数（_check_login_rate_limit/_record_login_fail）、商品辅助函数（_batch_sales_stats/_validate_category_id/_get_default_category_id）、客户辅助函数（_validate_owner_user）、订单库存辅助函数（_deduct_inventory/_restore_inventory）、订单明细校验（_validate_and_prepare_items）、收款登记服务（register_payment）、请求体大小限制中间件（BodyLimitMiddleware）、外键验证边界（含无效 UUID/不存在用户/不存在客户/不存在商品）、导出服务软删除过滤（商品/客户/订单/收款排除已删除记录）、中间件（BodyLimit 请求体限制/RequestLog 日志记录） |
 
@@ -191,9 +191,9 @@ CSV 数据导出验证，包括基本导出、多维度筛选（keyword/status/d
 
 数据范围权限、敏感字段过滤、权限码拦截、导出数据范围过滤。
 
-### test_edge_cases.py（31 个测试）
+### test_edge_cases.py（33 个测试）
 
-6 大业务模块异常路径：缺字段、负值、重复、404、状态转换、库存不足、伪造 Token。
+6 大业务模块异常路径：缺字段、负值、重复、404、状态转换、库存不足、伪造 Token、LIKE 注入防护（商品/客户搜索 % 和 _ 不作为通配符）。
 
 ### test_validation.py（25 个测试）
 
@@ -239,13 +239,13 @@ refresh_token 异常、价格/库存/名称校验、CSV 边界、用户列表、
 
 订单 CRUD + 状态流转全生命周期：创建（正常/空明细/客户不存在/商品不存在/零数量/负价拒绝/低于成本价拒绝）、详情/404/列表/状态筛选/客户筛选、编辑草稿（修改明细+金额重算+负价拒绝/低于成本价拒绝）、确认（库存扣减验证）、取消（库存回滚/商品已删除跳过）、库存不足确认失败、低于成本价阻止下单、订单号后缀回退。
 
-### test_payment_crud.py（27 个测试）
+### test_payment_crud.py（31 个测试）
 
-收款登记 + 冲正：创建（部分收款→partially_paid、全额→completed）、超额收款、零金额、草稿不可收款、订单不存在、列表全量/按 order_id 筛选/非管理员数据范围过滤/分页、冲正/重复冲正/不存在/关联订单已删除、已取消订单收款拒绝、已完成订单收款拒绝、负数金额、无权限用户收款/冲正 403、冲正后 completed→partially_paid 回退、冲正全部金额后→confirmed 回退。路径已对齐规范文档 POST /sales-orders/{id}/payments。
+收款登记 + 冲正：创建（部分收款→partially_paid、全额→completed）、超额收款、零金额、草稿不可收款、订单不存在、列表全量/按 order_id 筛选/非管理员数据范围过滤/分页、冲正/重复冲正/不存在/关联订单已删除、已取消订单收款拒绝、已完成订单收款拒绝、负数金额、无权限用户收款/冲正 403、冲正后 completed→partially_paid 回退、冲正全部金额后→confirmed 回退、非订单所有者收款拒绝、收款列表排除已冲正记录、金额多小数位精度处理。路径已对齐规范文档 POST /sales-orders/{id}/payments。
 
-### test_inventory_crud.py（21 个测试）
+### test_inventory_crud.py（24 个测试）
 
-库存调整 + 流水查询：手工调整（增加/减少/归零）、零调整拒绝、超量扣减拒绝、商品不存在、流水列表/按 product_id 筛选/按 movement_type 筛选、字段完整性校验、无调整权限 403、无列表权限 403、已删除商品调整 404、流水分页、order_confirm 类型筛选、未认证访问 401（流水/调整）、无效商品 UUID 400、调整响应字段验证、不存在 product_id 筛选空列表、备注 XSS strip_html。
+库存调整 + 流水查询：手工调整（增加/减少/归零）、零调整拒绝、超量扣减拒绝、商品不存在、流水列表/按 product_id 筛选/按 movement_type 筛选/组合筛选（product_id + movement_type）、字段完整性校验、无调整权限 403、无列表权限 403、已删除商品调整 404、流水分页、order_confirm 类型筛选、未认证访问 401（流水/调整）、无效商品 UUID 400、调整响应字段验证、不存在 product_id 筛选空列表、备注 XSS strip_html、小数数量拒绝、备注 500/501 字符长度边界。
 
 ### test_deps.py（26 个测试）
 
