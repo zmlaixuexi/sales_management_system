@@ -2,16 +2,16 @@
 
 最后更新时间：2026-05-02
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-269
+当前任务编号：ROUND-270
 当前任务名称：自动循环验证
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 270：执行文档 8.5 节补充 12 个遗漏 API 端点（53 端点全覆盖）
 - Round 269：请求日志添加响应体大小字段（resp_bytes），833 后端测试全绿
 - Round 267：安全响应头中间件测试 3 项
-- Round 266：密码强度校验测试 6 项
 
 ## 最终验证状态
 
@@ -29,7 +29,7 @@
 继续 keep-going 模式。可选无阻塞方向：
 - 代码质量：剩余 JOIN 过滤和列查询（8 处不适合直接 active_query 替换）
 - 测试补强：前端 _toastDisplayed 防重复提示单元测试
-- 文档完善：exec 文档第 8.5 节补充遗漏的 8 个端点（change-password、import、export）
+- 文档完善：README 或 docs/testing.md 端点计数更新
 
 ## 阻塞问题
 
