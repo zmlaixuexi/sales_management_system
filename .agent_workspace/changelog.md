@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-03（第四百零二轮·自动循环）
+
+### 测试补强：登录失败审计日志 actor_id 为 None 验证
+
+- `test_audit_log.py`：新增 test_87（登录失败审计日志 actor_id 为 None，确认未认证用户无 ID）
+- 后端测试：1085/1085 全绿，ruff clean
+
 ## 2026-05-03（第四百零一轮·自动循环）
 
 ### 测试补强：客户编辑审计日志 before_data/after_data 含 level/contact_name 变更

@@ -2298,3 +2298,21 @@ def test_86_customer_update_audit_log_level_contact_name_change():
     assert log["after_data"]["level"] == "vip"
     assert log["after_data"]["contact_name"] == "新联系人"
     assert log["resource_type"] == "customer"
+
+
+def test_87_login_failed_audit_log_actor_id_is_none():
+    """登录失败审计日志 actor_id 为 None（未认证用户无 ID）"""
+    headers = _admin_auth()
+    # 触发登录失败
+    client.post("/api/v1/auth/login", json={
+        "username": "nonexistent_user_xyz",
+        "password": "wrongpass",
+    })
+
+    resp = client.get("/api/v1/audit-logs?action=login_failed", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) >= 1
+    failed_log = next(i for i in items if i["actor_name"] == "nonexistent_user_xyz")
+    assert failed_log["actor_id"] is None
+    assert failed_log["action"] == "login_failed"

@@ -2,32 +2,32 @@
 
 最后更新时间：2026-05-03
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-401
-当前任务名称：客户编辑审计日志 level/contact_name 变更
+当前任务编号：ROUND-402
+当前任务名称：登录失败审计日志 actor_id 为 None 验证
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 401：客户编辑审计日志 before_data/after_data 新增 level/contact_name + test_86，1084 后端测试全绿
-- Round 400：docs/testing.md 同步至 1082 + 商品停用审计日志完整性 test_85，1083 后端测试全绿
+- Round 402：登录失败审计日志 actor_id 为 None 验证 test_87，1085 后端测试全绿
+- Round 401：客户编辑审计日志 level/contact_name 变更 + test_86，1084 后端测试全绿
 
 ## 最终验证状态
 
 | 门禁 | 结果 |
 |---|---|
-| 后端测试 | 1084/1084 ✓ |
+| 后端测试 | 1085/1085 ✓ |
 | 前端测试 | 382/382 ✓ |
 | ruff | 0 errors ✓ |
-| 总计 | 1466 tests |
+| 总计 | 1467 tests |
 
 ## 下一步第一动作
 
 继续 keep-going 模式。可选无阻塞方向：
+- docs/testing.md 更新至 1085（test_audit_log.py 87 tests）
 - 测试补强：订单创建审计日志 after_data 含 items 明细
-- docs/testing.md 更新至 1084（test_audit_log.py 86 tests）
 - 测试补强：客户转移审计日志 after_data 含 name（确认完整性）
-- 测试补强：登录失败审计日志 actor_id 为 None 验证
+- 测试补强：审计日志 created_at 为 ISO 8601 格式验证
 
 ## 阻塞问题
 
