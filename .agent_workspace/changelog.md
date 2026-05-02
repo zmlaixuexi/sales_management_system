@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-05-03（第四百一十轮·自动循环）
+
+### 代码质量 + 测试补强：docs/testing.md 同步 + 审计日志 ip_address 非空 + 商品删除 deleted=True
+
+- `docs/testing.md`：更新后端测试总数 1092→1094、总计 1474→1476、test_audit_log.py 96→98、report 标记 174→176
+- `test_audit_log.py`：新增 test_95（所有审计日志 ip_address 非空验证）、test_96（商品删除 after_data 含 deleted=True）
+- 后端测试：1094/1094 全绿，ruff clean
+
+## 2026-05-03（第四百零九轮·自动循环）
+
+### 代码质量 + 测试补强：docs/testing.md 同步 + 收款冲正审计日志 before_data 含 amount
+
+- `docs/testing.md`：更新后端测试总数 1089→1091、总计 1471→1473、test_audit_log.py 91→93
+- `test_audit_log.py`：新增 test_94（收款冲正 before_data 含 amount/status/order_id，after_data 含 status=reversed）
+- 后端测试：1092/1092 全绿，ruff clean
+
 ## 2026-05-03（第四百零八轮·自动循环）
 
 ### 测试补强：订单取消审计日志 after_data 含 cancelled 状态验证

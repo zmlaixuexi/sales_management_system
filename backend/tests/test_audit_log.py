@@ -2459,3 +2459,87 @@ def test_93_order_cancel_audit_log_after_data_has_cancelled_status():
     assert log["after_data"]["status"] == "cancelled"
     assert log["after_data"]["order_no"] == log["before_data"]["order_no"]
     assert log["resource_type"] == "order"
+
+
+def test_94_payment_reverse_audit_log_before_data_has_amount():
+    """收款冲正审计日志 before_data 含 amount 字段"""
+    headers = _admin_auth()
+    # 创建客户+商品+订单
+    resp = client.post("/api/v1/customers", json={"name": "冲正审计客户", "phone": "13800949494"}, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/products", json={
+        "name": "冲正审计商品", "sale_price": "150.00", "cost_price": "80.00", "stock_quantity": 30,
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cid,
+        "items": [{"product_id": pid, "quantity": 1, "unit_price": "150.00"}],
+    }, headers=headers)
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=headers)
+
+    resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
+        "amount": "150.00", "payment_method": "cash",
+    }, headers=headers)
+    assert resp.status_code == 200
+    pay_id = resp.json()["data"]["id"]
+
+    # 冲正
+    resp = client.post(f"/api/v1/payments/{pay_id}/reverse", headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=payment_reverse", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == pay_id)
+    assert log["before_data"]["amount"] == "150.00"
+    assert log["before_data"]["status"] == "normal"
+    assert log["before_data"]["order_id"] == oid
+    assert log["after_data"]["status"] == "reversed"
+    assert log["after_data"]["amount"] == "150.00"
+    assert log["resource_type"] == "payment"
+
+
+def test_95_audit_log_ip_address_non_null():
+    """所有审计日志 ip_address 非空验证"""
+    headers = _admin_auth()
+    # 创建商品触发一条审计日志确保有数据
+    resp = client.post("/api/v1/products", json={
+        "name": "IP验证商品95", "sale_price": "50.00", "cost_price": "20.00", "stock_quantity": 10,
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?page_size=100", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) > 0
+    for log in items:
+        assert log["ip_address"] is not None, f"ip_address 为空: action={log['action']}"
+        assert isinstance(log["ip_address"], str), f"ip_address 非字符串: {log['ip_address']}"
+        assert len(log["ip_address"]) > 0, f"ip_address 为空字符串: action={log['action']}"
+
+
+def test_96_product_delete_audit_log_after_data_has_deleted():
+    """商品删除审计日志 after_data 含 deleted=True 验证"""
+    headers = _admin_auth()
+    # 创建商品
+    resp = client.post("/api/v1/products", json={
+        "name": "待删除商品96", "sale_price": "88.00", "cost_price": "40.00", "stock_quantity": 5,
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    # 软删除
+    resp = client.delete(f"/api/v1/products/{pid}", headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=product_delete", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == pid)
+    assert log["after_data"] is not None
+    assert log["after_data"].get("deleted") is True, f"after_data.deleted 不是 True: {log['after_data']}"
+    assert log["resource_type"] == "product"
