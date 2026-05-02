@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-05-03（第四百五十四轮·自动循环）
+
+### 性能优化：Nginx gzip 压缩级别提升 + 前端 bundle 分析
+
+- Nginx gzip_comp_level 从默认 1 提升至 6（传输体积预计减小 15-20%）
+- 添加 gzip_buffers 16 8k 优化大文件压缩效率
+- 前端 bundle 分析结论：
+  - antd 1.29MB/396KB gzip：已 tree-shaken，是 Antd 6 正常体积
+  - 图标/locale 已正确 tree-shake
+  - 所有页面已 React.lazy 代码分割
+  - 依赖全部必需，无冗余包
+  - 总首次加载约 460KB gzip（内部管理系统合理水平）
+
 ## 2026-05-03（第四百五十三轮·自动循环）
 
 ### 代码质量：修复异常处理不一致
