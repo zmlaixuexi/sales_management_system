@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-03（第四百六十九轮·自动循环）
+
+### 文档完善：架构文档更新
+
+- architecture.md：路由表补充 6 个缺失页面（CustomerDetail/ReportsCenter/Users/Inventory/Payments）
+- architecture.md：覆盖率更新 99%→100%，API 模块数 11→12
+
 ## 2026-05-03（第四百六十八轮·自动循环）
 
 ### 回归验证：全面门禁通过
