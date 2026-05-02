@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第二百六十二轮·自动循环）
+
+### 部署：生产环境健康检查脚本
+
+- 新增 scripts/health-check.sh：独立健康检查脚本
+- 检查后端 /api/v1/health 和前端首页可用性
+- 支持自定义 BASE_URL，返回 0/1 退出码
+- docker-compose.prod.yml 已有后端健康检查（使用 Python urllib）
+
 ## 2026-05-02（第二百六十一轮·自动循环）
 
 ### 修复：CustomerForm/OrderForm/AuditLogs 防止重复错误提示
