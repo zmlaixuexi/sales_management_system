@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-02（第一百七十一轮·自动循环）
+
+### 测试：补强 deps DB 依赖函数（get_or_404/generate_sequential_code/paginate）
+
+- `test_deps.py`：+10 测试（get_or_404 存在/不存在/无效 UUID/软删除/无 deleted_at，generate_sequential_code 首次/递增，paginate 首页/末页/空表）
+- 后端 635→645，总计 960 tests
+
 ## 2026-05-02（第一百七十轮·自动循环）
 
 ### 测试：补强 useSubmit + deps 辅助函数边界用例
