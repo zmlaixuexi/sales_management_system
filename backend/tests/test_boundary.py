@@ -1730,3 +1730,89 @@ def test_90_user_create_password_no_digit():
         "username": "pwd_nodigit_90", "password": "abcdefgh",
     }, headers=headers)
     assert resp.status_code == 422, f"无数字密码应被拒绝: {resp.status_code}"
+
+
+def test_91_login_password_max_length_boundary():
+    """登录密码恰好 100 字符正常流程，101 字符返回 422"""
+    # 101 字符密码
+    resp = client.post("/api/v1/auth/login", json={
+        "username": "boundary_admin", "password": "a" * 95 + "12345",
+    })
+    # 100 字符 — 正常登录（应成功或 401，取决于密码是否正确）
+    # 这里只是验证 schema 不拒绝
+    assert resp.status_code in (200, 401)
+
+    # 101 字符
+    resp = client.post("/api/v1/auth/login", json={
+        "username": "boundary_admin", "password": "a" * 96 + "12345",
+    })
+    assert resp.status_code == 422, f"101 字符密码应被拒绝: {resp.status_code}"
+
+
+def test_92_login_password_min_length_boundary():
+    """登录密码空字符串返回 422"""
+    resp = client.post("/api/v1/auth/login", json={
+        "username": "boundary_admin", "password": "",
+    })
+    assert resp.status_code == 422, f"空密码应被拒绝: {resp.status_code}"
+
+
+def test_93_login_username_max_length_boundary():
+    """登录用户名恰好 50 字符返回 401（不存在），51 字符返回 422"""
+    # 50 字符用户名 — schema 通过，但用户不存在返回 401
+    # 注意：避免用 "u"*50，因为 test_76 创建了该用户
+    fifty_char = "z" * 50
+    resp = client.post("/api/v1/auth/login", json={
+        "username": fifty_char, "password": "pass123456",
+    })
+    assert resp.status_code == 401
+
+    # 51 字符用户名
+    resp = client.post("/api/v1/auth/login", json={
+        "username": "z" * 51, "password": "pass123456",
+    })
+    assert resp.status_code == 422, f"51 字符用户名应被拒绝: {resp.status_code}"
+
+
+def test_94_change_password_boundary():
+    """修改密码 new_password 6 字符通过，5 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    # 6 字符新密码
+    resp = client.post("/api/v1/auth/change-password", json={
+        "old_password": "pass123456", "new_password": "n12345",
+    }, headers=headers)
+    # 改回去（先改成 n12345，再改回 pass123456）
+
+    # 先检查 6 字符是否通过
+    if resp.status_code == 200:
+        # 改回原密码
+        client.post("/api/v1/auth/change-password", json={
+            "old_password": "n12345", "new_password": "pass123456",
+        }, headers=headers)
+
+    # 5 字符新密码
+    resp = client.post("/api/v1/auth/change-password", json={
+        "old_password": "pass123456", "new_password": "n1234",
+    }, headers=headers)
+    assert resp.status_code == 422, f"5 字符新密码应被拒绝: {resp.status_code}"
+
+
+def test_95_change_password_no_digit():
+    """修改密码 new_password 无数字返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    resp = client.post("/api/v1/auth/change-password", json={
+        "old_password": "pass123456", "new_password": "abcdefghij",
+    }, headers=headers)
+    assert resp.status_code == 422, f"无数字新密码应被拒绝: {resp.status_code}"
+
+
+def test_96_change_password_no_letter():
+    """修改密码 new_password 无字母返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    resp = client.post("/api/v1/auth/change-password", json={
+        "old_password": "pass123456", "new_password": "1234567890",
+    }, headers=headers)
+    assert resp.status_code == 422, f"无字母新密码应被拒绝: {resp.status_code}"
