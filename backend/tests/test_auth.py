@@ -270,3 +270,45 @@ def test_refresh_access_token_rejected_401():
         "refresh_token": access_token,
     })
     assert resp.status_code == 401
+
+
+def test_change_password_audit_log():
+    """修改密码产生审计日志"""
+    from app.models.audit import AuditLog
+
+    # 获取用户 ID
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "testuser").first()
+        user_id = str(user.id)
+    finally:
+        db.close()
+
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    token = login_resp.json()["data"]["access_token"]
+
+    resp = client.post("/api/v1/auth/change-password", json={
+        "old_password": "testpass123",
+        "new_password": "auditpass123",
+    }, headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+
+    # 直接查询数据库验证审计日志
+    db = TestSession()
+    try:
+        log = db.query(AuditLog).filter(
+            AuditLog.action == "password_change",
+            AuditLog.resource_id == user_id,
+        ).first()
+        assert log is not None
+        assert log.resource_type == "user"
+    finally:
+        db.close()
+
+    # 改回原密码
+    login2 = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "auditpass123"})
+    token2 = login2.json()["data"]["access_token"]
+    client.post("/api/v1/auth/change-password", json={
+        "old_password": "auditpass123",
+        "new_password": "testpass123",
+    }, headers={"Authorization": f"Bearer {token2}"})
