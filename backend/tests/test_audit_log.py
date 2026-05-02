@@ -2427,3 +2427,35 @@ def test_92_audit_log_request_id_non_null():
     for log in items:
         assert log["request_id"] is not None, f"request_id 为 None: action={log['action']}"
         assert log["request_id"] != "", f"request_id 为空: action={log['action']}"
+
+
+def test_93_order_cancel_audit_log_after_data_has_cancelled_status():
+    """订单取消审计日志 after_data 含 status=cancelled"""
+    headers = _admin_auth()
+    # 创建客户+商品+订单
+    resp = client.post("/api/v1/customers", json={"name": "取消审计客户", "phone": "13800939393"}, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/products", json={
+        "name": "取消审计商品", "sale_price": "80.00", "cost_price": "40.00", "stock_quantity": 20,
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cid,
+        "items": [{"product_id": pid, "quantity": 1, "unit_price": "80.00"}],
+    }, headers=headers)
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+
+    resp = client.post(f"/api/v1/sales-orders/{oid}/cancel", headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?action=order_cancel", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    log = next(i for i in items if i["resource_id"] == oid)
+    assert log["before_data"]["status"] == "draft"
+    assert log["after_data"]["status"] == "cancelled"
+    assert log["after_data"]["order_no"] == log["before_data"]["order_no"]
+    assert log["resource_type"] == "order"

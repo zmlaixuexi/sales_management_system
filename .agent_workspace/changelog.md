@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-03（第四百零八轮·自动循环）
+
+### 测试补强：订单取消审计日志 after_data 含 cancelled 状态验证
+
+- `test_audit_log.py`：新增 test_93（订单取消 after_data 含 status=cancelled、order_no 保持一致，before_data 含原 status=draft）
+- 后端测试：1091/1091 全绿（test_tampered_token_rejected 偶发抖动，单独通过），ruff clean
+
 ## 2026-05-03（第四百零七轮·自动循环）
 
 ### 代码质量 + 测试补强：docs/testing.md 同步 + 审计日志 request_id 非空验证
