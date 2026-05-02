@@ -31,6 +31,8 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
                 name="app.request", level=level,
                 pathname="", lineno=0, msg="", args=None, exc_info=None,
             )
+            content_length = response.headers.get("Content-Length")
+            resp_size = int(content_length) if content_length else None
             record.extra_fields = {  # type: ignore[attr-defined]
                 "method": request.method,
                 "path": path,
@@ -40,9 +42,11 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
                 "user_id": user_id_ctx.get(""),
                 "slow": is_slow,
                 "request_id": request_id_ctx.get(""),
+                "resp_bytes": resp_size,
             }
             label = "SLOW " if is_slow else ""
-            record.msg = f"{label}{request.method} {path} {response.status_code} {duration_ms}ms"
+            size_label = f" {resp_size}B" if resp_size is not None else ""
+            record.msg = f"{label}{request.method} {path} {response.status_code} {duration_ms}ms{size_label}"
             logger.handle(record)
 
         response.headers["X-Response-Time"] = f"{duration_ms}ms"

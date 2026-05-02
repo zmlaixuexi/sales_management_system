@@ -115,6 +115,27 @@ def test_request_log_adds_response_time_header():
     assert resp.headers["X-Response-Time"].endswith("ms")
 
 
+def test_request_log_includes_response_size(caplog):
+    """日志中包含响应体大小"""
+    app = FastAPI()
+    app.add_middleware(RequestLogMiddleware)
+
+    @app.get("/api/v1/test")
+    async def test_endpoint():
+        return {"ok": True}
+
+    with caplog.at_level(logging.INFO, logger="app.request"):
+        client = TestClient(app)
+        resp = client.get("/api/v1/test")
+        assert resp.status_code == 200
+
+    log_records = [r for r in caplog.records if r.name == "app.request"]
+    assert len(log_records) >= 1
+    record = log_records[0]
+    assert hasattr(record, "extra_fields")
+    assert record.extra_fields["resp_bytes"] == len(resp.content)
+
+
 def test_request_log_skips_non_api_paths(caplog):
     """非 API 路径不记录日志"""
     app = FastAPI()
