@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-03（第四百七十七轮·自动循环）
+
+### 重构：file_service 异常策略统一为 HTTPException
+
+- 移除 FileSizeExceededError / FileTypeError 自定义 ValueError 子类
+- file_service.py 所有校验函数直接抛 HTTPException（与 payment_service 金标准对齐）
+- files.py API 层移除 try/except 转换逻辑，简化调用链
+- delete_file 对不存在记录改为抛 HTTPException 404（原 return False）
+- 更新 test_file_service.py（6 处 ValueError→HTTPException）和 test_file_upload.py test_15
+- 1219 后端 + 417 前端 = 1636 测试全绿，ruff 0
+
 ## 2026-05-03（第四百七十六轮·自动循环）
 
 ### 功能：订单详情页添加操作日志查看
