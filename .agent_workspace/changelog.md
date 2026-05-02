@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-02（第三百六十二轮·自动循环）
+
+### 代码质量：docs/testing.md 更新 + ruff 修复
+
+- `docs/testing.md`：测试计数更新至 1028，test_auth.py 29→35、test_audit_log.py 37→45、test_boundary.py 47→64，补充覆盖模块描述
+- `test_auth.py`：清理 test_31 中未使用变量、修复 import 排序、添加末尾换行
+- `test_boundary.py`：清理 test_63 中未使用变量 pay1
+- 后端测试：1028/1028 全绿，ruff 0 errors
+
 ## 2026-05-02（第三百六十一轮·自动循环）
 
 ### 测试补强：收款冲正后订单状态回退验证

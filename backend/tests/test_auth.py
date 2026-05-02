@@ -475,6 +475,12 @@ def test_30_token_nonexistent_user_rejected():
 
 def test_31_expired_refresh_token_rejected():
     """已过期的 refresh token 应返回 401"""
+    from datetime import UTC, datetime, timedelta
+
+    from jose import jwt as jose_jwt
+
+    from app.core.config import settings
+
     db = TestSession()
     try:
         user = db.query(User).filter(User.username == "testuser").first()
@@ -482,20 +488,11 @@ def test_31_expired_refresh_token_rejected():
     finally:
         db.close()
 
-    expired_refresh = create_refresh_token(
-        subject=user_id,
-    )
-    # 手动构造一个过期的 refresh token
-    from datetime import UTC
-    from jose import jwt as jose_jwt
-
-    from app.core.config import settings
-
-    now = __import__("datetime").datetime.now(UTC)
+    now = datetime.now(UTC)
     payload = {
         "sub": user_id,
-        "exp": now - __import__("datetime").timedelta(seconds=1),
-        "iat": now - __import__("datetime").timedelta(seconds=100),
+        "exp": now - timedelta(seconds=1),
+        "iat": now - timedelta(seconds=100),
         "jti": str(uuid.uuid4()),
         "type": "refresh",
     }

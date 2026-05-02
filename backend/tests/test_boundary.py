@@ -1236,7 +1236,6 @@ def test_63_reverse_full_payment_back_to_partially_paid():
         "amount": "60", "payment_method": "cash",
     }, headers=_auth())
     assert resp.status_code == 200
-    pay1 = resp.json()["data"]["id"]
 
     resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
         "amount": "40", "payment_method": "transfer",
