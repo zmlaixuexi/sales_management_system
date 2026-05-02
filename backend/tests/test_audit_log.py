@@ -2883,3 +2883,45 @@ def test_106_payment_create_audit_log_before_data_is_none():
     assert log["after_data"] is not None
     assert log["after_data"]["order_id"] == oid
     assert log["after_data"]["amount"] == "99.00"
+
+
+def test_107_audit_log_action_resource_type_cross_constraint():
+    """审计日志 action 与 resource_type 交叉约束验证"""
+    headers = _admin_auth()
+    # 触发各种操作确保有各类型审计日志
+    resp = client.post("/api/v1/products", json={
+        "name": "交叉约束商品107", "sale_price": "45.00", "cost_price": "15.00", "stock_quantity": 8,
+    }, headers=headers)
+    assert resp.status_code == 200
+
+    resp = client.get("/api/v1/audit-logs?page_size=100", headers=headers)
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+
+    # 已知交叉约束：action 前缀应匹配 resource_type
+    known_mappings = {
+        "user_create": "user", "user_update": "user",
+        "product_create": "product", "product_update": "product",
+        "product_delete": "product", "product_disable": "product",
+        "product_import": "product",
+        "customer_create": "customer", "customer_update": "customer",
+        "customer_delete": "customer", "customer_transfer": "customer",
+        "customer_import": "customer",
+        "order_create": "order", "order_update": "order",
+        "order_confirm": "order", "order_cancel": "order",
+        "payment_create": "payment", "payment_reverse": "payment",
+        "inventory_adjust": "product",
+        "login_success": "user", "login_failed": "user",
+        "password_change": "user",
+        "export_products": "product", "export_customers": "customer",
+        "export_orders": "order", "export_payments": "payment",
+        "file_upload": "file", "file_delete": "file",
+    }
+    for log in items:
+        action = log["action"]
+        rtype = log["resource_type"]
+        if action in known_mappings:
+            expected = known_mappings[action]
+            assert rtype == expected, (
+                f"action={action} 期望 resource_type={expected}，实际={rtype}"
+            )

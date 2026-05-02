@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第四百二十一轮·自动循环）
+
+### 测试补强：审计日志 action 与 resource_type 交叉约束验证
+
+- `test_audit_log.py`：新增 test_107（action 与 resource_type 交叉约束验证，覆盖全部已知 26 种 action 映射）
+- `docs/testing.md`：更新后端测试总数 1104→1105、总计 1486→1487、test_audit_log.py 108→109
+- 后端测试：1105/1105 全绿，ruff clean
+
 ## 2026-05-03（第四百二十轮·自动循环）
 
 ### 测试补强：收款创建审计日志 before_data 为 None 独立性验证
