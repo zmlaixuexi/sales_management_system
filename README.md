@@ -134,7 +134,7 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（832 个）
+# 后端测试（833 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v

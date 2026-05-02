@@ -4,11 +4,11 @@
 
 | 指标 | 值 |
 |---|---|
-| 后端测试总数 | 832 |
-| 后端测试文件 | 40 |
+| 后端测试总数 | 833 |
+| 后端测试文件 | 42 |
 | 前端测试总数 | 382 |
 | 前端测试文件 | 37 |
-| 测试总计 | 1214 |
+| 测试总计 | 1215 |
 | 后端覆盖率 | 99.79% |
 | 覆盖模块 | 认证、商品、客户、订单、库存、收款、报表（含客户/销售人员排行）、审计日志（含手机号/邮箱脱敏）、数据导出（含权限/数据范围/敏感字段边界）、批量导入（含负价格/非法格式/英文表头/批量内去重）、权限校验（含导出敏感字段过滤、报表利润权限）、速率限制、SQL 注入防护、XSS 防护、请求 ID 中间件、CORS 验证、日志格式器（JSON/文本/setup_logging）、金额计算、文件服务（含 FILE_TOO_LARGE/FILE_NOT_BOUND 错误码、上传权限 403）、密码强度、订单操作日志、支付路径（含已取消/已完成订单拒绝、无权限 403）、派生销售字段、响应体 request_id、报表 period 参数校验、CSV 导入校验（含行数上限+XSS 消毒+commit 回滚）、客户 source/level 枚举校验、生产环境 OpenAPI 禁用、SQL 慢查询日志、用户管理（含角色列表 API 和权限边界）、安全模块（bcrypt 72 字节截断/JWT token 篡改/过期/错误密钥/iat/jti）、报表辅助函数（_date_range/_apply_data_scope）、导出 API 辅助函数（_csv_filename）、登录速率限制辅助函数（_check_login_rate_limit/_record_login_fail）、商品辅助函数（_batch_sales_stats/_validate_category_id/_get_default_category_id）、客户辅助函数（_validate_owner_user）、订单库存辅助函数（_deduct_inventory/_restore_inventory）、订单明细校验（_validate_and_prepare_items）、收款登记服务（register_payment）、请求体大小限制中间件（BodyLimitMiddleware）、外键验证边界（含无效 UUID/不存在用户/不存在客户/不存在商品）、导出服务软删除过滤（商品/客户/订单/收款排除已删除记录）、中间件（BodyLimit 请求体限制/RequestLog 日志记录） |
 
@@ -79,6 +79,11 @@ cd frontend && npx eslint src/
 | test_order_validate_items.py | （SQLite 内存） | 订单明细校验 _validate_and_prepare_items |
 | test_payment_register.py | （SQLite 内存） | 收款登记服务 register_payment |
 | test_body_limit.py | test_body_limit.db | 请求体大小限制中间件 |
+| test_middleware.py | （无） | 中间件单元测试（BodyLimit/RequestLog/SecurityHeaders） |
+| test_slow_query.py | （无） | SQL 慢查询日志测试 |
+| test_csv_import.py | （无） | CSV 导入共享校验函数 validate_csv_upload |
+| test_file_service.py | （无） | 文件服务单元测试（扩展名/MIME/魔数字节/大小限制） |
+| test_export_helpers.py | （无） | 导出辅助函数测试 |
 
 ### 依赖注入覆盖
 
