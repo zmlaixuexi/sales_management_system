@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-03（第四百六十二轮·自动循环）
+
+### 文档：testing.md 补充前端页面测试覆盖描述
+
+- 新增"前端覆盖页面"行，列出 11 个页面组件和工具函数的测试覆盖范围
+- 包括 Products、ProductForm、CustomerForm、OrderForm、Dashboard 等页面
+
 ## 2026-05-03（第四百六十一轮·自动循环）
 
 ### 回归验证：全面门禁通过
