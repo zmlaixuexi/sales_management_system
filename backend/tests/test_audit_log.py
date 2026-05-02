@@ -395,3 +395,18 @@ def test_20_audit_log_page_size_100():
     data = resp.json()["data"]
     assert data["page_size"] == 100
     assert isinstance(data["items"], list)
+
+
+def test_21_audit_log_no_permission_403():
+    """无 audit:log 权限用户获取审计日志返回 403"""
+    from helpers import make_user_with_perms
+
+    token = make_user_with_perms(TestSession, "no_audit_log", ["audit:export"])
+    resp = client.get("/api/v1/audit-logs", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
+
+
+def test_22_audit_log_requires_auth():
+    """未认证获取审计日志返回 401"""
+    resp = client.get("/api/v1/audit-logs")
+    assert resp.status_code == 401
