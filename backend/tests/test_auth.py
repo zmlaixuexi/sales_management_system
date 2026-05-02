@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.api.deps import get_db
 from app.api.v1.auth import _login_fail_counts
-from app.core.security import create_access_token, hash_password
+from app.core.security import create_access_token, create_refresh_token, hash_password
 from app.db.session import Base
 from app.main import app
 from app.models.user import User
@@ -467,4 +467,72 @@ def test_30_token_nonexistent_user_rejected():
     token = create_access_token(subject=str(ghost_id))
 
     resp = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 401
+
+
+# ─── JWT refresh token 边界验证 ───
+
+
+def test_31_expired_refresh_token_rejected():
+    """已过期的 refresh token 应返回 401"""
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "testuser").first()
+        user_id = str(user.id)
+    finally:
+        db.close()
+
+    expired_refresh = create_refresh_token(
+        subject=user_id,
+    )
+    # 手动构造一个过期的 refresh token
+    from datetime import UTC
+    from jose import jwt as jose_jwt
+
+    from app.core.config import settings
+
+    now = __import__("datetime").datetime.now(UTC)
+    payload = {
+        "sub": user_id,
+        "exp": now - __import__("datetime").timedelta(seconds=1),
+        "iat": now - __import__("datetime").timedelta(seconds=100),
+        "jti": str(uuid.uuid4()),
+        "type": "refresh",
+    }
+    expired_token = jose_jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+
+    resp = client.post("/api/v1/auth/refresh", json={"refresh_token": expired_token})
+    assert resp.status_code == 401
+
+
+def test_32_refresh_token_wrong_signature_rejected():
+    """错误签名的 refresh token 应返回 401"""
+    from jose import jwt as jose_jwt
+
+    fake_payload = {"sub": str(uuid.uuid4()), "type": "refresh", "jti": str(uuid.uuid4())}
+    bad_token = jose_jwt.encode(fake_payload, "wrong-secret-key", algorithm="HS256")
+
+    resp = client.post("/api/v1/auth/refresh", json={"refresh_token": bad_token})
+    assert resp.status_code == 401
+
+
+def test_33_refresh_token_nonexistent_user_rejected():
+    """不存在用户的 refresh token 应返回 401"""
+    ghost_id = uuid.uuid4()
+    token = create_refresh_token(subject=str(ghost_id))
+
+    resp = client.post("/api/v1/auth/refresh", json={"refresh_token": token})
+    assert resp.status_code == 401
+
+
+def test_34_refresh_token_missing_type_rejected():
+    """缺少 type 字段的 refresh token 应返回 401"""
+    from jose import jwt as jose_jwt
+
+    from app.core.config import settings
+
+    payload = {"sub": str(uuid.uuid4()), "jti": str(uuid.uuid4())}
+    token = jose_jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+
+    resp = client.post("/api/v1/auth/refresh", json={"refresh_token": token})
     assert resp.status_code == 401

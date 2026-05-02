@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-02（第三百五十八轮·自动循环）
+
+### 安全加固：JWT refresh token 过期边界验证
+
+- `test_auth.py`：新增 4 个测试（test_31~test_34）
+  - 过期 refresh token 返回 401
+  - 错误签名 refresh token 返回 401
+  - 不存在用户 refresh token 返回 401
+  - 缺少 type 字段 refresh token 返回 401
+- 后端测试：1023/1023 全绿
+
 ## 2026-05-02（第三百五十七轮·自动循环）
 
 ### 测试补强：订单状态机完整性断言强化
