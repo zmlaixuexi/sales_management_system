@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第二百五十五轮·自动循环）
+
+### 重构：9 处手动 deleted_at 过滤替换为 active_query
+
+- customers.py：_validate_owner_user、create_customer 手机号检查、update_customer 手机号检查、delete_customer 关联订单检查（4 处）
+- orders.py：_validate_and_prepare_items、_deduct_inventory、_restore_inventory（3 处）
+- payments.py：reverse_payment 关联订单查询（1 处）
+- payment_service.py：register_payment 订单查询（1 处）
+- 809 后端测试全绿，ruff 0 errors，mypy 0 errors
+
 ## 2026-05-02（第二百五十四轮·自动循环）
 
 ### 重构：6 处手动 deleted_at 过滤替换为 active_query
