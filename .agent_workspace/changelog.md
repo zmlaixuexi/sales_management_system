@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-03（第四百六十九轮·自动循环）
+
+### 安全：全面并发安全审计 + 商品编辑库存变更行锁
+
+- 审计全部 13 个写端点的并发安全性（products/customers/inventory/users/files）
+- 发现 1 个 HIGH 风险：PUT /products/{product_id} 的 stock_quantity 更新缺少行锁
+- 修复：当请求包含 stock_quantity 变更时使用 with_for_update() 查询商品行
+- 其余 12 个端点均为 LOW 风险（幂等操作、非金额字段、审计日志重复等）
+- inventory.py 的 POST /inventory/adjustments 已有 with_for_update() 保护
+- 后端 1216 测试全绿
+
 ## 2026-05-03（第四百六十八轮·自动循环）
 
 ### 安全：订单确认/取消添加行锁防护防止并发双重操作
