@@ -1674,3 +1674,59 @@ def test_86_customer_create_contact_name_max_length_boundary():
         headers=headers,
     )
     assert resp.status_code == 422, f"101 字符联系人应被拒绝: {resp.status_code}"
+
+
+def test_87_user_create_password_max_length_boundary():
+    """用户创建 password 恰好 100 字符通过，101 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    # 恰好 100 字符（含字母+数字）
+    pwd_100 = "a" * 90 + "1234567890"  # 100 字符
+    resp = client.post("/api/v1/users", json={
+        "username": "pwd_bnd_87", "password": pwd_100,
+    }, headers=headers)
+    assert resp.status_code == 200, f"100 字符密码应通过: {resp.json()}"
+
+    # 101 字符
+    pwd_101 = "a" * 91 + "1234567890"  # 101 字符
+    resp = client.post("/api/v1/users", json={
+        "username": "pwd_bnd_87b", "password": pwd_101,
+    }, headers=headers)
+    assert resp.status_code == 422, f"101 字符密码应被拒绝: {resp.status_code}"
+
+
+def test_88_user_create_password_min_length_boundary():
+    """用户创建 password 恰好 6 字符通过，5 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    # 恰好 6 字符
+    resp = client.post("/api/v1/users", json={
+        "username": "pwd_min_88", "password": "a12345",
+    }, headers=headers)
+    assert resp.status_code == 200, f"6 字符密码应通过: {resp.json()}"
+
+    # 5 字符
+    resp = client.post("/api/v1/users", json={
+        "username": "pwd_min_88b", "password": "a1234",
+    }, headers=headers)
+    assert resp.status_code == 422, f"5 字符密码应被拒绝: {resp.status_code}"
+
+
+def test_89_user_create_password_no_letter():
+    """用户创建 password 无字母返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    resp = client.post("/api/v1/users", json={
+        "username": "pwd_noletter_89", "password": "12345678",
+    }, headers=headers)
+    assert resp.status_code == 422, f"无字母密码应被拒绝: {resp.status_code}"
+
+
+def test_90_user_create_password_no_digit():
+    """用户创建 password 无数字返回 422"""
+    headers = _auth_for_user(_user_id)
+
+    resp = client.post("/api/v1/users", json={
+        "username": "pwd_nodigit_90", "password": "abcdefgh",
+    }, headers=headers)
+    assert resp.status_code == 422, f"无数字密码应被拒绝: {resp.status_code}"
