@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第一百九十二轮·自动循环）
+
+### 测试：新增登录速率限制辅助函数单元测试（_check_login_rate_limit/_record_login_fail 5 项）
+
+- 新建 `test_auth_rate_limit.py`，5 个测试覆盖 auth.py 私有速率限制函数
+- _check_login_rate_limit：阈值通过（9 次）、阈值拒绝（10 次 429）、不同 IP 独立计数、过期记录清理
+- _record_login_fail：时间戳追加验证
+- 使用 autouse fixture 重置模块级计数器
+- 后端 711→716，总计 1055 tests
+
 ## 2026-05-02（第一百九十一轮·自动循环）
 
 ### 测试：补强 request 封装函数边界测试（无参数 get/无 body post+put 3 项）

@@ -134,7 +134,7 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（711 个）
+# 后端测试（716 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
@@ -153,6 +153,7 @@ npm run build
 | 模块 | 测试数 | 覆盖内容 |
 |---|---|---|
 | 认证 | 16 | 登录成功/失败、Token 刷新、当前用户、权限校验、禁用用户刷新被拒、密码修改、登录失败速率限制（连续失败触发 429） |
+| 登录速率限制函数 | 5 | _check_login_rate_limit 阈值通过/拒绝/独立 IP/过期清理，_record_login_fail 时间戳追加 |
 | 健康检查 | 18 | 健康状态、版本信息、安全响应头（含 Cache-Control: no-store）、请求日志记录、请求 ID 生成/透传/日志关联/响应体、生产环境 JWT 密钥检查、未处理异常 JSON 响应、CORS 允许/拒绝验证、生产环境 OpenAPI 禁用、连接池状态 |
 | 集成（端到端） | 28 | 完整业务流程：商品→客户→订单→库存→收款→报表→订单日志 |
 | 审计日志 | 19 | 全操作类型日志、筛选、操作类型列表、用户管理操作审计日志 |
@@ -186,7 +187,7 @@ npm run build
 | 安全模块 | 14 | hash_password bcrypt 哈希/盐值、verify_password 正确/错误/空密码、create_access_token 解码/type/exp/自定义过期、create_refresh_token 解码/type/exp/长于 access |
 | 报表辅助函数 | 11 | _date_range 全分支（today/7d/30d/this_month/last_month/跨月边界/跨年边界/月初/无效 period）、_apply_data_scope 管理员/销售 |
 | 慢查询 | 5 | 慢查询结构化日志记录、SQL 截断、阈值验证 |
-| **合计** | **711** | |
+| **合计** | **716** | |
 
 ### 前端测试覆盖
 
