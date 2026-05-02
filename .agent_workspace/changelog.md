@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-02（第二百八十七轮·自动循环）
+
+### 工程：修复 ruff 19 项 lint 问题
+
+- test_security: assert False→pytest.fail，导入移至顶部，移除内联重复导入
+- test_middleware: SecurityHeadersMiddleware 导入移至顶部，移除未用 json
+- test_export: 导入排序修复，timezone.utc→datetime.UTC
+- test_payment_crud: 移除未用变量 oid
+- ruff / mypy / ESLint / TypeScript 全绿
+
 ## 2026-05-02（第二百八十六轮·自动循环）
 
 ### 文档：更新测试计数至 844 后端 / 382 前端
