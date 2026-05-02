@@ -6,7 +6,7 @@ import uuid
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.deps import PaginationParams, get_db, paginate, paginated_resp, require_permission, resp
+from app.api.deps import PaginationParams, fmt_dt, get_db, paginate, paginated_resp, require_permission, resp
 from app.core.sanitize import escape_like
 from app.models.audit import AuditLog
 from app.models.user import User
@@ -70,7 +70,7 @@ def list_audit_logs(
             "ip_address": item.ip_address,
             "user_agent": item.user_agent,
             "request_id": item.request_id,
-            "created_at": item.created_at.isoformat() if item.created_at else None,
+            "created_at": fmt_dt(item.created_at),
         }
         result_items.append(row)
 

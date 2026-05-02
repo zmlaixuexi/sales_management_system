@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
-from app.api.deps import PaginationParams, get_db, paginate, paginated_resp, parse_uuid_or_400, require_permission, resp
+from app.api.deps import PaginationParams, fmt_dt, get_db, paginate, paginated_resp, parse_uuid_or_400, require_permission, resp
 from app.models.order import InventoryMovement
 from app.models.product import Product
 from app.models.user import User
@@ -55,7 +55,7 @@ def list_movements(
                 "related_type": m.related_type,
                 "related_id": str(m.related_id) if m.related_id else None,
                 "remark": m.remark,
-                "created_at": m.created_at.isoformat() if m.created_at else None,
+                "created_at": fmt_dt(m.created_at),
             }
             for m in items
         ],

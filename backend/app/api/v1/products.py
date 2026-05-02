@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import (
     PaginationParams,
+    fmt_dt,
     generate_sequential_code,
     get_db,
     get_or_404,
@@ -171,8 +172,8 @@ def list_products(
             "status": p.status,
             "sort_weight": p.sort_weight,
             "remark": p.remark,
-            "created_at": p.created_at.isoformat() if p.created_at else None,
-            "updated_at": p.updated_at.isoformat() if p.updated_at else None,
+            "created_at": fmt_dt(p.created_at),
+            "updated_at": fmt_dt(p.updated_at),
         }
         if can_view_cost:
             row["cost_price"] = str(p.cost_price)
@@ -313,8 +314,8 @@ def get_product(
             }
             for img in product.images
         ],
-        "created_at": product.created_at.isoformat() if product.created_at else None,
-        "updated_at": product.updated_at.isoformat() if product.updated_at else None,
+        "created_at": fmt_dt(product.created_at),
+        "updated_at": fmt_dt(product.updated_at),
     }
     if can_view_cost:
         data["cost_price"] = str(product.cost_price)
@@ -529,7 +530,7 @@ def price_history(
             "id": str(h.id),
             "old_sale_price": str(h.old_sale_price) if h.old_sale_price is not None else None,
             "new_sale_price": str(h.new_sale_price) if h.new_sale_price is not None else None,
-            "created_at": h.created_at.isoformat() if h.created_at else None,
+            "created_at": fmt_dt(h.created_at),
         }
         if can_view_cost:
             row["old_cost_price"] = str(h.old_cost_price) if h.old_cost_price is not None else None

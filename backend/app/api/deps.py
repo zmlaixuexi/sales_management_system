@@ -172,6 +172,11 @@ def paginate(query, page: int, page_size: int):
     return items, total
 
 
+def fmt_dt(dt: datetime | None) -> str | None:
+    """安全格式化 datetime 为 ISO 字符串，None 返回 None。"""
+    return dt.isoformat() if dt else None
+
+
 def paginated_resp(items: list, page: int, page_size: int, total: int, message: str = "查询成功") -> dict:
     """构建标准分页响应。"""
     return resp(data={"items": items, "page": page, "page_size": page_size, "total": total}, message=message)

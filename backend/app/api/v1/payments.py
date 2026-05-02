@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import (
     PaginationParams,
     check_owner_or_forbid,
+    fmt_dt,
     get_db,
     has_permission,
     paginate,
@@ -68,8 +69,8 @@ def list_payments(
                 "payment_method": p.payment_method,
                 "status": p.status,
                 "remark": p.remark,
-                "paid_at": p.paid_at.isoformat() if p.paid_at else None,
-                "created_at": p.created_at.isoformat() if p.created_at else None,
+                "paid_at": fmt_dt(p.paid_at),
+                "created_at": fmt_dt(p.created_at),
             }
             for p in items
         ],

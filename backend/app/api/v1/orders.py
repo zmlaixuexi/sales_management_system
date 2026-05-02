@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import (
     PaginationParams,
     check_owner_or_forbid,
+    fmt_dt,
     generate_sequential_code,
     get_db,
     get_or_404,
@@ -254,8 +255,8 @@ def list_orders(
             "paid_amount": str(o.paid_amount),
             "item_count": len(o.items),
             "remark": o.remark,
-            "created_at": o.created_at.isoformat() if o.created_at else None,
-            "updated_at": o.updated_at.isoformat() if o.updated_at else None,
+            "created_at": fmt_dt(o.created_at),
+            "updated_at": fmt_dt(o.updated_at),
         }
         if can_view_cost:
             row["total_cost"] = str(o.total_cost)
@@ -372,9 +373,9 @@ def get_order(
         "id": str(p.id),
         "amount": str(p.amount),
         "payment_method": p.payment_method,
-        "paid_at": p.paid_at.isoformat() if p.paid_at else None,
+        "paid_at": fmt_dt(p.paid_at),
         "remark": p.remark,
-        "created_at": p.created_at.isoformat() if p.created_at else None,
+        "created_at": fmt_dt(p.created_at),
     } for p in order.payments if p.status == "normal"]
 
     data: dict = {
@@ -389,8 +390,8 @@ def get_order(
         "remark": order.remark,
         "items": items_out,
         "payments": payments_out,
-        "created_at": order.created_at.isoformat() if order.created_at else None,
-        "updated_at": order.updated_at.isoformat() if order.updated_at else None,
+        "created_at": fmt_dt(order.created_at),
+        "updated_at": fmt_dt(order.updated_at),
     }
     if can_view_cost:
         data["total_cost"] = str(order.total_cost)
@@ -584,7 +585,7 @@ def order_logs(
             "ip_address": item.ip_address,
             "user_agent": item.user_agent,
             "request_id": item.request_id,
-            "created_at": item.created_at.isoformat() if item.created_at else None,
+            "created_at": fmt_dt(item.created_at),
         }
         for item in items
     ]

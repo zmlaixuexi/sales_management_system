@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import (
     PaginationParams,
     check_owner_or_forbid,
+    fmt_dt,
     get_db,
     get_or_404,
     has_permission,
@@ -101,8 +102,8 @@ def list_customers(
         "owner_name": c.owner.display_name if c.owner else None,
         "follow_status": c.follow_status,
         "remark": c.remark,
-        "created_at": c.created_at.isoformat() if c.created_at else None,
-        "updated_at": c.updated_at.isoformat() if c.updated_at else None,
+        "created_at": fmt_dt(c.created_at),
+        "updated_at": fmt_dt(c.updated_at),
     } for c in items]
 
     return paginated_resp(result_items, pagination.page, pagination.page_size, total)
@@ -204,8 +205,8 @@ def get_customer(
             "owner_name": customer.owner.display_name if customer.owner else None,
             "follow_status": customer.follow_status,
             "remark": customer.remark,
-            "created_at": customer.created_at.isoformat() if customer.created_at else None,
-            "updated_at": customer.updated_at.isoformat() if customer.updated_at else None,
+            "created_at": fmt_dt(customer.created_at),
+            "updated_at": fmt_dt(customer.updated_at),
         },
         message="查询成功",
     )

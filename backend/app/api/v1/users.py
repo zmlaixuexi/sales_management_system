@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import PaginationParams, get_current_user, get_db, paginate, paginated_resp, parse_uuid_or_400, resp
+from app.api.deps import PaginationParams, fmt_dt, get_current_user, get_db, paginate, paginated_resp, parse_uuid_or_400, resp
 from app.core.sanitize import escape_like
 from app.core.security import hash_password
 from app.models.user import Role, User, UserRole
@@ -59,8 +59,8 @@ def list_users(
         "is_active": u.is_active,
         "is_superuser": u.is_superuser,
         "roles": [RoleBrief(id=str(r.id), name=r.name, display_name=r.display_name).model_dump() for r in u.roles],
-        "created_at": u.created_at.isoformat() if u.created_at else None,
-        "updated_at": u.updated_at.isoformat() if u.updated_at else None,
+        "created_at": fmt_dt(u.created_at),
+        "updated_at": fmt_dt(u.updated_at),
     } for u in users]
 
     return paginated_resp(items, pagination.page, pagination.page_size, total)
