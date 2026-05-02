@@ -131,3 +131,18 @@ def test_07_exact_limit_passes(monkeypatch):
         "name": "小商品", "sale_price": "10.00",
     }, headers=_auth())
     assert resp.status_code != 413
+
+
+def test_08_head_request_not_limited():
+    """HEAD 请求不受限制"""
+    resp = client.head("/api/v1/products", headers=_auth())
+    assert resp.status_code != 413
+
+
+def test_09_uploads_path_exempt(monkeypatch):
+    """/uploads 路径不受请求体限制"""
+    from app.core.config import settings
+    monkeypatch.setattr(settings, "MAX_JSON_BODY_MB", 0)
+    # /uploads 路径应该直接放行（实际可能 404 但不应 413）
+    resp = client.post("/uploads/test", content=b"data", headers=_auth())
+    assert resp.status_code != 413
