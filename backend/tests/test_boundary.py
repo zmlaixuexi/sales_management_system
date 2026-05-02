@@ -1251,3 +1251,59 @@ def test_63_reverse_full_payment_back_to_partially_paid():
     resp = client.get(f"/api/v1/sales-orders/{oid}", headers=_auth())
     assert resp.status_code == 200
     assert resp.json()["data"]["status"] == "partially_paid"
+
+
+def test_65_order_create_remark_max_length_boundary():
+    """订单创建备注恰好 500 字符通过，501 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/customers", json={"name": "订单备注边界客户", "phone": "13900656565"}, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/products", json={
+        "name": "订单备注边界商品", "sale_price": "50.00", "cost_price": "20.00", "stock_quantity": 10,
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+
+    # 恰好 500 字符
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cid,
+        "items": [{"product_id": pid, "quantity": 1, "unit_price": "50.00"}],
+        "remark": "R" * 500,
+    }, headers=headers)
+    assert resp.status_code == 200, f"500 字符备注应通过: {resp.json()}"
+
+    # 501 字符
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cid,
+        "items": [{"product_id": pid, "quantity": 1, "unit_price": "50.00"}],
+        "remark": "R" * 501,
+    }, headers=headers)
+    assert resp.status_code == 422, f"501 字符备注应被拒绝: {resp.status_code}"
+
+
+def test_66_order_update_remark_max_length_boundary():
+    """订单编辑备注恰好 500 字符通过，501 字符返回 422"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/customers", json={"name": "订单编辑备注客户", "phone": "13900666666"}, headers=headers)
+    assert resp.status_code == 200
+    cid = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/products", json={
+        "name": "订单编辑备注商品", "sale_price": "60.00", "cost_price": "25.00", "stock_quantity": 10,
+    }, headers=headers)
+    assert resp.status_code == 200
+    pid = resp.json()["data"]["id"]
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": cid,
+        "items": [{"product_id": pid, "quantity": 1, "unit_price": "60.00"}],
+    }, headers=headers)
+    assert resp.status_code == 200
+    oid = resp.json()["data"]["id"]
+
+    # 恰好 500 字符
+    resp = client.put(f"/api/v1/sales-orders/{oid}", json={"remark": "U" * 500}, headers=headers)
+    assert resp.status_code == 200, f"编辑备注 500 字符应通过: {resp.json()}"
+
+    # 501 字符
+    resp = client.put(f"/api/v1/sales-orders/{oid}", json={"remark": "U" * 501}, headers=headers)
+    assert resp.status_code == 422, f"编辑备注 501 字符应被拒绝: {resp.status_code}"
