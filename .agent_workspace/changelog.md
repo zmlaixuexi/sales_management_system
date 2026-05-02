@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-02（第三百四十轮·自动循环）
+
+### 代码质量：修复 ruff 发现的 5 个代码质量问题
+
+- `test_user_management.py`：移除未使用的 create_access_token import
+- `test_payment_crud.py`：移除 3 处未使用的 cat 变量、1 处未使用的 admin_headers 变量
+- ruff 全量扫描 0 errors，后端测试 987/987 全绿
+
 ## 2026-05-02（第三百三十九轮·自动循环）
 
 ### 文档：更新测试文档最终计数

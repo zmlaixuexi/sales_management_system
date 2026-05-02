@@ -977,7 +977,6 @@ def test_38_reverse_payment_draft_order_400():
     db = TestSession()
     try:
         user = db.query(User).filter(User.username == "pay_tester").first()
-        cat = db.query(ProductCategory).first()
         cust = db.query(Customer).first()
         prod = db.query(Product).filter(Product.sku == "PAY-TEST-01").first()
 
@@ -1020,7 +1019,6 @@ def test_39_reverse_payment_cancelled_order_400():
     db = TestSession()
     try:
         user = db.query(User).filter(User.username == "pay_tester").first()
-        cat = db.query(ProductCategory).first()
         cust = db.query(Customer).first()
         prod = db.query(Product).filter(Product.sku == "PAY-TEST-01").first()
 
@@ -1075,13 +1073,12 @@ def test_42_reverse_payment_non_owner_403():
     """非归属用户冲正收款返回 403（无 order:view_all）"""
     from helpers import admin_auth_header, make_user_with_perms
 
-    admin_headers = admin_auth_header(TestSession, "pay_tester")
+    admin_auth_header(TestSession, "pay_tester")
 
     # 创建新的已确认订单 + 收款
     db = TestSession()
     try:
         user = db.query(User).filter(User.username == "pay_tester").first()
-        cat = db.query(ProductCategory).first()
         cust = db.query(Customer).first()
         prod = db.query(Product).filter(Product.sku == "PAY-TEST-01").first()
 
