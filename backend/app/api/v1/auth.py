@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db, resp
+from app.api.deps import active_query, get_current_user, get_db, resp
 from app.core.config import settings
 from app.core.security import create_access_token, create_refresh_token, hash_password, verify_password
 from app.models.user import User
@@ -56,7 +56,7 @@ def login(request: Request, req: LoginRequest, db: Session = Depends(get_db)):
     _check_login_rate_limit(client_ip)
 
     meta = get_request_meta(request)
-    user = db.query(User).filter(User.username == req.username, User.deleted_at.is_(None)).first()
+    user = active_query(db, User).filter(User.username == req.username).first()
     if not user or not verify_password(req.password, user.hashed_password):
         _record_login_fail(client_ip)
         log_action(db, action="login_failed", resource_type="user", actor_name=req.username, **meta)
@@ -104,7 +104,7 @@ def refresh_token(req: RefreshRequest, db: Session = Depends(get_db)):
     except JWTError:
         raise credentials_exception from None
 
-    user = db.query(User).filter(User.id == uuid.UUID(user_id), User.deleted_at.is_(None)).first()
+    user = active_query(db, User).filter(User.id == uuid.UUID(user_id)).first()
     if user is None or not user.is_active:
         raise credentials_exception
 

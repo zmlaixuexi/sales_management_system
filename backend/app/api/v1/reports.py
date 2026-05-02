@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, has_permission, require_permission, resp
+from app.api.deps import active_query, get_db, has_permission, require_permission, resp
 from app.core.config import settings
 from app.models.customer import Customer
 from app.models.order import SalesOrder, SalesOrderItem
@@ -314,9 +314,8 @@ def inventory_warning(
     if threshold is None:
         threshold = settings.INVENTORY_WARNING_THRESHOLD
     rows = (
-        db.query(Product)
+        active_query(db, Product)
         .filter(
-            Product.deleted_at.is_(None),
             Product.status == "active",
             Product.stock_quantity <= threshold,
         )

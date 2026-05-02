@@ -8,6 +8,7 @@ from decimal import Decimal
 
 from sqlalchemy.orm import Session, selectinload
 
+from app.api.deps import active_query
 from app.core.sanitize import escape_like
 from app.models.customer import Customer
 from app.models.order import Payment, SalesOrder
@@ -70,7 +71,7 @@ def export_products(
     category_id: uuid.UUID | None = None,
     can_view_cost: bool = True,
 ) -> Generator[str, None, None]:
-    query = db.query(Product).filter(Product.deleted_at.is_(None))
+    query = active_query(db, Product)
     if keyword:
         query = query.filter(Product.name.ilike(f"%{escape_like(keyword)}%", escape="\\"))
     if status:
@@ -120,7 +121,7 @@ def export_customers(
     source: str | None = None,
     owner_user_id: uuid.UUID | None = None,
 ) -> Generator[str, None, None]:
-    query = db.query(Customer).filter(Customer.deleted_at.is_(None))
+    query = active_query(db, Customer)
     if keyword:
         escaped = escape_like(keyword)
         query = query.filter(
@@ -199,7 +200,7 @@ def export_orders(
     sales_user_id: uuid.UUID | None = None,
     can_view_cost: bool = True,
 ) -> Generator[str, None, None]:
-    query = db.query(SalesOrder).filter(SalesOrder.deleted_at.is_(None)).options(
+    query = active_query(db, SalesOrder).options(
         selectinload(SalesOrder.items),
     )
     if keyword:
