@@ -713,3 +713,77 @@ def test_41_export_payments_excludes_deleted_order():
     resp = client.get("/api/v1/exports/payments", headers=_auth())
     assert resp.status_code == 200
     assert payment_id not in resp.text
+
+
+def test_42_export_customers_data_scope_filtered():
+    """非 customer:view_all 用户导出客户只包含本人归属数据"""
+    from app.core.security import create_access_token
+    from app.models.user import Permission, Role, RolePermission, UserRole
+
+    db = TestSession()
+    try:
+        perm = db.query(Permission).filter(Permission.code == "customer:list").first()
+        if not perm:
+            perm = Permission(id=uuid.uuid4(), code="customer:list", name="客户列表", module="customer")
+            db.add(perm)
+            db.flush()
+        role = Role(id=uuid.uuid4(), name="cust_export_scope", display_name="客户范围测试")
+        db.add(role)
+        db.flush()
+        db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+        scope_user = User(
+            id=uuid.uuid4(), username="scope_cust_exporter",
+            hashed_password=hash_password("testpass123"),
+            display_name="客户范围导出员", is_active=True, is_superuser=False,
+        )
+        db.add(scope_user)
+        db.flush()
+        db.add(UserRole(user_id=scope_user.id, role_id=role.id))
+        db.commit()
+        token = create_access_token(str(scope_user.id))
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/exports/customers", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    # scope_user 没有客户，应只有表头行
+    lines = [line for line in resp.text.strip().split("\n") if line.strip()]
+    data_lines = [ln for ln in lines if "客户名称" not in ln]
+    assert len(data_lines) == 0
+
+
+def test_43_export_payments_data_scope_filtered():
+    """非 order:view_all 用户导出收款只包含本人订单关联的收款"""
+    from app.core.security import create_access_token
+    from app.models.user import Permission, Role, RolePermission, UserRole
+
+    db = TestSession()
+    try:
+        perm = db.query(Permission).filter(Permission.code == "payment:list").first()
+        if not perm:
+            perm = Permission(id=uuid.uuid4(), code="payment:list", name="收款列表", module="payment")
+            db.add(perm)
+            db.flush()
+        role = Role(id=uuid.uuid4(), name="pay_export_scope", display_name="收款范围测试")
+        db.add(role)
+        db.flush()
+        db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+        scope_user = User(
+            id=uuid.uuid4(), username="scope_pay_exporter",
+            hashed_password=hash_password("testpass123"),
+            display_name="收款范围导出员", is_active=True, is_superuser=False,
+        )
+        db.add(scope_user)
+        db.flush()
+        db.add(UserRole(user_id=scope_user.id, role_id=role.id))
+        db.commit()
+        token = create_access_token(str(scope_user.id))
+    finally:
+        db.close()
+
+    resp = client.get("/api/v1/exports/payments", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    # scope_user 没有订单和收款，应只有表头行
+    lines = [line for line in resp.text.strip().split("\n") if line.strip()]
+    data_lines = [ln for ln in lines if "收款ID" not in ln]
+    assert len(data_lines) == 0
