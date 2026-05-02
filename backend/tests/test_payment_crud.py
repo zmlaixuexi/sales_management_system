@@ -1113,3 +1113,16 @@ def test_42_reverse_payment_non_owner_403():
     token = make_user_with_perms(TestSession, "non_owner_reverse", ["payment:reverse"])
     resp = client.post(f"/api/v1/payments/{pay_id}/reverse", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 403
+
+
+def test_43_payment_list_data_scope_non_owner():
+    """无 order:view_all 用户收款列表只返回本人订单的收款（数据范围过滤）"""
+    from helpers import make_user_with_perms
+
+    # DB 中已有 pay_tester 的订单和收款
+    # 非归属用户只能看到自己订单的收款（应为空列表）
+    token = make_user_with_perms(TestSession, "non_owner_pay_scope", ["payment:list"])
+    resp = client.get("/api/v1/payments", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert len(items) == 0, "非归属用户不应看到其他人的收款"
