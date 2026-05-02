@@ -6,6 +6,38 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260502-184
+
+- 名称：生产环境健康检查脚本
+- 轮次：Round 262（自动循环）
+- 描述：新增 scripts/health-check.sh — 检查后端 /api/v1/health 和前端首页可用性，支持自定义 BASE_URL，返回 0/1 退出码
+- 涉及文件：scripts/health-check.sh
+- 验证：脚本可执行，curl 超时正确处理
+
+## 功能编号：FEAT-20260502-183
+
+- 名称：前端重复错误提示全面修复
+- 轮次：Round 259-261（自动循环）
+- 描述：全前端 23 处 catch 块添加 _toastDisplayed 防重复检查 — Dashboard 1、ReportsCenter 6、OrderDetail 5、ProductForm 2、CustomerDetail 2、CustomerForm 1、OrderForm 1、Products 2、Customers 1、Users 1、AuditLogs 1
+- 涉及文件：frontend/src/pages/*.tsx（11 个文件）
+- 验证：382 前端测试全绿，构建 262ms
+
+## 功能编号：FEAT-20260502-182
+
+- 名称：密码安全加固 + 7 项安全测试
+- 轮次：Round 257（自动循环）
+- 描述：hash_password/verify_password 添加 72 字节截断防止 bcrypt ValueError；新增测试 — token 篡改/错误密钥/过期/bcrypt 12 轮/Unicode 密码/长密码/超 72 字节截断
+- 涉及文件：backend/app/core/security.py、backend/tests/test_security.py
+- 验证：816 后端测试全绿（+7），ruff/mypy 0 errors
+
+## 功能编号：FEAT-20260502-181
+
+- 名称：active_query 统一软删除过滤重构
+- 轮次：Round 254-256、258（自动循环）
+- 描述：20 处手动 deleted_at 过滤替换为 active_query(db, Model) 辅助函数 — export_service 3、auth 2、reports 1、customers 4、orders 3、payments 1、payment_service 1、products 2、users 2、inventory 1；剩余 8 处为 JOIN 过滤/列查询不适合直接替换
+- 涉及文件：backend/app/api/v1/*.py、backend/app/services/export_service.py、backend/app/services/payment_service.py（10 个文件）
+- 验证：816 后端测试全绿，ruff/mypy 0 errors
+
 ## 功能编号：FEAT-20260502-180
 
 - 名称：外键验证边界条件测试
