@@ -752,3 +752,30 @@ def test_28_product_detail_cost_fields_hidden_for_non_privileged():
     assert data.get("cost_price") is None
     assert data.get("unit_profit") is None
     assert data.get("gross_margin") is None
+
+
+def _admin_auth():
+    """直接生成 admin token，避免依赖登录状态"""
+    from app.core.security import create_access_token
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "prod_admin").first()
+        return {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+
+def test_29_list_products_keyword_like_percent():
+    """关键字搜索含 % 不应匹配全部商品"""
+    resp = client.get("/api/v1/products", params={"keyword": "%"}, headers=_admin_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert all("%" not in p.get("name", "") for p in items)
+
+
+def test_30_list_products_keyword_like_underscore():
+    """关键字搜索含 _ 不应匹配任意单字符，只返回实际含 _ 的商品"""
+    resp = client.get("/api/v1/products", params={"keyword": "_"}, headers=_admin_auth())
+    assert resp.status_code == 200
+    items = resp.json()["data"]["items"]
+    assert all("_" in p.get("name", "") or "_" in p.get("sku", "") for p in items)
