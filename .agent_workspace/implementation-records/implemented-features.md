@@ -13,6 +13,13 @@
 - 验证：+1 测试验证 429 响应无 retry-after 头时使用默认 5 秒等待值，前端 831 测试全绿
 - 关联：frontend/src/__tests__/client-interceptor.test.ts
 
+## 功能编号：FEAT-20260503-230
+
+- 描述：manage.sh 添加 backup 命令快捷方式
+- 状态：已完成
+- 验证：backup 命令委托 backup.sh 执行数据库和上传文件备份，帮助文本已更新
+- 关联：deploy/manage.sh
+
 ## 功能编号：FEAT-20260503-228
 
 - 描述：Nginx 配置 /metrics 反代（Prometheus 采集入口）

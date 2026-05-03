@@ -8,6 +8,7 @@
 #   ./deploy/manage.sh logs [svc]   — 查看日志（可选指定服务）
 #   ./deploy/manage.sh migrate      — 仅执行数据库迁移
 #   ./deploy/manage.sh check        — 运行部署前检查
+#   ./deploy/manage.sh backup [dir] — 备份数据库和上传文件
 
 set -euo pipefail
 
@@ -134,6 +135,10 @@ case "${1:-help}" in
         echo ""
         ;;
 
+    backup)
+        "${SCRIPT_DIR}/backup.sh" "${2:-./backups}"
+        ;;
+
     check)
         "${SCRIPT_DIR}/pre-deploy-check.sh" "${@:2}"
         ;;
@@ -155,11 +160,13 @@ case "${1:-help}" in
         echo "                 自动生成迁移文件（alembic revision --autogenerate）"
         echo "  cleanup-files [小时]"
         echo "                 清理未绑定商品的孤立图片（默认 24 小时）"
+        echo "  backup [目录]  备份数据库和上传文件（默认 ./backups）"
         echo "  check          运行完整部署前检查"
         echo ""
         echo "示例："
         echo "  $0 start"
         echo "  $0 logs backend"
+        echo "  $0 backup /data/backups"
         echo "  $0 check --skip-build"
         echo ""
         ;;

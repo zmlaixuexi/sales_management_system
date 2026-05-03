@@ -2,17 +2,16 @@
 
 最后更新时间：2026-05-03
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-629
-当前任务名称：自动循环：完成第 629 轮开发推进
+当前任务编号：ROUND-630
+当前任务名称：自动循环：完成第 630 轮开发推进
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 630：manage.sh 添加 backup 命令（委托 backup.sh）
 - Round 629：client.ts 429 无 retry-after 头默认等待分支覆盖（前端 830→831）
-- Round 611：全量质量门禁验证 + 测试文档同步（testing.md 更新至 1310+830=2140）
-- Round 610：ErrorBoundary 默认错误提示分支覆盖
-- Round 609：前端 client.ts 429 重试路径覆盖
+- Round 611：全量质量门禁验证 + 测试文档同步
 
 ## 验证状态
 
@@ -33,8 +32,8 @@
 继续 keep-going 模式。可选方向：
 - 代码质量：覆盖剩余 3 个防御性分支（Products.tsx/Customers.tsx ref null、OrderDetail.tsx !id guard）
 - 安全加固：输入校验边界路径
-- 部署体验：Docker 优化或启动脚本改进
-- 可观测性：添加更多监控指标或日志
+- 可观测性：添加慢查询日志或请求追踪可视化
+- 部署体验：添加 restore 命令或数据库初始化验证
 
 ## 阻塞问题
 
