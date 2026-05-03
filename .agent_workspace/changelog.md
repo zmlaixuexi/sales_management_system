@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-03（第六百零六轮·自动循环）
+
+### 部署体验：Nginx 配置 /metrics 反代
+
+- deploy/nginx.conf 添加 /metrics location 块，代理至后端 /metrics 端点
+- 关闭 access_log 避免高频采集写入日志
+- 与已有 /health 健康检查反代模式一致
+- 生产环境可叠加 basic auth 限制访问（注释提示已保留）
+- 后端 1306/1306 ✓、前端 828/828 ✓
+
 ## 2026-05-03（第六百零五轮·自动循环）
 
 ### 可观测性：添加 Prometheus metrics 端点

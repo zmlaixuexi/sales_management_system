@@ -6,6 +6,20 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-228
+
+- 描述：Nginx 配置 /metrics 反代（Prometheus 采集入口）
+- 状态：已完成
+- 验证：deploy/nginx.conf 添加 location /metrics → proxy_pass backend/metrics，access_log off，1306 后端 + 828 前端测试全绿
+- 关联：deploy/nginx.conf
+
+## 功能编号：FEAT-20260503-227
+
+- 描述：Prometheus metrics 端点（/metrics，prometheus-fastapi-instrumentator 7.x）
+- 状态：已完成
+- 验证：+2 测试验证 Prometheus 格式输出和指标递增，1306 后端测试全绿
+- 关联：backend/app/main.py、backend/pyproject.toml、backend/tests/test_health.py
+
 ## 功能编号：FEAT-20260503-226
 
 - 描述：Login 页面 + roles API 前端测试
