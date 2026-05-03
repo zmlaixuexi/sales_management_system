@@ -3,6 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
+from app.schemas.auth import RefreshRequest, UserCreate, UserUpdate
 from app.schemas.inventory import InventoryAdjust
 from app.schemas.order import OrderItemInput
 from app.schemas.payment import PaymentCreate
@@ -121,3 +122,55 @@ def test_inventory_adjust_at_max_ok():
 def test_inventory_adjust_at_min_ok():
     adj = InventoryAdjust(product_id="x", quantity_change=-9999999)
     assert adj.quantity_change == -9999999
+
+
+# ─── RefreshRequest token 长度 ─────────────────────────────────
+
+
+def test_refresh_request_empty_token_422():
+    with pytest.raises(ValidationError):
+        RefreshRequest(refresh_token="")
+
+
+def test_refresh_request_too_long_422():
+    with pytest.raises(ValidationError):
+        RefreshRequest(refresh_token="x" * 2049)
+
+
+def test_refresh_request_valid_token_ok():
+    req = RefreshRequest(refresh_token="valid.jwt.token")
+    assert req.refresh_token == "valid.jwt.token"
+
+
+# ─── UserCreate role_ids 列表长度 ──────────────────────────────
+
+
+def test_user_create_role_ids_too_many_422():
+    with pytest.raises(ValidationError):
+        UserCreate(
+            username="testuser",
+            password="pass123abc",
+            role_ids=[str(i) for i in range(51)],
+        )
+
+
+def test_user_create_role_ids_at_max_ok():
+    u = UserCreate(
+        username="testuser",
+        password="pass123abc",
+        role_ids=[str(i) for i in range(50)],
+    )
+    assert len(u.role_ids) == 50
+
+
+# ─── UserUpdate role_ids 列表长度 ──────────────────────────────
+
+
+def test_user_update_role_ids_too_many_422():
+    with pytest.raises(ValidationError):
+        UserUpdate(role_ids=[str(i) for i in range(51)])
+
+
+def test_user_update_role_ids_at_max_ok():
+    u = UserUpdate(role_ids=[str(i) for i in range(50)])
+    assert len(u.role_ids) == 50

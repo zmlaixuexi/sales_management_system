@@ -18,7 +18,7 @@ class TokenResponse(BaseModel):
 
 
 class RefreshRequest(BaseModel):
-    refresh_token: str
+    refresh_token: str = Field(..., min_length=1, max_length=2048)
 
 
 class ChangePasswordRequest(BaseModel):
@@ -57,7 +57,7 @@ class UserCreate(BaseModel):
     display_name: str | None = Field(None, max_length=100)
     phone: str | None = Field(None, max_length=30)
     email: str | None = Field(None, max_length=100)
-    role_ids: list[str] = []
+    role_ids: list[str] = Field(default=[], max_length=50)
 
     @field_validator("password")
     @classmethod
@@ -89,7 +89,7 @@ class UserUpdate(BaseModel):
     phone: str | None = Field(None, max_length=30)
     email: str | None = Field(None, max_length=100)
     is_active: bool | None = None
-    role_ids: list[str] | None = None
+    role_ids: list[str] | None = Field(None, max_length=50)
 
     @field_validator("display_name", "email", "phone")
     @classmethod
