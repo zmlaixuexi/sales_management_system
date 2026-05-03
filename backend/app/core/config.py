@@ -24,6 +24,8 @@ class Settings(BaseSettings):
     INVENTORY_WARNING_THRESHOLD: int = 10
     RATE_LIMIT_MAX: int = 1000
     RATE_LIMIT_WINDOW: int = 60
+    LOGIN_FAIL_MAX: int = 10
+    LOGIN_FAIL_WINDOW_SECONDS: int = 900
     SLOW_REQUEST_THRESHOLD_MS: int = 1000
     SLOW_SQL_THRESHOLD_MS: int = 200
     DB_POOL_SIZE: int = 5

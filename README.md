@@ -291,6 +291,8 @@ npm run build
 | `LOG_FORMAT` | 日志格式（`text` 或 `json`） | `text` |
 | `RATE_LIMIT_MAX` | API 速率限制（每窗口请求数） | `1000` |
 | `RATE_LIMIT_WINDOW` | 速率限制窗口（秒） | `60` |
+| `LOGIN_FAIL_MAX` | 登录失败最大次数（每 IP） | `10` |
+| `LOGIN_FAIL_WINDOW_SECONDS` | 登录失败窗口（秒） | `900` |
 | `INVENTORY_WARNING_THRESHOLD` | 库存预警阈值 | `10` |
 | `SLOW_REQUEST_THRESHOLD_MS` | 慢请求阈值（毫秒） | `1000` |
 | `SLOW_SQL_THRESHOLD_MS` | 慢 SQL 阈值（毫秒） | `200` |

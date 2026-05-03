@@ -23,21 +23,19 @@ router = APIRouter(
     },
 )
 
-# 登录失败速率限制：每 IP 最多 10 次失败 / 15 分钟
+# 登录失败速率限制：每 IP 最多 LOGIN_FAIL_MAX 次失败 / LOGIN_FAIL_WINDOW_SECONDS 秒
 _login_fail_lock = Lock()
 _login_fail_counts: dict[str, list[float]] = defaultdict(list)
-_LOGIN_FAIL_MAX = 10
-_LOGIN_FAIL_WINDOW = 900  # 15 分钟
 
 
 def _check_login_rate_limit(ip: str) -> None:
     now = time.monotonic()
     with _login_fail_lock:
-        cutoff = now - _LOGIN_FAIL_WINDOW
+        cutoff = now - settings.LOGIN_FAIL_WINDOW_SECONDS
         timestamps = _login_fail_counts[ip]
         while timestamps and timestamps[0] < cutoff:
             timestamps.pop(0)
-        if len(timestamps) >= _LOGIN_FAIL_MAX:
+        if len(timestamps) >= settings.LOGIN_FAIL_MAX:
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail={"code": "RATE_LIMIT_EXCEEDED", "message": "登录失败次数过多，请 15 分钟后再试"},
