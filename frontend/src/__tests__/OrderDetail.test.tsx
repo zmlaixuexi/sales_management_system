@@ -54,6 +54,7 @@ vi.mock('@/utils', () => ({
 }))
 
 const _messageError = vi.fn()
+const _messageSuccess = vi.fn()
 vi.mock('antd', () => ({
   Card: ({ title, children }: any) => (
     <div data-testid="card" data-title={title}>{children}</div>
@@ -62,7 +63,7 @@ vi.mock('antd', () => ({
     ({ children }: any) => <div data-testid="descriptions">{children}</div>,
     { Item: ({ children, label }: any) => <div data-testid="desc-item" data-label={label}>{children}</div> },
   ),
-  Table: ({ dataSource, columns, rowKey, footer, locale }: any) => (
+  Table: ({ dataSource, columns, rowKey, footer, locale, pagination }: any) => (
     <div>
       <table data-testid="table">
         <tbody>
@@ -79,6 +80,8 @@ vi.mock('antd', () => ({
       </table>
       {(!dataSource || dataSource.length === 0) && locale?.emptyText && <span>{locale.emptyText}</span>}
       {footer && <div data-testid="table-footer">{footer()}</div>}
+      {pagination?.showTotal && <span data-testid="pagination-total">{pagination.showTotal(pagination.total)}</span>}
+      {pagination?.onChange && <button data-testid="page-change" onClick={() => pagination.onChange(2, pagination.pageSize)}>翻页</button>}
     </div>
   ),
   Button: ({ children, onClick, icon, type, danger, disabled }: any) => (
@@ -101,8 +104,14 @@ vi.mock('antd', () => ({
     <input data-testid="input" value={value || ''} placeholder={placeholder} onChange={(e: any) => onChange?.(e)} />
   ),
   Image: ({ src }: any) => <img data-testid="image" src={src} />,
-  Modal: ({ title, children, open }: any) => open ? <div data-testid="modal" data-title={title}>{children}</div> : null,
-  message: { error: (...args: any[]) => _messageError(...args), success: vi.fn() },
+  Modal: ({ title, children, open, onOk, onCancel }: any) => open ? (
+    <div data-testid="modal" data-title={title}>
+      {children}
+      <button data-testid="modal-ok" onClick={onOk}>确定</button>
+      <button data-testid="modal-cancel" onClick={onCancel}>取消</button>
+    </div>
+  ) : null,
+  message: { error: (...args: any[]) => _messageError(...args), success: (...args: any[]) => _messageSuccess(...args) },
 }))
 
 vi.mock('@ant-design/icons', () => ({
@@ -153,6 +162,7 @@ function renderOrderDetail() {
     <MemoryRouter initialEntries={['/orders/order-1']}>
       <Routes>
         <Route path="/orders/:id" element={<OrderDetail />} />
+        <Route path="/orders/:id/edit" element={<div>Edit Order</div>} />
         <Route path="/orders" element={<div>Orders List</div>} />
       </Routes>
     </MemoryRouter>,
@@ -537,5 +547,193 @@ describe('OrderDetail', () => {
       (b) => b.textContent?.includes('编辑'),
     )
     expect(editBtn).toBeTruthy()
+  })
+
+  it('编辑按钮点击导航到编辑页面', async () => {
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('编辑')).toBeInTheDocument()
+    })
+    const editBtn = screen.getAllByTestId('button').find(
+      (b) => b.textContent?.includes('编辑'),
+    )
+    await act(async () => { fireEvent.click(editBtn!) })
+    await waitFor(() => {
+      expect(screen.getByText('Edit Order')).toBeInTheDocument()
+    })
+  })
+
+  it('登记收款成功提交并刷新', async () => {
+    const confirmedData = {
+      success: true,
+      data: { ...mockOrderData.data, status: 'confirmed', payments: [] },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(confirmedData)
+    _paymentMocks.createPayment.mockResolvedValueOnce({ success: true })
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText(/ORD-20260501-001/)).toBeInTheDocument()
+    })
+    const payBtn = screen.getAllByTestId('button').find(
+      (b) => b.textContent?.includes('登记收款'),
+    )
+    await act(async () => { fireEvent.click(payBtn!) })
+    await waitFor(() => {
+      expect(screen.getByTestId('modal')).toBeInTheDocument()
+    })
+    // 输入金额
+    const inputNumber = screen.getByTestId('input-number')
+    await act(async () => {
+      fireEvent.change(inputNumber, { target: { value: '500' } })
+    })
+    // 点击确定
+    const okBtn = screen.getByTestId('modal-ok')
+    await act(async () => { fireEvent.click(okBtn) })
+    await waitFor(() => {
+      expect(_paymentMocks.createPayment).toHaveBeenCalledWith('order-1', {
+        amount: '500',
+        payment_method: 'cash',
+        remark: undefined,
+      })
+      expect(_messageSuccess).toHaveBeenCalledWith('收款登记成功')
+    })
+  })
+
+  it('登记收款金额为 0 显示错误提示', async () => {
+    const confirmedData = {
+      success: true,
+      data: { ...mockOrderData.data, status: 'confirmed', payments: [] },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(confirmedData)
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText(/ORD-20260501-001/)).toBeInTheDocument()
+    })
+    const payBtn = screen.getAllByTestId('button').find(
+      (b) => b.textContent?.includes('登记收款'),
+    )
+    await act(async () => { fireEvent.click(payBtn!) })
+    await waitFor(() => {
+      expect(screen.getByTestId('modal')).toBeInTheDocument()
+    })
+    // 不修改金额，直接提交（默认为 0）
+    const okBtn = screen.getByTestId('modal-ok')
+    await act(async () => { fireEvent.click(okBtn) })
+    await waitFor(() => {
+      expect(_messageError).toHaveBeenCalledWith('请输入正确的收款金额')
+    })
+  })
+
+  it('登记收款失败显示错误提示', async () => {
+    const confirmedData = {
+      success: true,
+      data: { ...mockOrderData.data, status: 'confirmed', payments: [] },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(confirmedData)
+    _paymentMocks.createPayment.mockRejectedValueOnce(new Error('支付失败'))
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText(/ORD-20260501-001/)).toBeInTheDocument()
+    })
+    const payBtn = screen.getAllByTestId('button').find(
+      (b) => b.textContent?.includes('登记收款'),
+    )
+    await act(async () => { fireEvent.click(payBtn!) })
+    await waitFor(() => {
+      expect(screen.getByTestId('modal')).toBeInTheDocument()
+    })
+    // 输入金额
+    const inputNumber = screen.getByTestId('input-number')
+    await act(async () => {
+      fireEvent.change(inputNumber, { target: { value: '100' } })
+    })
+    const okBtn = screen.getByTestId('modal-ok')
+    await act(async () => { fireEvent.click(okBtn) })
+    await waitFor(() => {
+      expect(_messageError).toHaveBeenCalledWith('收款登记失败')
+    })
+  })
+
+  it('收款弹窗点击取消关闭', async () => {
+    const confirmedData = {
+      success: true,
+      data: { ...mockOrderData.data, status: 'confirmed', payments: [] },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(confirmedData)
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText(/ORD-20260501-001/)).toBeInTheDocument()
+    })
+    const payBtn = screen.getAllByTestId('button').find(
+      (b) => b.textContent?.includes('登记收款'),
+    )
+    await act(async () => { fireEvent.click(payBtn!) })
+    await waitFor(() => {
+      expect(screen.getByTestId('modal')).toBeInTheDocument()
+    })
+    const cancelBtn = screen.getByTestId('modal-cancel')
+    await act(async () => { fireEvent.click(cancelBtn) })
+    await waitFor(() => {
+      expect(screen.queryByTestId('modal')).not.toBeInTheDocument()
+    })
+  })
+
+  it('操作日志分页超过 10 条时显示分页', async () => {
+    _orderMocks.fetchOrderLogs.mockResolvedValue({
+      success: true,
+      data: { items: mockLogsData.data.items, page: 1, page_size: 10, total: 25 },
+    })
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByTestId('pagination-total')).toBeInTheDocument()
+    })
+    expect(screen.getByTestId('pagination-total').textContent).toBe('共 25 条')
+    // 点击翻页
+    await act(async () => { fireEvent.click(screen.getByTestId('page-change')) })
+    await waitFor(() => {
+      expect(_orderMocks.fetchOrderLogs).toHaveBeenCalledWith('order-1', { page: 2, page_size: 10 })
+    })
+  })
+
+  it('收款弹窗中输入备注', async () => {
+    const confirmedData = {
+      success: true,
+      data: { ...mockOrderData.data, status: 'confirmed', payments: [] },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(confirmedData)
+    _paymentMocks.createPayment.mockResolvedValueOnce({ success: true })
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText(/ORD-20260501-001/)).toBeInTheDocument()
+    })
+    const payBtn = screen.getAllByTestId('button').find(
+      (b) => b.textContent?.includes('登记收款'),
+    )
+    await act(async () => { fireEvent.click(payBtn!) })
+    await waitFor(() => {
+      expect(screen.getByTestId('modal')).toBeInTheDocument()
+    })
+    // 修改金额
+    const inputNumber = screen.getByTestId('input-number')
+    await act(async () => {
+      fireEvent.change(inputNumber, { target: { value: '300' } })
+    })
+    // 输入备注
+    const inputs = screen.getAllByTestId('input')
+    const remarkInput = inputs.find((inp) => inp.getAttribute('placeholder') === '可选')
+    expect(remarkInput).toBeTruthy()
+    await act(async () => {
+      fireEvent.change(remarkInput!, { target: { value: '定金' } })
+    })
+    // 提交
+    const okBtn = screen.getByTestId('modal-ok')
+    await act(async () => { fireEvent.click(okBtn) })
+    await waitFor(() => {
+      expect(_paymentMocks.createPayment).toHaveBeenCalledWith('order-1', {
+        amount: '300',
+        payment_method: 'cash',
+        remark: '定金',
+      })
+    })
   })
 })
