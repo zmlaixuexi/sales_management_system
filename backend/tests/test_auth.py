@@ -693,3 +693,132 @@ def test_38_password_change_old_refresh_token_revoked():
         "old_password": "newpass999",
         "new_password": "testpass123",
     }, headers={"Authorization": f"Bearer {token2}"})
+
+
+def test_39_password_change_full_lifecycle():
+    """密码修改完整生命周期：登录→使用→改密→旧 token 失效→重登→新 token 有效→改回"""
+    import time
+    from app.models.user import User
+
+    # 步骤 1：登录获取 token
+    login1 = client.post("/api/v1/auth/login", json={
+        "username": "testuser", "password": "testpass123",
+    })
+    assert login1.status_code == 200
+    token1 = login1.json()["data"]["access_token"]
+    headers1 = {"Authorization": f"Bearer {token1}"}
+
+    # 步骤 2：使用 token 访问 API
+    me = client.get("/api/v1/auth/me", headers=headers1)
+    assert me.status_code == 200
+    user_id = me.json()["data"]["id"]
+
+    # 步骤 3：记录当前 password_changed_at（可能被之前测试修改过）
+    db = TestSession()
+    user = db.query(User).filter(User.username == "testuser").first()
+    old_changed_at = user.password_changed_at
+    db.close()
+
+    # 步骤 4：确保时间差超过 1 秒
+    time.sleep(1.1)
+
+    # 步骤 5：修改密码
+    change = client.post("/api/v1/auth/change-password", json={
+        "old_password": "testpass123",
+        "new_password": "lifecycle1",
+    }, headers=headers1)
+    assert change.status_code == 200
+
+    # 步骤 6：验证 password_changed_at 已更新
+    db = TestSession()
+    user = db.query(User).filter(User.username == "testuser").first()
+    assert user.password_changed_at is not None
+    if old_changed_at is not None:
+        assert user.password_changed_at > old_changed_at
+    db.close()
+
+    # 步骤 7：旧 token 全部失效（access + me）
+    assert client.get("/api/v1/auth/me", headers=headers1).status_code == 401
+
+    # 步骤 8：用旧密码登录失败
+    bad_login = client.post("/api/v1/auth/login", json={
+        "username": "testuser", "password": "testpass123",
+    })
+    assert bad_login.status_code == 401
+
+    # 步骤 9：用新密码登录成功
+    login2 = client.post("/api/v1/auth/login", json={
+        "username": "testuser", "password": "lifecycle1",
+    })
+    assert login2.status_code == 200
+    token2 = login2.json()["data"]["access_token"]
+    refresh2 = login2.json()["data"]["refresh_token"]
+    headers2 = {"Authorization": f"Bearer {token2}"}
+
+    # 步骤 10：新 token 正常使用
+    me2 = client.get("/api/v1/auth/me", headers=headers2)
+    assert me2.status_code == 200
+    assert me2.json()["data"]["id"] == user_id
+
+    # 步骤 11：新 refresh token 正常使用
+    refresh_resp = client.post("/api/v1/auth/refresh", json={"refresh_token": refresh2})
+    assert refresh_resp.status_code == 200
+
+    # 步骤 12：改回原密码（清理）
+    time.sleep(1.1)
+    client.post("/api/v1/auth/change-password", json={
+        "old_password": "lifecycle1",
+        "new_password": "testpass123",
+    }, headers=headers2)
+
+
+def test_40_password_change_invalidates_all_prior_tokens():
+    """多次密码修改后，所有旧 token 均失效"""
+    import time
+
+    # 登录获取 token_a
+    login_a = client.post("/api/v1/auth/login", json={
+        "username": "testuser", "password": "testpass123",
+    })
+    token_a = login_a.json()["data"]["access_token"]
+
+    time.sleep(1.1)
+
+    # 第一次改密
+    client.post("/api/v1/auth/change-password", json={
+        "old_password": "testpass123",
+        "new_password": "second_pw1",
+    }, headers={"Authorization": f"Bearer {token_a}"})
+
+    # 登录获取 token_b
+    login_b = client.post("/api/v1/auth/login", json={
+        "username": "testuser", "password": "second_pw1",
+    })
+    token_b = login_b.json()["data"]["access_token"]
+
+    time.sleep(1.1)
+
+    # 第二次改密
+    client.post("/api/v1/auth/change-password", json={
+        "old_password": "second_pw1",
+        "new_password": "third_pw12",
+    }, headers={"Authorization": f"Bearer {token_b}"})
+
+    # token_a 和 token_b 都应失效
+    assert client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token_a}"}).status_code == 401
+    assert client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token_b}"}).status_code == 401
+
+    # 用新密码登录正常
+    login_c = client.post("/api/v1/auth/login", json={
+        "username": "testuser", "password": "third_pw12",
+    })
+    assert login_c.status_code == 200
+    token_c = login_c.json()["data"]["access_token"]
+    assert client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token_c}"}).status_code == 200
+
+    # 清理：改回原密码
+    time.sleep(1.1)
+    client.post("/api/v1/auth/change-password", json={
+        "old_password": "third_pw12",
+        "new_password": "testpass123",
+    }, headers={"Authorization": f"Bearer {token_c}"})
