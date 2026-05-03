@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-03（第六百五十九轮·自动循环）
+
+### 代码质量：添加 safe_commit 辅助函数 + 统一 35 处 db.commit() rollback 保护
+
+- 新增 `deps.safe_commit(db)` 封装 try/commit/except/rollback/re-raise 模式
+- 替换 10 个 API 文件中全部 35 处裸 `db.commit()` 调用
+- CSV 导入函数清理冗余 `db.rollback()` 调用
+- 防止 IntegrityError 等异常后 session 处于不可用状态
+- 全量验证通过：后端 1367 + 前端 837 = 2204 测试
+
 ## 2026-05-03（第六百五十八轮·自动循环）
 
 ### 代码质量：提取 isToastDisplayed 辅助函数 + 消除 28 处类型断言
