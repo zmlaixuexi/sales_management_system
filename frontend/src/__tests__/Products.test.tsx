@@ -52,7 +52,10 @@ const _paginatedListReturn = {
 }
 
 vi.mock('@/hooks/usePaginatedList', () => ({
-  usePaginatedList: (_fetcher: any, _extraFilters: any, _errorMsg: string) => _paginatedListReturn,
+  usePaginatedList: (fetcher: any, _extraFilters: any, _errorMsg: string) => {
+    try { fetcher({ page: 1, page_size: 20 }) } catch { /* mock 返回非 Promise，.then() 会报错 */ }
+    return _paginatedListReturn
+  },
 }))
 
 vi.mock('antd', () => {

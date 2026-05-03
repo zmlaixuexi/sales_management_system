@@ -23,7 +23,9 @@ vi.mock('@/api/inventory', () => ({
 }))
 
 vi.mock('@/hooks/usePaginatedList', () => ({
-  usePaginatedList: (_fetchFn: any, _filters: any, _errorMsg: string) => {
+  usePaginatedList: (fetchFn: any, _filters: any, _errorMsg: string) => {
+    // 调用 fetchFn 覆盖回调函数体（mock API 返回非 Promise 会抛错，try/catch 静默处理）
+    try { fetchFn({ page: 1, page_size: 20 }) } catch { /* mock 返回非 Promise，.then() 会报错 */ }
     const result = _inventoryMocks.fetchInventoryMovements()
     _paginatedListReturn.data = result?.data?.items ?? []
     _paginatedListReturn.total = result?.data?.total ?? 0
