@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-04（第六百九十九轮·自动循环）
+
+### 部署体验：Docker Compose 生产环境加固
+
+- docker-compose.prod.yml 新增：
+  - 3 个独立 bridge 网络：backend（postgres↔backend）、frontend（backend↔nginx）、monitoring（prometheus↔grafana）
+  - 资源限制：postgres 512M/1CPU、backend 512M/1CPU、nginx 128M/0.5CPU、prometheus 256M/0.5CPU、grafana 256M/0.5CPU
+  - 日志轮转：json-file 驱动，max-size 10-20M，max-file 3-5
+  - 安全选项：backend/nginx 设置 no-new-privileges + cap_drop ALL
+  - 补充缺失环境变量：ACCOUNT_LOCK_MAX_FAILURES、ACCOUNT_LOCK_WINDOW_SECONDS
+- YAML 语法验证通过，后端测试 1581 全部通过
+
 ## 2026-05-04（第六百九十八轮·自动循环）
 
 ### 安全加固：密码强度验证增强（大小写+数字+特殊字符+弱密码黑名单）
