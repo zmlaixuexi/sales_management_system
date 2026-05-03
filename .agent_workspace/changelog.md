@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第六百七十六轮·自动循环）
+
+### 安全加固：auth schema 边界验证 + 7 项测试
+
+- RefreshRequest: refresh_token 添加 min_length/max_length
+- UserCreate/UserUpdate: role_ids 添加 max_length=50
+- 后端测试 1444（+7），ruff 0 errors
+
 ## 2026-05-03（第六百七十五轮·自动循环）
 
 ### 安全加固：Pydantic Schema 边界验证完善
