@@ -392,3 +392,252 @@ def test_no_restore_endpoints():
         # 不应该有 restore/undelete 路由
         assert "/restore" not in source
         assert "/undelete" not in source
+
+
+# ═══════════════════════════════════════════════════════
+# 8. get_or_404 自动过滤软删除
+# ═══════════════════════════════════════════════════════
+
+
+def test_get_or_404_auto_filters_deleted_at():
+    """get_or_404 对有 deleted_at 的模型自动添加过滤"""
+    source = inspect.getsource(get_or_404)
+    assert "deleted_at" in source
+
+
+def test_get_or_404_uses_hasattr_check():
+    """get_or_404 用 hasattr 检查模型是否有 deleted_at"""
+    source = inspect.getsource(get_or_404)
+    assert "hasattr" in source
+    assert "deleted_at" in source
+
+
+# ═══════════════════════════════════════════════════════
+# 9. active_query 过滤逻辑
+# ═══════════════════════════════════════════════════════
+
+
+def test_active_query_filters_deleted_at():
+    """active_query 添加 deleted_at IS NULL 过滤"""
+    source = inspect.getsource(active_query)
+    assert "deleted_at" in source
+
+
+@pytest.mark.parametrize("model", [Product, Customer, SalesOrder, User])
+def test_active_query_used_in_list_endpoints(model):
+    """各模型的列表端点使用 active_query"""
+    import app.api.v1.customers as customers_mod
+    import app.api.v1.orders as orders_mod
+    import app.api.v1.products as products_mod
+    import app.api.v1.users as users_mod
+
+    module_map = {Product: products_mod, Customer: customers_mod, SalesOrder: orders_mod, User: users_mod}
+    source = inspect.getsource(module_map[model])
+    assert "active_query" in source
+
+
+# ═══════════════════════════════════════════════════════
+# 10. 报表端点 JOIN 软删除过滤一致性
+# ═══════════════════════════════════════════════════════
+
+
+def test_order_period_filter_covers_sales_order():
+    """_order_period_filter 包含 SalesOrder.deleted_at 过滤"""
+    from app.api.v1.reports import _order_period_filter
+
+    source = inspect.getsource(_order_period_filter)
+    assert "deleted_at" in source
+
+
+def test_reports_module_uses_order_period_filter():
+    """报表模块使用 _order_period_filter"""
+    from app.api.v1 import reports
+
+    source = inspect.getsource(reports)
+    # 应在多处调用
+    assert source.count("_order_period_filter") >= 4
+
+
+def test_customer_ranking_filters_customer_deleted():
+    """customer-ranking 端点过滤 Customer.deleted_at"""
+    from app.api.v1.reports import customer_ranking
+
+    source = inspect.getsource(customer_ranking)
+    assert "Customer.deleted_at" in source or "deleted_at" in source
+
+
+def test_inventory_warning_uses_active_query():
+    """inventory-warning 使用 active_query 过滤 Product"""
+    from app.api.v1.reports import inventory_warning
+
+    source = inspect.getsource(inventory_warning)
+    assert "active_query" in source
+
+
+# ═══════════════════════════════════════════════════════
+# 11. 导出端点软删除过滤一致性
+# ═══════════════════════════════════════════════════════
+
+
+def test_export_products_uses_active_query():
+    """导出商品使用 active_query"""
+    from app.services.export_service import export_products
+
+    source = inspect.getsource(export_products)
+    assert "active_query" in source
+
+
+def test_export_customers_uses_active_query():
+    """导出客户使用 active_query"""
+    from app.services.export_service import export_customers
+
+    source = inspect.getsource(export_customers)
+    assert "active_query" in source
+
+
+def test_export_orders_uses_active_query():
+    """导出订单使用 active_query"""
+    from app.services.export_service import export_orders
+
+    source = inspect.getsource(export_orders)
+    assert "active_query" in source
+
+
+def test_export_payments_filters_sales_order():
+    """导出收款过滤 SalesOrder.deleted_at"""
+    from app.services.export_service import export_payments
+
+    source = inspect.getsource(export_payments)
+    assert "deleted_at" in source
+
+
+# ═══════════════════════════════════════════════════════
+# 12. 认证端点软删除过滤
+# ═══════════════════════════════════════════════════════
+
+
+def test_login_uses_active_query():
+    """登录端点使用 active_query 查找用户"""
+    from app.api.v1.auth import login
+
+    source = inspect.getsource(login)
+    assert "active_query" in source
+
+
+def test_get_current_user_filters_deleted():
+    """get_current_user 过滤 deleted_at"""
+    from app.api.deps import get_current_user
+
+    source = inspect.getsource(get_current_user)
+    assert "deleted_at" in source
+
+
+def test_refresh_token_uses_active_query():
+    """refresh token 端点使用 active_query"""
+    from app.api.v1.auth import refresh_token
+
+    source = inspect.getsource(refresh_token)
+    assert "active_query" in source
+
+
+# ═══════════════════════════════════════════════════════
+# 13. 商品删除防护 — 有订单时不允许删除
+# ═══════════════════════════════════════════════════════
+
+
+def test_product_delete_checks_order_items():
+    """商品删除检查是否有关联订单"""
+    from app.api.v1.products import delete_product
+
+    source = inspect.getsource(delete_product)
+    assert "SalesOrderItem" in source or "order_item" in source.lower()
+
+
+def test_customer_delete_checks_orders():
+    """客户删除检查是否有关联订单"""
+    from app.api.v1.customers import delete_customer
+
+    source = inspect.getsource(delete_customer)
+    assert "SalesOrder" in source or "order" in source.lower()
+
+
+# ═══════════════════════════════════════════════════════
+# 14. 迁移文件包含 deleted_at 列
+# ═══════════════════════════════════════════════════════
+
+
+def test_migration_files_contain_deleted_at():
+    """迁移文件中包含 deleted_at 列定义"""
+    migration_dir = Path(__file__).resolve().parent.parent / "app" / "db" / "migrations"
+    if not migration_dir.exists():
+        pytest.skip("迁移目录不存在")
+    migration_files = list(migration_dir.glob("*.py"))
+    if not migration_files:
+        pytest.skip("无迁移文件")
+    content = ""
+    for f in migration_files:
+        content += f.read_text()
+    assert "deleted_at" in content
+
+
+# ═══════════════════════════════════════════════════════
+# 15. 没有 deleted_at 的模型 — 确认完整性
+# ═══════════════════════════════════════════════════════
+
+
+@pytest.mark.parametrize("model", [Role, Permission, SalesOrderItem, Payment, InventoryMovement, ProductCategory])
+def test_models_without_deleted_at(model):
+    """这些模型不应有 deleted_at（不支持软删除）"""
+    assert not hasattr(model, "deleted_at") or model.__table__.c.get("deleted_at") is None
+
+
+# ═══════════════════════════════════════════════════════
+# 16. 商品导入 SKU 查重过滤软删除
+# ═══════════════════════════════════════════════════════
+
+
+def test_product_import_sku_dedup_filters_deleted():
+    """商品导入 SKU 查重过滤已删除商品"""
+    from app.api.v1.products import import_products_csv
+
+    source = inspect.getsource(import_products_csv)
+    assert "deleted_at" in source
+
+
+# ═══════════════════════════════════════════════════════
+# 17. 客户导入手机号查重过滤软删除
+# ═══════════════════════════════════════════════════════
+
+
+def test_customer_import_phone_dedup_filters_deleted():
+    """客户导入手机号查重过滤已删除客户"""
+    from app.api.v1.customers import import_customers_csv
+
+    source = inspect.getsource(import_customers_csv)
+    assert "deleted_at" in source
+
+
+# ═══════════════════════════════════════════════════════
+# 18. 收款列表 JOIN 过滤
+# ═══════════════════════════════════════════════════════
+
+
+def test_payments_list_filters_sales_order_deleted():
+    """收款列表 JOIN SalesOrder 时过滤 deleted_at"""
+    from app.api.v1.payments import list_payments
+
+    source = inspect.getsource(list_payments)
+    assert "deleted_at" in source
+
+
+# ═══════════════════════════════════════════════════════
+# 19. 商品销售统计 JOIN 过滤
+# ═══════════════════════════════════════════════════════
+
+
+def test_product_sales_stats_filters_order_deleted():
+    """商品销售统计 JOIN SalesOrder 时过滤 deleted_at"""
+    from app.api.v1.products import _batch_sales_stats
+
+    source = inspect.getsource(_batch_sales_stats)
+    assert "deleted_at" in source
