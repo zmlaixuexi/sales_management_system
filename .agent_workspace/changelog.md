@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-05-04（第七百二十九轮·自动循环）
+
+### 异常路径：分页参数边界测试（44 项覆盖 PaginationParams 约束、offset 计算、响应结构、API 参数验证、跨端点一致性、极端值）
+
+**变更文件：**
+- `backend/tests/test_pagination_boundaries.py`（新建 44 项测试）
+  - PaginationParams Query 约束：默认值 page=1/page_size=20、Ge/Le 边界 page∈[1,10000]/page_size∈[1,100]
+  - paginate() offset 计算：page 1→0, page 2→20, page 3→40, page_size=1→offset=page-1, 返回 total
+  - paginated_resp() 结构：items/page/page_size/total 字段、success=True、默认/自定义消息、空列表
+  - API 参数验证：page=0/-1/10001/abc/1.5→422、page_size=0/101/xyz→422、合法值 1/100/10000 接受
+  - 跨端点一致性：7 个列表端点（products/customers/orders/payments/users/inventory/audit-logs）均支持分页
+  - 响应结构类型：total/page/page_size 为 int、items 为 list
+  - 极端值：page 超出 total 返回空 items、page_size=100 offset 正确
+
+**关键修复：**
+- PaginationParams 使用 FastAPI Query() 作默认值，直接实例化返回 Query 对象而非原始值
+- 改为通过 inspect.signature 获取 Query 元数据（default、metadata Ge/Le 约束）
+- RUF059: `items` 未使用 → `_`
+
+**验证：**
+- 后端 2593/2593 ✓（新增 44 项）
+- ruff 0 errors ✓
+
 ## 2026-05-04（第七百二十八轮·自动循环）
 
 ### 文档完善：API 路由一致性边界测试（59 项覆盖路由注册、方法验证、UUID 参数、OpenAPI 文档、前缀一致性）
