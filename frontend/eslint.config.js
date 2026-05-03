@@ -23,6 +23,7 @@ export default defineConfig([
       '@typescript-eslint/no-unused-vars': ['error', {
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_',
+        destructuredArrayIgnorePattern: '^_',
       }],
       'react-hooks/set-state-in-effect': 'off',
       'react-hooks/preserve-manual-memoization': 'off',

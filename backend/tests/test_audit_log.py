@@ -778,6 +778,9 @@ def test_36_password_change_audit_log_fields():
     }, headers=headers)
     assert resp.status_code == 200
 
+    # 密码修改后旧 Token 失效，重新获取
+    headers = _admin_auth()
+
     # 查询审计日志
     db = TestSession()
     try:
@@ -1194,7 +1197,8 @@ def test_52_keyword_search_by_resource_id():
     assert resp.status_code == 200
     items = resp.json()["data"]["items"]
     assert len(items) > 0
-    rid = items[0]["resource_id"]
+    rid = next((i["resource_id"] for i in items if i.get("resource_id")), None)
+    assert rid is not None, "需要有 resource_id 不为空的审计日志"
     # 取 resource_id 的中间部分作为关键字
     partial = rid[len(rid) // 4: len(rid) // 4 + 8]
 

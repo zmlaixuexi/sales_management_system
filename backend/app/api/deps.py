@@ -57,7 +57,6 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     if user.password_changed_at:
         token_iat = payload.get("iat")
         if token_iat is not None:
-            from datetime import datetime
             token_issued = datetime.fromtimestamp(token_iat, tz=UTC)
             changed_at = user.password_changed_at
             if changed_at.tzinfo is None:
