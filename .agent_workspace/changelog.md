@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第六百零七轮·自动循环）
+
+### 工程：修复 ruff lint 错误
+
+- file_service.py 移除未使用的 func 导入
+- test_file_service.py 修复导入排序、移除未使用导入、SessionLocal → session_local、timezone.utc → UTC
+- ruff 检查恢复 0 errors
+
 ## 2026-05-03（第六百零六轮·自动循环）
 
 ### 业务逻辑：孤立图片清理服务
