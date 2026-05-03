@@ -326,8 +326,9 @@ def test_paginate_empty(db: Session):
 
 def test_pagination_params_page_max_ok():
     """page = 10000 正常通过 Query 校验"""
-    from fastapi import FastAPI, Depends
+    from fastapi import Depends, FastAPI
     from fastapi.testclient import TestClient
+
     from app.api.deps import PaginationParams
 
     test_app = FastAPI()
@@ -344,8 +345,9 @@ def test_pagination_params_page_max_ok():
 
 def test_pagination_params_page_over_max_rejected():
     """page = 10001 被 Query 校验拒绝为 422"""
-    from fastapi import FastAPI, Depends
+    from fastapi import Depends, FastAPI
     from fastapi.testclient import TestClient
+
     from app.api.deps import PaginationParams
 
     test_app = FastAPI()
@@ -361,8 +363,9 @@ def test_pagination_params_page_over_max_rejected():
 
 def test_pagination_params_page_zero_rejected():
     """page = 0 被拒绝"""
-    from fastapi import FastAPI, Depends
+    from fastapi import Depends, FastAPI
     from fastapi.testclient import TestClient
+
     from app.api.deps import PaginationParams
 
     test_app = FastAPI()
@@ -425,8 +428,9 @@ def test_safe_commit_rollback_on_failure(db: Session):
 
 def test_safe_commit_reraises_original_exception(db: Session):
     """重新抛出原始异常类型（不只是 Exception）"""
-    from sqlalchemy.exc import IntegrityError
     from unittest.mock import MagicMock
+
+    from sqlalchemy.exc import IntegrityError
 
     original_commit = db.commit
     original_rollback = db.rollback

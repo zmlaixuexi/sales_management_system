@@ -48,7 +48,7 @@ ignore = ["RUF001", "RUF002", "RUF003"]
 "app/models/*.py" = ["F821"]  # SQLAlchemy forward references in type annotations
 "app/api/**/*.py" = ["B008"]  # FastAPI Depends() in function defaults is intentional
 "alembic/versions/*.py" = ["UP"]  # Auto-generated migration files
-"tests/*.py" = ["ARG001"]  # pytest fixtures/setup_module signatures require unused params
+"tests/*.py" = ["ARG001", "B008"]  # pytest fixtures/setup_module signatures require unused params; Depends() in test endpoints is intentional
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
