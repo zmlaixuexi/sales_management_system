@@ -49,13 +49,15 @@ vi.mock('antd', () => {
       <div data-testid="spin" data-spinning={spinning ? 'true' : 'false'}>{children}</div>
     ),
     Empty: ({ description }: any) => <div data-testid="empty">{description}</div>,
-    Table: ({ dataSource, columns }: any) => (
+    Table: ({ dataSource, columns, rowKey }: any) => (
       <table data-testid="table">
         <tbody>
           {dataSource?.map((row: any) => (
-            <tr key={row.id || row.product_id}>
+            <tr key={row[rowKey] || row.id || row.product_id} data-testid={`row-${row[rowKey] || row.id || row.product_id}`}>
               {columns?.map((col: any) => (
-                <td key={col.dataIndex}>{row[col.dataIndex]}</td>
+                <td key={col.dataIndex} data-col={col.dataIndex}>
+                  {col.render ? col.render(row[col.dataIndex], row) : row[col.dataIndex]}
+                </td>
               ))}
             </tr>
           ))}
@@ -334,5 +336,33 @@ describe('Dashboard', () => {
     await waitFor(() => {
       expect(_messageError).toHaveBeenCalledWith('加载看板数据失败，请稍后重试')
     })
+  })
+
+  it('商品排行毛利列渲染', async () => {
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('spin')).toHaveAttribute('data-spinning', 'false')
+    })
+    // rankingData: total_sales=3000, total_cost=1800 → profit=1200
+    expect(screen.getByText('¥1200')).toBeInTheDocument()
+  })
+
+  it('库存预警数量显示 Tag', async () => {
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('spin')).toHaveAttribute('data-spinning', 'false')
+    })
+    // warningData: stock_quantity=2 → orange Tag
+    expect(screen.getByText('2')).toBeInTheDocument()
+  })
+
+  it('趋势图表渲染柱状条', async () => {
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('spin')).toHaveAttribute('data-spinning', 'false')
+    })
+    // 趋势柱状条通过 div title 属性显示数据
+    const bars = document.querySelectorAll('div[title]')
+    expect(bars.length).toBeGreaterThanOrEqual(2)
   })
 })
