@@ -9,6 +9,7 @@
 #   ./deploy/manage.sh migrate      — 仅执行数据库迁移
 #   ./deploy/manage.sh check        — 运行部署前检查
 #   ./deploy/manage.sh backup [dir] — 备份数据库和上传文件
+#   ./deploy/manage.sh restore <file> — 恢复数据库（可选指定上传文件备份）
 
 set -euo pipefail
 
@@ -139,6 +140,15 @@ case "${1:-help}" in
         "${SCRIPT_DIR}/backup.sh" "${2:-./backups}"
         ;;
 
+    restore)
+        if [ -z "${2:-}" ]; then
+            err "请指定备份文件"
+            info "用法: $0 restore <备份文件.sql.gz> [上传文件.tar.gz]"
+            exit 1
+        fi
+        "${SCRIPT_DIR}/restore.sh" "$2" "${3:-}"
+        ;;
+
     check)
         "${SCRIPT_DIR}/pre-deploy-check.sh" "${@:2}"
         ;;
@@ -161,12 +171,15 @@ case "${1:-help}" in
         echo "  cleanup-files [小时]"
         echo "                 清理未绑定商品的孤立图片（默认 24 小时）"
         echo "  backup [目录]  备份数据库和上传文件（默认 ./backups）"
+        echo "  restore <文件> [上传文件备份]"
+        echo "                 恢复数据库（可选同时恢复上传文件）"
         echo "  check          运行完整部署前检查"
         echo ""
         echo "示例："
         echo "  $0 start"
         echo "  $0 logs backend"
         echo "  $0 backup /data/backups"
+        echo "  $0 restore ./backups/sales_mgmt_20260503_120000.sql.gz"
         echo "  $0 check --skip-build"
         echo ""
         ;;

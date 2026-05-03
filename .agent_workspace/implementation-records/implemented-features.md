@@ -13,6 +13,13 @@
 - 验证：+1 测试验证 429 响应无 retry-after 头时使用默认 5 秒等待值，前端 831 测试全绿
 - 关联：frontend/src/__tests__/client-interceptor.test.ts
 
+## 功能编号：FEAT-20260503-232
+
+- 描述：manage.sh 添加 restore 命令快捷方式
+- 状态：已完成
+- 验证：restore 命令委托 restore.sh 执行数据库恢复（含上传文件恢复），帮助文本已更新
+- 关联：deploy/manage.sh、deploy/restore.sh
+
 ## 功能编号：FEAT-20260503-231
 
 - 描述：Products/Customers 组件卸载时 ref null 分支测试覆盖
