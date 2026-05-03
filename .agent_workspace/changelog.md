@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-03（第五百四十轮·自动循环）
+
+### 部署：增强 pre-deploy-check.sh 添加前端代码质量检查
+
+- 步骤 5 从"前端构建"扩展为"前端代码检查与构建"
+- 新增 TypeScript 类型检查（npx tsc --noEmit）
+- 新增 ESLint 检查（npx eslint src/ --max-warnings 0）
+- 新增前端测试（npx vitest run）
+- --skip-tests 现在同时跳过后端和前端测试
+- 构建仍放在最后，代码质量检查优先捕获问题
+
 ## 2026-05-03（第五百三十九轮·自动循环）
 
 ### 文档：更新 README 和 testing.md 反映 100% 覆盖率里程碑

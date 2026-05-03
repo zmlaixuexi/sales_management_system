@@ -7,7 +7,7 @@
 #   2. 环境变量配置
 #   3. Docker 可用性
 #   4. 后端代码检查（ruff、mypy、测试）
-#   5. 前端构建检查
+#   5. 前端代码检查（tsc、eslint、测试、构建）
 #   6. 数据库迁移一致性
 #   7. 端口可用性
 #   8. 磁盘空间
@@ -217,12 +217,12 @@ fi
 echo ""
 
 # ==========================================
-# 5. 前端构建
+# 5. 前端代码检查与构建
 # ==========================================
-echo "--- 5/8 前端构建 ---"
+echo "--- 5/8 前端代码检查 ---"
 
 if [ "${SKIP_BUILD}" = "true" ]; then
-    skip "前端构建（已跳过）"
+    skip "前端检查（已跳过）"
 else
     if [ -f "frontend/package.json" ]; then
         if [ -d "frontend/node_modules" ]; then
@@ -239,6 +239,48 @@ else
             fi
         fi
 
+        # TypeScript 类型检查
+        echo -n "  TypeScript 类型检查..."
+        TSC_OUTPUT=$(cd frontend && npx tsc --noEmit 2>&1) && TSC_RC=0 || TSC_RC=$?
+        if [ "${TSC_RC}" -eq 0 ]; then
+            echo -e "\r  ${GREEN}✓${NC} tsc 类型检查通过"
+            PASS=$((PASS + 1))
+        else
+            echo -e "\r  ${RED}✗${NC} tsc 类型检查失败"
+            FAIL=$((FAIL + 1))
+            echo "${TSC_OUTPUT}" | tail -5 | sed 's/^/    /'
+        fi
+
+        # ESLint 检查
+        echo -n "  ESLint 检查..."
+        ESLINT_OUTPUT=$(cd frontend && npx eslint src/ --max-warnings 0 2>&1) && ESLINT_RC=0 || ESLINT_RC=$?
+        if [ "${ESLINT_RC}" -eq 0 ]; then
+            echo -e "\r  ${GREEN}✓${NC} eslint 检查通过"
+            PASS=$((PASS + 1))
+        else
+            echo -e "\r  ${RED}✗${NC} eslint 检查失败"
+            FAIL=$((FAIL + 1))
+            echo "${ESLINT_OUTPUT}" | tail -5 | sed 's/^/    /'
+        fi
+
+        # 前端测试
+        if [ "${SKIP_TESTS}" = "true" ]; then
+            skip "前端测试（已跳过）"
+        else
+            echo -n "  运行前端测试..."
+            FE_TEST_OUTPUT=$(cd frontend && npx vitest run --reporter=verbose 2>&1) && FE_TEST_RC=0 || FE_TEST_RC=$?
+            if [ "${FE_TEST_RC}" -eq 0 ]; then
+                FE_TEST_COUNT=$(echo "${FE_TEST_OUTPUT}" | grep -oP '\d+ Tests' | head -1 || echo "ok")
+                echo -e "\r  ${GREEN}✓${NC} 前端测试通过 (${FE_TEST_COUNT})"
+                PASS=$((PASS + 1))
+            else
+                echo -e "\r  ${RED}✗${NC} 前端测试失败"
+                FAIL=$((FAIL + 1))
+                echo "${FE_TEST_OUTPUT}" | tail -10 | sed 's/^/    /'
+            fi
+        fi
+
+        # 前端构建
         echo -n "  构建前端..."
         BUILD_OUTPUT=$(cd frontend && npx vite build 2>&1) && BUILD_RC=0 || BUILD_RC=$?
         if [ "${BUILD_RC}" -eq 0 ]; then
