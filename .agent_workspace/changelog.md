@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第六百零八轮·自动循环）
+
+### 工程：添加 .gitattributes 跨平台行尾一致性
+
+- 新增 .gitattributes 文件，强制 LF 行尾（脚本、Python、JS/TS、配置文件）
+- Windows 脚本（.bat/.ps1）保持 CRLF
+- 二进制文件（图片、字体、数据库）标记为 binary
+- 清理遗留 test_iso.db 文件
+
 ## 2026-05-03（第六百零七轮·自动循环）
 
 ### 工程：修复 ruff lint 错误
