@@ -257,9 +257,14 @@ class TestSignatureValidation:
             )
 
     def test_tampered_payload_rejected(self):
-        """篡改 token 最后一个字符导致签名失败"""
+        """篡改 token payload 部分导致签名失败"""
         token = _encode(_base_access_claims())
-        tampered = token[:-1] + ("a" if token[-1] != "a" else "b")
+        parts = token.split(".")
+        # 篡改 payload（第二段）的中间字符
+        payload_chars = list(parts[1])
+        payload_chars[len(payload_chars) // 2] = "!" if payload_chars[len(payload_chars) // 2] != "!" else "?"
+        parts[1] = "".join(payload_chars)
+        tampered = ".".join(parts)
         with pytest.raises(JWTError):
             jose_jwt.decode(
                 tampered, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM],
