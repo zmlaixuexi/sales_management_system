@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第六百八十四轮·自动循环）
+
+### 安全加固：CORS 配置验证 + 生产环境 localhost 告警
+
+- config.py：新增 CORS_ORIGINS field_validator，拒绝通配符 `*`、无协议 origin、空值
+- main.py：生产环境启动时检测 CORS localhost 地址并记录 WARNING 日志
+- test_health.py：新增 6 项 CORS 配置验证测试
+- 后端测试 1487（+6），ruff 0 errors
+
 ## 2026-05-03（第六百八十三轮·自动循环）
 
 ### 代码质量：未使用导入/变量扫描 + 测试隔离修复 + ESLint 配置补全
