@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第六百六十三轮·自动循环）
+
+### 代码质量：修复全仓库最后一个 eslint 错误
+
+- Roles.test.tsx 中 isToastDisplayed mock 的 `any` 改为 `unknown` + 安全类型断言
+- 全仓库 eslint 扫描结果：0 errors, 0 warnings（源文件）
+- 841 前端测试全部通过
+
 ## 2026-05-03（第六百六十二轮·自动循环）
 
 ### 代码质量：修复 eslint 配置 + ProductForm 严格相等检查
