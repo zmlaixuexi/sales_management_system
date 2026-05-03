@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第五百五十三轮·自动循环）
+
+### 测试：routes/index.tsx 路由配置测试，0%→覆盖 7 个测试场景
+
+- 新增 routes-index.test.tsx：验证 /login、/、/products、通配符 404 路由渲染
+- 验证受保护路由包含 ProtectedRoute 包裹、children 配置、Suspense 结构
+- 前端测试 588→595，总计 1892→1899
+
 ## 2026-05-03（第五百五十二轮·自动循环）
 
 ### 测试：Body limit 单测补强，+3 测试覆盖 PUT/DELETE/无 content-length 场景
