@@ -2,17 +2,17 @@
 
 最后更新时间：2026-05-04
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-689
-当前任务名称：自动循环：完成第 689 轮开发推进
+当前任务编号：ROUND-690
+当前任务名称：自动循环：完成第 690 轮开发推进
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 689：异常路径 — 404/405 响应统一标准 JSON 格式 + 2 项测试
+- Round 690：部署体验 — Dockerfile 添加 HEALTHCHECK 指令
+- Round 689：异常路径 — 404/405 响应统一标准 JSON 格式
 - Round 688：安全响应头测试补强 — COOP/CORP + HSTS HTTP 排除
 - Round 687：请求日志新增 query_string 字段
-- Round 686：JWT_SECRET_KEY 强度校验
 
 ## 验证状态
 
@@ -29,9 +29,9 @@
 
 继续 keep-going 模式。可选方向：
 - 测试补强：密码修改后 Token 失效行为端到端测试
+- 安全加固：输入消毒 — XSS/SQL 注入向量测试
 - 代码质量：检测未使用的公共 API 端点或死路由
-- 部署体验：Docker 健康检查端点验证
-- 安全加固：输入消毒 — SQL 注入 / XSS 向量测试
+- 部署体验：docker-compose.prod.yml 依赖健康检查验证
 
 ## 阻塞问题
 

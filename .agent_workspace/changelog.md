@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-04（第六百九十轮·自动循环）
+
+### 部署体验：Dockerfile 添加 HEALTHCHECK 指令
+
+- Dockerfile：添加 HEALTHCHECK（15s 间隔、5s 超时、10s 启动等待、3 次重试）
+- 检查逻辑：GET /api/v1/health + 验证 database == ok
+- 与 docker-compose.prod.yml 中已有 healthcheck 配置一致
+- 后端测试 1494（+0）
+
 ## 2026-05-04（第六百八十九轮·自动循环）
 
 ### 异常路径：404/405 响应统一标准 JSON 格式
