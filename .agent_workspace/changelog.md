@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-04（第六百八十九轮·自动循环）
+
+### 异常路径：404/405 响应统一标准 JSON 格式
+
+- main.py：新增 StarletteHTTPException 异常处理器，将 404/405 统一为 {success, error, request_id} 格式
+- test_health.py：新增 test_404_returns_standard_json + test_405_returns_standard_json
+- 后端测试 1494（+2），ruff 0 errors
+
 ## 2026-05-04（第六百八十八轮·自动循环）
 
 ### 测试补强：安全响应头审计 — COOP/CORP + HSTS
