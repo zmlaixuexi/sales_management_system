@@ -952,4 +952,169 @@ describe('OrderDetail', () => {
       expect(btnTexts.some((t) => t.includes('取消订单'))).toBe(true)
     })
   })
+
+  it('确认订单 _toastDisplayed 错误静默', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _orderMocks.confirmOrder.mockRejectedValueOnce(err)
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('确认订单')).toBeInTheDocument()
+    })
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    const confirmPop = popconfirms.find((p) => p.getAttribute('data-title')?.includes('确认订单'))
+    confirmPop!.click()
+    await waitFor(() => {
+      expect(_orderMocks.confirmOrder).toHaveBeenCalled()
+    })
+    expect(_messageError).not.toHaveBeenCalledWith('确认失败')
+  })
+
+  it('取消订单 _toastDisplayed 错误静默', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _orderMocks.cancelOrder.mockRejectedValueOnce(err)
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('取消订单')).toBeInTheDocument()
+    })
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    const cancelPop = popconfirms.find((p) => p.getAttribute('data-title')?.includes('取消该订单'))
+    cancelPop!.click()
+    await waitFor(() => {
+      expect(_orderMocks.cancelOrder).toHaveBeenCalled()
+    })
+    expect(_messageError).not.toHaveBeenCalledWith('取消失败')
+  })
+
+  it('登记收款 _toastDisplayed 错误静默', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    const confirmedData = {
+      success: true,
+      data: { ...mockOrderData.data, status: 'confirmed', payments: [] },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(confirmedData)
+    _paymentMocks.createPayment.mockRejectedValueOnce(err)
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText(/ORD-20260501-001/)).toBeInTheDocument()
+    })
+    const payBtn = screen.getAllByTestId('button').find(
+      (b) => b.textContent?.includes('登记收款'),
+    )
+    await act(async () => { fireEvent.click(payBtn!) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeInTheDocument() })
+    const inputNumber = screen.getByTestId('input-number')
+    await act(async () => { fireEvent.change(inputNumber, { target: { value: '100' } }) })
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => {
+      expect(_paymentMocks.createPayment).toHaveBeenCalled()
+    })
+    expect(_messageError).not.toHaveBeenCalledWith('收款登记失败')
+  })
+
+  it('冲正 _toastDisplayed 错误静默', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _paymentMocks.reversePayment.mockRejectedValueOnce(err)
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('冲正')).toBeInTheDocument()
+    })
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    const reversePop = popconfirms.find((p) => p.getAttribute('data-title')?.includes('冲正'))
+    await act(async () => { fireEvent.click(reversePop!) })
+    await waitFor(() => {
+      expect(_paymentMocks.reversePayment).toHaveBeenCalled()
+    })
+    expect(_messageError).not.toHaveBeenCalledWith('冲正失败')
+  })
+
+  it('加载订单 _toastDisplayed 错误静默', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _orderMocks.fetchOrder.mockRejectedValue(err)
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('加载中...')).toBeInTheDocument()
+    })
+    expect(_messageError).not.toHaveBeenCalledWith('加载订单详情失败')
+  })
+
+  it('确认订单 res.success=false 不显示成功消息', async () => {
+    _orderMocks.confirmOrder.mockResolvedValueOnce({ success: false, data: null })
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('确认订单')).toBeInTheDocument()
+    })
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    const confirmPop = popconfirms.find((p) => p.getAttribute('data-title')?.includes('确认订单'))
+    confirmPop!.click()
+    await waitFor(() => {
+      expect(_orderMocks.confirmOrder).toHaveBeenCalled()
+    })
+    expect(_messageSuccess).not.toHaveBeenCalledWith('订单已确认，库存已扣减')
+  })
+
+  it('取消订单 res.success=false 不显示成功消息', async () => {
+    _orderMocks.cancelOrder.mockResolvedValueOnce({ success: false, data: null })
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('取消订单')).toBeInTheDocument()
+    })
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    const cancelPop = popconfirms.find((p) => p.getAttribute('data-title')?.includes('取消该订单'))
+    cancelPop!.click()
+    await waitFor(() => {
+      expect(_orderMocks.cancelOrder).toHaveBeenCalled()
+    })
+    expect(_messageSuccess).not.toHaveBeenCalledWith('订单已取消')
+  })
+
+  it('登记收款 res.success=false 不显示成功消息', async () => {
+    const confirmedData = {
+      success: true,
+      data: { ...mockOrderData.data, status: 'confirmed', payments: [] },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(confirmedData)
+    _paymentMocks.createPayment.mockResolvedValueOnce({ success: false, data: null })
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText(/ORD-20260501-001/)).toBeInTheDocument()
+    })
+    const payBtn = screen.getAllByTestId('button').find(
+      (b) => b.textContent?.includes('登记收款'),
+    )
+    await act(async () => { fireEvent.click(payBtn!) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeInTheDocument() })
+    const inputNumber = screen.getByTestId('input-number')
+    await act(async () => { fireEvent.change(inputNumber, { target: { value: '100' } }) })
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => {
+      expect(_paymentMocks.createPayment).toHaveBeenCalled()
+    })
+    expect(_messageSuccess).not.toHaveBeenCalledWith('收款登记成功')
+  })
+
+  it('冲正 res.success=false 不显示成功消息', async () => {
+    _paymentMocks.reversePayment.mockResolvedValueOnce({ success: false, data: null })
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('冲正')).toBeInTheDocument()
+    })
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    const reversePop = popconfirms.find((p) => p.getAttribute('data-title')?.includes('冲正'))
+    await act(async () => { fireEvent.click(reversePop!) })
+    await waitFor(() => {
+      expect(_paymentMocks.reversePayment).toHaveBeenCalled()
+    })
+    expect(_messageSuccess).not.toHaveBeenCalledWith('冲正成功')
+  })
+
+  it('loadLogs res.success=false 不设置日志', async () => {
+    _orderMocks.fetchOrderLogs.mockResolvedValue({
+      success: false,
+      data: null,
+    })
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('暂无操作日志')).toBeInTheDocument()
+    })
+  })
 })
