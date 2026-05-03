@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-03（第五百二十六轮·自动循环）
+
+### 测试：后端新增 16 个辅助函数单元测试（1253）
+
+- _order_period_filter 3 个（报表日期过滤查询构建）
+- _require_superuser 3 个（角色超级管理员校验）
+- _serialize_role 6 个（角色序列化字段映射）
+- _generate_order_no 2 个（订单号生成委托）
+- _generate_sku 2 个（SKU 生成委托）
+- 新建 test_role_helpers.py，扩展 test_reports_helpers/test_order_calc/test_product_helpers
+- 后端测试 1237→1253，总计 1753→1769
+
 ## 2026-05-03（第五百二十五轮·自动循环）
 
 ### 修复：useSubmit mock 未使用参数 ESLint 错误（3 处）
