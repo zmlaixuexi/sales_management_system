@@ -41,7 +41,7 @@ export default function AppLayout() {
 
   useEffect(() => {
     authApi.getMe().then((res) => {
-      if (res.data.success) setUser(res.data.data)
+      if (res.data?.success) setUser(res.data.data)
     }).catch(() => {})
   }, [])
 

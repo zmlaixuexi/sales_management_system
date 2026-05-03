@@ -20,12 +20,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true });
     try {
       const { data } = await authApi.login({ username, password });
-      if (data.success) {
-        localStorage.setItem('access_token', data.data.access_token);
-        localStorage.setItem('refresh_token', data.data.refresh_token);
-        set({ token: data.data.access_token });
-        await get().fetchUser();
+      if (!data.success) {
+        throw new Error(data.error?.message || '登录失败');
       }
+      localStorage.setItem('access_token', data.data.access_token);
+      localStorage.setItem('refresh_token', data.data.refresh_token);
+      set({ token: data.data.access_token });
+      await get().fetchUser();
     } finally {
       set({ loading: false });
     }

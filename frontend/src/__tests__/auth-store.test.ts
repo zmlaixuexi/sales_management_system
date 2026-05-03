@@ -163,12 +163,12 @@ describe('useAuthStore', () => {
   })
 
   describe('login API 返回 success:false', () => {
-    it('不存储 token', async () => {
+    it('不存储 token 并抛出异常', async () => {
       mockLogin.mockResolvedValueOnce({
-        data: { success: false, data: { access_token: '', refresh_token: '', token_type: 'bearer' }, message: 'fail' },
+        data: { success: false, error: { code: 'AUTH_FAILED', message: '用户名或密码错误' } },
       })
 
-      await useAuthStore.getState().login('admin', 'password')
+      await expect(useAuthStore.getState().login('admin', 'password')).rejects.toThrow('用户名或密码错误')
 
       expect(localStorage.getItem('access_token')).toBeNull()
       expect(useAuthStore.getState().token).toBeNull()

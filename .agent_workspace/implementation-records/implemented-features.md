@@ -6,6 +6,13 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-242
+
+- 描述：前端异常处理修复（OrderForm catch、auth store 登录异常、AppLayout 安全访问）
+- 状态：已完成
+- 验证：tsc 0 errors、eslint 0 errors、837 测试通过、vite build 成功
+- 关联：frontend/src/pages/OrderForm.tsx、frontend/src/stores/auth.ts、frontend/src/routes/AppLayout.tsx
+
 ## 功能编号：FEAT-20260503-241
 
 - 描述：导出接口参数枚举校验 + 日期类型约束

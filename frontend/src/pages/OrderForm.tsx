@@ -48,6 +48,7 @@ export default function OrderForm() {
   useEffect(() => {
     fetchCustomers({ page: 1, page_size: 50, keyword: customerSearch || undefined })
       .then((res) => { if (res.success) setCustomers(res.data.items) })
+      .catch(() => { /* 客户列表加载失败，静默处理 */ })
   }, [customerSearch])
 
   // 加载商品列表

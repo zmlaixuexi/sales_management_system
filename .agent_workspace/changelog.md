@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第六百五十四轮·自动循环）
+
+### 代码质量：前端异常处理修复
+
+- OrderForm.tsx：fetchCustomers 添加 .catch() 防止未处理的 Promise 拒绝
+- stores/auth.ts：登录 API 返回 success:false 时抛出异常，确保 Login 页面 catch 块能收到错误
+- AppLayout.tsx：getMe 响应添加可选链 `res.data?.success` 防止异常响应结构导致崩溃
+- auth-store.test.ts：更新 login success:false 测试从静默处理改为验证抛出异常
+
 ## 2026-05-03（第六百五十三轮·自动循环）
 
 ### 代码质量：导出接口参数枚举校验 + 日期类型约束
