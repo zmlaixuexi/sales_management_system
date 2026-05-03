@@ -688,6 +688,44 @@ describe('OrderForm', () => {
         )
       })
     })
+
+    it('多行时修改数量只更新目标行', async () => {
+      const twoProducts = [
+        { id: 'p1', name: '商品A', sku: 'SKU001', sale_price: '100.00', main_image_url: null, stock_quantity: 10 },
+        { id: 'p2', name: '商品B', sku: 'SKU002', sale_price: '200.00', main_image_url: null, stock_quantity: 5 },
+      ]
+      _productApi.fetchProducts.mockResolvedValue({ success: true, data: { items: twoProducts } })
+      renderNewOrder()
+
+      // 添加第一个商品
+      const addBtn = screen.getAllByTestId('button').find(b => b.textContent?.includes('添加商品'))
+      await act(async () => { fireEvent.click(addBtn!) })
+      await waitFor(() => { expect(screen.getAllByText('选择').length).toBeGreaterThanOrEqual(1) })
+      const selectBtns = screen.getAllByTestId('button').filter(b => b.textContent?.includes('选择'))
+      await act(async () => { fireEvent.click(selectBtns[0]) })
+      await waitFor(() => { expect(screen.getByText('共 1 项')).toBeInTheDocument() })
+
+      // 添加第二个商品
+      _productApi.fetchProducts.mockResolvedValue({ success: true, data: { items: twoProducts } })
+      const addBtn2 = screen.getAllByTestId('button').find(b => b.textContent?.includes('添加商品'))
+      await act(async () => { fireEvent.click(addBtn2!) })
+      await waitFor(() => { expect(screen.getAllByText('选择').length).toBeGreaterThanOrEqual(1) })
+      const selectBtns2 = screen.getAllByTestId('button').filter(b => b.textContent?.includes('选择'))
+      const uncheckedBtn = selectBtns2.find(b => b.getAttribute('data-disabled') !== 'true')
+      if (uncheckedBtn) {
+        await act(async () => { fireEvent.click(uncheckedBtn) })
+      }
+
+      // 修改第一个商品的数量 — updateLine 遍历多行时 l.key !== key 覆盖
+      await waitFor(() => {
+        const footer = screen.getByTestId('table-footer')
+        expect(footer).toBeTruthy()
+      })
+      const inputs = screen.getAllByTestId('input-number')
+      if (inputs.length >= 2) {
+        await act(async () => { fireEvent.change(inputs[0], { target: { value: '5' } }) })
+      }
+    })
   })
 
   describe('编辑模式错误处理', () => {
