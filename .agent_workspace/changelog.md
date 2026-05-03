@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-05-04（第七百零二轮·自动循环）
+
+### 安全加固：rate limiting 端到端测试（15 项覆盖配额递减、多方法共享、429 结构、窗口过期）
+
+- 新增 test_ratelimit_e2e.py：15 项端到端测试
+  - 配额递减：连续请求 Remaining 递减、永不为负数
+  - 多方法共享：GET/POST/PUT/DELETE 共享 IP 配额
+  - 错误请求消耗配额：404、422 均消耗配额
+  - 跨路径共享：/products 与 /customers 共享配额
+  - 429 响应体结构：success=false、error.code=RATE_LIMIT_EXCEEDED
+  - 未认证请求受限：无 Token 也触发限流
+  - 非 API 路径不限：openapi.json、health 端点验证
+  - 滑动窗口过期：全部/部分过期后配额恢复
+  - clear_rate_limit 恢复满额、限流头始终存在
+- 后端测试 1616（+15），全部通过
+
 ## 2026-05-04（第七百零一轮·自动循环）
 
 ### 可观测性：结构化日志字段完整性校验（14 项测试）
