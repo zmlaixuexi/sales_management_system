@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第五百八十六轮·自动循环）
+
+### 测试：补强 Customers 分支覆盖率，86.11% → 97.22%
+
+- Customers.test.tsx +8：分页总条数/翻页、导入按钮 click 触发、导入 success=false、
+  空文件不调 API、_toastDisplayed 静默错误、未知等级显示原始值
+- 更新 Table mock 支持 pagination 和 loading
+- 整体分支覆盖率 94.03% → 94.55%，总测试数 771 → 779
+
 ## 2026-05-03（第五百八十五轮·自动循环）
 
 ### 测试：补强 Users 分支覆盖率，85.71% → 100%
