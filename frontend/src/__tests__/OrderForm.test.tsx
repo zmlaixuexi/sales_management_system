@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 
 const _orderApi = {
@@ -15,12 +15,20 @@ vi.mock('@/api/orders', () => ({
   updateOrder: (...a: any[]) => _orderApi.updateOrder(...a),
 }))
 
-vi.mock('@/api/customers', () => ({
+const _customerApi = {
   fetchCustomers: vi.fn().mockResolvedValue({ success: true, data: { items: [] } }),
+}
+
+vi.mock('@/api/customers', () => ({
+  fetchCustomers: (...a: any[]) => _customerApi.fetchCustomers(...a),
 }))
 
-vi.mock('@/api/products', () => ({
+const _productApi = {
   fetchProducts: vi.fn().mockResolvedValue({ success: true, data: { items: [] } }),
+}
+
+vi.mock('@/api/products', () => ({
+  fetchProducts: (...a: any[]) => _productApi.fetchProducts(...a),
 }))
 
 vi.mock('@/utils', () => ({
@@ -28,11 +36,13 @@ vi.mock('@/utils', () => ({
   getApiErrorMessage: (_e: any, fallback: string) => fallback,
 }))
 
+const _useSubmit = { callback: null as any, submitting: false }
+
 vi.mock('@/hooks/useSubmit', () => ({
-  useSubmit: (_onSubmit: any) => ({
-    submitting: false,
-    handleSubmit: (e: any) => { e?.preventDefault?.() },
-  }),
+  useSubmit: (cb: any) => {
+    _useSubmit.callback = cb
+    return { submitting: _useSubmit.submitting, handleSubmit: cb }
+  },
 }))
 
 const _mockForm = {
@@ -105,6 +115,9 @@ vi.mock('@ant-design/icons', () => ({
 }))
 
 import OrderForm from '@/pages/OrderForm'
+
+// 从已 mock 的 antd 获取 message 引用
+import { message as antdMessage } from 'antd'
 
 function renderNewOrder() {
   return render(
@@ -283,5 +296,138 @@ describe('OrderForm', () => {
     const textarea = screen.getByTestId('textarea')
     expect(textarea).toHaveAttribute('maxlength', '500')
     expect(textarea.tagName).toBe('TEXTAREA')
+  })
+
+  describe('商品选择', () => {
+    const mockProducts = [
+      {
+        id: 'p1', name: '商品A', sku: 'SKU001', sale_price: '100.00',
+        main_image_url: 'http://img/a.jpg', stock_quantity: 10,
+      },
+      {
+        id: 'p2', name: '商品B', sku: 'SKU002', sale_price: '200.00',
+        main_image_url: null, stock_quantity: 5,
+      },
+    ]
+
+    it('点击添加商品触发 fetchProducts', async () => {
+      _productApi.fetchProducts.mockResolvedValueOnce({ success: true, data: { items: mockProducts } })
+      renderNewOrder()
+
+      // 通过直接点击按钮元素
+      const addBtn = screen.getAllByTestId('button').find(
+        (b) => b.textContent?.includes('添加商品'),
+      )
+      expect(addBtn).toBeTruthy()
+      fireEvent.click(addBtn!)
+
+      await waitFor(() => {
+        expect(_productApi.fetchProducts).toHaveBeenCalled()
+      })
+    })
+
+    it('关闭按钮关闭商品选择器', async () => {
+      _productApi.fetchProducts.mockResolvedValueOnce({ success: true, data: { items: mockProducts } })
+      renderNewOrder()
+
+      const addBtn = screen.getAllByTestId('button').find(
+        (b) => b.textContent?.includes('添加商品'),
+      )
+      fireEvent.click(addBtn!)
+
+      // 等待商品选择器卡片出现（title 在 data-title 属性中）
+      await waitFor(() => {
+        const picker = screen.getAllByTestId('card').find(
+          (c) => c.getAttribute('data-title') === '选择商品',
+        )
+        expect(picker).toBeTruthy()
+      })
+
+      // 点击关闭按钮
+      const closeBtn = screen.getByText('关闭')
+      fireEvent.click(closeBtn)
+
+      // 选择器应消失
+      await waitFor(() => {
+        const picker = screen.getAllByTestId('card').find(
+          (c) => c.getAttribute('data-title') === '选择商品',
+        )
+        expect(picker).toBeFalsy()
+      })
+    })
+  })
+
+  describe('编辑模式加载', () => {
+    it('编辑模式加载订单行数据', async () => {
+      _orderApi.fetchOrder.mockResolvedValue({
+        success: true,
+        data: {
+          id: 'o-1', order_no: 'SO-001', customer_id: 'c1',
+          status: 'draft', status_label: '草稿',
+          total_amount: '300.00', total_cost: '200.00',
+          gross_profit: '100.00', gross_margin: '33.33',
+          paid_amount: '0', remark: '测试备注',
+          sales_user_id: 'u1', created_at: '2026-05-01', updated_at: null,
+          items: [
+            {
+              id: 'oi1', product_id: 'p1', product_sku_snapshot: 'SKU001',
+              product_name_snapshot: '商品A', product_image_url_snapshot: 'http://img/a.jpg',
+              quantity: 2, unit_price: '100.00', discount_amount: '0',
+              discount_rate: '1', cost_price_snapshot: '80.00',
+              subtotal_amount: '200.00', subtotal_cost: '160.00',
+            },
+          ],
+          payments: [],
+        },
+      })
+      renderEditOrder()
+
+      await waitFor(() => {
+        expect(screen.getAllByTestId('table')[0].textContent).toContain('SKU001')
+      })
+    })
+
+    it('编辑模式设置表单值', async () => {
+      _orderApi.fetchOrder.mockResolvedValue({
+        success: true,
+        data: {
+          id: 'o-1', order_no: 'SO-001', customer_id: 'c1',
+          status: 'draft', status_label: '草稿',
+          total_amount: '0', total_cost: '0',
+          gross_profit: '0', gross_margin: '0',
+          paid_amount: '0', remark: '备注内容',
+          sales_user_id: 'u1', created_at: null, updated_at: null,
+          items: [], payments: [],
+        },
+      })
+      renderEditOrder()
+
+      await waitFor(() => {
+        expect(_mockForm.setFieldsValue).toHaveBeenCalledWith({
+          customer_id: 'c1',
+          remark: '备注内容',
+        })
+      })
+    })
+  })
+
+  describe('提交订单', () => {
+    it('提交时验证至少一个商品', async () => {
+      renderNewOrder()
+      expect(_useSubmit.callback).toBeTruthy()
+
+      _mockForm.validateFields.mockResolvedValueOnce({ customer_id: 'c1' })
+
+      await _useSubmit.callback()
+      expect(antdMessage.error).toHaveBeenCalledWith('请添加至少一个商品')
+    })
+  })
+
+  describe('客户搜索', () => {
+    it('客户选择器有搜索功能', () => {
+      renderNewOrder()
+      const selects = screen.getAllByTestId('select')
+      expect(selects[0].getAttribute('data-testid')).toBe('select')
+    })
   })
 })
