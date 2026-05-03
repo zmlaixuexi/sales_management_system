@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, act, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 
 const _inventoryMocks = {
@@ -32,7 +32,7 @@ vi.mock('@/hooks/usePaginatedList', () => ({
 }))
 
 vi.mock('antd', () => ({
-  Table: ({ dataSource, columns, rowKey, locale, loading }: any) => (
+  Table: ({ dataSource, columns, rowKey, locale, loading, pagination }: any) => (
     <div>
       {loading ? <span>加载中...</span> : (
       <table data-testid="table">
@@ -50,6 +50,10 @@ vi.mock('antd', () => ({
       </table>
       )}
       {(!dataSource || dataSource.length === 0) && !loading && locale?.emptyText && <span>{locale.emptyText}</span>}
+      {pagination?.showTotal && <span data-testid="pagination-total">{pagination.showTotal(pagination.total)}</span>}
+      {pagination?.onChange && (
+        <button data-testid="page-change" onClick={() => pagination.onChange(2, pagination.pageSize)}>翻页</button>
+      )}
     </div>
   ),
   Space: ({ children }: any) => <span>{children}</span>,
@@ -230,5 +234,51 @@ describe('InventoryPage', () => {
     const cells = row.querySelectorAll('td')
     const relatedCell = Array.from(cells).find((td) => td.getAttribute('data-col') === 'related_type')
     expect(relatedCell?.textContent).toBe('--')
+  })
+
+  it('分页显示总条数', () => {
+    renderInventory()
+    expect(screen.getByTestId('pagination-total')).toBeInTheDocument()
+    expect(screen.getByTestId('pagination-total').textContent).toBe('共 2 条')
+  })
+
+  it('翻页调用 onPageChange', async () => {
+    renderInventory()
+    const pageBtn = screen.getByTestId('page-change')
+    await act(async () => { fireEvent.click(pageBtn) })
+    expect(_paginatedListReturn.onPageChange).toHaveBeenCalledWith(2, 20)
+  })
+
+  it('时间列格式化显示', () => {
+    renderInventory()
+    // created_at 列经过 render 函数格式化
+    const row = screen.getByTestId('row-mov-001')
+    expect(row.textContent).toContain('2026')
+  })
+
+  it('变动量正数颜色为绿色', () => {
+    renderInventory()
+    const posEl = screen.getByText('+10')
+    expect(posEl).toBeInTheDocument()
+    expect(posEl.style.color).toBe('rgb(82, 196, 26)')
+  })
+
+  it('变动量负数颜色为红色', () => {
+    renderInventory()
+    const negEl = screen.getByText('-5')
+    expect(negEl).toBeInTheDocument()
+    expect(negEl.style.color).toBe('rgb(255, 77, 79)')
+  })
+
+  it('重试链接调用 refresh', async () => {
+    _paginatedListReturn.loading = false
+    _paginatedListReturn.error = true
+    _paginatedListReturn.data = []
+    _inventoryMocks.fetchInventoryMovements.mockReturnValue({ data: { items: [], total: 0 } })
+    renderInventory()
+    const retryLink = screen.getByText('重试')
+    await act(async () => { fireEvent.click(retryLink) })
+    expect(_paginatedListReturn.refresh).toHaveBeenCalled()
+    _paginatedListReturn.error = false
   })
 })
