@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第五百零三轮·自动循环）
+
+### 文档：新增角色管理 API 文档
+
+- docs/api.md 新增角色管理章节（GET /roles 列表、GET /roles/permissions 权限分组、POST 创建、PUT 编辑、DELETE 删除）
+- 更新权限码脚注（²）：角色 CRUD 端点已实现
+- ruff 0 + tsc 0
+
 ## 2026-05-03（第五百零二轮·自动循环）
 
 ### 验证：全回归验证 + 需求合规检查
