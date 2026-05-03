@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, field_validator
 from app.core.sanitize import sanitize_text as _sanitize
 
 VALID_PAYMENT_METHODS = ("cash", "transfer", "wechat", "alipay", "other")
+_MAX_AMOUNT = Decimal("9999999999.99")
 
 
 class PaymentCreate(BaseModel):
@@ -24,6 +25,8 @@ class PaymentCreate(BaseModel):
             raise ValueError("金额格式不正确") from None
         if d <= 0:
             raise ValueError("收款金额必须大于 0")
+        if d > _MAX_AMOUNT:
+            raise ValueError(f"收款金额不能超过 {_MAX_AMOUNT}")
         return v
 
     @field_validator("remark")

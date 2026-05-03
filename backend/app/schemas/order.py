@@ -4,10 +4,12 @@ from pydantic import BaseModel, Field, field_validator
 
 from app.core.sanitize import sanitize_text as _sanitize
 
+_MAX_PRICE = Decimal("9999999999.99")
+
 
 class OrderItemInput(BaseModel):
     product_id: str = Field(..., description="商品 ID")
-    quantity: int = Field(..., gt=0, description="数量")
+    quantity: int = Field(..., gt=0, le=99999, description="数量")
     unit_price: str | None = Field(None, description="成交单价，为空则使用商品售价")
 
     @field_validator("unit_price")
@@ -20,12 +22,14 @@ class OrderItemInput(BaseModel):
                 raise ValueError("成交单价格式不正确") from None
             if d < 0:
                 raise ValueError("成交单价不能为负")
+            if d > _MAX_PRICE:
+                raise ValueError(f"成交单价不能超过 {_MAX_PRICE}")
         return v
 
 
 class OrderCreate(BaseModel):
     customer_id: str = Field(..., description="客户 ID")
-    items: list[OrderItemInput] = Field(..., min_length=1, description="订单明细")
+    items: list[OrderItemInput] = Field(..., min_length=1, max_length=500, description="订单明细")
     remark: str | None = Field(None, max_length=500, description="备注")
 
     @field_validator("remark")

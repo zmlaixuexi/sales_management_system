@@ -8,6 +8,9 @@ from app.core.sanitize import sanitize_text as _sanitize
 ProductStatus = Literal["active", "inactive", "disabled"]
 
 
+_MAX_PRICE = Decimal("9999999999.99")
+
+
 def _validate_price(v: str | None, field_name: str) -> str | None:
     if v is None:
         return v
@@ -17,6 +20,8 @@ def _validate_price(v: str | None, field_name: str) -> str | None:
         raise ValueError(f"{field_name}格式不正确") from None
     if d < 0:
         raise ValueError(f"{field_name}不能为负数")
+    if d > _MAX_PRICE:
+        raise ValueError(f"{field_name}不能超过 {_MAX_PRICE}")
     return v
 
 
@@ -25,11 +30,11 @@ class ProductCreate(BaseModel):
     sku: str | None = Field(None, max_length=50, description="商品编码，为空则自动生成")
     sale_price: str = Field("0", description="销售价")
     cost_price: str = Field("0", description="成本价")
-    stock_quantity: int = Field(0, ge=0, description="库存数量")
+    stock_quantity: int = Field(0, ge=0, le=9999999, description="库存数量")
     category_id: str | None = Field(None, description="分类 ID")
     main_image_url: str | None = Field(None, max_length=500, description="主图 URL")
     status: ProductStatus = Field("active", description="状态：active/inactive/disabled")
-    sort_weight: int = Field(0, description="排序权重")
+    sort_weight: int = Field(0, ge=-99999, le=99999, description="排序权重")
     remark: str | None = Field(None, max_length=500, description="备注")
 
     @field_validator("sale_price")
@@ -53,11 +58,11 @@ class ProductUpdate(BaseModel):
     sku: str | None = Field(None, max_length=50)
     sale_price: str | None = None
     cost_price: str | None = None
-    stock_quantity: int | None = Field(None, ge=0)
+    stock_quantity: int | None = Field(None, ge=0, le=9999999)
     category_id: str | None = None
     main_image_url: str | None = Field(None, max_length=500)
     status: ProductStatus | None = None
-    sort_weight: int | None = None
+    sort_weight: int | None = Field(None, ge=-99999, le=99999)
     remark: str | None = Field(None, max_length=500)
 
     @field_validator("sale_price")
