@@ -347,4 +347,229 @@ describe('ReportsCenter', () => {
       expect(_messageError).toHaveBeenCalledWith('加载库存预警失败')
     })
   })
+
+  it('无成本权限时概览不显示成本和毛利卡片', async () => {
+    _reportMocks.fetchSalesSummary.mockResolvedValue({
+      success: true,
+      data: {
+        total_amount: '5000',
+        order_count: 10,
+        period: '30d',
+        start_date: '2026-04-02',
+        end_date: '2026-05-02',
+      },
+    })
+    renderReportsCenter()
+    await waitFor(() => {
+      const stats = screen.getAllByTestId('statistic')
+      const titles = stats.map((s) => s.getAttribute('data-title'))
+      expect(titles).toContain('销售总额')
+      expect(titles).toContain('订单数')
+      expect(titles).not.toContain('总成本')
+      expect(titles).not.toContain('毛利')
+    })
+  })
+
+  it('无成本权限时商品排行不显示成本列', async () => {
+    _reportMocks.fetchSalesSummary.mockResolvedValue({
+      success: true,
+      data: {
+        total_amount: '5000',
+        order_count: 10,
+        period: '30d',
+        start_date: '2026-04-02',
+        end_date: '2026-05-02',
+      },
+    })
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('商品A')).toBeInTheDocument()
+    })
+    // 在 tab-products 中查找表头
+    const tabProducts = screen.getByTestId('tab-products')
+    const ths = tabProducts.querySelectorAll('th')
+    const headerTexts = Array.from(ths).map((th) => th.textContent)
+    expect(headerTexts).not.toContain('成本')
+  })
+
+  it('无成本权限时客户排行不显示成本和毛利列', async () => {
+    _reportMocks.fetchSalesSummary.mockResolvedValue({
+      success: true,
+      data: {
+        total_amount: '5000',
+        order_count: 10,
+        period: '30d',
+        start_date: '2026-04-02',
+        end_date: '2026-05-02',
+      },
+    })
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('客户X')).toBeInTheDocument()
+    })
+    const tabCustomers = screen.getByTestId('tab-customers')
+    const ths = tabCustomers.querySelectorAll('th')
+    const headerTexts = Array.from(ths).map((th) => th.textContent)
+    expect(headerTexts).not.toContain('成本')
+    expect(headerTexts).not.toContain('毛利')
+  })
+
+  it('客户排行空成本/毛利显示 --', async () => {
+    _reportMocks.fetchCustomerRanking.mockResolvedValue({
+      success: true,
+      data: {
+        items: [
+          { rank: 2, customer_id: 'c-2', customer_name: '客户Y', total_sales: '1000', total_cost: null, gross_profit: null, order_count: 1 },
+        ],
+        period: '30d',
+      },
+    })
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('客户Y')).toBeInTheDocument()
+    })
+    const tabCustomers = screen.getByTestId('tab-customers')
+    const row = tabCustomers.querySelector('tr[data-testid]')
+    expect(row?.textContent).toContain('--')
+  })
+
+  it('销售排行空成本/毛利显示 --', async () => {
+    _reportMocks.fetchSalespersonRanking.mockResolvedValue({
+      success: true,
+      data: {
+        items: [
+          { rank: 2, user_id: 'u-2', name: '销售员B', total_sales: '2000', total_cost: null, gross_profit: null, order_count: 5 },
+        ],
+        period: '30d',
+      },
+    })
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('销售员B')).toBeInTheDocument()
+    })
+    const tabSalespersons = screen.getByTestId('tab-salespersons')
+    const row = tabSalespersons.querySelector('tr[data-testid]')
+    expect(row?.textContent).toContain('--')
+  })
+
+  it('商品 SKU 为空显示 --', async () => {
+    _reportMocks.fetchProductRanking.mockResolvedValue({
+      success: true,
+      data: {
+        items: [
+          { rank: 2, product_id: 'p-2', product_name: '无SKU商品', sku: null, total_sales: '100', total_cost: '60', total_quantity: 2 },
+        ],
+        period: '30d',
+      },
+    })
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('无SKU商品')).toBeInTheDocument()
+    })
+    // SKU 列 null → '--'
+    const tabProducts = screen.getByTestId('tab-products')
+    expect(tabProducts.textContent).toContain('--')
+  })
+
+  it('库存为 0 显示红色标签', async () => {
+    _reportMocks.fetchInventoryWarning.mockResolvedValue({
+      success: true,
+      data: {
+        items: [
+          { id: 'inv-2', sku: 'SKU-003', name: '缺货商品', stock_quantity: 0, sale_price: '50.00' },
+        ],
+        threshold: 10,
+        total: 1,
+      },
+    })
+    renderReportsCenter()
+    await waitFor(() => {
+      const tags = screen.getAllByTestId('tag')
+      const redTag = tags.find((t) => t.getAttribute('data-color') === 'red')
+      expect(redTag).toBeTruthy()
+      expect(redTag?.textContent).toBe('0')
+    })
+  })
+
+  it('概览总金额为 0 时显示 0', async () => {
+    _reportMocks.fetchSalesSummary.mockResolvedValue({
+      success: true,
+      data: {
+        total_amount: '0',
+        total_cost: '0',
+        gross_profit: '0',
+        gross_margin: '0',
+        order_count: 0,
+        period: '30d',
+        start_date: '2026-04-02',
+        end_date: '2026-05-02',
+      },
+    })
+    renderReportsCenter()
+    await waitFor(() => {
+      const stats = screen.getAllByTestId('statistic')
+      const salesStat = stats.find((s) => s.getAttribute('data-title') === '销售总额')
+      expect(salesStat?.textContent).toContain('¥0')
+    })
+  })
+
+  it('概览 _toastDisplayed 错误不显示消息', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _reportMocks.fetchSalesSummary.mockRejectedValue(err)
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('报表中心')).toBeInTheDocument()
+    })
+    expect(_messageError).not.toHaveBeenCalledWith('加载销售概览失败')
+  })
+
+  it('趋势 _toastDisplayed 错误不显示消息', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _reportMocks.fetchSalesTrend.mockRejectedValue(err)
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('报表中心')).toBeInTheDocument()
+    })
+    expect(_messageError).not.toHaveBeenCalledWith('加载销售趋势失败')
+  })
+
+  it('商品排行 _toastDisplayed 错误不显示消息', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _reportMocks.fetchProductRanking.mockRejectedValue(err)
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('报表中心')).toBeInTheDocument()
+    })
+    expect(_messageError).not.toHaveBeenCalledWith('加载商品排行失败')
+  })
+
+  it('客户排行 _toastDisplayed 错误不显示消息', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _reportMocks.fetchCustomerRanking.mockRejectedValue(err)
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('报表中心')).toBeInTheDocument()
+    })
+    expect(_messageError).not.toHaveBeenCalledWith('加载客户排行失败')
+  })
+
+  it('销售排行 _toastDisplayed 错误不显示消息', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _reportMocks.fetchSalespersonRanking.mockRejectedValue(err)
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('报表中心')).toBeInTheDocument()
+    })
+    expect(_messageError).not.toHaveBeenCalledWith('加载销售排行失败')
+  })
+
+  it('库存预警 _toastDisplayed 错误不显示消息', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _reportMocks.fetchInventoryWarning.mockRejectedValue(err)
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('报表中心')).toBeInTheDocument()
+    })
+    expect(_messageError).not.toHaveBeenCalledWith('加载库存预警失败')
+  })
 })
