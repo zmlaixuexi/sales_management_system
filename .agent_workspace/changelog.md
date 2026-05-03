@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第六百六十九轮·自动循环）
+
+### 代码质量：启用 noUncheckedIndexedAccess TypeScript 严格模式
+
+- tsconfig.app.json 添加 `noUncheckedIndexedAccess: true`
+- 数组索引和对象键访问自动产生 `T | undefined` 联合类型
+- 代码库已满足该严格级别，tsc/eslint/841 测试全部通过
+
 ## 2026-05-03（第六百六十八轮·自动循环）
 
 ### 代码质量：修复 import 排序 + 密码安全验证审计
