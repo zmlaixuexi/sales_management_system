@@ -257,4 +257,11 @@ describe('apiClient 响应拦截器', () => {
 
     expect(mockMessageError).toHaveBeenCalledWith('参数格式不正确')
   })
+
+  it('成功响应直接返回', () => {
+    const handler = apiClient.interceptors.response.handlers[0]?.fulfilled
+    expect(handler).toBeDefined()
+    const response = { status: 200, data: { foo: 'bar' } }
+    expect(handler!(response as never)).toEqual(response)
+  })
 })

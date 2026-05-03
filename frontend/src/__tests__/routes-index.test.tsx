@@ -121,4 +121,116 @@ describe('routes/index', () => {
     expect(protectedRoute!.children).toBeDefined()
     expect(protectedRoute!.children!.length).toBeGreaterThanOrEqual(5)
   })
+
+  it('/inventory 渲染库存页', async () => {
+    renderRoute('/inventory')
+    await waitFor(() => {
+      expect(screen.getByText('Inventory')).toBeInTheDocument()
+    })
+  })
+
+  it('/customers 渲染客户列表', async () => {
+    renderRoute('/customers')
+    await waitFor(() => {
+      expect(screen.getByText('Customers')).toBeInTheDocument()
+    })
+  })
+
+  it('/customers/new 渲染新建客户', async () => {
+    renderRoute('/customers/new')
+    await waitFor(() => {
+      expect(screen.getByText('CustomerForm')).toBeInTheDocument()
+    })
+  })
+
+  it('/customers/:id 渲染客户详情', async () => {
+    renderRoute('/customers/c1')
+    await waitFor(() => {
+      expect(screen.getByText('CustomerDetail')).toBeInTheDocument()
+    })
+  })
+
+  it('/customers/:id/edit 渲染编辑客户', async () => {
+    renderRoute('/customers/c1/edit')
+    await waitFor(() => {
+      expect(screen.getByText('CustomerForm')).toBeInTheDocument()
+    })
+  })
+
+  it('/orders 渲染订单列表', async () => {
+    renderRoute('/orders')
+    await waitFor(() => {
+      expect(screen.getByText('Orders')).toBeInTheDocument()
+    })
+  })
+
+  it('/orders/new 渲染新建订单', async () => {
+    renderRoute('/orders/new')
+    await waitFor(() => {
+      expect(screen.getByText('OrderForm')).toBeInTheDocument()
+    })
+  })
+
+  it('/orders/:id 渲染订单详情', async () => {
+    renderRoute('/orders/o1')
+    await waitFor(() => {
+      expect(screen.getByText('OrderDetail')).toBeInTheDocument()
+    })
+  })
+
+  it('/orders/:id/edit 渲染编辑订单', async () => {
+    renderRoute('/orders/o1/edit')
+    await waitFor(() => {
+      expect(screen.getByText('OrderForm')).toBeInTheDocument()
+    })
+  })
+
+  it('/payments 渲染收款列表', async () => {
+    renderRoute('/payments')
+    await waitFor(() => {
+      expect(screen.getByText('Payments')).toBeInTheDocument()
+    })
+  })
+
+  it('/audit-logs 渲染审计日志', async () => {
+    renderRoute('/audit-logs')
+    await waitFor(() => {
+      expect(screen.getByText('AuditLogs')).toBeInTheDocument()
+    })
+  })
+
+  it('/reports 渲染报表中心', async () => {
+    renderRoute('/reports')
+    await waitFor(() => {
+      expect(screen.getByText('ReportsCenter')).toBeInTheDocument()
+    })
+  })
+
+  it('/users 渲染用户管理', async () => {
+    renderRoute('/users')
+    await waitFor(() => {
+      expect(screen.getByText('Users')).toBeInTheDocument()
+    })
+  })
+
+  it('/roles 渲染角色管理', async () => {
+    renderRoute('/roles')
+    await waitFor(() => {
+      expect(screen.getByText('Roles')).toBeInTheDocument()
+    })
+  })
+
+  it('/products/new 渲染新建商品', async () => {
+    renderRoute('/products/new')
+    await waitFor(() => {
+      expect(screen.getByText('ProductForm')).toBeInTheDocument()
+    })
+  })
+
+  it('/products/:id/edit 渲染编辑商品', async () => {
+    renderRoute('/products/p1/edit')
+    await waitFor(() => {
+      expect(screen.getByText('ProductForm')).toBeInTheDocument()
+    })
+  })
 })
