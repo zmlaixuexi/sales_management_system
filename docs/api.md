@@ -252,6 +252,52 @@ JSON 日志格式示例：
 
 ---
 
+## 角色管理
+
+> 以下接口仅超级管理员（`is_superuser=True`）可访问。
+
+### GET /roles
+
+角色列表（含权限详情和用户数量）。
+
+**响应字段**：每项含 `id`、`name`、`display_name`、`description`、`permissions`（含 `id`/`code`/`name`/`module`）、`user_count`、`created_at`、`updated_at`。
+
+### GET /roles/permissions
+
+所有可用权限（按模块分组）。
+
+**响应字段**：以模块名为 key 的对象，每个模块包含权限列表（`id`、`code`、`name`、`module`）。
+
+### POST /roles
+
+创建角色。
+
+**请求体**：
+```json
+{
+  "name": "custom_role",
+  "display_name": "自定义角色",
+  "description": "角色说明",
+  "permission_ids": ["uuid"]
+}
+```
+
+`name` 必填，其余可选。`permission_ids` 为权限 ID 列表。
+
+### PUT /roles/{role_id}
+
+编辑角色。
+
+**请求体**（均可选）：`name`、`display_name`、`description`、`permission_ids`
+
+`permission_ids` 传空数组可清空权限。`name` 修改时校验唯一性。
+
+### DELETE /roles/{role_id}
+
+删除角色。仅当角色无用户关联时可删除（`user_count=0`），否则返回 400。
+
+---
+
 ## 文件上传
 
 ### POST /files/images
@@ -751,7 +797,7 @@ JSON 日志格式示例：
 权限码脚注：
 
 - （¹）种子数据中已定义，但用户/角色管理接口通过 `is_superuser` 布尔字段判断权限，不经过 `require_permission()` 校验。
-- （²）对应接口尚未实现：`DELETE /users/{user_id}` 和角色 CRUD 端点（`POST /roles`、`PUT /roles/{id}`、`DELETE /roles/{id}`）。
+- （²）`DELETE /users/{user_id}` 尚未实现。角色 CRUD 端点（`POST /roles`、`PUT /roles/{id}`、`DELETE /roles/{id}`）已实现，但通过 `is_superuser` 校验权限。
 
 ---
 
