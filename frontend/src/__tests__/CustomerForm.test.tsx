@@ -270,4 +270,25 @@ describe('CustomerForm', () => {
     await (() => new Promise((r) => setTimeout(r, 0)))()
     expect(screen.getByText('Customers List')).toBeInTheDocument()
   })
+
+  it('编辑模式 fetchCustomer 失败验证', async () => {
+    _customerApi.fetchCustomer.mockRejectedValue(new Error('加载失败'))
+    renderEditCustomer()
+    await vi.waitFor(() => {
+      expect(_customerApi.fetchCustomer).toHaveBeenCalled()
+    })
+  })
+
+  it('创建按钮 htmlType 为 submit', () => {
+    renderNewCustomer()
+    const submitBtn = screen.getByText('创建客户').closest('button')
+    expect(submitBtn?.getAttribute('data-htmltype')).toBe('submit')
+  })
+
+  it('表单包含备注字段', () => {
+    renderNewCustomer()
+    const formItems = screen.getAllByTestId('form-item')
+    const names = formItems.map((fi) => fi.getAttribute('data-name'))
+    expect(names).toContain('remark')
+  })
 })
