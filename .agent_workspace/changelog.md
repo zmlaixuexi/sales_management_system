@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-05-04（第七百二十三轮·自动循环）
+
+### 安全加固：CSRF 防护验证测试（48 项覆盖 CORS 配置、安全响应头、Cookie 使用、认证模式、Nginx 安全）
+
+**变更文件：**
+- `backend/tests/test_csrf_security.py`（新建 48 项测试）
+  - CORS 配置：通配符拒绝、空值拒绝、无协议拒绝、http/https 接受、多 origin、去空白、默认值
+  - JWT 密钥：空值拒绝、短密钥拒绝（<8）、长密钥通过
+  - 安全响应头：nosniff/DENY/XSS-Protection/Referrer-Policy/Permissions-Policy/CSP/COOP/CORP/HSTS/Cache-Control/总数≥8
+  - 认证模式：Bearer Token 头认证、后端无 set_cookie、登录返回 JSON token
+  - CORS 中间件：allow_credentials/指定方法/指定头/从 Settings 读取
+  - Nginx 安全：安全头/隐藏版本/阻止隐藏文件/CSP
+  - 速率限制：模块存在/登录有限制
+  - 请求体限制：模块存在/默认大小>0
+  - 生产安全：Swagger 禁用/JWT 算法可配/HSTS max-age 可配
+  - 输入消毒：HTML 移除/控制字符移除/CSV 公式注入防御
+  - Docker 安全：no-new-privileges/cap_drop
+
+**测试结果：** 后端 2360/2360 ✓ / 前端 858/858 ✓ / 总计 3218 tests
+
 ## 2026-05-04（第七百二十二轮·自动循环）
 
 ### 代码质量：Pydantic Schema 验证边界测试（122 项覆盖 7 个模块字段约束、自定义验证器、文本消毒、缺省必填）
