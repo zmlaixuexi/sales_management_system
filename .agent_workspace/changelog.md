@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-05-04（第七百零五轮·自动循环）
+
+### 代码质量：API 错误响应结构一致性测试（20 项覆盖 401/403/404/405/422/400 格式校验）
+
+- 新增 test_error_response_consistency.py：20 项端到端测试
+  - HTTPException dict detail（404/401/400）：资源不存在、未认证、业务校验失败
+  - RequestValidationError（422）：缺必填字段、类型错误、无效 JSON、字段位置信息
+  - Starlette 路由异常：未知路由 404、方法不允许 405
+  - 跨模块一致性：CRUD 404 格式完全一致
+  - 成功/错误响应对比：成功有 data、错误无 data、success 布尔值
+  - 权限不足 403：非 superuser 访问管理端点
+- 后端测试 1789（+20），全部通过
+
 ## 2026-05-04（第七百零四轮·自动循环）
 
 ### 安全加固：JWT token 边界条件测试（35 项覆盖 iss/aud 签名验证、claim 缺失篡改、过期空值）
