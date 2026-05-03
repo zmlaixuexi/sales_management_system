@@ -395,7 +395,6 @@ def test_safe_commit_rollback_on_failure(db: Session):
 
     # 制造唯一约束冲突：code 列无唯一约束，用 name 重复 + 手动异常模拟
     # 更直接的方式：让 commit 抛异常，验证 rollback 被调用
-    from unittest.mock import MagicMock
 
     original_commit = db.commit
     call_count = {"rollback": 0}
