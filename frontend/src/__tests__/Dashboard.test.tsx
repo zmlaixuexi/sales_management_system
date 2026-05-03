@@ -284,4 +284,55 @@ describe('Dashboard', () => {
     })
     expect(screen.getByText('暂无数据')).toBeInTheDocument()
   })
+
+  it('无预警数据时显示"暂无预警商品"', async () => {
+    _reportMocks.fetchInventoryWarning.mockResolvedValue({
+      success: true,
+      data: { items: [], threshold: 5, total: 0 },
+    })
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('spin')).toHaveAttribute('data-spinning', 'false')
+    })
+    expect(screen.getByText('暂无预警商品')).toBeInTheDocument()
+  })
+
+  it('无排行数据时显示"暂无排行数据"', async () => {
+    _reportMocks.fetchProductRanking.mockResolvedValue({
+      success: true,
+      data: { items: [], period: '30d' },
+    })
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('spin')).toHaveAttribute('data-spinning', 'false')
+    })
+    expect(screen.getByText('暂无排行数据')).toBeInTheDocument()
+  })
+
+  it('库存为 0 的预警商品显示红色标签', async () => {
+    _reportMocks.fetchInventoryWarning.mockResolvedValue({
+      success: true,
+      data: {
+        items: [
+          { id: 'w2', sku: 'SKU-ZERO', name: '零库存商品', stock_quantity: 0, sale_price: '50.00' },
+        ],
+        threshold: 5,
+        total: 1,
+      },
+    })
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('spin')).toHaveAttribute('data-spinning', 'false')
+    })
+    expect(screen.getByText('SKU-ZERO')).toBeInTheDocument()
+    expect(screen.getByText('0')).toBeInTheDocument()
+  })
+
+  it('部分 API 失败触发错误提示', async () => {
+    _reportMocks.fetchSalesTrend.mockRejectedValue(new Error('趋势接口失败'))
+    renderDashboard()
+    await waitFor(() => {
+      expect(_messageError).toHaveBeenCalledWith('加载看板数据失败，请稍后重试')
+    })
+  })
 })
