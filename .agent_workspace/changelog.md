@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第六百六十八轮·自动循环）
+
+### 代码质量：修复 import 排序 + 密码安全验证审计
+
+- ruff I001 自动修复 test_deps.py 中 4 处 import 排序问题
+- pyproject.toml 为 tests/*.py 添加 B008 忽略规则
+- 密码安全审计确认：min_length=6 + 字母+数字校验 + 边界测试已全面覆盖
+- 全量 ruff 检查（app/ + tests/）：0 errors
+
 ## 2026-05-03（第六百六十七轮·自动循环）
 
 ### 代码质量：后端未使用 import 审计 + 清理
