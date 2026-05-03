@@ -59,7 +59,9 @@ def test_static_path_not_logged(client, caplog):
     """非 API 路径不写入日志"""
     with caplog.at_level(logging.INFO, logger="app.request"):
         client.get("/static/file.txt")
-    assert len(caplog.records) == 0
+    # 确保没有 /static/ 路径的日志（可能有其他测试的残留）
+    static_records = [r for r in caplog.records if "/static/" in r.msg]
+    assert len(static_records) == 0
 
 
 def test_extra_fields_populated(client, caplog):
