@@ -22,12 +22,18 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def create_access_token(subject: str, expires_delta: timedelta | None = None) -> str:
     now = datetime.now(UTC)
     expire = now + (expires_delta or timedelta(minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode = {"sub": subject, "exp": expire, "iat": now, "jti": str(uuid.uuid4()), "type": "access"}
+    to_encode = {
+        "sub": subject, "exp": expire, "iat": now, "jti": str(uuid.uuid4()),
+        "type": "access", "iss": settings.JWT_ISSUER, "aud": settings.JWT_AUDIENCE,
+    }
     return str(jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM))
 
 
 def create_refresh_token(subject: str) -> str:
     now = datetime.now(UTC)
     expire = now + timedelta(days=settings.JWT_REFRESH_TOKEN_EXPIRE_DAYS)
-    to_encode = {"sub": subject, "exp": expire, "iat": now, "jti": str(uuid.uuid4()), "type": "refresh"}
+    to_encode = {
+        "sub": subject, "exp": expire, "iat": now, "jti": str(uuid.uuid4()),
+        "type": "refresh", "iss": settings.JWT_ISSUER, "aud": settings.JWT_AUDIENCE,
+    }
     return str(jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM))

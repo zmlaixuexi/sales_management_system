@@ -120,7 +120,10 @@ def refresh_token(req: RefreshRequest, db: Session = Depends(get_db)):
         detail={"code": "AUTH_UNAUTHORIZED", "message": "Refresh Token 无效或已过期"},
     )
     try:
-        payload = jwt.decode(req.refresh_token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        payload = jwt.decode(
+            req.refresh_token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM],
+            audience=settings.JWT_AUDIENCE, issuer=settings.JWT_ISSUER,
+        )
         user_id: str | None = payload.get("sub")
         token_type: str | None = payload.get("type")
         if user_id is None or token_type != "refresh":

@@ -39,7 +39,10 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        payload = jwt.decode(
+            token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM],
+            audience=settings.JWT_AUDIENCE, issuer=settings.JWT_ISSUER,
+        )
         user_id: str | None = payload.get("sub")
         token_type: str | None = payload.get("type")
         if user_id is None or token_type != "access":

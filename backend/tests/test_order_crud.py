@@ -612,7 +612,8 @@ class TestOrderFilterAndEdge:
         pid = str(prod.id)
 
         # 直接在数据库创建草稿订单，避免 order_no 与已有订单冲突
-        payload = jwt.decode(_tokens["access"], settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        payload = jwt.decode(_tokens["access"], settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM],
+                             audience=settings.JWT_AUDIENCE, issuer=settings.JWT_ISSUER)
         user_id = uuid.UUID(payload["sub"])
         draft = SalesOrder(
             id=uuid.uuid4(),
@@ -655,7 +656,8 @@ class TestOrderFilterAndEdge:
         pid = str(prod.id)
 
         # 直接在 DB 创建订单和明细，避免 order_no 冲突
-        payload = jose_jwt.decode(_tokens["access"], settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        payload = jose_jwt.decode(_tokens["access"], settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM],
+                                   audience=settings.JWT_AUDIENCE, issuer=settings.JWT_ISSUER)
         user_id = uuid.UUID(payload["sub"])
         order = SalesOrder(
             id=uuid.uuid4(),

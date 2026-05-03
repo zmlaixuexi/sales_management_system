@@ -8,6 +8,14 @@ from jose.exceptions import ExpiredSignatureError, JWTError
 from pydantic import ValidationError
 
 from app.core.config import settings
+
+
+def _decode(token: str) -> dict:
+    """解码 JWT 并验证 iss/aud 声明"""
+    return jwt.decode(
+        token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM],
+        audience=settings.JWT_AUDIENCE, issuer=settings.JWT_ISSUER,
+    )
 from app.core.security import (
     create_access_token,
     create_refresh_token,
@@ -68,28 +76,28 @@ def test_verify_password_hash_from_hash_password():
 def test_access_token_decodable():
     """access token 可用同一密钥解码"""
     token = create_access_token("user-123")
-    payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    payload = _decode(token)
     assert payload["sub"] == "user-123"
 
 
 def test_access_token_type_claim():
     """access token type 为 access"""
     token = create_access_token("user-abc")
-    payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    payload = _decode(token)
     assert payload["type"] == "access"
 
 
 def test_access_token_has_exp():
     """access token 包含 exp 过期时间"""
     token = create_access_token("user-1")
-    payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    payload = _decode(token)
     assert "exp" in payload
 
 
 def test_access_token_custom_expiry():
     """自定义过期时间生效"""
     token = create_access_token("user-1", expires_delta=timedelta(minutes=5))
-    payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    payload = _decode(token)
     assert "exp" in payload
 
 
@@ -99,21 +107,21 @@ def test_access_token_custom_expiry():
 def test_refresh_token_decodable():
     """refresh token 可用同一密钥解码"""
     token = create_refresh_token("user-456")
-    payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    payload = _decode(token)
     assert payload["sub"] == "user-456"
 
 
 def test_refresh_token_type_claim():
     """refresh token type 为 refresh"""
     token = create_refresh_token("user-xyz")
-    payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    payload = _decode(token)
     assert payload["type"] == "refresh"
 
 
 def test_refresh_token_has_exp():
     """refresh token 包含 exp 过期时间"""
     token = create_refresh_token("user-1")
-    payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    payload = _decode(token)
     assert "exp" in payload
 
 
@@ -121,8 +129,8 @@ def test_refresh_token_longer_expiry():
     """refresh token 过期时间晚于 access token"""
     access = create_access_token("user-1")
     refresh = create_refresh_token("user-1")
-    a_payload = jwt.decode(access, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
-    r_payload = jwt.decode(refresh, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    a_payload = _decode(access)
+    r_payload = _decode(refresh)
     assert r_payload["exp"] > a_payload["exp"]
 
 
@@ -150,7 +158,7 @@ def test_verify_password_none_hash_returns_false():
 def test_access_token_has_iat():
     """access token 包含 iat 签发时间"""
     token = create_access_token("user-1")
-    payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    payload = _decode(token)
     assert "iat" in payload
     assert isinstance(payload["iat"], (int, float))
 
@@ -158,14 +166,14 @@ def test_access_token_has_iat():
 def test_refresh_token_has_iat():
     """refresh token 包含 iat 签发时间"""
     token = create_refresh_token("user-1")
-    payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    payload = _decode(token)
     assert "iat" in payload
 
 
 def test_access_token_has_jti():
     """access token 包含 jti 唯一标识"""
     token = create_access_token("user-1")
-    payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    payload = _decode(token)
     assert "jti" in payload
     assert len(payload["jti"]) == 36  # UUID 格式
 
@@ -173,7 +181,7 @@ def test_access_token_has_jti():
 def test_refresh_token_has_jti():
     """refresh token 包含 jti 唯一标识"""
     token = create_refresh_token("user-1")
-    payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    payload = _decode(token)
     assert "jti" in payload
 
 
@@ -181,8 +189,8 @@ def test_tokens_have_unique_jti():
     """每次生成的 token jti 不同"""
     t1 = create_access_token("user-1")
     t2 = create_access_token("user-1")
-    p1 = jwt.decode(t1, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
-    p2 = jwt.decode(t2, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    p1 = _decode(t1)
+    p2 = _decode(t2)
     assert p1["jti"] != p2["jti"]
 
 
