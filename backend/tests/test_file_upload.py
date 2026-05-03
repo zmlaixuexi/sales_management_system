@@ -4,15 +4,23 @@ import os
 import tempfile
 import uuid
 
+import pytest
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.api.deps import get_db
+from app.core.config import settings
 from app.core.security import hash_password
 from app.db.session import Base
 from app.main import app
 from app.models.user import Permission, Role, User, UserRole
+from app.services.file_service import (
+    MAX_SIZE_BYTES,
+    _validate_image,
+    _validate_magic_bytes,
+)
 
 TEST_DB_URL = "sqlite:///./test_file_upload.db"
 engine = create_engine(TEST_DB_URL, connect_args={"check_same_thread": False})
@@ -298,9 +306,6 @@ def test_14_delete_other_user_file_forbidden():
 
 def test_15_delete_file_service_raises_for_missing():
     """file_service.delete_file 对不存在的文件抛出 HTTPException"""
-    import pytest
-    from fastapi import HTTPException
-
     from app.services.file_service import delete_file
 
     db = TestSession()
@@ -525,3 +530,125 @@ def test_25_upload_requires_product_create_permission():
     )
     assert resp.status_code == 403
     assert resp.json()["error"]["code"] == "AUTH_FORBIDDEN"
+
+
+# ═══════════════════════════════════════════════════════
+# 边界测试：配置、验证函数、魔数字节
+# ═══════════════════════════════════════════════════════
+
+
+def test_26_allowed_extensions_complete():
+    """允许 4 种图片格式"""
+    from app.services.file_service import ALLOWED_EXTENSIONS as EXT
+    assert {".jpg", ".jpeg", ".png", ".webp"} == EXT
+
+
+def test_27_allowed_mime_types_complete():
+    """允许 3 种 MIME 类型"""
+    from app.services.file_service import ALLOWED_TYPES as TYPES
+    assert {"image/jpeg", "image/png", "image/webp"} == TYPES
+
+
+def test_28_magic_signatures_cover_all_types():
+    """魔数字节映射覆盖所有允许的类型"""
+    from app.services.file_service import MAGIC_SIGNATURES
+    for mime in ("image/jpeg", "image/png", "image/webp"):
+        assert mime in MAGIC_SIGNATURES
+
+
+def test_29_max_size_bytes_matches_config():
+    """MAX_SIZE_BYTES 与配置一致"""
+    from app.services.file_service import MAX_SIZE_BYTES as MSB
+    assert MSB == settings.MAX_IMAGE_SIZE_MB * 1024 * 1024
+
+
+def test_30_validate_image_rejects_gif():
+    """GIF 文件被拒绝"""
+    with pytest.raises(HTTPException) as exc_info:
+        _validate_image("anim.gif", "image/gif", 100)
+    assert exc_info.value.detail["code"] == "FILE_INVALID_TYPE"
+
+
+def test_31_validate_image_rejects_bmp():
+    """BMP 文件被拒绝"""
+    with pytest.raises(HTTPException) as exc_info:
+        _validate_image("pic.bmp", "image/bmp", 100)
+    assert exc_info.value.detail["code"] == "FILE_INVALID_TYPE"
+
+
+def test_32_validate_image_rejects_svg():
+    """SVG 文件被拒绝"""
+    with pytest.raises(HTTPException) as exc_info:
+        _validate_image("logo.svg", "image/svg+xml", 100)
+    assert exc_info.value.detail["code"] == "FILE_INVALID_TYPE"
+
+
+def test_33_validate_image_case_insensitive_extension():
+    """扩展名大小写不敏感"""
+    _validate_image("photo.JPG", "image/jpeg", 100)
+    _validate_image("photo.Png", "image/png", 100)
+    _validate_image("photo.WEBP", "image/webp", 100)
+
+
+def test_34_validate_image_accepts_exact_max_size():
+    """恰好等于大小限制的文件通过"""
+    _validate_image("exact.jpg", "image/jpeg", MAX_SIZE_BYTES)
+
+
+def test_35_validate_image_rejects_one_byte_over():
+    """超过限制 1 字节被拒绝"""
+    with pytest.raises(HTTPException) as exc_info:
+        _validate_image("over.jpg", "image/jpeg", MAX_SIZE_BYTES + 1)
+    assert exc_info.value.detail["code"] == "FILE_TOO_LARGE"
+
+
+def test_36_magic_bytes_jpeg_spoofed_as_png():
+    """JPEG 内容伪装为 PNG 被拒绝"""
+    jpeg_content = b"\xff\xd8\xff\xe0" + b"\x00" * 100
+    with pytest.raises(HTTPException) as exc_info:
+        _validate_magic_bytes(jpeg_content, "image/png")
+    assert exc_info.value.detail["code"] == "FILE_INVALID_TYPE"
+
+
+def test_37_magic_bytes_png_spoofed_as_jpeg():
+    """PNG 内容伪装为 JPEG 被拒绝"""
+    png_content = b"\x89PNG\r\n\x1a\n" + b"\x00" * 100
+    with pytest.raises(HTTPException) as exc_info:
+        _validate_magic_bytes(png_content, "image/jpeg")
+    assert exc_info.value.detail["code"] == "FILE_INVALID_TYPE"
+
+
+def test_38_magic_bytes_webp_missing_webp():
+    """WebP 缺少 WEBP 标记被拒绝"""
+    content = b"RIFF" + b"\x00" * 100
+    with pytest.raises(HTTPException) as exc_info:
+        _validate_magic_bytes(content, "image/webp")
+    assert exc_info.value.detail["code"] == "FILE_INVALID_TYPE"
+
+
+def test_39_magic_bytes_empty_rejected():
+    """空内容被拒绝"""
+    with pytest.raises(HTTPException) as exc_info:
+        _validate_magic_bytes(b"", "image/jpeg")
+    assert exc_info.value.detail["code"] == "FILE_INVALID_TYPE"
+
+
+def test_40_error_response_structure_file_invalid():
+    """文件类型错误响应体结构正确"""
+    with pytest.raises(HTTPException) as exc_info:
+        _validate_image("test.exe", "application/octet-stream", 100)
+    detail = exc_info.value.detail
+    assert isinstance(detail, dict)
+    assert "code" in detail
+    assert "message" in detail
+    assert detail["code"] == "FILE_INVALID_TYPE"
+
+
+def test_41_error_response_structure_file_too_large():
+    """文件过大错误响应体结构正确"""
+    with pytest.raises(HTTPException) as exc_info:
+        _validate_image("big.jpg", "image/jpeg", MAX_SIZE_BYTES + 1)
+    detail = exc_info.value.detail
+    assert isinstance(detail, dict)
+    assert detail["code"] == "FILE_TOO_LARGE"
+    assert "MB" in detail["message"]
