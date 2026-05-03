@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第五百八十三轮·自动循环）
+
+### 测试：补强 OrderForm 分支覆盖率，84% → 98%
+
+- OrderForm.test.tsx +7：_toastDisplayed 静默错误、fetchOrder/fetchCustomers/fetchProducts
+  success=false、createOrder/updateOrder success=false、重复商品警告
+- 修复 Button mock 使用 data-disabled 代替 disabled 以支持点击测试
+- 整体分支覆盖率 91.05% → 91.95%，总测试数 745 → 752
+
 ## 2026-05-03（第五百八十二轮·自动循环）
 
 ### 测试：补强 AuditLogs 分支覆盖率，82.6% → 89.13%
