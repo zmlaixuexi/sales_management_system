@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第六百六十一轮·自动循环）
+
+### 测试补强：为 isToastDisplayed 添加 4 个单元测试 + 修复 null 安全问题
+
+- 测试发现 `isToastDisplayed(null/undefined)` 会抛 TypeError
+- 修复为先检查 `typeof === 'object' && e !== null` 守卫
+- 新增 4 个测试覆盖 true/false/null/undefined 场景
+- 前端测试从 837→841，总计 2211
+
 ## 2026-05-03（第六百六十轮·自动循环）
 
 ### 测试补强：为 safe_commit 添加 3 个单元测试
