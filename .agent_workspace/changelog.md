@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-04（第七百一十五轮·自动循环）
+
+### 可观测性：Prometheus 指标覆盖率测试（+27 新增覆盖命名规范、标签独立性、Gauge 行为、/metrics 集成）
+
+- 扩展 test_business_metrics.py：从 10 项扩展至 37 项（+27）
+  - 命名规范（3 项）：business_ 前缀、Counter _total 后缀、Gauge 无 _total
+  - 指标描述与标签（5 项）：非空描述、status/method/result 标签存在、简单 Counter 无标签
+  - Counter 递增（9 项）：各 Counter 独立递增、不同标签值独立、inc(N) 支持
+  - Gauge 行为（3 项）：设为 0、大值、覆盖前值
+  - /metrics 集成（5 项）：HTTP 请求指标、延迟直方图桶、排除 health、Counter 带标签格式、指标总数 8
+- 后端测试 1987（+27），全部通过
+
 ## 2026-05-04（第七百一十四轮·自动循环）
 
 ### 代码质量：密码强度验证边界测试（+30 新增覆盖黑名单完整性、字符类别边界、Schema 长度、E2E 修改密码）
