@@ -358,4 +358,53 @@ describe('CustomerForm', () => {
       expect(message.error).toHaveBeenCalledWith('加载客户信息失败')
     })
   })
+
+  it('fetchCustomer 返回 success=false 不填充表单', async () => {
+    _customerApi.fetchCustomer.mockResolvedValueOnce({ success: false, data: null })
+    renderEditCustomer()
+    await waitFor(() => {
+      expect(_customerApi.fetchCustomer).toHaveBeenCalled()
+    })
+    expect(_mockForm.setFieldsValue).not.toHaveBeenCalledWith(
+      expect.objectContaining({ name: expect.anything() }),
+    )
+  })
+
+  it('fetchCustomer _toastDisplayed 错误不显示消息', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _customerApi.fetchCustomer.mockRejectedValueOnce(err)
+    const { message } = await import('antd')
+    renderEditCustomer()
+    await waitFor(() => {
+      expect(_customerApi.fetchCustomer).toHaveBeenCalled()
+    })
+    expect(message.error).not.toHaveBeenCalledWith('加载客户信息失败')
+  })
+
+  it('更新客户 success=false 不导航', async () => {
+    _customerApi.fetchCustomer.mockResolvedValue({ success: true, data: {} })
+    _customerApi.updateCustomer.mockResolvedValueOnce({ success: false })
+    const { message } = await import('antd')
+    renderEditCustomer()
+    await act(async () => {
+      await _useSubmit.callback({ name: '测试' })
+    })
+    await waitFor(() => {
+      expect(_customerApi.updateCustomer).toHaveBeenCalled()
+    })
+    expect(message.success).not.toHaveBeenCalledWith('更新成功')
+  })
+
+  it('创建客户 success=false 不导航', async () => {
+    _customerApi.createCustomer.mockResolvedValueOnce({ success: false })
+    const { message } = await import('antd')
+    renderNewCustomer()
+    await act(async () => {
+      await _useSubmit.callback({ name: '新客户' })
+    })
+    await waitFor(() => {
+      expect(_customerApi.createCustomer).toHaveBeenCalled()
+    })
+    expect(message.success).not.toHaveBeenCalledWith('创建成功')
+  })
 })
