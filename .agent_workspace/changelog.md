@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第七百四十二轮·自动循环）
+
+### 代码质量：前端 hooks 边界测试（27 项覆盖 useSubmit 并发/锁定/异常、usePaginatedList 初始状态/null 安全/filters）
+
+**变更文件：**
+- `frontend/src/__tests__/hooks-boundaries.test.ts`（新建 27 项测试）
+  - useSubmit（16 项）：提交空值/undefined/返回值忽略/三次并发只执行一次/errorFields+_toastDisplayed/无 response 时 fallback/空串 fallback/number 异常不崩溃/handleRef 稳定性/初始 submitting=false/locked 重置后可再提交
+  - usePaginatedList（11 项）：初始 page=1/pageSize=20/keyword=''/loading=true/error=false/空串 keyword 传 undefined/非空 keyword 传参/items=null 安全/items=undefined 安全/fetchFn 变更用最新引用/默认 errorMessage/自定义 errorMessage/onPageChange 更新/空 filters/undefined 值 filters/refresh 返回 Promise
+
+**测试计数：** 后端 3179、前端 1028（+27）、总计 4207
+
 ## 2026-05-04（第七百四十一轮·自动循环）
 
 ### 安全加固：安全头与 CORS 配置边界测试（44 项覆盖安全响应头、CORS、Body Limit、JWT 配置）
