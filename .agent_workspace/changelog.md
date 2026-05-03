@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第七百零一轮·自动循环）
+
+### 可观测性：结构化日志字段完整性校验（14 项测试）
+
+- 新增 test_logging_consistency.py：14 项校验
+  - JSON 格式器：合法 JSON、5 个基础字段（timestamp/level/logger/message/app_env）、ISO 时间戳、级别名、记录器名、中文不转义
+  - extra_fields：自定义字段合并、请求日志 10 个必要字段（method/path/status/duration_ms/client_ip/user_agent/slow/request_id/resp_bytes/query_string）
+  - 异常格式化：exception 字段包含堆栈、无异常时不含
+  - 文本格式器：可读输出、非 JSON
+- 后端测试 1601（+14），全部通过
+
 ## 2026-05-04（第七百轮·自动循环）
 
 ### 代码质量：API 路由与文档一致性自动校验测试（6 项回归守卫）
