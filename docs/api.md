@@ -62,23 +62,28 @@ Authorization: Bearer <access_token>
 | 400 | INVENTORY_NOT_ENOUGH | 库存不足 |
 | 400 | PAYMENT_AMOUNT_EXCEEDED | 收款金额超过剩余应收 |
 | 400 | PRICE_BELOW_COST | 订单明细单价低于商品成本价 |
-| 409 | PRODUCT_SKU_DUPLICATED | 商品编码重复（创建时） |
+| 400 | PAYMENT_RATE_LIMITED | 收款操作过于频繁（防重复提交） |
+| 400 | PAYLOAD_TOO_LARGE | 请求体超过大小限制 |
 | 400 | PRODUCT_SKU_DUPLICATED | 商品编码重复（更新时） |
 | 400 | CUSTOMER_HAS_ORDERS | 客户有未删除订单，无法删除 |
 | 400 | IMPORT_FAILED | CSV 导入失败 |
+| 400 | INVALID_PASSWORD | 旧密码不正确 |
+| 400 | FILE_TOO_LARGE | 文件超过大小限制 |
+| 400 | FILE_INVALID_TYPE | 文件格式不支持 |
+| 400 | FILE_NOT_BOUND | 文件已绑定商品，无法删除 |
 | 401 | AUTH_UNAUTHORIZED | 未认证或 Token 无效 |
 | 403 | AUTH_FORBIDDEN | 无权限执行此操作 |
 | 404 | RESOURCE_NOT_FOUND | 资源不存在 |
+| 404 | FILE_NOT_FOUND | 文件不存在 |
+| 405 | METHOD_NOT_ALLOWED | HTTP 方法不被允许 |
+| 409 | PRODUCT_SKU_DUPLICATED | 商品编码重复（创建时） |
 | 409 | CUSTOMER_DUPLICATED_WARNING | 客户手机号重复 |
 | 409 | PRODUCT_IN_USE | 商品已被订单引用，无法删除 |
-| 400 | FILE_TOO_LARGE | 文件超过大小限制 |
-| 400 | FILE_INVALID_TYPE | 文件格式不支持 |
-| 404 | FILE_NOT_FOUND | 文件不存在 |
-| 400 | FILE_NOT_BOUND | 文件已绑定商品，无法删除 |
-| 400 | INVALID_PASSWORD | 旧密码不正确 |
 | 422 | VALIDATION_FAILED | 请求参数格式错误（FastAPI 校验） |
 | 429 | RATE_LIMIT_EXCEEDED | 请求过于频繁，请稍后再试 |
+| 429 | ACCOUNT_LOCKED | 账户登录失败次数过多，暂时锁定 |
 | 500 | SYSTEM_INTERNAL_ERROR | 服务器内部错误 |
+| 503 | SHUTTING_DOWN | 服务正在关闭 |
 
 ## 速率限制
 
