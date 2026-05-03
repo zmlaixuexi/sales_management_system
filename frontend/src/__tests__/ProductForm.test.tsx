@@ -20,7 +20,7 @@ vi.mock('@/api/products', () => ({
 vi.mock('@/hooks/useSubmit', () => ({
   useSubmit: (onSubmit: any) => ({
     submitting: false,
-    handleSubmit: (e: any) => { e?.preventDefault?.(); onSubmit({}) },
+    handleSubmit: (e: any) => { e?.preventDefault?.() },
   }),
 }))
 
@@ -240,5 +240,19 @@ describe('ProductForm', () => {
     const inputs = screen.getAllByTestId('input')
     const skuInput = inputs.find((inp) => inp.getAttribute('placeholder') === '留空自动生成')
     expect(skuInput).toBeUndefined()
+  })
+
+  it('返回列表按钮导航到商品列表', async () => {
+    renderNewProduct()
+    screen.getByText('返回列表').click()
+    await (() => new Promise((r) => setTimeout(r, 0)))()
+    expect(screen.getByText('Products List')).toBeInTheDocument()
+  })
+
+  it('取消按钮导航到商品列表', async () => {
+    renderNewProduct()
+    screen.getByText('取消').click()
+    await (() => new Promise((r) => setTimeout(r, 0)))()
+    expect(screen.getByText('Products List')).toBeInTheDocument()
   })
 })
