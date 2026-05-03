@@ -6,6 +6,14 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-238
+
+- 描述：列表接口 status/source 枚举参数 Query 级校验
+- 状态：已完成
+- 验证：orders/products/customers 列表接口的 status/source 参数改为 Literal 类型，无效值返回 422，+3 测试，全部 1364 测试通过
+- 安全影响：防止无效枚举值静默通过导致意外空结果，改善 OpenAPI 文档自动生成
+- 关联：app/api/v1/orders.py、app/api/v1/products.py、app/api/v1/customers.py、tests/test_validation.py
+
 ## 功能编号：FEAT-20260503-237
 
 - 描述：订单错误消息移除敏感信息泄露（成本价、库存数量）

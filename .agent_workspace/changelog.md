@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-03（第六百五十轮·自动循环）
+
+### 安全加固：列表接口 status/source 枚举参数 Query 级校验
+
+- orders.py list_orders：status 参数从 str 改为 Literal["draft","confirmed","cancelled","partially_paid","completed"]
+- products.py list_products：status 参数从 str 改为 Literal["active","inactive","disabled"]
+- customers.py list_customers：source 参数从 str 改为 Literal["referral","online","offline","ad","other"]
+- 无效值现在返回 422 而非静默返回空结果
+- 新增 3 个枚举校验测试（test_validation.py test_26-28）
+
 ## 2026-05-03（第六百四十九轮·自动循环·续）
 
 ### 安全加固：订单错误消息移除敏感信息泄露

@@ -328,3 +328,21 @@ def test_25_customer_create_invalid_level():
         "name": "无效等级客户", "phone": "13800138001", "level": "super_vip",
     }, headers=_auth())
     assert resp.status_code == 422
+
+
+def test_26_list_orders_invalid_status():
+    """订单列表使用无效 status 值被拒绝"""
+    resp = client.get("/api/v1/sales-orders?status=invalid_status", headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_27_list_products_invalid_status():
+    """商品列表使用无效 status 值被拒绝"""
+    resp = client.get("/api/v1/products?status=deleted", headers=_auth())
+    assert resp.status_code == 422
+
+
+def test_28_list_customers_invalid_source():
+    """客户列表使用无效 source 值被拒绝"""
+    resp = client.get("/api/v1/customers?source=wechat", headers=_auth())
+    assert resp.status_code == 422

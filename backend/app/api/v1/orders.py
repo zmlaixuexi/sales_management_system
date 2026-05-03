@@ -3,6 +3,7 @@
 import json
 import uuid
 from decimal import ROUND_HALF_UP, Decimal
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
@@ -220,7 +221,7 @@ def _restore_inventory(db: Session, order_id: uuid.UUID, items: list[SalesOrderI
 def list_orders(
     pagination: PaginationParams = Depends(),
     keyword: str | None = None,
-    status: str | None = None,
+    status: Literal["draft", "confirmed", "cancelled", "partially_paid", "completed"] | None = None,
     customer_id: uuid.UUID | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("order:list")),

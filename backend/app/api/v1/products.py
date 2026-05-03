@@ -3,6 +3,7 @@
 import uuid
 from datetime import datetime
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile
 from sqlalchemy import func
@@ -114,7 +115,7 @@ def _calc_profit(sale_price: Decimal, cost_price: Decimal) -> tuple[Decimal, Dec
 def list_products(
     pagination: PaginationParams = Depends(),
     keyword: str | None = None,
-    status: str | None = None,
+    status: Literal["active", "inactive", "disabled"] | None = None,
     category_id: uuid.UUID | None = None,
     sort_by: str = Query("sort_weight"),
     sort_order: str = Query("desc"),

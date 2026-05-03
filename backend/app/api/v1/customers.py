@@ -2,6 +2,7 @@
 
 import uuid
 from datetime import datetime
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
 from sqlalchemy.orm import Session
@@ -63,7 +64,7 @@ def _validate_owner_user(db: Session, owner_uid: uuid.UUID) -> None:
 def list_customers(
     pagination: PaginationParams = Depends(),
     keyword: str | None = None,
-    source: str | None = None,
+    source: Literal["referral", "online", "offline", "ad", "other"] | None = None,
     owner_user_id: uuid.UUID | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("customer:list")),
