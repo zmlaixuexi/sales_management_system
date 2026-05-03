@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-05-04（第七百五十一轮·自动循环）
+
+### 测试补强：收款服务边界测试（58 项覆盖 PaymentCreate schema、register_payment 业务逻辑、金额精度、状态转换、并发防护、模型字段校验）
+
+**变更文件：**
+- `backend/tests/test_payment_service_boundaries.py`（新建 58 项测试）
+  - PaymentCreate Schema：金额零/负/超限/非数字/空串/极小正数/科学计数法/恰好上限/支付方式/备注长度/HTML消毒
+  - 常量校验：VALID_PAYMENT_METHODS=5 种/_MAX_AMOUNT 值
+  - register_payment 正常路径：confirmed/partially_paid 订单收款/恰好付清/返回结构/operator_id/备注保存
+  - register_payment 错误路径：订单不存在/草稿/已完成/已取消/超额/非 owner/超级用户/无效 UUID
+  - 金额精度：分位精度/超额错误消息精度
+  - 并发防护：同订单阻塞/不同订单独立/清除后重入/幂等清除/全局清空/只清目标/detail 结构/成功清除/失败清除/UUID 格式
+  - 状态转换：confirmed→partially_paid→completed/一次付清/累加 paid_amount/updated_by
+  - 模型字段：Payment 列名/Numeric(12,2)/默认值/索引/SalesOrder 字段
+
+**测试计数：** 后端 3671（+58）、前端 1076、总计 4747
+
 ## 2026-05-04（第七百五十轮·自动循环）
 
 ### 测试补强：后端 CORS 预检请求边界测试（24 项覆盖未允许 Origin、OPTIONS 各种路径、PATCH 方法、allow-headers 边界、credentials、配置校验、安全头共存）
