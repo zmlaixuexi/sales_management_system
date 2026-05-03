@@ -6,6 +6,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 const _auditMocks = {
   fetchAuditActions: vi.fn(),
 }
+const _searchValues: Record<string, string> = {}
 
 vi.mock('@/api/auditLogs', () => ({
   fetchAuditLogs: vi.fn(),
@@ -72,8 +73,8 @@ vi.mock('antd', () => ({
     {
       Search: ({ placeholder, onSearch, onClear }: any) => (
         <div>
-          <input data-testid="search-input" placeholder={placeholder} />
-          <button data-testid={`search-btn-${placeholder}`} onClick={() => onSearch?.('test-search')}>搜索</button>
+          <input data-testid="search-input" placeholder={placeholder} onChange={(e: any) => { _searchValues[placeholder] = e.target.value }} />
+          <button data-testid={`search-btn-${placeholder}`} onClick={() => onSearch?.(_searchValues[placeholder] ?? 'test-search')}>搜索</button>
           {onClear && <button data-testid={`clear-btn-${placeholder}`} onClick={onClear}>清除</button>}
         </div>
       ),
@@ -124,6 +125,7 @@ function renderAuditLogs() {
 describe('AuditLogs', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    Object.keys(_searchValues).forEach((k) => delete _searchValues[k])
     _auditMocks.fetchAuditActions.mockResolvedValue({
       actions: ['product_create', 'order_confirm', 'login_success'],
       resource_types: ['product', 'order', 'user'],
@@ -397,5 +399,98 @@ describe('AuditLogs', () => {
       { id: 'log-3', created_at: '2026-05-01T12:00:00Z', actor_name: '管理员', action: 'product_update', resource_type: 'product', resource_id: 'prod-1', detail: '更新了商品' },
     ]
     _paginatedListReturn.total = 3
+  })
+
+  it('resource_type 为 null 显示 -', () => {
+    _paginatedListReturn.data = [
+      { id: 'al-null-rt', created_at: '2026-05-01T10:00:00Z', actor_name: '管理员', action: 'login_success', resource_type: null, resource_id: 'x', after_data: null, ip_address: '127.0.0.1', request_id: null, user_agent: null },
+    ]
+    _paginatedListReturn.total = 1
+    renderAuditLogs()
+    const row = screen.getByTestId('row-al-null-rt')
+    // resource_type null → '-' (the RESOURCE_LABELS[v] || v || '-' expression)
+    expect(row.textContent).toContain('-')
+    _paginatedListReturn.data = [
+      { id: 'al1', created_at: '2026-05-01T10:00:00Z', actor_name: '管理员', action: 'product_create', resource_type: 'product', resource_id: 'abc-def012345', after_data: { name: '新商品', status: 'active' }, ip_address: '192.168.1.1', request_id: 'req-001', user_agent: 'Mozilla/5.0' },
+      { id: 'al2', created_at: '2026-05-01T11:00:00Z', actor_name: '销售A', action: 'order_confirm', resource_type: 'order', resource_id: null, after_data: null, ip_address: null, request_id: null, user_agent: null },
+      { id: 'al3', created_at: null, actor_name: null, action: 'login_success', resource_type: 'user', resource_id: 'xyz-123', after_data: null, ip_address: '10.0.0.1', request_id: null, user_agent: null },
+    ]
+    _paginatedListReturn.total = 3
+  })
+
+  it('after_data 包含 order_no 显示变更内容', () => {
+    _paginatedListReturn.data = [
+      { id: 'al-order-no', created_at: '2026-05-01T10:00:00Z', actor_name: '管理员', action: 'order_create', resource_type: 'order', resource_id: 'ord-1', after_data: { order_no: 'ORD-20260501-001' }, ip_address: '127.0.0.1', request_id: null, user_agent: null },
+    ]
+    _paginatedListReturn.total = 1
+    renderAuditLogs()
+    expect(screen.getByText(/order_no: ORD-20260501-001/)).toBeInTheDocument()
+    _paginatedListReturn.data = [
+      { id: 'al1', created_at: '2026-05-01T10:00:00Z', actor_name: '管理员', action: 'product_create', resource_type: 'product', resource_id: 'abc-def012345', after_data: { name: '新商品', status: 'active' }, ip_address: '192.168.1.1', request_id: 'req-001', user_agent: 'Mozilla/5.0' },
+      { id: 'al2', created_at: '2026-05-01T11:00:00Z', actor_name: '销售A', action: 'order_confirm', resource_type: 'order', resource_id: null, after_data: null, ip_address: null, request_id: null, user_agent: null },
+      { id: 'al3', created_at: null, actor_name: null, action: 'login_success', resource_type: 'user', resource_id: 'xyz-123', after_data: null, ip_address: '10.0.0.1', request_id: null, user_agent: null },
+    ]
+    _paginatedListReturn.total = 3
+  })
+
+  it('after_data 仅含非匹配键显示 -', () => {
+    _paginatedListReturn.data = [
+      { id: 'al-no-match', created_at: '2026-05-01T10:00:00Z', actor_name: '管理员', action: 'product_update', resource_type: 'product', resource_id: 'prod-1', after_data: { price: 100, quantity: 5 }, ip_address: '127.0.0.1', request_id: null, user_agent: null },
+    ]
+    _paginatedListReturn.total = 1
+    renderAuditLogs()
+    const row = screen.getByTestId('row-al-no-match')
+    // after_data keys 'price' and 'quantity' don't match name/order_no/status → parts empty → '-'
+    const cells = row.querySelectorAll('td')
+    const changeCell = Array.from(cells).find((td) => td.getAttribute('data-col') === 'after_data')
+    expect(changeCell?.textContent).toBe('-')
+    _paginatedListReturn.data = [
+      { id: 'al1', created_at: '2026-05-01T10:00:00Z', actor_name: '管理员', action: 'product_create', resource_type: 'product', resource_id: 'abc-def012345', after_data: { name: '新商品', status: 'active' }, ip_address: '192.168.1.1', request_id: 'req-001', user_agent: 'Mozilla/5.0' },
+      { id: 'al2', created_at: '2026-05-01T11:00:00Z', actor_name: '销售A', action: 'order_confirm', resource_type: 'order', resource_id: null, after_data: null, ip_address: null, request_id: null, user_agent: null },
+      { id: 'al3', created_at: null, actor_name: null, action: 'login_success', resource_type: 'user', resource_id: 'xyz-123', after_data: null, ip_address: '10.0.0.1', request_id: null, user_agent: null },
+    ]
+    _paginatedListReturn.total = 3
+  })
+
+  it('操作筛选器含未知操作类型显示原始值', async () => {
+    _auditMocks.fetchAuditActions.mockResolvedValue({
+      actions: ['product_create', 'custom_action'],
+      resource_types: ['product'],
+    })
+    renderAuditLogs()
+    await waitFor(() => {
+      expect(_auditMocks.fetchAuditActions).toHaveBeenCalled()
+    })
+    const selects = screen.getAllByTestId('action-select')
+    const actionSelect = selects[0]
+    const optionTexts = Array.from(actionSelect.querySelectorAll('option')).map((o) => o.textContent)
+    // custom_action not in ACTION_LABELS → label falls to raw value 'custom_action'
+    expect(optionTexts).toContain('custom_action')
+  })
+
+  it('资源筛选器含未知资源类型显示原始值', async () => {
+    _auditMocks.fetchAuditActions.mockResolvedValue({
+      actions: ['product_create'],
+      resource_types: ['product', 'invoice'],
+    })
+    renderAuditLogs()
+    await waitFor(() => {
+      expect(_auditMocks.fetchAuditActions).toHaveBeenCalled()
+    })
+    const selects = screen.getAllByTestId('action-select')
+    const resourceSelect = selects[1]
+    const optionTexts = Array.from(resourceSelect.querySelectorAll('option')).map((o) => o.textContent)
+    // 'invoice' not in RESOURCE_LABELS → label falls to raw value 'invoice'
+    expect(optionTexts).toContain('invoice')
+  })
+
+  it('资源ID搜索空值触发 setResourceIdFilter(undefined)', async () => {
+    _searchValues['资源ID精确筛选'] = ''
+    renderAuditLogs()
+    await waitFor(() => { expect(_auditMocks.fetchAuditActions).toHaveBeenCalled() })
+    const searchBtn = screen.getByTestId('search-btn-资源ID精确筛选')
+    fireEvent.click(searchBtn)
+    // v || undefined with v='' → undefined, but setPage(1) is always called
+    expect(_paginatedListReturn.setPage).toHaveBeenCalledWith(1)
   })
 })
