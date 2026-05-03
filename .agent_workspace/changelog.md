@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-03（第六百五十八轮·自动循环）
+
+### 代码质量：提取 isToastDisplayed 辅助函数 + 消除 28 处类型断言
+
+- 新增 `utils/index.ts` 的 `isToastDisplayed()` 辅助函数，统一 toast 去重检查逻辑
+- 14 个源文件：将 `(e as Record<string, boolean>)?._toastDisplayed` 替换为 `isToastDisplayed(e)` 调用
+- 12 个测试文件：同步更新 `vi.mock('@/utils')` 添加 `isToastDisplayed` mock
+- client.ts：`_toastDisplayed` 赋值使用安全类型断言
+- 全量验证通过：tsc 0 errors, 837 前端测试
+
 ## 2026-05-03（第六百五十七轮·自动循环）
 
 ### 代码质量：前端表单类型安全改进

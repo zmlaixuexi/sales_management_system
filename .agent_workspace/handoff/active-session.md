@@ -2,16 +2,16 @@
 
 最后更新时间：2026-05-03
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-657
-当前任务名称：自动循环：完成第 657 轮开发推进
+当前任务编号：ROUND-658
+当前任务名称：自动循环：完成第 658 轮开发推进
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 658：提取 isToastDisplayed 辅助函数，消除 28 处类型断言（14 个源文件 + 12 个测试文件 + client.ts + utils/index.ts）
 - Round 657：前端表单类型安全改进（CustomerForm 移除 as unknown as、ProductForm 类型断言改进）
 - Round 656：全量验证通过 + 前端 API 层 get 函数参数类型改进（移除 11 处类型断言）
-- Round 655：README 补充监控部署说明 + 更新测试计数
 
 ## 验证状态
 
@@ -30,8 +30,8 @@
 继续 keep-going 模式。可选方向：
 - 代码质量：db.commit() 显式 rollback 保护
 - 安全加固：OpenAPI 响应文档补充
-- 前端质量：剩余类型断言清理（api/client.ts、utils/index.ts）
 - 代码质量：更多边界路径探索
+- 前端质量：剩余类型安全审查
 
 ## 阻塞问题
 
