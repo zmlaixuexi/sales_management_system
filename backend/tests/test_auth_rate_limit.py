@@ -1,4 +1,4 @@
-"""登录速率限制辅助函数单元测试 — _check_login_rate_limit / _record_login_fail"""
+"""登录速率限制辅助函数单元测试 — _check_login_rate_limit / _check_account_lock / _record_login_fail"""
 
 import time
 from collections import defaultdict
@@ -7,7 +7,7 @@ from threading import Lock
 import pytest
 from fastapi import HTTPException
 
-from app.api.v1.auth import _check_login_rate_limit, _record_login_fail
+from app.api.v1.auth import _check_account_lock, _check_login_rate_limit, _record_login_fail
 
 
 @pytest.fixture(autouse=True)
@@ -100,3 +100,85 @@ def test_check_rate_limit_error_code():
         _check_login_rate_limit("6.6.6.6")
     detail = exc_info.value.detail
     assert detail["code"] == "RATE_LIMIT_EXCEEDED"
+
+
+# ─── _check_account_lock 每账户锁定测试 ───────────────────────
+
+
+def test_account_lock_passes_under_threshold():
+    """账户失败次数未达阈值时通过"""
+    for _ in range(4):
+        _record_login_fail("1.2.3.4", "target_user")
+    _check_account_lock("target_user")  # 不抛异常
+
+
+def test_account_lock_blocks_at_threshold():
+    """账户失败次数达到阈值时抛 429"""
+    for _ in range(5):
+        _record_login_fail("1.2.3.4", "locked_user")
+    with pytest.raises(HTTPException) as exc_info:
+        _check_account_lock("locked_user")
+    assert exc_info.value.status_code == 429
+    assert "账户" in str(exc_info.value.detail)
+    assert exc_info.value.detail["code"] == "ACCOUNT_LOCKED"
+
+
+def test_account_lock_independent_usernames():
+    """不同用户名独立计数"""
+    for _ in range(5):
+        _record_login_fail("1.1.1.1", "user_a")
+    # user_b 应该不受影响
+    _check_account_lock("user_b")
+
+
+def test_account_lock_records_per_username():
+    """失败记录按用户名分别记录"""
+    import app.api.v1.auth as mod
+
+    _record_login_fail("10.0.0.1", "user_x")
+    _record_login_fail("10.0.0.1", "user_y")
+    assert len(mod._account_fail_counts["user_x"]) == 1
+    assert len(mod._account_fail_counts["user_y"]) == 1
+
+
+def test_account_lock_expired_entries_cleaned():
+    """过期的账户失败记录被清理"""
+    import app.api.v1.auth as mod
+
+    old_time = time.monotonic() - 1000  # 超过 15 分钟窗口
+    mod._account_fail_counts["old_user"] = [old_time] * 5
+    _check_account_lock("old_user")  # 旧记录被清理，不抛异常
+
+
+def test_account_lock_mixed_expired_and_fresh_passes():
+    """2 条过期 + 3 条新鲜 → 仅 3 条有效，不触发"""
+    import app.api.v1.auth as mod
+
+    now = time.monotonic()
+    old_time = now - 1000
+    mod._account_fail_counts["mixed_user"] = [old_time] * 2 + [now] * 3
+    _check_account_lock("mixed_user")  # 3 条有效 < 5，不抛异常
+
+
+def test_account_lock_mixed_expired_and_fresh_blocks():
+    """2 条过期 + 5 条新鲜 → 5 条有效，触发 429"""
+    import app.api.v1.auth as mod
+
+    now = time.monotonic()
+    old_time = now - 1000
+    mod._account_fail_counts["blocked_user"] = [old_time] * 2 + [now] * 5
+    with pytest.raises(HTTPException) as exc_info:
+        _check_account_lock("blocked_user")
+    assert exc_info.value.status_code == 429
+
+
+def test_account_lock_different_ips_same_username():
+    """不同 IP 对同一用户名的失败累积到同一计数器"""
+    _record_login_fail("1.1.1.1", "shared_user")
+    _record_login_fail("2.2.2.2", "shared_user")
+    _record_login_fail("3.3.3.3", "shared_user")
+    _record_login_fail("4.4.4.4", "shared_user")
+    _record_login_fail("5.5.5.5", "shared_user")
+    with pytest.raises(HTTPException) as exc_info:
+        _check_account_lock("shared_user")
+    assert exc_info.value.detail["code"] == "ACCOUNT_LOCKED"
