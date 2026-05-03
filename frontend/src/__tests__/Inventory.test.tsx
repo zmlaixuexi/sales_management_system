@@ -174,4 +174,61 @@ describe('InventoryPage', () => {
     const row = screen.getByTestId('row-mov-002')
     expect(row.textContent).toContain('--')
   })
+
+  it('未知变动类型显示原始值', () => {
+    const customData = {
+      data: {
+        items: [{
+          id: 'mov-003', product_id: 'prod-003', movement_type: 'unknown_type',
+          quantity_before: 10, quantity_change: 0, quantity_after: 10,
+          related_type: null, related_id: null, remark: null, created_at: '2026-05-01T00:00:00Z',
+        }],
+        total: 1,
+      },
+    }
+    _inventoryMocks.fetchInventoryMovements.mockReturnValue(customData)
+    renderInventory()
+    expect(screen.getByText('unknown_type')).toBeInTheDocument()
+  })
+
+  it('未知关联类型显示原始值', () => {
+    const customData = {
+      data: {
+        items: [{
+          id: 'mov-004', product_id: 'prod-004', movement_type: 'manual_adjust',
+          quantity_before: 20, quantity_change: 5, quantity_after: 25,
+          related_type: 'purchase_order', related_id: 'po-001', remark: null, created_at: '2026-05-01T00:00:00Z',
+        }],
+        total: 1,
+      },
+    }
+    _inventoryMocks.fetchInventoryMovements.mockReturnValue(customData)
+    renderInventory()
+    expect(screen.getByText('purchase_order')).toBeInTheDocument()
+  })
+
+  it('变动量为 0 时无正负前缀', () => {
+    const customData = {
+      data: {
+        items: [{
+          id: 'mov-005', product_id: 'prod-005', movement_type: 'manual_adjust',
+          quantity_before: 30, quantity_change: 0, quantity_after: 30,
+          related_type: null, related_id: null, remark: null, created_at: '2026-05-01T00:00:00Z',
+        }],
+        total: 1,
+      },
+    }
+    _inventoryMocks.fetchInventoryMovements.mockReturnValue(customData)
+    renderInventory()
+    expect(screen.getByText('0')).toBeInTheDocument()
+  })
+
+  it('空关联类型显示 --', () => {
+    renderInventory()
+    const row = screen.getByTestId('row-mov-002')
+    // mov-002 的 related_type 为 null
+    const cells = row.querySelectorAll('td')
+    const relatedCell = Array.from(cells).find((td) => td.getAttribute('data-col') === 'related_type')
+    expect(relatedCell?.textContent).toBe('--')
+  })
 })
