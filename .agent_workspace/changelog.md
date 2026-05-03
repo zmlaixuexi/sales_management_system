@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-05-04（第七百四十轮·自动循环）
+
+### 文档完善：OpenAPI 文档一致性边界测试（60 项覆盖 schema、tags、路由、认证、分页、响应、错误码）
+
+**变更文件：**
+- `backend/tests/test_openapi_consistency.py`（新建 60 项测试）
+  - 端点可访问性：openapi.json/docs/redoc 均返回 200
+  - Schema 基本结构：OpenAPI 3.x/标题/版本 0.1.0/描述/paths/components
+  - Tag 完整性：11 个 tag 全部存在且带描述（认证/用户/商品/客户/订单/收款/库存/报表/日志/导出/文件）
+  - 路由路径：auth/users/products/customers/sales-orders/payments/inventory/reports/audit-logs/exports/files/health 全部存在，所有路径在 /api/v1/ 下
+  - 认证方案：OAuth2PasswordBearer/tokenUrl 指向 /auth/login
+  - 分页参数：page(ge=1,le=10000)/page_size(ge=1,le=100,default=20)
+  - 响应模型：ApiResponse schema 存在/success,data,message 字段
+  - HTTP 方法：login=POST/health=GET/列表=GET/创建=POST
+  - 错误码：422 格式 VALIDATION_FAILED
+  - /metrics 不在 schema 中
+  - 配置：docs_url/redoc_url/openapi_url 非生产环境可用
+  - JWT 配置：HS256/30min/7d/issuer/audience
+  - OAuth2 scheme 实例/tokenUrl
+  - 版本端点与 OpenAPI info.version 一致
+
+**测试计数：** 后端 3135（+61）、前端 1001、总计 4136
+
 ## 2026-05-04（第七百三十九轮·自动循环）
 
 ### 可观测性：日志格式一致性边界测试（84 项覆盖日志配置、格式器、中间件、审计服务）
