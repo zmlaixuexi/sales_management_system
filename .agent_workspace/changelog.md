@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-05-04（第七百三十二轮·自动循环）
+
+### 安全加固：JWT token 边界测试（+32 新增覆盖配置验证、API 认证端点、OAuth2 方案、密码哈希、Auth Schema、password_changed_at）
+
+**变更文件：**
+- `backend/tests/test_jwt_boundaries.py`（在原有 35 项基础上新增 32 项，共 67 项）
+  - JWT 配置验证：algorithm=HS256、issuer/audience=sales-management-system、secret_key>=8 字符、access/refresh 过期时间正且 access<refresh
+  - API 认证端点：/auth/me 无/无效/过期/refresh token 均返回 401、受保护端点 401/403
+  - OAuth2 scheme：auto_error=True、flows.password.tokenUrl=/api/v1/auth/login
+  - 密码哈希：hash_password/verify_password、相同密码不同哈希、非明文
+  - Auth Schema：LoginRequest 必填 username/password、RefreshRequest 必填 refresh_token、TokenResponse 包含三个字段
+  - User 模型：password_changed_at 存在且 nullable
+  - Login 端点：无 body/空 JSON→422、错误凭据→401
+  - Logout 端点：存在返回 200/401
+
+**关键发现：**
+- 密码哈希函数名为 `hash_password` 而非 `get_password_hash`
+- OAuth2 scheme 属性通过 `oauth2_scheme.auto_error` 直接访问，`model.flows.password.tokenUrl` 获取 tokenUrl
+- 401 响应中 OAuth2 scheme 未自动添加 WWW-Authenticate header（由异常处理器控制）
+
+**验证：**
+- 后端 2772/2772 ✓（新增 32 项）
+- ruff 0 errors ✓
+
 ## 2026-05-04（第七百三十一轮·自动循环）
 
 ### 异常路径：金额/数值边界测试（71 项覆盖价格/收款 Schema 约束、Decimal 精度、舍入行为、数量边界、模型字段类型、计算一致性）
