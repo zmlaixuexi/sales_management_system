@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第五六十轮·自动循环）
+
+### 修复：OrderDetail 删除重复 useEffect，消除 loadOrder 双重调用
+
+- OrderDetail.tsx 第 63 行和第 66 行有完全相同的 useEffect，导致每次 loadOrder 变化时触发两次请求
+- 删除重复的 useEffect，保留原始声明
+- 620 前端测试全部通过，tsc 0 errors
+
 ## 2026-05-03（第五百五十九轮·自动循环）
 
 ### 测试：API client 拦截器测试补强，+2 测试覆盖 refresh 失败/data.message 兜底

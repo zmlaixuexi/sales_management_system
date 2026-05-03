@@ -63,8 +63,6 @@ export default function OrderDetail() {
   useEffect(() => { loadOrder() }, [loadOrder])
   useEffect(() => { if (id) loadLogs() }, [id, loadLogs])
 
-  useEffect(() => { loadOrder() }, [loadOrder])
-
   const handleConfirm = async () => {
     if (!id || actionLoading) return
     setActionLoading('confirm')

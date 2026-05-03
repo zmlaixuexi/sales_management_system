@@ -2,15 +2,15 @@
 
 最后更新时间：2026-05-03
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-559
-当前任务名称：自动循环：完成第 559 轮开发推进
+当前任务编号：ROUND-560
+当前任务名称：自动循环：完成第 560 轮开发推进
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
-- Round 559：API client 拦截器测试补强，+2 测试覆盖 refresh 失败/data.message 兜底
-- Round 558：Inventory 交互测试补强，+6 测试
+- Round 560：修复 OrderDetail 重复 useEffect，消除 loadOrder 双重调用
+- Round 559：API client 拦截器测试补强，+2 测试
 
 ## 验证状态
 
