@@ -124,3 +124,53 @@ def test_04_sliding_window_cleans_expired():
     count = w.count(60.0, now)
     assert count == 1
     assert len(w.timestamps) == 1
+
+
+def test_05_non_api_paths_not_limited():
+    """非 /api/ 路径不受速率限制"""
+    # /docs 是 FastAPI 自带文档路径，不带限流头
+    resp = client.get("/docs", follow_redirects=False)
+    # 可能 200 或 307（重定向到 /docs/）
+    if resp.status_code != 404:
+        assert "X-RateLimit-Limit" not in resp.headers
+
+
+def test_06_different_ips_independent():
+    """不同 IP 的限流计数器独立"""
+    from app.core.ratelimit import clear_rate_limit
+    clear_rate_limit()
+    # 用 TestClient 无法模拟多 IP，但可验证 _SlidingWindow 独立性
+    w1 = _SlidingWindow()
+    w2 = _SlidingWindow()
+    now = time.monotonic()
+    for _ in range(5):
+        w1.record(now)
+    for _ in range(3):
+        w2.record(now)
+    assert w1.count(60.0, now) == 5
+    assert w2.count(60.0, now) == 3
+
+
+def test_07_clear_rate_limit_resets_buckets():
+    """clear_rate_limit 清空所有 IP 的计数"""
+    from app.core.ratelimit import clear_rate_limit, _shared_buckets
+    clear_rate_limit()
+    if _shared_buckets is not None:
+        assert len(_shared_buckets) == 0
+
+
+def test_08_sliding_window_empty():
+    """空窗口计数为 0"""
+    w = _SlidingWindow()
+    now = time.monotonic()
+    assert w.count(60.0, now) == 0
+
+
+def test_09_sliding_window_all_expired():
+    """所有条目都过期时 count 返回 0"""
+    w = _SlidingWindow()
+    now = time.monotonic()
+    w.record(now - 120)
+    w.record(now - 90)
+    assert w.count(60.0, now) == 0
+    assert len(w.timestamps) == 0
