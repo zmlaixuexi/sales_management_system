@@ -293,4 +293,34 @@ describe('ReportsCenter', () => {
       expect(_messageError).toHaveBeenCalledWith('加载客户排行失败')
     })
   })
+
+  it('销售排行加载失败显示错误提示', async () => {
+    _reportMocks.fetchSalespersonRanking.mockRejectedValue(new Error('network'))
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(_messageError).toHaveBeenCalledWith('加载销售排行失败')
+    })
+  })
+
+  it('趋势数据为空时显示空状态', async () => {
+    _reportMocks.fetchSalesTrend.mockResolvedValue({
+      success: true,
+      data: { items: [], period: '30d' },
+    })
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('暂无趋势数据')).toBeInTheDocument()
+    })
+  })
+
+  it('库存预警无数据时显示空状态', async () => {
+    _reportMocks.fetchInventoryWarning.mockResolvedValue({
+      success: true,
+      data: { items: [], threshold: 10, total: 0 },
+    })
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('暂无库存预警')).toBeInTheDocument()
+    })
+  })
 })
