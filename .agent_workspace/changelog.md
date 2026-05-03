@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-03（第六百三十六轮·自动循环）
+
+### 安全加固：配置值域校验
+
+- config.py 新增 Pydantic field_validator，验证关键配置项值域
+- JWT_EXPIRE / REFRESH_DAYS 必须为正整数
+- DB_POOL_SIZE / MAX_IMAGE_SIZE_MB / MAX_CSV_IMPORT_ROWS 必须 > 0
+- RATE_LIMIT_MAX 不能为负数（0 = 禁用）
+- +16 测试覆盖：零值/负数拒绝、正常值接受、边界值验证
+- 后端测试 1310 → 1326，总计 2163
+
 ## 2026-05-03（第六百三十五轮·自动循环）
 
 ### 工程质量：全量质量门禁验证通过

@@ -13,6 +13,13 @@
 - 验证：+1 测试验证 429 响应无 retry-after 头时使用默认 5 秒等待值，前端 831 测试全绿
 - 关联：frontend/src/__tests__/client-interceptor.test.ts
 
+## 功能编号：FEAT-20260503-234
+
+- 描述：后端配置值域校验（Pydantic field_validator）
+- 状态：已完成
+- 验证：+16 测试验证关键配置项零值/负数拒绝、正常值接受，后端 1326 测试全绿，ruff 0 errors
+- 关联：backend/app/core/config.py、backend/tests/test_config_validation.py
+
 ## 功能编号：FEAT-20260503-233
 
 - 描述：useDocumentTitle hook + 全页面浏览器标题管理

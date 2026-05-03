@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -33,6 +34,27 @@ class Settings(BaseSettings):
     DB_POOL_RECYCLE_SECONDS: int = 1800
     MAX_JSON_BODY_MB: int = 1
     HSTS_MAX_AGE: int = 31536000  # 1 年，仅在 HTTPS 生产环境生效
+
+    @field_validator("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "JWT_REFRESH_TOKEN_EXPIRE_DAYS")
+    @classmethod
+    def _positive_int(cls, v: int) -> int:
+        if v <= 0:
+            raise ValueError("必须为正整数")
+        return v
+
+    @field_validator("DB_POOL_SIZE", "MAX_IMAGE_SIZE_MB", "MAX_CSV_IMPORT_ROWS")
+    @classmethod
+    def _strictly_positive(cls, v: int) -> int:
+        if v <= 0:
+            raise ValueError("必须大于 0")
+        return v
+
+    @field_validator("RATE_LIMIT_MAX")
+    @classmethod
+    def _non_negative(cls, v: int) -> int:
+        if v < 0:
+            raise ValueError("不能为负数")
+        return v
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
