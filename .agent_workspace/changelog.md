@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-03（第五百四十九轮·自动循环）
+
+### 安全：安全响应头加固，新增 COOP/CORP/条件 HSTS + 4 测试
+
+- security_headers.py 新增 Cross-Origin-Opener-Policy: same-origin
+- security_headers.py 新增 Cross-Origin-Resource-Policy: same-origin
+- security_headers.py 新增条件 HSTS（仅 HTTPS 请求，使用 settings.HSTS_MAX_AGE）
+- config.py 新增 HSTS_MAX_AGE 配置项（默认 31536000 秒 = 1 年）
+- 新增 4 个安全头测试：COOP、CORP、HTTP 无 HSTS、HTTPS 有 HSTS
+- 后端测试 1290→1294，总计 1878→1882
+
 ## 2026-05-03（第五百四十八轮·自动循环）
 
 ### 测试：Roles 交互测试补强，覆盖率 73%→98%，整体前端突破 85%

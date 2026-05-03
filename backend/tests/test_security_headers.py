@@ -47,6 +47,34 @@ def test_cache_control(client):
     assert client.get("/").headers["Cache-Control"] == "no-store"
 
 
+def test_cross_origin_opener_policy(client):
+    assert client.get("/").headers["Cross-Origin-Opener-Policy"] == "same-origin"
+
+
+def test_cross_origin_resource_policy(client):
+    assert client.get("/").headers["Cross-Origin-Resource-Policy"] == "same-origin"
+
+
+def test_hsts_not_set_on_http(client):
+    """HTTP 请求不添加 HSTS"""
+    resp = client.get("/")
+    assert "Strict-Transport-Security" not in resp.headers
+
+
+def test_hsts_set_on_https():
+    """HTTPS 请求添加 HSTS"""
+    async def homepage(request):
+        return PlainTextResponse("ok")
+
+    app = Starlette(routes=[Route("/", homepage)])
+    app.add_middleware(SecurityHeadersMiddleware)
+    with TestClient(app, base_url="https://testserver") as c:
+        resp = c.get("/")
+        assert "Strict-Transport-Security" in resp.headers
+        assert "max-age=31536000" in resp.headers["Strict-Transport-Security"]
+        assert "includeSubDomains" in resp.headers["Strict-Transport-Security"]
+
+
 def test_all_headers_present(client):
     """所有安全头都存在"""
     resp = client.get("/")
@@ -57,6 +85,8 @@ def test_all_headers_present(client):
         "Referrer-Policy",
         "Permissions-Policy",
         "Content-Security-Policy",
+        "Cross-Origin-Opener-Policy",
+        "Cross-Origin-Resource-Policy",
         "Cache-Control",
     ]
     for h in expected:

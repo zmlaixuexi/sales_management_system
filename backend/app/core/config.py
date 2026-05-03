@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     DB_MAX_OVERFLOW: int = 10
     DB_POOL_RECYCLE_SECONDS: int = 1800
     MAX_JSON_BODY_MB: int = 1
+    HSTS_MAX_AGE: int = 31536000  # 1 年，仅在 HTTPS 生产环境生效
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
