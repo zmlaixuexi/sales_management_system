@@ -57,8 +57,8 @@ vi.mock('antd', () => ({
   ),
   Space: ({ children }: any) => <span>{children}</span>,
   Tag: ({ children, color }: any) => <span data-testid="tag" data-color={color}>{children}</span>,
-  Popconfirm: ({ title, children }: any) => (
-    <span data-testid="popconfirm" data-title={title}>{children}</span>
+  Popconfirm: ({ title, children, onConfirm }: any) => (
+    <span data-testid="popconfirm" data-title={title} onClick={onConfirm}>{children}</span>
   ),
   message: { error: (...args: any[]) => _messageError(...args), success: vi.fn() },
 }))
@@ -198,5 +198,31 @@ describe('CustomerDetail', () => {
       expect(screen.getByText('加载中...')).toBeInTheDocument()
     })
     resolveFn!(mockCustomerData)
+  })
+
+  it('确认删除调用 deleteCustomer', async () => {
+    _customerMocks.deleteCustomer.mockResolvedValue({ success: true })
+    renderCustomerDetail()
+    await waitFor(() => {
+      expect(screen.getByText('编辑')).toBeInTheDocument()
+    })
+    const popconfirm = screen.getByTestId('popconfirm')
+    popconfirm.click()
+    await waitFor(() => {
+      expect(_customerMocks.deleteCustomer).toHaveBeenCalledWith('cust-1')
+    })
+  })
+
+  it('编辑按钮跳转到编辑页', async () => {
+    renderCustomerDetail()
+    await waitFor(() => {
+      expect(screen.getByText('编辑')).toBeInTheDocument()
+    })
+    const buttons = screen.getAllByTestId('button')
+    const editBtn = buttons.find((b) => b.textContent?.includes('编辑'))
+    editBtn!.click()
+    await waitFor(() => {
+      expect(screen.getByText('Edit Form')).toBeInTheDocument()
+    })
   })
 })
