@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-05-04（第七百三十一轮·自动循环）
+
+### 异常路径：金额/数值边界测试（71 项覆盖价格/收款 Schema 约束、Decimal 精度、舍入行为、数量边界、模型字段类型、计算一致性）
+
+**变更文件：**
+- `backend/tests/test_amount_boundaries.py`（新建 71 项测试）
+  - 商品价格约束：_MAX_PRICE=9999999999.99、_validate_price 正/零/负/超限/边界
+  - 订单明细约束：quantity gt=0 le=99999、unit_price 非负、items min=1 max=500
+  - 收款金额约束：_MAX_AMOUNT=9999999999.99、amount 必须为正、拒绝负值和超限
+  - 库存数量约束：stock_quantity ge=0 le=9999999
+  - Decimal 精度：乘法/除法无浮点误差、quantize 2dp/4dp、字符串转换
+  - 模型字段类型：Numeric(12,2) 金额、Numeric(8,4) 费率、Integer 数量
+  - 计算一致性：小计/毛利/毛利率/折扣率/累计已付/剩余金额
+  - _MAX_PRICE 交叉校验：product/order/payment 三者常量一致
+  - 库存变动：before+change=after、增加/减少/零变动
+  - 金额序列化：Decimal→str 保持精度
+  - 订单汇总：单明细/多明细/空列表总金额
+  - 收款冲减：paid_amount 下限归零防护
+  - sort_weight：[-99999, 99999]
+  - 价格历史字段精度：Numeric(12,2)
+
+**关键发现：**
+- `_validate_price` 返回 str 而非 Decimal（Pydantic validator 保留原始类型）
+- `_MAX_PRICE` 在 product/order/payment 三个 schema 中分别定义（重复常量）但值一致
+
+**验证：**
+- 后端 2740/2740 ✓（新增 71 项）
+- ruff 0 errors ✓
+
 ## 2026-05-04（第七百三十轮·自动循环）
 
 ### 异常路径：日期范围查询边界测试（76 项覆盖 _date_range 计算、PeriodType 约束、datetime 边界转换、导出日期验证、报表端点一致性）
