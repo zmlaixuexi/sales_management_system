@@ -129,3 +129,52 @@ def test_get_request_meta_with_request_id():
     req = _mock_request(request_id="req-123")
     meta = get_request_meta(req)
     assert meta["request_id"] == "req-123"
+
+
+# ─── log_action user_agent 截断 ──────────────────────────────
+
+
+def test_log_action_truncates_long_user_agent():
+    """超长 user_agent 被截断到 500 字符"""
+    from app.services.audit_service import log_action
+
+    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    from app.models.audit import Base
+    Base.metadata.create_all(engine)
+    db = sessionmaker(bind=engine)()
+
+    long_ua = "A" * 600
+    req = _mock_request(user_agent=long_ua)
+    meta = get_request_meta(req)
+
+    log_action(
+        db, action="test", resource_type="user",
+        actor_name="tester", user_agent=meta["user_agent"],
+    )
+    db.flush()
+
+    log = db.query(AuditLog).first()
+    assert len(log.user_agent) == 500
+    assert log.user_agent == "A" * 500
+
+
+def test_log_action_short_user_agent_unchanged():
+    """短 user_agent 不被截断"""
+    from app.services.audit_service import log_action
+
+    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    from app.models.audit import Base
+    Base.metadata.create_all(engine)
+    db = sessionmaker(bind=engine)()
+
+    req = _mock_request(user_agent="ShortAgent/1.0")
+    meta = get_request_meta(req)
+
+    log_action(
+        db, action="test", resource_type="user",
+        actor_name="tester", user_agent=meta["user_agent"],
+    )
+    db.flush()
+
+    log = db.query(AuditLog).first()
+    assert log.user_agent == "ShortAgent/1.0"

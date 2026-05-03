@@ -256,3 +256,32 @@ def test_cleanup_orphan_files_returns_count(tmp_path):
     count = fs_mod.cleanup_orphan_files(db, max_age_hours=24)
 
     assert count == 3
+
+
+# ─── webp 魔数验证安全测试 ──────────────────────────────────
+
+
+def test_validate_magic_bytes_webp_rejects_non_webp_riff():
+    """非 WebP 的 RIFF 文件（如 WAV）不应通过 webp 验证"""
+    from app.services.file_service import _validate_magic_bytes
+    # RIFF 头但不是 WebP（WAV 格式）
+    fake_wav = b"RIFF\x24\x08\x00\x00WAVD" + b"\x00" * 100
+    with pytest.raises(HTTPException) as exc_info:
+        _validate_magic_bytes(fake_wav, "image/webp")
+    assert exc_info.value.status_code == 400
+
+
+def test_validate_magic_bytes_webp_accepts_valid():
+    """合法 WebP 文件通过验证"""
+    from app.services.file_service import _validate_magic_bytes
+    valid_webp = b"RIFF\x00\x00\x00\x00WEBP" + b"\x00" * 100
+    _validate_magic_bytes(valid_webp, "image/webp")  # 不抛异常
+
+
+def test_validate_magic_bytes_webp_rejects_only_webp_no_riff():
+    """只有 WEBP 头但缺少 RIFF 头不应通过"""
+    from app.services.file_service import _validate_magic_bytes
+    bad_content = b"WEBP" + b"\x00" * 100
+    with pytest.raises(HTTPException) as exc_info:
+        _validate_magic_bytes(bad_content, "image/webp")
+    assert exc_info.value.status_code == 400

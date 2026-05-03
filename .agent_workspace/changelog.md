@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-03（第六百四十四轮·自动循环）
+
+### 安全修复 + 代码质量：webp 魔数验证 OR→AND + 边界路径测试
+
+- file_service.py _validate_magic_bytes 修复 webp 多签名 OR 逻辑安全缺陷（非 WebP RIFF 文件可绕过验证）
+- 改为 AND 逻辑：webp 文件必须同时包含 RIFF 和 WEBP 魔数（前 64 字节内）
+- test_file_service.py +3 测试：非 WebP RIFF 拒绝、合法 WebP 通过、仅 WEBP 无 RIFF 拒绝
+- test_audit_service.py +2 测试：超长 user_agent 截断 500 字符、短 user_agent 不变
+- 后端 1352/1352 ✓
+
 ## 2026-05-03（第六百四十三轮·自动循环）
 
 ### 文档 + 测试：同步 testing.md 并添加 /metrics 集成测试

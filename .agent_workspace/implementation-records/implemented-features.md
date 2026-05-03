@@ -6,6 +6,14 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-233
+
+- 描述：修复 webp 魔数验证 OR→AND 安全缺陷 + 边界路径测试补强
+- 状态：已完成
+- 验证：file_service webp 多签名改为 AND 逻辑，+5 测试覆盖
+- 安全影响：非 WebP RIFF 文件（WAV/AVI）此前可绕过 webp 类型验证
+- 关联：app/services/file_service.py、tests/test_file_service.py、tests/test_audit_service.py
+
 ## 功能编号：FEAT-20260503-232
 
 - 描述：/metrics 端点集成测试 + testing.md 同步

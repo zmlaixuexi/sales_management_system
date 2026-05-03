@@ -52,13 +52,22 @@ def _validate_magic_bytes(content: bytes, content_type: str) -> None:
             status_code=400,
             detail={"code": "FILE_INVALID_TYPE", "message": "文件内容为空"},
         )
-    for sig in MAGIC_SIGNATURES[content_type]:
-        if content.startswith(sig):
-            return
-    raise HTTPException(
-        status_code=400,
-        detail={"code": "FILE_INVALID_TYPE", "message": f"文件内容与声明的类型 {content_type} 不匹配"},
-    )
+    signatures = MAGIC_SIGNATURES[content_type]
+    # 多签名类型（如 webp 需要 RIFF + WEBP）：所有签名都必须匹配
+    if len(signatures) > 1:
+        for sig in signatures:
+            if sig not in content[:64]:
+                raise HTTPException(
+                    status_code=400,
+                    detail={"code": "FILE_INVALID_TYPE", "message": f"文件内容与声明的类型 {content_type} 不匹配"},
+                )
+        return
+    # 单签名类型（jpeg/png）：前缀匹配即可
+    if not content.startswith(signatures[0]):
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "FILE_INVALID_TYPE", "message": f"文件内容与声明的类型 {content_type} 不匹配"},
+        )
 
 
 async def upload_image(db: Session, file: UploadFile, user_id: uuid.UUID | None = None) -> File:
