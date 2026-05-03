@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor, act, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 
 const _customerApi = {
@@ -15,11 +15,13 @@ vi.mock('@/api/customers', () => ({
   updateCustomer: (...a: any[]) => _customerApi.updateCustomer(...a),
 }))
 
+const _useSubmit: { callback: any; submitting: boolean } = { callback: null, submitting: false }
+
 vi.mock('@/hooks/useSubmit', () => ({
-  useSubmit: (_onSubmit: any) => ({
-    submitting: false,
-    handleSubmit: (e: any) => { e?.preventDefault?.() },
-  }),
+  useSubmit: (onSubmit: any) => {
+    _useSubmit.callback = onSubmit
+    return { submitting: _useSubmit.submitting, handleSubmit: (e: any) => { e?.preventDefault?.() } }
+  },
 }))
 
 const _mockForm = {
@@ -290,5 +292,70 @@ describe('CustomerForm', () => {
     const formItems = screen.getAllByTestId('form-item')
     const names = formItems.map((fi) => fi.getAttribute('data-name'))
     expect(names).toContain('remark')
+  })
+
+  it('创建客户成功', async () => {
+    _customerApi.createCustomer.mockResolvedValueOnce({ success: true })
+    const { message } = await import('antd')
+    renderNewCustomer()
+    await act(async () => {
+      await _useSubmit.callback({ name: '新客户', phone: '13800001111' })
+    })
+    await waitFor(() => {
+      expect(_customerApi.createCustomer).toHaveBeenCalledWith(
+        expect.objectContaining({ name: '新客户' }),
+      )
+      expect(message.success).toHaveBeenCalledWith('创建成功')
+    })
+  })
+
+  it('更新客户成功', async () => {
+    _customerApi.fetchCustomer.mockResolvedValue({ success: true, data: {} })
+    _customerApi.updateCustomer.mockResolvedValueOnce({ success: true })
+    const { message } = await import('antd')
+    renderEditCustomer()
+    await act(async () => {
+      await _useSubmit.callback({ name: '更新客户' })
+    })
+    await waitFor(() => {
+      expect(_customerApi.updateCustomer).toHaveBeenCalledWith(
+        'c-123',
+        expect.objectContaining({ name: '更新客户' }),
+      )
+      expect(message.success).toHaveBeenCalledWith('更新成功')
+    })
+  })
+
+  it('创建客户失败不崩溃', async () => {
+    _customerApi.createCustomer.mockRejectedValueOnce(new Error('创建失败'))
+    renderNewCustomer()
+    await act(async () => {
+      await _useSubmit.callback({ name: '失败客户' }).catch(() => {})
+    })
+    await waitFor(() => {
+      expect(_customerApi.createCustomer).toHaveBeenCalled()
+    })
+  })
+
+  it('更新客户失败不崩溃', async () => {
+    _customerApi.fetchCustomer.mockResolvedValue({ success: true, data: {} })
+    _customerApi.updateCustomer.mockRejectedValueOnce(new Error('更新失败'))
+    renderEditCustomer()
+    await act(async () => {
+      await _useSubmit.callback({ name: '失败' }).catch(() => {})
+    })
+    await waitFor(() => {
+      expect(_customerApi.updateCustomer).toHaveBeenCalled()
+    })
+  })
+
+  it('fetchCustomer 失败导航回列表并显示错误', async () => {
+    _customerApi.fetchCustomer.mockRejectedValueOnce(new Error('加载失败'))
+    const { message } = await import('antd')
+    renderEditCustomer()
+    await waitFor(() => {
+      expect(_customerApi.fetchCustomer).toHaveBeenCalledWith('c-123')
+      expect(message.error).toHaveBeenCalledWith('加载客户信息失败')
+    })
   })
 })
