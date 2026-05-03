@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-03（第五百九十六轮·自动循环）
+
+### 测试：补强 Roles 分支覆盖率，93.02% → 100%
+
+- Roles.test.tsx +3：updateRole/createRole/deleteRole success=false
+- 整体分支覆盖率 98.7% → 99.09%，总测试数 807 → 810
+
 ## 2026-05-03（第五百九十五轮·自动循环）
 
 ### 测试：补强 Products 分支覆盖率，93.75% → 96.87%
