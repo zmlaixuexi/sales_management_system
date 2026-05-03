@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from prometheus_fastapi_instrumentator import Instrumentator
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 import app.core.logging
 import app.core.metrics as _business_metrics  # noqa: F401
@@ -110,6 +111,20 @@ async def http_exception_handler(_request: Request, exc: HTTPException):
             error["details"] = detail["details"]
     else:
         error = {"code": "SYSTEM_INTERNAL_ERROR", "message": str(detail)}
+    result: dict = {"success": False, "error": error}
+    rid = request_id_ctx.get("")
+    if rid:
+        result["request_id"] = rid
+    return JSONResponse(status_code=exc.status_code, content=result)
+
+
+@app.exception_handler(StarletteHTTPException)
+async def starlette_exception_handler(_request: Request, exc: StarletteHTTPException):
+    """将 Starlette 路由异常（404/405 等）统一为标准 JSON 格式"""
+    from app.core.request_id import request_id_ctx
+
+    error = {"code": "RESOURCE_NOT_FOUND" if exc.status_code == 404 else "METHOD_NOT_ALLOWED",
+             "message": str(exc.detail)}
     result: dict = {"success": False, "error": error}
     rid = request_id_ctx.get("")
     if rid:

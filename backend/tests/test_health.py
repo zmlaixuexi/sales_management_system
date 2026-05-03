@@ -158,6 +158,26 @@ def test_production_env_rejects_default_secret(monkeypatch):
     assert should_reject is False
 
 
+def test_404_returns_standard_json():
+    """404 Not Found 应返回标准 JSON 格式"""
+    response = client.get("/api/v1/nonexistent-endpoint")
+    assert response.status_code == 404
+    data = response.json()
+    assert data["success"] is False
+    assert data["error"]["code"] == "RESOURCE_NOT_FOUND"
+    assert "request_id" in data
+
+
+def test_405_returns_standard_json():
+    """405 Method Not Allowed 应返回标准 JSON 格式"""
+    response = client.patch("/api/v1/health")
+    assert response.status_code == 405
+    data = response.json()
+    assert data["success"] is False
+    assert data["error"]["code"] == "METHOD_NOT_ALLOWED"
+    assert "request_id" in data
+
+
 def test_unhandled_exception_returns_json():
     """全局未处理异常应返回一致的 JSON 格式，不泄露内部详情"""
     from fastapi import APIRouter
