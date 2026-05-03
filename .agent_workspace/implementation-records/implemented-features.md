@@ -6,6 +6,13 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-235
+
+- 描述：docker-compose 添加 Prometheus + Grafana 监控栈
+- 状态：已完成
+- 验证：YAML 格式校验通过，Grafana 使用 profiles 按需启用
+- 关联：deploy/docker-compose.prod.yml、deploy/prometheus.yml、deploy/grafana/dashboards.yml
+
 ## 功能编号：FEAT-20260503-234
 
 - 描述：Grafana 业务运营仪表盘 JSON 模板

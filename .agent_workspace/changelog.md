@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-03（第六百四十七轮·自动循环）
+
+### 部署体验：docker-compose 添加 Prometheus + Grafana 监控栈
+
+- docker-compose.prod.yml 新增 prometheus + grafana 服务
+- Grafana 使用 profiles: monitoring，默认不启动，`--profile monitoring` 按需启用
+- 新增 deploy/prometheus.yml：15s 采集间隔，从 backend:8000/metrics 抓取
+- 新增 deploy/grafana/dashboards.yml：自动加载 dashboard.json
+- 新增 prometheus_data / grafana_data 持久卷
+
 ## 2026-05-03（第六百四十六轮·自动循环）
 
 ### 可观测性：Grafana 业务运营仪表盘 JSON 模板

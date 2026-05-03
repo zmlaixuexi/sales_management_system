@@ -2,16 +2,16 @@
 
 最后更新时间：2026-05-03
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-646
-当前任务名称：自动循环：完成第 646 轮开发推进
+当前任务编号：ROUND-647
+当前任务名称：自动循环：完成第 647 轮开发推进
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 647：docker-compose 添加 Prometheus + Grafana 监控栈
 - Round 646：Grafana 业务运营仪表盘 JSON 模板（12 面板）
 - Round 645：testing.md 同步至 1352 后端测试
-- Round 644：修复 webp 魔数验证安全缺陷 + 边界路径测试
 
 ## 验证状态
 
@@ -28,10 +28,10 @@
 ## 下一步第一动作
 
 继续 keep-going 模式。可选方向：
-- 部署体验：docker-compose.prod.yml 添加 Grafana + Prometheus 服务
 - 代码质量：后端更多边界路径探索
 - 安全加固：更多输入校验边界
-- 文档：README 中补充可观测性使用说明
+- 文档：README 补充监控部署说明
+- 部署体验：manage.sh 添加监控启停命令
 
 ## 阻塞问题
 
