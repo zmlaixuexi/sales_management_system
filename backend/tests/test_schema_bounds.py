@@ -150,7 +150,7 @@ def test_user_create_role_ids_too_many_422():
     with pytest.raises(ValidationError):
         UserCreate(
             username="testuser",
-            password="pass123abc",
+            password="Pass123abc!",
             role_ids=[f"00000000-0000-0000-0000-{i:012d}" for i in range(51)],
         )
 
@@ -158,7 +158,7 @@ def test_user_create_role_ids_too_many_422():
 def test_user_create_role_ids_at_max_ok():
     u = UserCreate(
         username="testuser",
-        password="pass123abc",
+        password="Pass123abc!",
         role_ids=[f"00000000-0000-0000-0000-{i:012d}" for i in range(50)],
     )
     assert len(u.role_ids) == 50
@@ -330,16 +330,16 @@ def test_inventory_adjust_product_id_valid_uuid_ok():
 
 def test_user_create_role_ids_invalid_uuid_422():
     with pytest.raises(ValidationError, match="角色 ID"):
-        UserCreate(username="testuser", password="pass123abc", role_ids=["not-a-uuid"])
+        UserCreate(username="testuser", password="Pass123abc!", role_ids=["not-a-uuid"])
 
 
 def test_user_create_role_ids_valid_uuid_ok():
-    u = UserCreate(username="testuser", password="pass123abc", role_ids=["12345678-1234-1234-1234-123456789abc"])
+    u = UserCreate(username="testuser", password="Pass123abc!", role_ids=["12345678-1234-1234-1234-123456789abc"])
     assert len(u.role_ids) == 1
 
 
 def test_user_create_role_ids_empty_ok():
-    u = UserCreate(username="testuser", password="pass123abc", role_ids=[])
+    u = UserCreate(username="testuser", password="Pass123abc!", role_ids=[])
     assert u.role_ids == []
 
 

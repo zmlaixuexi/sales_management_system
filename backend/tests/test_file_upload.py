@@ -48,7 +48,7 @@ def setup_module(module):
         user = User(
             id=uuid.uuid4(),
             username="file_tester",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="文件测试员",
             is_active=True,
             is_superuser=True,
@@ -113,7 +113,7 @@ def _make_png_bytes(size_kb: int = 1) -> bytes:
 def test_01_login():
     """登录获取 Token"""
     resp = client.post("/api/v1/auth/login", json={
-        "username": "file_tester", "password": "testpass123",
+        "username": "file_tester", "password": "TestPass123!",
     })
     assert resp.status_code == 200
     _tokens["access"] = resp.json()["data"]["access_token"]
@@ -270,7 +270,7 @@ def test_14_delete_other_user_file_forbidden():
     other_user = User(
         id=uuid.uuid4(),
         username="file_other",
-        hashed_password=hash_password("testpass123"),
+        hashed_password=hash_password("TestPass123!"),
         display_name="其他用户",
         is_active=True,
         is_superuser=False,
@@ -282,7 +282,7 @@ def test_14_delete_other_user_file_forbidden():
 
     # 以第二个用户登录
     resp = client.post("/api/v1/auth/login", json={
-        "username": "file_other", "password": "testpass123",
+        "username": "file_other", "password": "TestPass123!",
     })
     assert resp.status_code == 200
     other_token = resp.json()["data"]["access_token"]
@@ -405,7 +405,7 @@ def test_22_get_other_user_file_forbidden():
     other_user = User(
         id=uuid.uuid4(),
         username="file_viewer",
-        hashed_password=hash_password("testpass123"),
+        hashed_password=hash_password("TestPass123!"),
         display_name="查看用户",
         is_active=True,
         is_superuser=False,
@@ -416,7 +416,7 @@ def test_22_get_other_user_file_forbidden():
     db.close()
 
     resp = client.post("/api/v1/auth/login", json={
-        "username": "file_viewer", "password": "testpass123",
+        "username": "file_viewer", "password": "TestPass123!",
     })
     other_token = resp.json()["data"]["access_token"]
 
@@ -488,7 +488,7 @@ def test_25_upload_requires_product_create_permission():
     no_perm_user = User(
         id=uuid.uuid4(),
         username="no_upload_perm",
-        hashed_password=hash_password("testpass123"),
+        hashed_password=hash_password("TestPass123!"),
         display_name="无上传权限用户",
         is_active=True,
         is_superuser=False,
@@ -512,7 +512,7 @@ def test_25_upload_requires_product_create_permission():
     db.close()
 
     resp = client.post("/api/v1/auth/login", json={
-        "username": "no_upload_perm", "password": "testpass123",
+        "username": "no_upload_perm", "password": "TestPass123!",
     })
     assert resp.status_code == 200
     token = resp.json()["data"]["access_token"]

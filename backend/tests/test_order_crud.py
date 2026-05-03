@@ -58,7 +58,7 @@ def setup_module(module):
         user = User(
             id=uuid.uuid4(),
             username="order_tester",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="订单测试员",
             is_active=True,
             is_superuser=True,
@@ -1171,7 +1171,7 @@ def test_47_order_logs_strip_cost_fields_for_non_privileged():
         # 创建非特权用户（有 order:view + order:view_all，无 product:view_cost）
         sale_user = User(
             id=uuid.uuid4(), username="log_cost_viewer",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="日志成本查看者",
             is_active=True, is_superuser=False,
         )

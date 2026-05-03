@@ -42,7 +42,7 @@ def setup_module(module):
         admin = User(
             id=uuid.uuid4(),
             username="prod_admin",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="商品管理员",
             is_active=True,
             is_superuser=True,
@@ -93,7 +93,7 @@ def _auth():
 
 def test_01_login():
     resp = client.post("/api/v1/auth/login", json={
-        "username": "prod_admin", "password": "testpass123",
+        "username": "prod_admin", "password": "TestPass123!",
     })
     assert resp.status_code == 200
     _tokens["access"] = resp.json()["data"]["access_token"]
@@ -659,7 +659,7 @@ def test_27_product_list_cost_fields_hidden_for_non_privileged():
         # 创建非特权用户（有 product:list 但无 product:view_cost）
         viewer = User(
             id=uuid.uuid4(), username="product_viewer",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="商品查看者",
             is_active=True, is_superuser=False,
         )
@@ -705,7 +705,7 @@ def test_28_product_detail_cost_fields_hidden_for_non_privileged():
     try:
         viewer = User(
             id=uuid.uuid4(), username="product_detail_viewer",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="商品详情查看者",
             is_active=True, is_superuser=False,
         )
@@ -842,7 +842,7 @@ def test_35_delete_product_no_permission_403():
     try:
         nop = User(
             id=uuid.uuid4(), username="no_product_delete",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="无删除权限", is_active=True, is_superuser=False,
         )
         db.add(nop)

@@ -18,7 +18,7 @@ def make_user_with_perms(session_factory, username: str, perms: list[str]) -> st
     try:
         user = User(
             id=uuid.uuid4(), username=username,
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name=username, is_active=True, is_superuser=False,
         )
         db.add(user)

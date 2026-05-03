@@ -47,7 +47,7 @@ def setup_module(module):
         user = User(
             id=uuid.uuid4(),
             username="inv_tester",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="库存测试员",
             is_active=True,
             is_superuser=True,
@@ -206,7 +206,7 @@ def test_11_adjust_no_permission_403():
     try:
         nop = User(
             id=uuid.uuid4(), username="no_inv_adjust",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="无库存调整权限", is_active=True, is_superuser=False,
         )
         db.add(nop)
@@ -227,7 +227,7 @@ def test_12_list_no_permission_403():
     try:
         nop = User(
             id=uuid.uuid4(), username="no_inv_list",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="无库存列表权限", is_active=True, is_superuser=False,
         )
         db.add(nop)

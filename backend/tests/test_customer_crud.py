@@ -42,7 +42,7 @@ def setup_module(module):
         admin = User(
             id=uuid.uuid4(),
             username="crud_admin",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="CRUD管理员",
             is_active=True,
             is_superuser=True,
@@ -53,7 +53,7 @@ def setup_module(module):
         second = User(
             id=uuid.uuid4(),
             username="second_user",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="第二销售员",
             is_active=True,
             is_superuser=True,
@@ -101,7 +101,7 @@ def _auth():
 
 def test_01_login():
     resp = client.post("/api/v1/auth/login", json={
-        "username": "crud_admin", "password": "testpass123",
+        "username": "crud_admin", "password": "TestPass123!",
     })
     assert resp.status_code == 200
     _tokens["access"] = resp.json()["data"]["access_token"]
@@ -645,7 +645,7 @@ def test_35_delete_customer_no_permission_403():
     try:
         nop = User(
             id=uuid.uuid4(), username="no_customer_delete",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="无删除权限", is_active=True, is_superuser=False,
         )
         db.add(nop)

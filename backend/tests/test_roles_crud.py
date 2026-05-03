@@ -42,7 +42,7 @@ def setup_module(module):
         admin = User(
             id=uuid.uuid4(),
             username="roles_admin",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="角色管理员",
             is_active=True,
             is_superuser=True,
@@ -89,7 +89,7 @@ def _auth():
 def test_01_login_admin():
     """管理员登录"""
     resp = client.post("/api/v1/auth/login", json={
-        "username": "roles_admin", "password": "testpass123",
+        "username": "roles_admin", "password": "TestPass123!",
     })
     assert resp.status_code == 200
     _tokens["access"] = resp.json()["data"]["access_token"]

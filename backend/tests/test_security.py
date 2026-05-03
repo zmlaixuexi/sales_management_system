@@ -272,8 +272,12 @@ def test_password_beyond_72_bytes():
 
 
 @pytest.mark.parametrize("pwd,error_keyword", [
-    ("123456", "字母"),
-    ("abcdef", "数字"),
+    ("123456!", "字母"),
+    ("Abcdef!", "数字"),
+    ("abcdef1!", "大写"),
+    ("ABCDEF1!", "小写"),
+    ("Abcdef1", "特殊"),
+    ("P@ssw0rd!", "常见"),
 ])
 def test_user_create_rejects_weak_passwords(pwd, error_keyword):
     """创建用户时拒绝弱密码"""
@@ -289,13 +293,13 @@ def test_user_create_rejects_short_password():
 
 def test_user_create_accepts_strong_password():
     """创建用户时接受符合要求的密码"""
-    u = UserCreate(username="test", password="test12")
-    assert u.password == "test12"
+    u = UserCreate(username="test", password="Test12!")
+    assert u.password == "Test12!"
 
 
 @pytest.mark.parametrize("pwd,error_keyword", [
-    ("123456", "字母"),
-    ("abcdef", "数字"),
+    ("123456!", "字母"),
+    ("Abcdef!", "数字"),
 ])
 def test_change_password_rejects_weak_new_password(pwd, error_keyword):
     """修改密码时拒绝弱新密码"""

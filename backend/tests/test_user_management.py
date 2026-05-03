@@ -40,7 +40,7 @@ def setup_module(module):
         admin = User(
             id=uuid.uuid4(),
             username="mgmt_admin",
-            hashed_password=hash_password("admin123"),
+            hashed_password=hash_password("Admin123!"),
             display_name="管理测试员",
             is_active=True,
             is_superuser=True,
@@ -82,7 +82,7 @@ def _auth():
 def test_01_login_admin():
     """管理员登录"""
     resp = client.post("/api/v1/auth/login", json={
-        "username": "mgmt_admin", "password": "admin123",
+        "username": "mgmt_admin", "password": "Admin123!",
     })
     assert resp.status_code == 200
     _tokens["access"] = resp.json()["data"]["access_token"]
@@ -108,7 +108,7 @@ def test_04_create_user():
     """创建用户"""
     resp = client.post("/api/v1/users", json={
         "username": "newuser",
-        "password": "password123",
+        "password": "Password123!",
         "display_name": "新建用户",
         "phone": "13800001234",
         "role_ids": [_role_id],
@@ -122,7 +122,7 @@ def test_05_create_duplicate_username():
     """创建重复用户名"""
     resp = client.post("/api/v1/users", json={
         "username": "newuser",
-        "password": "password123",
+        "password": "Password123!",
         "display_name": "重复用户",
     }, headers=_auth())
     assert resp.status_code == 400
@@ -192,12 +192,12 @@ def test_10_create_user_requires_admin():
     db.close()
 
     login = client.post("/api/v1/auth/login", json={
-        "username": "newuser", "password": "password123",
+        "username": "newuser", "password": "Password123!",
     })
     token = login.json()["data"]["access_token"]
 
     resp = client.post("/api/v1/users", json={
-        "username": "unauthorized", "password": "pass123456",
+        "username": "unauthorized", "password": "Pass123456!",
     }, headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 403
 
@@ -212,7 +212,7 @@ def test_11_non_admin_update_user_forbidden():
     db.close()
 
     login = client.post("/api/v1/auth/login", json={
-        "username": "newuser", "password": "password123",
+        "username": "newuser", "password": "Password123!",
     })
     token = login.json()["data"]["access_token"]
     admin_id = resp_id_from_list("mgmt_admin")
@@ -273,7 +273,7 @@ def test_16_create_user_invalid_role_ids_400():
     fake_role_id = str(uuid.uuid4())
     resp = client.post("/api/v1/users", json={
         "username": "badroleuser",
-        "password": "password123",
+        "password": "Password123!",
         "display_name": "无效角色用户",
         "role_ids": [fake_role_id],
     }, headers=_auth())
@@ -302,7 +302,7 @@ def test_18_list_roles_requires_admin():
     db.close()
 
     login = client.post("/api/v1/auth/login", json={
-        "username": "newuser", "password": "password123",
+        "username": "newuser", "password": "Password123!",
     })
     token = login.json()["data"]["access_token"]
 
@@ -335,7 +335,7 @@ def test_21_list_users_non_admin_forbidden():
     db.close()
 
     login = client.post("/api/v1/auth/login", json={
-        "username": "newuser", "password": "password123",
+        "username": "newuser", "password": "Password123!",
     })
     token = login.json()["data"]["access_token"]
 
@@ -347,7 +347,7 @@ def test_22_create_user_audit_log():
     """创建用户产生审计日志"""
     resp = client.post("/api/v1/users", json={
         "username": "audit_target",
-        "password": "password123",
+        "password": "Password123!",
         "display_name": "审计目标用户",
     }, headers=_auth())
     assert resp.status_code == 200
@@ -385,7 +385,7 @@ def test_24_create_user_display_name_too_long_422():
     """display_name 超过 max_length 返回 422"""
     resp = client.post("/api/v1/users", json={
         "username": "longnameuser",
-        "password": "password123",
+        "password": "Password123!",
         "display_name": "A" * 101,
     }, headers=_auth())
     assert resp.status_code == 422
@@ -395,7 +395,7 @@ def test_25_create_user_phone_too_long_422():
     """phone 超过 max_length 返回 422"""
     resp = client.post("/api/v1/users", json={
         "username": "longphoneuser",
-        "password": "password123",
+        "password": "Password123!",
         "phone": "1" * 31,
     }, headers=_auth())
     assert resp.status_code == 422
@@ -419,7 +419,7 @@ def test_27_create_user_malformed_role_ids_422():
     """创建用户时 role_ids 含非 UUID 字符串由 Pydantic 拦截返回 422"""
     resp = client.post("/api/v1/users", json={
         "username": "badroleuser",
-        "password": "password123",
+        "password": "Password123!",
         "role_ids": ["not-a-uuid"],
     }, headers=_admin_auth())
     assert resp.status_code == 422
@@ -429,7 +429,7 @@ def test_28_update_user_empty_role_ids():
     """编辑用户 role_ids 为空列表清除所有角色"""
     resp = client.post("/api/v1/users", json={
         "username": "emptyroleuser",
-        "password": "password123",
+        "password": "Password123!",
         "role_ids": [_role_id],
     }, headers=_admin_auth())
     assert resp.status_code == 200
@@ -522,7 +522,7 @@ def test_37_create_user_password_letters_and_special_no_digits_422():
     """密码含字母和特殊字符但无数字返回 422"""
     resp = client.post("/api/v1/users", json={
         "username": "nodigituser2",
-        "password": "abc!@#$",
+        "password": "Abc!@#$",
         "display_name": "无数字密码用户",
     }, headers=_admin_auth())
     assert resp.status_code == 422
@@ -543,12 +543,12 @@ def test_38_create_user_password_digits_and_special_no_letters_422():
 def test_39_change_password_special_only_422():
     """修改密码为纯特殊字符返回 422"""
     login_resp = client.post("/api/v1/auth/login", json={
-        "username": "mgmt_admin", "password": "admin123",
+        "username": "mgmt_admin", "password": "Admin123!",
     })
     token = login_resp.json()["data"]["access_token"]
 
     resp = client.post("/api/v1/auth/change-password", json={
-        "old_password": "admin123",
+        "old_password": "Admin123!",
         "new_password": "!@#$%^",
     }, headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 422

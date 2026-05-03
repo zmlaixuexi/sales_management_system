@@ -53,7 +53,7 @@ def setup_module(module):
         user = User(
             id=uuid.uuid4(),
             username="pay_tester",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="收款测试员",
             is_active=True,
             is_superuser=True,
@@ -265,7 +265,7 @@ def _create_user_with_perms(db, username, perm_codes):
     user = User(
         id=uuid.uuid4(),
         username=username,
-        hashed_password=hash_password("testpass123"),
+        hashed_password=hash_password("TestPass123!"),
         display_name=username,
         is_active=True,
         is_superuser=False,
@@ -540,7 +540,7 @@ def test_18_payment_no_permission_403():
     try:
         nop = User(
             id=uuid.uuid4(), username="no_pay_perm",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="无收款权限", is_active=True, is_superuser=False,
         )
         db.add(nop)

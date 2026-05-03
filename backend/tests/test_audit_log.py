@@ -43,7 +43,7 @@ def setup_module(module):
         user = User(
             id=uuid.uuid4(),
             username="audit_tester",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="审计测试员",
             is_active=True,
             is_superuser=True,
@@ -78,7 +78,7 @@ def test_01_login_creates_audit_log():
     """登录成功产生审计日志"""
     resp = client.post("/api/v1/auth/login", json={
         "username": "audit_tester",
-        "password": "testpass123",
+        "password": "TestPass123!",
     })
     assert resp.status_code == 200
     _tokens["access"] = resp.json()["data"]["access_token"]
@@ -182,7 +182,7 @@ def test_04_customer_crud_audit_logs():
     # 客户归属转移
     other_user = User(
         id=uuid.uuid4(), username="transfer_target",
-        hashed_password=hash_password("testpass123"),
+        hashed_password=hash_password("TestPass123!"),
         display_name="转移目标用户", is_active=True, is_superuser=False,
     )
     db2 = TestSession()
@@ -630,7 +630,7 @@ def test_30_customer_transfer_audit_log_fields():
     from app.models.user import User as UserModel
     target = UserModel(
         id=uuid.uuid4(), username="transfer_target_30",
-        hashed_password=hash_password("testpass123"),
+        hashed_password=hash_password("TestPass123!"),
         display_name="转移目标", is_active=True, is_superuser=False,
     )
     db = TestSession()
@@ -688,7 +688,7 @@ def test_32_login_success_audit_log_fields():
     headers = _admin_auth()
     resp = client.post("/api/v1/auth/login", json={
         "username": "audit_tester",
-        "password": "testpass123",
+        "password": "TestPass123!",
     })
     assert resp.status_code == 200
 
@@ -727,7 +727,7 @@ def test_34_user_create_audit_log_fields():
     headers = _admin_auth()
     resp = client.post("/api/v1/users", json={
         "username": "audit_create_user",
-        "password": "password123",
+        "password": "Password123!",
         "display_name": "审计创建用户",
     }, headers=headers)
     assert resp.status_code == 200
@@ -748,7 +748,7 @@ def test_35_user_update_audit_log_fields():
     # 创建用户
     resp = client.post("/api/v1/users", json={
         "username": "audit_update_user",
-        "password": "password123",
+        "password": "Password123!",
         "display_name": "更新前名称",
     }, headers=headers)
     assert resp.status_code == 200
@@ -773,8 +773,8 @@ def test_36_password_change_audit_log_fields():
     headers = _admin_auth()
     # 修改密码
     resp = client.post("/api/v1/auth/change-password", json={
-        "old_password": "testpass123",
-        "new_password": "auditpass123",
+        "old_password": "TestPass123!",
+        "new_password": "Auditpass123!",
     }, headers=headers)
     assert resp.status_code == 200
 
@@ -799,12 +799,12 @@ def test_36_password_change_audit_log_fields():
 
     # 改回原密码
     login2 = client.post("/api/v1/auth/login", json={
-        "username": "audit_tester", "password": "auditpass123",
+        "username": "audit_tester", "password": "Auditpass123!",
     })
     token2 = login2.json()["data"]["access_token"]
     client.post("/api/v1/auth/change-password", json={
-        "old_password": "auditpass123",
-        "new_password": "testpass123",
+        "old_password": "Auditpass123!",
+        "new_password": "TestPass123!",
     }, headers={"Authorization": f"Bearer {token2}"})
 
 
@@ -1024,7 +1024,7 @@ def test_45_user_update_audit_log_before_data():
     # 创建用户
     resp = client.post("/api/v1/users", json={
         "username": "before_data_user",
-        "password": "password123",
+        "password": "Password123!",
         "display_name": "编辑前名称",
     }, headers=headers)
     assert resp.status_code == 200
@@ -1086,7 +1086,7 @@ def test_47_all_audit_logs_have_actor_and_ip():
     headers = _admin_auth()
     # 执行一个操作确保有审计日志
     client.post("/api/v1/auth/login", json={
-        "username": "audit_tester", "password": "testpass123",
+        "username": "audit_tester", "password": "TestPass123!",
     })
 
     resp = client.get("/api/v1/audit-logs", params={"page_size": 50}, headers=headers)
@@ -1373,7 +1373,7 @@ def test_58_audit_logs_ordered_by_created_at_desc():
     headers = _admin_auth()
     # 执行操作确保有审计日志
     client.post("/api/v1/auth/login", json={
-        "username": "audit_tester", "password": "testpass123",
+        "username": "audit_tester", "password": "TestPass123!",
     })
     client.post("/api/v1/products", json={
         "name": "排序审计商品",
@@ -1398,7 +1398,7 @@ def test_59_audit_log_pagination_page2():
     headers = _admin_auth()
     # 确保有足够审计日志
     client.post("/api/v1/auth/login", json={
-        "username": "audit_tester", "password": "testpass123",
+        "username": "audit_tester", "password": "TestPass123!",
     })
     client.post("/api/v1/products", json={
         "name": "分页审计商品",
@@ -1510,7 +1510,7 @@ def test_62_customer_transfer_audit_log_before_data():
     # 创建目标用户
     target = User(
         id=uuid.uuid4(), username="transfer_target_62",
-        hashed_password=hash_password("testpass123"),
+        hashed_password=hash_password("TestPass123!"),
         display_name="转移目标62", is_active=True, is_superuser=False,
     )
     db = TestSession()
@@ -1720,7 +1720,7 @@ def test_67_user_disable_audit_log_before_data():
     # 创建用户
     resp = client.post("/api/v1/users", json={
         "username": "disable_audit_user",
-        "password": "password123",
+        "password": "Password123!",
         "display_name": "禁用审计用户",
     }, headers=headers)
     assert resp.status_code == 200
@@ -1758,8 +1758,8 @@ def test_68_password_change_audit_log_after_data():
     headers = _admin_auth()
     # 修改密码
     resp = client.post("/api/v1/auth/change-password", json={
-        "old_password": "testpass123",
-        "new_password": "auditpass123",
+        "old_password": "TestPass123!",
+        "new_password": "Auditpass123!",
     }, headers=headers)
     assert resp.status_code == 200
 
@@ -1785,12 +1785,12 @@ def test_68_password_change_audit_log_after_data():
 
     # 改回原密码
     login2 = client.post("/api/v1/auth/login", json={
-        "username": "audit_tester", "password": "auditpass123",
+        "username": "audit_tester", "password": "Auditpass123!",
     })
     token2 = login2.json()["data"]["access_token"]
     client.post("/api/v1/auth/change-password", json={
-        "old_password": "auditpass123",
-        "new_password": "testpass123",
+        "old_password": "Auditpass123!",
+        "new_password": "TestPass123!",
     }, headers={"Authorization": f"Bearer {token2}"})
 
 
@@ -1853,7 +1853,7 @@ def test_71_user_create_audit_log_after_data_has_is_active():
     headers = _admin_auth()
     resp = client.post("/api/v1/users", json={
         "username": "create_active_user",
-        "password": "password123",
+        "password": "Password123!",
         "display_name": "创建活跃用户",
     }, headers=headers)
     assert resp.status_code == 200
@@ -2349,7 +2349,7 @@ def test_89_customer_transfer_audit_log_after_data_completeness():
     from app.models.user import User as UserModel
     target = UserModel(
         id=uuid.uuid4(), username="transfer_target_89",
-        hashed_password=hash_password("testpass123"),
+        hashed_password=hash_password("TestPass123!"),
         display_name="转移目标89", is_active=True, is_superuser=False,
     )
     db = TestSession()
@@ -3108,7 +3108,7 @@ def test_115_password_change_audit_log_after_data_has_username():
     headers = _admin_auth()
     # 修改密码
     resp = client.post("/api/v1/auth/change-password", json={
-        "old_password": "testpass123",
+        "old_password": "TestPass123!",
         "new_password": "Newpass456!",
     }, headers=headers)
     assert resp.status_code == 200
@@ -3128,7 +3128,7 @@ def test_115_password_change_audit_log_after_data_has_username():
     # 恢复密码以便后续测试
     client.post("/api/v1/auth/change-password", json={
         "old_password": "Newpass456!",
-        "new_password": "testpass123",
+        "new_password": "TestPass123!",
     }, headers=headers)
 
 

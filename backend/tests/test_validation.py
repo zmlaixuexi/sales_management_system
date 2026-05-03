@@ -42,7 +42,7 @@ def setup_module(module):
         user = User(
             id=uuid.uuid4(),
             username="val_tester",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="验证测试员",
             is_active=True,
             is_superuser=True,
@@ -92,7 +92,7 @@ def _auth():
 def test_01_login():
     """登录获取 Token"""
     resp = client.post("/api/v1/auth/login", json={
-        "username": "val_tester", "password": "testpass123",
+        "username": "val_tester", "password": "TestPass123!",
     })
     assert resp.status_code == 200
     _tokens["access"] = resp.json()["data"]["access_token"]
@@ -298,18 +298,18 @@ def test_21_password_no_letters():
 
 
 def test_22_password_no_digits():
-    """密码纯字母被拒绝"""
+    """密码无数字被拒绝"""
     resp = client.post("/api/v1/users", json={
-        "username": "weak_user2", "password": "abcdef",
+        "username": "weak_user2", "password": "Abcdef!",
     }, headers=_auth())
     assert resp.status_code == 422
     assert "数字" in str(resp.json())
 
 
 def test_23_password_valid_strength():
-    """包含字母和数字的密码通过"""
+    """包含大小写字母、数字和特殊字符的密码通过"""
     resp = client.post("/api/v1/users", json={
-        "username": "strong_user", "password": "pass123",
+        "username": "strong_user", "password": "Pass123!",
     }, headers=_auth())
     assert resp.status_code == 200
 

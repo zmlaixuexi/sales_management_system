@@ -141,21 +141,21 @@ def test_customer_update_strips_html():
 
 def test_user_create_password_valid():
     """合法密码通过"""
-    u = UserCreate(username="test", password="pass123")
-    assert u.password == "pass123"
+    u = UserCreate(username="test", password="Pass123!")
+    assert u.password == "Pass123!"
 
 
 def test_user_create_password_no_digits_rejected():
     """密码无数字被拒绝"""
     with pytest.raises(ValidationError) as exc_info:
-        UserCreate(username="test", password="abcdef")
+        UserCreate(username="test", password="Abcdef!")
     assert "数字" in str(exc_info.value)
 
 
 def test_user_create_password_no_letters_rejected():
     """密码无字母被拒绝"""
     with pytest.raises(ValidationError) as exc_info:
-        UserCreate(username="test", password="123456")
+        UserCreate(username="test", password="123456!")
     assert "字母" in str(exc_info.value)
 
 
@@ -164,7 +164,7 @@ def test_user_create_password_no_letters_rejected():
 
 def test_user_create_email_strips_html():
     """用户邮箱去除 HTML"""
-    u = UserCreate(username="test", password="pass123", email="<script>x</script>@evil.com")
+    u = UserCreate(username="test", password="Pass123!", email="<script>x</script>@evil.com")
     assert u.email == "x@evil.com"
 
 
@@ -179,8 +179,8 @@ def test_user_update_display_name_strips_html():
 
 def test_change_password_valid():
     """合法新密码通过"""
-    r = ChangePasswordRequest(old_password="old123", new_password="new456")
-    assert r.new_password == "new456"
+    r = ChangePasswordRequest(old_password="old123", new_password="New456!")
+    assert r.new_password == "New456!"
 
 
 def test_change_password_short_rejected():

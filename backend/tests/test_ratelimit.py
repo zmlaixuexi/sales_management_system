@@ -40,7 +40,7 @@ def setup_module(module):
         user = User(
             id=uuid.uuid4(),
             username="rl_tester",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="限流测试员",
             is_active=True,
             is_superuser=True,
@@ -72,7 +72,7 @@ def _auth():
 def test_01_login():
     """登录获取 Token"""
     resp = client.post("/api/v1/auth/login", json={
-        "username": "rl_tester", "password": "testpass123",
+        "username": "rl_tester", "password": "TestPass123!",
     })
     assert resp.status_code == 200
     _tokens["access"] = resp.json()["data"]["access_token"]

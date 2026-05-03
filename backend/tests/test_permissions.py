@@ -40,7 +40,7 @@ def _create_user_with_perms(db, username, perm_codes):
     user = User(
         id=uuid.uuid4(),
         username=username,
-        hashed_password=hash_password("testpass123"),
+        hashed_password=hash_password("TestPass123!"),
         display_name=username,
         is_active=True,
         is_superuser=False,
@@ -74,7 +74,7 @@ def setup_module(module):
         admin = User(
             id=uuid.uuid4(),
             username="perm_admin",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="权限管理员",
             is_active=True,
             is_superuser=True,
@@ -152,11 +152,11 @@ def _auth(username="sale01"):
 
 def test_01_login_both_users():
     """登录管理员和销售员"""
-    resp = client.post("/api/v1/auth/login", json={"username": "sale01", "password": "testpass123"})
+    resp = client.post("/api/v1/auth/login", json={"username": "sale01", "password": "TestPass123!"})
     assert resp.status_code == 200
     _tokens["access"] = resp.json()["data"]["access_token"]
 
-    resp = client.post("/api/v1/auth/login", json={"username": "perm_admin", "password": "testpass123"})
+    resp = client.post("/api/v1/auth/login", json={"username": "perm_admin", "password": "TestPass123!"})
     assert resp.status_code == 200
     _admin_tokens["access"] = resp.json()["data"]["access_token"]
 

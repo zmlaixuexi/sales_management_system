@@ -38,7 +38,7 @@ def setup_module(module):
         user = User(
             id=uuid.uuid4(),
             username="customer_importer",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="客户导入员",
             is_active=True,
             is_superuser=True,
@@ -70,7 +70,7 @@ def _auth():
 def test_01_login():
     """登录获取 Token"""
     resp = client.post("/api/v1/auth/login", json={
-        "username": "customer_importer", "password": "testpass123",
+        "username": "customer_importer", "password": "TestPass123!",
     })
     assert resp.status_code == 200
     _tokens["access"] = resp.json()["data"]["access_token"]
@@ -289,7 +289,7 @@ def test_17_import_requires_create_permission():
     try:
         nop = User(
             id=uuid.uuid4(), username="no_import_perm",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="无导入权限", is_active=True, is_superuser=False,
         )
         db.add(nop)

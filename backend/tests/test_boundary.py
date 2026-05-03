@@ -48,7 +48,7 @@ def setup_module(module):
         user = User(
             id=uuid.uuid4(),
             username="boundary_admin",
-            hashed_password=hash_password("pass123456"),
+            hashed_password=hash_password("Pass123456!"),
             display_name="边界管理员",
             is_active=True,
             is_superuser=True,
@@ -62,7 +62,7 @@ def setup_module(module):
         inactive = User(
             id=uuid.uuid4(),
             username="inactive_user",
-            hashed_password=hash_password("pass123456"),
+            hashed_password=hash_password("Pass123456!"),
             display_name="已禁用用户",
             is_active=False,
             is_superuser=False,
@@ -146,7 +146,7 @@ def _auth_for_user(user_id: str):
 def test_01_login():
     """登录获取 Token"""
     resp = client.post("/api/v1/auth/login", json={
-        "username": "boundary_admin", "password": "pass123456",
+        "username": "boundary_admin", "password": "Pass123456!",
     })
     assert resp.status_code == 200
     data = resp.json()["data"]
@@ -168,7 +168,7 @@ def test_03_login_inactive_user():
     """禁用用户登录返回 403"""
     # 先设为 active 登录一次，然后这里直接用 inactive 用户测试
     resp = client.post("/api/v1/auth/login", json={
-        "username": "inactive_user", "password": "pass123456",
+        "username": "inactive_user", "password": "Pass123456!",
     })
     assert resp.status_code == 403
 
@@ -204,7 +204,7 @@ def test_07_token_deleted_user():
     try:
         temp_user = User(
             id=uuid.uuid4(), username="temp_delete_me",
-            hashed_password=hash_password("pass123456"),
+            hashed_password=hash_password("Pass123456!"),
             display_name="临时用户", is_active=True, is_superuser=False,
         )
         db.add(temp_user)
@@ -493,7 +493,7 @@ def test_25_user_create_duplicate_username():
     """创建重复用户名"""
     resp = client.post("/api/v1/users", json={
         "username": "boundary_admin",
-        "password": "pass123456",
+        "password": "Pass123456!",
         "display_name": "重复用户",
     }, headers=_auth())
     assert resp.status_code == 400
@@ -516,7 +516,7 @@ def test_27_user_list_non_admin():
     try:
         normal = User(
             id=uuid.uuid4(), username="normal_user_bn",
-            hashed_password=hash_password("pass123456"),
+            hashed_password=hash_password("Pass123456!"),
             display_name="普通用户", is_active=True, is_superuser=False,
         )
         db.add(normal)
@@ -541,7 +541,7 @@ def test_28_user_create_by_non_admin():
         db.close()
 
     resp = client.post("/api/v1/users", json={
-        "username": "new_user_xyz", "password": "pass123456",
+        "username": "new_user_xyz", "password": "Pass123456!",
         "display_name": "新用户",
     }, headers={"Authorization": f"Bearer {normal_token}"})
     assert resp.status_code == 403
@@ -550,7 +550,7 @@ def test_28_user_create_by_non_admin():
 def test_29_user_create_and_update():
     """创建用户并更新"""
     resp = client.post("/api/v1/users", json={
-        "username": "test_new_user", "password": "pass123456",
+        "username": "test_new_user", "password": "Pass123456!",
         "display_name": "新用户", "phone": "13811112222",
     }, headers=_auth())
     assert resp.status_code == 200
@@ -661,7 +661,7 @@ def test_37_cancel_partially_paid_restores_inventory():
     # 确保 token 有效
     if not _tokens.get("access"):
         resp = client.post("/api/v1/auth/login", json={
-            "username": "boundary_admin", "password": "pass123456",
+            "username": "boundary_admin", "password": "Pass123456!",
         })
         assert resp.status_code == 200
         _tokens["access"] = resp.json()["data"]["access_token"]
@@ -713,7 +713,7 @@ def test_38_cancelled_order_rejects_payment():
     """已取消订单不允许登记收款"""
     if not _tokens.get("access"):
         resp = client.post("/api/v1/auth/login", json={
-            "username": "boundary_admin", "password": "pass123456",
+            "username": "boundary_admin", "password": "Pass123456!",
         })
         assert resp.status_code == 200
         _tokens["access"] = resp.json()["data"]["access_token"]
@@ -745,7 +745,7 @@ def test_39_order_with_deleted_product_rejected():
     """已删除商品不能创建订单"""
     if not _tokens.get("access"):
         resp = client.post("/api/v1/auth/login", json={
-            "username": "boundary_admin", "password": "pass123456",
+            "username": "boundary_admin", "password": "Pass123456!",
         })
         assert resp.status_code == 200
         _tokens["access"] = resp.json()["data"]["access_token"]
@@ -773,7 +773,7 @@ def test_40_transfer_to_nonexistent_user():
     """客户转移给不存在的用户应被拒绝"""
     if not _tokens.get("access"):
         resp = client.post("/api/v1/auth/login", json={
-            "username": "boundary_admin", "password": "pass123456",
+            "username": "boundary_admin", "password": "Pass123456!",
         })
         assert resp.status_code == 200
         _tokens["access"] = resp.json()["data"]["access_token"]
@@ -790,7 +790,7 @@ def test_41_self_deactivation_rejected():
     """超级管理员不能停用自己的账号"""
     if not _tokens.get("access"):
         resp = client.post("/api/v1/auth/login", json={
-            "username": "boundary_admin", "password": "pass123456",
+            "username": "boundary_admin", "password": "Pass123456!",
         })
         assert resp.status_code == 200
         _tokens["access"] = resp.json()["data"]["access_token"]
@@ -807,7 +807,7 @@ def test_42_create_user_nonexistent_role_rejected():
     """创建用户时指定不存在的角色应被拒绝"""
     if not _tokens.get("access"):
         resp = client.post("/api/v1/auth/login", json={
-            "username": "boundary_admin", "password": "pass123456",
+            "username": "boundary_admin", "password": "Pass123456!",
         })
         assert resp.status_code == 200
         _tokens["access"] = resp.json()["data"]["access_token"]
@@ -815,7 +815,7 @@ def test_42_create_user_nonexistent_role_rejected():
     fake_role_id = str(uuid.uuid4())
     resp = client.post("/api/v1/users", json={
         "username": "test_norole",
-        "password": "pass123456",
+        "password": "Pass123456!",
         "display_name": "测试用户",
         "role_ids": [fake_role_id],
     }, headers=_auth())
@@ -828,7 +828,7 @@ def test_43_order_update_deleted_customer_rejected():
     """订单更新客户 ID 为已删除客户应返回 404"""
     if not _tokens.get("access"):
         resp = client.post("/api/v1/auth/login", json={
-            "username": "boundary_admin", "password": "pass123456",
+            "username": "boundary_admin", "password": "Pass123456!",
         })
         assert resp.status_code == 200
         _tokens["access"] = resp.json()["data"]["access_token"]
@@ -863,7 +863,7 @@ def test_44_customer_create_nonexistent_owner_rejected():
     """创建客户时指定不存在的归属用户应被拒绝"""
     if not _tokens.get("access"):
         resp = client.post("/api/v1/auth/login", json={
-            "username": "boundary_admin", "password": "pass123456",
+            "username": "boundary_admin", "password": "Pass123456!",
         })
         assert resp.status_code == 200
         _tokens["access"] = resp.json()["data"]["access_token"]
@@ -883,7 +883,7 @@ def test_45_product_create_nonexistent_category_rejected():
     """创建商品时指定不存在的分类应被拒绝"""
     if not _tokens.get("access"):
         resp = client.post("/api/v1/auth/login", json={
-            "username": "boundary_admin", "password": "pass123456",
+            "username": "boundary_admin", "password": "Pass123456!",
         })
         assert resp.status_code == 200
         _tokens["access"] = resp.json()["data"]["access_token"]
@@ -904,7 +904,7 @@ def test_46_product_update_nonexistent_category_rejected():
     """更新商品分类为不存在的分类应被拒绝"""
     if not _tokens.get("access"):
         resp = client.post("/api/v1/auth/login", json={
-            "username": "boundary_admin", "password": "pass123456",
+            "username": "boundary_admin", "password": "Pass123456!",
         })
         assert resp.status_code == 200
         _tokens["access"] = resp.json()["data"]["access_token"]
@@ -925,7 +925,7 @@ def test_47_customer_search_sql_injection_safe():
     """客户搜索关键词 SQL 注入安全"""
     if not _tokens.get("access"):
         resp = client.post("/api/v1/auth/login", json={
-            "username": "boundary_admin", "password": "pass123456",
+            "username": "boundary_admin", "password": "Pass123456!",
         })
         assert resp.status_code == 200
         _tokens["access"] = resp.json()["data"]["access_token"]
@@ -948,7 +948,7 @@ def test_48_product_search_sql_injection_safe():
     """商品搜索关键词 SQL 注入安全"""
     if not _tokens.get("access"):
         resp = client.post("/api/v1/auth/login", json={
-            "username": "boundary_admin", "password": "pass123456",
+            "username": "boundary_admin", "password": "Pass123456!",
         })
         assert resp.status_code == 200
         _tokens["access"] = resp.json()["data"]["access_token"]
@@ -968,7 +968,7 @@ def test_49_order_search_sql_injection_safe():
     """订单搜索关键词 SQL 注入安全"""
     if not _tokens.get("access"):
         resp = client.post("/api/v1/auth/login", json={
-            "username": "boundary_admin", "password": "pass123456",
+            "username": "boundary_admin", "password": "Pass123456!",
         })
         assert resp.status_code == 200
         _tokens["access"] = resp.json()["data"]["access_token"]
@@ -986,7 +986,7 @@ def test_50_customer_list_page_zero_422():
     """客户列表 page=0 返回 422"""
     if not _tokens.get("access"):
         resp = client.post("/api/v1/auth/login", json={
-            "username": "boundary_admin", "password": "pass123456",
+            "username": "boundary_admin", "password": "Pass123456!",
         })
         assert resp.status_code == 200
         _tokens["access"] = resp.json()["data"]["access_token"]
@@ -999,7 +999,7 @@ def test_51_product_list_page_size_over_max_422():
     """商品列表 page_size=101 返回 422"""
     if not _tokens.get("access"):
         resp = client.post("/api/v1/auth/login", json={
-            "username": "boundary_admin", "password": "pass123456",
+            "username": "boundary_admin", "password": "Pass123456!",
         })
         assert resp.status_code == 200
         _tokens["access"] = resp.json()["data"]["access_token"]
@@ -1012,7 +1012,7 @@ def test_52_order_list_negative_page_size_422():
     """订单列表 page_size=-1 返回 422"""
     if not _tokens.get("access"):
         resp = client.post("/api/v1/auth/login", json={
-            "username": "boundary_admin", "password": "pass123456",
+            "username": "boundary_admin", "password": "Pass123456!",
         })
         assert resp.status_code == 200
         _tokens["access"] = resp.json()["data"]["access_token"]
@@ -1027,7 +1027,7 @@ def test_52_order_list_negative_page_size_422():
 def _ensure_login():
     if not _tokens.get("access"):
         resp = client.post("/api/v1/auth/login", json={
-            "username": "boundary_admin", "password": "pass123456",
+            "username": "boundary_admin", "password": "Pass123456!",
         })
         assert resp.status_code == 200
         _tokens["access"] = resp.json()["data"]["access_token"]
@@ -1476,13 +1476,13 @@ def test_76_user_create_username_max_length_boundary():
 
     # 恰好 50 字符
     resp = client.post("/api/v1/users", json={
-        "username": "u" * 50, "password": "pass123456", "display_name": "用户名边界76",
+        "username": "u" * 50, "password": "Pass123456!", "display_name": "用户名边界76",
     }, headers=headers)
     assert resp.status_code == 200, f"50 字符用户名应通过: {resp.json()}"
 
     # 51 字符
     resp = client.post("/api/v1/users", json={
-        "username": "u" * 51, "password": "pass123456", "display_name": "用户名边界76b",
+        "username": "u" * 51, "password": "Pass123456!", "display_name": "用户名边界76b",
     }, headers=headers)
     assert resp.status_code == 422, f"51 字符用户名应被拒绝: {resp.status_code}"
 
@@ -1493,13 +1493,13 @@ def test_77_user_create_display_name_max_length_boundary():
 
     # 恰好 100 字符
     resp = client.post("/api/v1/users", json={
-        "username": "display_bnd_77", "password": "pass123456", "display_name": "显" * 100,
+        "username": "display_bnd_77", "password": "Pass123456!", "display_name": "显" * 100,
     }, headers=headers)
     assert resp.status_code == 200, f"100 字符显示名称应通过: {resp.json()}"
 
     # 101 字符
     resp = client.post("/api/v1/users", json={
-        "username": "display_bnd_77b", "password": "pass123456", "display_name": "显" * 101,
+        "username": "display_bnd_77b", "password": "Pass123456!", "display_name": "显" * 101,
     }, headers=headers)
     assert resp.status_code == 422, f"101 字符显示名称应被拒绝: {resp.status_code}"
 
@@ -1508,7 +1508,7 @@ def test_78_user_update_display_name_max_length_boundary():
     """用户编辑 display_name 恰好 100 字符通过，101 字符返回 422"""
     headers = _auth_for_user(_user_id)
     resp = client.post("/api/v1/users", json={
-        "username": "upd_disp_bnd_78", "password": "pass123456",
+        "username": "upd_disp_bnd_78", "password": "Pass123456!",
     }, headers=headers)
     assert resp.status_code == 200
     uid = resp.json()["data"]["id"]
@@ -1529,7 +1529,7 @@ def test_79_user_create_email_max_length_boundary():
     # 恰好 100 字符的邮箱：local 部分 + @ + domain
     email_100 = "a" * 88 + "@example.com"  # 88 + 12 = 100
     resp = client.post("/api/v1/users", json={
-        "username": "email_bnd_79", "password": "pass123456",
+        "username": "email_bnd_79", "password": "Pass123456!",
         "email": email_100,
     }, headers=headers)
     assert resp.status_code == 200, f"100 字符邮箱应通过: {resp.json()}"
@@ -1537,7 +1537,7 @@ def test_79_user_create_email_max_length_boundary():
     # 101 字符
     email_101 = "a" * 89 + "@example.com"  # 89 + 12 = 101
     resp = client.post("/api/v1/users", json={
-        "username": "email_bnd_79b", "password": "pass123456",
+        "username": "email_bnd_79b", "password": "Pass123456!",
         "email": email_101,
     }, headers=headers)
     assert resp.status_code == 422, f"101 字符邮箱应被拒绝: {resp.status_code}"
@@ -1547,7 +1547,7 @@ def test_80_user_update_email_max_length_boundary():
     """用户编辑 email 恰好 100 字符通过，101 字符返回 422"""
     headers = _auth_for_user(_user_id)
     resp = client.post("/api/v1/users", json={
-        "username": "upd_email_bnd_80", "password": "pass123456",
+        "username": "upd_email_bnd_80", "password": "Pass123456!",
     }, headers=headers)
     assert resp.status_code == 200
     uid = resp.json()["data"]["id"]
@@ -1679,15 +1679,15 @@ def test_87_user_create_password_max_length_boundary():
     """用户创建 password 恰好 100 字符通过，101 字符返回 422"""
     headers = _auth_for_user(_user_id)
 
-    # 恰好 100 字符（含字母+数字）
-    pwd_100 = "a" * 90 + "1234567890"  # 100 字符
+    # 恰好 100 字符（含大小写+数字+特殊字符）
+    pwd_100 = "A" * 90 + "a1!" + "b" * 7  # 90+3+7=100
     resp = client.post("/api/v1/users", json={
         "username": "pwd_bnd_87", "password": pwd_100,
     }, headers=headers)
     assert resp.status_code == 200, f"100 字符密码应通过: {resp.json()}"
 
     # 101 字符
-    pwd_101 = "a" * 91 + "1234567890"  # 101 字符
+    pwd_101 = "A" * 91 + "a1!" + "b" * 7  # 91+3+7=101
     resp = client.post("/api/v1/users", json={
         "username": "pwd_bnd_87b", "password": pwd_101,
     }, headers=headers)
@@ -1698,15 +1698,15 @@ def test_88_user_create_password_min_length_boundary():
     """用户创建 password 恰好 6 字符通过，5 字符返回 422"""
     headers = _auth_for_user(_user_id)
 
-    # 恰好 6 字符
+    # 恰好 6 字符（含大小写+数字+特殊字符）
     resp = client.post("/api/v1/users", json={
-        "username": "pwd_min_88", "password": "a12345",
+        "username": "pwd_min_88", "password": "Aa1!bc",
     }, headers=headers)
     assert resp.status_code == 200, f"6 字符密码应通过: {resp.json()}"
 
     # 5 字符
     resp = client.post("/api/v1/users", json={
-        "username": "pwd_min_88b", "password": "a1234",
+        "username": "pwd_min_88b", "password": "Aa1!c",
     }, headers=headers)
     assert resp.status_code == 422, f"5 字符密码应被拒绝: {resp.status_code}"
 
@@ -1762,13 +1762,13 @@ def test_93_login_username_max_length_boundary():
     # 注意：避免用 "u"*50，因为 test_76 创建了该用户
     fifty_char = "z" * 50
     resp = client.post("/api/v1/auth/login", json={
-        "username": fifty_char, "password": "pass123456",
+        "username": fifty_char, "password": "Pass123456!",
     })
     assert resp.status_code == 401
 
     # 51 字符用户名
     resp = client.post("/api/v1/auth/login", json={
-        "username": "z" * 51, "password": "pass123456",
+        "username": "z" * 51, "password": "Pass123456!",
     })
     assert resp.status_code == 422, f"51 字符用户名应被拒绝: {resp.status_code}"
 
@@ -1801,7 +1801,7 @@ def test_94_change_password_boundary():
 
     # 密码修改导致 password_changed_at 更新，需刷新缓存的 _tokens
     login_resp = client.post("/api/v1/auth/login", json={
-        "username": "boundary_admin", "password": "pass123456",
+        "username": "boundary_admin", "password": "Pass123456!",
     })
     if login_resp.status_code == 200:
         _tokens["access"] = login_resp.json()["data"]["access_token"]
@@ -2302,7 +2302,7 @@ def test_139_explicit_null_required_field():
     resp = client.post("/api/v1/customers", json={"name": None}, headers=headers)
     assert resp.status_code == 422, f"name=null 应返回 422: {resp.status_code}"
     # 用户名为 null
-    resp = client.post("/api/v1/users", json={"username": None, "password": "pass123456"}, headers=headers)
+    resp = client.post("/api/v1/users", json={"username": None, "password": "Pass123456!"}, headers=headers)
     assert resp.status_code == 422, f"username=null 应返回 422: {resp.status_code}"
 
 

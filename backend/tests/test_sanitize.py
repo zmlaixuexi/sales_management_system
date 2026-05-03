@@ -77,7 +77,7 @@ def test_customer_schema_sanitizes_email():
 def test_user_schema_sanitizes_email():
     """UserCreate schema 净化邮箱中的 HTML"""
     from app.schemas.auth import UserCreate
-    u = UserCreate(username="testuser", password="pass123", email="<script>x</script>@evil.com")
+    u = UserCreate(username="testuser", password="Pass123!", email="<script>x</script>@evil.com")
     assert u.email == "x@evil.com"
 
 
@@ -124,7 +124,7 @@ def test_sanitize_customer_remark_strips_html():
 def test_sanitize_user_username_strips_html():
     """用户名中的 HTML 标签被移除"""
     from app.schemas.auth import UserCreate
-    data = UserCreate(username="<b>admin</b>", password="pass123456")
+    data = UserCreate(username="<b>admin</b>", password="Pass123456!")
     assert "<b>" not in data.username
     assert "admin" in data.username
 
@@ -132,7 +132,7 @@ def test_sanitize_user_username_strips_html():
 def test_sanitize_user_display_name_strips_html():
     """用户显示名称中的 HTML 标签被移除"""
     from app.schemas.auth import UserCreate
-    data = UserCreate(username="testuser", password="pass123456", display_name="<script>x</script>管理员")
+    data = UserCreate(username="testuser", password="Pass123456!", display_name="<script>x</script>管理员")
     assert "<script>" not in data.display_name
     assert "管理员" in data.display_name
 
@@ -236,7 +236,6 @@ def test_csv_cell_number():
 
 import uuid
 
-import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -272,7 +271,7 @@ def setup_module(module):
     db = _ApiSession()
     db.add(User(
         id=uuid.uuid4(), username="admin", display_name="管理员",
-        hashed_password=hash_password("testpass123"), is_superuser=True, is_active=True,
+        hashed_password=hash_password("TestPass123!"), is_superuser=True, is_active=True,
     ))
     db.commit()
     db.close()

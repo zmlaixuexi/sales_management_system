@@ -56,7 +56,7 @@ def setup_module(module):
     try:
         user = User(
             id=uuid.uuid4(), username="sm_tester",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="状态机测试员", is_active=True, is_superuser=True,
         )
         db.add(user)

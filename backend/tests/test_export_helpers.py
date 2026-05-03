@@ -1,6 +1,6 @@
 """导出服务辅助函数单元测试 — _dec / _str / _dt / 行构建函数"""
 
-from datetime import datetime
+from datetime import UTC, datetime
 from decimal import Decimal
 from unittest.mock import MagicMock
 
@@ -352,8 +352,7 @@ def test_str_quote_in_value():
 
 def test_dt_timezone_aware():
     """时区感知 datetime 转为本地时间字符串"""
-    from datetime import timezone
-    dt = datetime(2026, 5, 1, 8, 30, 0, tzinfo=timezone.utc)
+    dt = datetime(2026, 5, 1, 8, 30, 0, tzinfo=UTC)
     result = _dt(dt)
     assert "2026-05-01" in result
     assert "08:30:00" in result

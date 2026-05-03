@@ -45,7 +45,7 @@ def setup_module(module):
         user = User(
             id=uuid.uuid4(),
             username="report_tester",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="报表测试员",
             is_active=True,
             is_superuser=True,
@@ -133,7 +133,7 @@ def _auth():
 
 def test_01_login():
     resp = client.post("/api/v1/auth/login", json={
-        "username": "report_tester", "password": "testpass123",
+        "username": "report_tester", "password": "TestPass123!",
     })
     assert resp.status_code == 200
     _tokens["access"] = resp.json()["data"]["access_token"]
@@ -389,7 +389,7 @@ def test_23_report_data_scope_filtered():
         # 创建非超管用户
         sales_user = User(
             id=uuid.uuid4(), username="scope_tester",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="范围测试员", is_active=True, is_superuser=False,
         )
         db.add(sales_user)
@@ -725,7 +725,7 @@ def test_49_sales_summary_zero_data():
         # 创建一个有 report:sales + report:profit 但无 order:view_all 的用户
         user = User(
             id=uuid.uuid4(), username="zero_data_reporter",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="零数据报表", is_active=True, is_superuser=False,
         )
         db.add(user)
@@ -761,7 +761,7 @@ def test_50_sales_trend_zero_data():
     try:
         user = User(
             id=uuid.uuid4(), username="zero_trend_user",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="零趋势用户", is_active=True, is_superuser=False,
         )
         db.add(user)
@@ -795,7 +795,7 @@ def test_51_product_ranking_zero_data():
     try:
         user = User(
             id=uuid.uuid4(), username="zero_rank_product",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="零排行商品", is_active=True, is_superuser=False,
         )
         db.add(user)
@@ -828,7 +828,7 @@ def test_52_customer_ranking_zero_data():
     try:
         user = User(
             id=uuid.uuid4(), username="zero_rank_customer",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="零排行客户", is_active=True, is_superuser=False,
         )
         db.add(user)
@@ -861,7 +861,7 @@ def test_53_salesperson_ranking_zero_data():
     try:
         user = User(
             id=uuid.uuid4(), username="zero_rank_sp",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="零排行销售", is_active=True, is_superuser=False,
         )
         db.add(user)

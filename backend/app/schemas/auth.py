@@ -1,9 +1,9 @@
-import re
 import uuid as _uuid
 from datetime import datetime
 
 from pydantic import BaseModel, Field, field_validator
 
+from app.core.password_strength import validate_password_strength
 from app.core.sanitize import sanitize_text as _sanitize
 
 
@@ -29,11 +29,7 @@ class ChangePasswordRequest(BaseModel):
     @field_validator("new_password")
     @classmethod
     def validate_password_strength(cls, v: str) -> str:
-        if not re.search(r"[a-zA-Z]", v):
-            raise ValueError("新密码必须包含至少一个字母")
-        if not re.search(r"\d", v):
-            raise ValueError("新密码必须包含至少一个数字")
-        return v
+        return validate_password_strength(v)
 
 
 class CurrentUser(BaseModel):
@@ -63,11 +59,7 @@ class UserCreate(BaseModel):
     @field_validator("password")
     @classmethod
     def validate_password_strength(cls, v: str) -> str:
-        if not re.search(r"[a-zA-Z]", v):
-            raise ValueError("密码必须包含至少一个字母")
-        if not re.search(r"\d", v):
-            raise ValueError("密码必须包含至少一个数字")
-        return v
+        return validate_password_strength(v)
 
     @field_validator("display_name", "email")
     @classmethod

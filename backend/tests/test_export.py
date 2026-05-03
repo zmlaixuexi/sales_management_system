@@ -43,7 +43,7 @@ def setup_module(module):
         user = User(
             id=uuid.uuid4(),
             username="export_tester",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="导出测试员",
             is_active=True,
             is_superuser=True,
@@ -78,7 +78,7 @@ def test_01_login_and_setup():
     """登录并准备测试数据"""
     resp = client.post("/api/v1/auth/login", json={
         "username": "export_tester",
-        "password": "testpass123",
+        "password": "TestPass123!",
     })
     assert resp.status_code == 200
     _tokens["access"] = resp.json()["data"]["access_token"]
@@ -444,7 +444,7 @@ def test_29_export_requires_permission():
     try:
         nop = User(
             id=uuid.uuid4(), username="no_export_perm",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="无导出权限", is_active=True, is_superuser=False,
         )
         db.add(nop)
@@ -477,7 +477,7 @@ def test_30_export_products_cost_hidden_without_permission():
         db.add(RolePermission(role_id=role.id, permission_id=perm_list.id))
         user = User(
             id=uuid.uuid4(), username="cost_checker",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="成本检查员", is_active=True, is_superuser=False,
         )
         db.add(user)
@@ -515,7 +515,7 @@ def test_31_export_orders_data_scope_filtered():
         db.add(RolePermission(role_id=role.id, permission_id=perm.id))
         scope_user = User(
             id=uuid.uuid4(), username="scope_exporter",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="范围导出员", is_active=True, is_superuser=False,
         )
         db.add(scope_user)
@@ -733,7 +733,7 @@ def test_42_export_customers_data_scope_filtered():
         db.add(RolePermission(role_id=role.id, permission_id=perm.id))
         scope_user = User(
             id=uuid.uuid4(), username="scope_cust_exporter",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="客户范围导出员", is_active=True, is_superuser=False,
         )
         db.add(scope_user)
@@ -770,7 +770,7 @@ def test_43_export_payments_data_scope_filtered():
         db.add(RolePermission(role_id=role.id, permission_id=perm.id))
         scope_user = User(
             id=uuid.uuid4(), username="scope_pay_exporter",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="收款范围导出员", is_active=True, is_superuser=False,
         )
         db.add(scope_user)
@@ -1054,9 +1054,10 @@ def test_47_export_product_with_comma_in_name():
 
 def test_48_export_large_decimal_prices():
     """导出高精度价格保留原始精度"""
+    from decimal import Decimal
+
     from app.core.security import create_access_token
     from app.models.product import Product
-    from decimal import Decimal
     db = TestSession()
     try:
         user = db.query(User).filter(User.username == "export_tester").first()

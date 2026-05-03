@@ -45,7 +45,7 @@ def setup_module(module):
         user = User(
             id=uuid.uuid4(),
             username="testuser",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="测试用户",
             is_active=True,
             is_superuser=False,
@@ -78,7 +78,7 @@ def teardown_module(module):
 
 
 def test_login_success():
-    response = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    response = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "TestPass123!"})
     assert response.status_code == 200
     data = response.json()
     assert data["success"] is True
@@ -98,7 +98,7 @@ def test_login_nonexistent_user():
 
 def test_get_me():
     # 先登录获取 token
-    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "TestPass123!"})
     token = login_resp.json()["data"]["access_token"]
 
     response = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
@@ -113,7 +113,7 @@ def test_get_me_unauthorized():
 
 
 def test_refresh_token():
-    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "TestPass123!"})
     refresh_token = login_resp.json()["data"]["refresh_token"]
 
     response = client.post("/api/v1/auth/refresh", json={"refresh_token": refresh_token})
@@ -124,7 +124,7 @@ def test_refresh_token():
 
 def test_refresh_rejected_for_inactive_user():
     """已禁用用户的 Refresh Token 应被拒绝"""
-    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "TestPass123!"})
     refresh_token = login_resp.json()["data"]["refresh_token"]
 
     db = TestSession()
@@ -149,7 +149,7 @@ def test_logout():
 
 
 def test_users_list_requires_admin():
-    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "TestPass123!"})
     token = login_resp.json()["data"]["access_token"]
 
     response = client.get("/api/v1/users", headers={"Authorization": f"Bearer {token}"})
@@ -158,7 +158,7 @@ def test_users_list_requires_admin():
 
 def test_access_with_refresh_token_rejected():
     """使用 refresh token 作为 Bearer 应被拒绝（type != access）"""
-    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "TestPass123!"})
     refresh_token = login_resp.json()["data"]["refresh_token"]
 
     response = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {refresh_token}"})
@@ -167,36 +167,36 @@ def test_access_with_refresh_token_rejected():
 
 def test_change_password_success():
     """修改密码成功"""
-    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "TestPass123!"})
     token = login_resp.json()["data"]["access_token"]
 
     resp = client.post("/api/v1/auth/change-password", json={
-        "old_password": "testpass123",
-        "new_password": "newpass456",
+        "old_password": "TestPass123!",
+        "new_password": "Newpass456!",
     }, headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 200
     assert "成功" in resp.json()["message"]
 
     # 用新密码登录验证
-    login2 = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "newpass456"})
+    login2 = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "Newpass456!"})
     assert login2.status_code == 200
 
     # 改回原密码
     token2 = login2.json()["data"]["access_token"]
     client.post("/api/v1/auth/change-password", json={
-        "old_password": "newpass456",
-        "new_password": "testpass123",
+        "old_password": "Newpass456!",
+        "new_password": "TestPass123!",
     }, headers={"Authorization": f"Bearer {token2}"})
 
 
 def test_change_password_wrong_old():
     """原密码错误"""
-    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "TestPass123!"})
     token = login_resp.json()["data"]["access_token"]
 
     resp = client.post("/api/v1/auth/change-password", json={
         "old_password": "wrongpass1",
-        "new_password": "newpass456",
+        "new_password": "Newpass456!",
     }, headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 400
     assert "原密码" in resp.json()["error"]["message"]
@@ -204,24 +204,24 @@ def test_change_password_wrong_old():
 
 def test_change_password_weak_new():
     """新密码不符合强度要求（纯数字）"""
-    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "TestPass123!"})
     token = login_resp.json()["data"]["access_token"]
 
     resp = client.post("/api/v1/auth/change-password", json={
-        "old_password": "testpass123",
+        "old_password": "TestPass123!",
         "new_password": "123456",
     }, headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 422
 
 
 def test_change_password_no_digits():
-    """新密码纯字母无数字被拒绝"""
-    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    """新密码无数字被拒绝"""
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "TestPass123!"})
     token = login_resp.json()["data"]["access_token"]
 
     resp = client.post("/api/v1/auth/change-password", json={
-        "old_password": "testpass123",
-        "new_password": "abcdef",
+        "old_password": "TestPass123!",
+        "new_password": "Abcdef!",
     }, headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 422
     assert "数字" in str(resp.json())
@@ -241,7 +241,7 @@ def test_login_rate_limit_after_failures():
 def test_login_rate_limit_does_not_affect_success():
     """正确密码不受速率限制影响"""
     _auth_mod._login_fail_counts.clear()
-    resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "TestPass123!"})
     assert resp.status_code == 200
     _auth_mod._login_fail_counts.clear()
 
@@ -249,20 +249,20 @@ def test_login_rate_limit_does_not_affect_success():
 def test_change_password_requires_auth():
     """未认证修改密码返回 401"""
     resp = client.post("/api/v1/auth/change-password", json={
-        "old_password": "testpass123",
-        "new_password": "newpass123",
+        "old_password": "TestPass123!",
+        "new_password": "Newpass123!",
     })
     assert resp.status_code == 401
 
 
 def test_change_password_empty_old_password_422():
     """空旧密码返回 422"""
-    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "TestPass123!"})
     token = login_resp.json()["data"]["access_token"]
 
     resp = client.post("/api/v1/auth/change-password", json={
         "old_password": "",
-        "new_password": "newpass123",
+        "new_password": "Newpass123!",
     }, headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 422
 
@@ -277,7 +277,7 @@ def test_refresh_invalid_token_401():
 
 def test_refresh_access_token_rejected_401():
     """使用 access token 作为 refresh token 被拒绝"""
-    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "TestPass123!"})
     access_token = login_resp.json()["data"]["access_token"]
 
     resp = client.post("/api/v1/auth/refresh", json={
@@ -298,12 +298,12 @@ def test_change_password_audit_log():
     finally:
         db.close()
 
-    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
+    login_resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "TestPass123!"})
     token = login_resp.json()["data"]["access_token"]
 
     resp = client.post("/api/v1/auth/change-password", json={
-        "old_password": "testpass123",
-        "new_password": "auditpass123",
+        "old_password": "TestPass123!",
+        "new_password": "Auditpass123!",
     }, headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 200
 
@@ -320,11 +320,11 @@ def test_change_password_audit_log():
         db.close()
 
     # 改回原密码
-    login2 = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "auditpass123"})
+    login2 = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "Auditpass123!"})
     token2 = login2.json()["data"]["access_token"]
     client.post("/api/v1/auth/change-password", json={
-        "old_password": "auditpass123",
-        "new_password": "testpass123",
+        "old_password": "Auditpass123!",
+        "new_password": "TestPass123!",
     }, headers={"Authorization": f"Bearer {token2}"})
 
 
@@ -337,7 +337,7 @@ def test_23_login_disabled_user_403():
     try:
         disabled = User(
             id=uuid.uuid4(), username="disabled_login_user",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="禁用用户", is_active=False, is_superuser=False,
         )
         db.add(disabled)
@@ -347,7 +347,7 @@ def test_23_login_disabled_user_403():
 
     resp = client.post("/api/v1/auth/login", json={
         "username": "disabled_login_user",
-        "password": "testpass123",
+        "password": "TestPass123!",
     })
     assert resp.status_code == 403
 
@@ -441,7 +441,7 @@ def test_29_token_deleted_user_rejected():
     try:
         temp = User(
             id=temp_id, username="temp_del_user",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="临时用户", is_active=True, is_superuser=False,
         )
         db.add(temp)
@@ -555,7 +555,7 @@ def test_35_disabled_user_access_token_immediately_invalid():
     """用户禁用后，已发放的 access token 立即返回 401"""
     # 用正常用户登录获取 token
     login_resp = client.post("/api/v1/auth/login", json={
-        "username": "testuser", "password": "testpass123",
+        "username": "testuser", "password": "TestPass123!",
     })
     assert login_resp.status_code == 200
     token = login_resp.json()["data"]["access_token"]
@@ -590,7 +590,7 @@ def test_35_disabled_user_access_token_immediately_invalid():
 def test_36_disabled_user_refresh_token_immediately_invalid():
     """用户禁用后，已发放的 refresh token 立即返回 401"""
     login_resp = client.post("/api/v1/auth/login", json={
-        "username": "testuser", "password": "testpass123",
+        "username": "testuser", "password": "TestPass123!",
     })
     assert login_resp.status_code == 200
     refresh = login_resp.json()["data"]["refresh_token"]
@@ -626,7 +626,7 @@ def test_37_password_change_old_access_token_revoked():
     import time
     # 登录获取 token
     login_resp = client.post("/api/v1/auth/login", json={
-        "username": "testuser", "password": "testpass123",
+        "username": "testuser", "password": "TestPass123!",
     })
     assert login_resp.status_code == 200
     old_token = login_resp.json()["data"]["access_token"]
@@ -640,8 +640,8 @@ def test_37_password_change_old_access_token_revoked():
 
     # 修改密码
     resp = client.post("/api/v1/auth/change-password", json={
-        "old_password": "testpass123",
-        "new_password": "newpass789",
+        "old_password": "TestPass123!",
+        "new_password": "Newpass789!",
     }, headers={"Authorization": f"Bearer {old_token}"})
     assert resp.status_code == 200
 
@@ -651,12 +651,12 @@ def test_37_password_change_old_access_token_revoked():
 
     # 改回原密码
     login2 = client.post("/api/v1/auth/login", json={
-        "username": "testuser", "password": "newpass789",
+        "username": "testuser", "password": "Newpass789!",
     })
     token2 = login2.json()["data"]["access_token"]
     client.post("/api/v1/auth/change-password", json={
-        "old_password": "newpass789",
-        "new_password": "testpass123",
+        "old_password": "Newpass789!",
+        "new_password": "TestPass123!",
     }, headers={"Authorization": f"Bearer {token2}"})
 
 
@@ -664,7 +664,7 @@ def test_38_password_change_old_refresh_token_revoked():
     """修改密码后旧 refresh token 自动失效"""
     import time
     login_resp = client.post("/api/v1/auth/login", json={
-        "username": "testuser", "password": "testpass123",
+        "username": "testuser", "password": "TestPass123!",
     })
     assert login_resp.status_code == 200
     old_refresh = login_resp.json()["data"]["refresh_token"]
@@ -675,8 +675,8 @@ def test_38_password_change_old_refresh_token_revoked():
 
     # 修改密码
     resp = client.post("/api/v1/auth/change-password", json={
-        "old_password": "testpass123",
-        "new_password": "newpass999",
+        "old_password": "TestPass123!",
+        "new_password": "Newpass999!",
     }, headers={"Authorization": f"Bearer {access}"})
     assert resp.status_code == 200
 
@@ -686,23 +686,24 @@ def test_38_password_change_old_refresh_token_revoked():
 
     # 改回原密码
     login2 = client.post("/api/v1/auth/login", json={
-        "username": "testuser", "password": "newpass999",
+        "username": "testuser", "password": "Newpass999!",
     })
     token2 = login2.json()["data"]["access_token"]
     client.post("/api/v1/auth/change-password", json={
-        "old_password": "newpass999",
-        "new_password": "testpass123",
+        "old_password": "Newpass999!",
+        "new_password": "TestPass123!",
     }, headers={"Authorization": f"Bearer {token2}"})
 
 
 def test_39_password_change_full_lifecycle():
     """密码修改完整生命周期：登录→使用→改密→旧 token 失效→重登→新 token 有效→改回"""
     import time
+
     from app.models.user import User
 
     # 步骤 1：登录获取 token
     login1 = client.post("/api/v1/auth/login", json={
-        "username": "testuser", "password": "testpass123",
+        "username": "testuser", "password": "TestPass123!",
     })
     assert login1.status_code == 200
     token1 = login1.json()["data"]["access_token"]
@@ -724,8 +725,8 @@ def test_39_password_change_full_lifecycle():
 
     # 步骤 5：修改密码
     change = client.post("/api/v1/auth/change-password", json={
-        "old_password": "testpass123",
-        "new_password": "lifecycle1",
+        "old_password": "TestPass123!",
+        "new_password": "Lifecycle1!",
     }, headers=headers1)
     assert change.status_code == 200
 
@@ -742,13 +743,13 @@ def test_39_password_change_full_lifecycle():
 
     # 步骤 8：用旧密码登录失败
     bad_login = client.post("/api/v1/auth/login", json={
-        "username": "testuser", "password": "testpass123",
+        "username": "testuser", "password": "TestPass123!",
     })
     assert bad_login.status_code == 401
 
     # 步骤 9：用新密码登录成功
     login2 = client.post("/api/v1/auth/login", json={
-        "username": "testuser", "password": "lifecycle1",
+        "username": "testuser", "password": "Lifecycle1!",
     })
     assert login2.status_code == 200
     token2 = login2.json()["data"]["access_token"]
@@ -767,8 +768,8 @@ def test_39_password_change_full_lifecycle():
     # 步骤 12：改回原密码（清理）
     time.sleep(1.1)
     client.post("/api/v1/auth/change-password", json={
-        "old_password": "lifecycle1",
-        "new_password": "testpass123",
+        "old_password": "Lifecycle1!",
+        "new_password": "TestPass123!",
     }, headers=headers2)
 
 
@@ -778,7 +779,7 @@ def test_40_password_change_invalidates_all_prior_tokens():
 
     # 登录获取 token_a
     login_a = client.post("/api/v1/auth/login", json={
-        "username": "testuser", "password": "testpass123",
+        "username": "testuser", "password": "TestPass123!",
     })
     token_a = login_a.json()["data"]["access_token"]
 
@@ -786,13 +787,13 @@ def test_40_password_change_invalidates_all_prior_tokens():
 
     # 第一次改密
     client.post("/api/v1/auth/change-password", json={
-        "old_password": "testpass123",
-        "new_password": "second_pw1",
+        "old_password": "TestPass123!",
+        "new_password": "Second_pw1!",
     }, headers={"Authorization": f"Bearer {token_a}"})
 
     # 登录获取 token_b
     login_b = client.post("/api/v1/auth/login", json={
-        "username": "testuser", "password": "second_pw1",
+        "username": "testuser", "password": "Second_pw1!",
     })
     token_b = login_b.json()["data"]["access_token"]
 
@@ -800,8 +801,8 @@ def test_40_password_change_invalidates_all_prior_tokens():
 
     # 第二次改密
     client.post("/api/v1/auth/change-password", json={
-        "old_password": "second_pw1",
-        "new_password": "third_pw12",
+        "old_password": "Second_pw1!",
+        "new_password": "Third_pw12!",
     }, headers={"Authorization": f"Bearer {token_b}"})
 
     # token_a 和 token_b 都应失效
@@ -810,7 +811,7 @@ def test_40_password_change_invalidates_all_prior_tokens():
 
     # 用新密码登录正常
     login_c = client.post("/api/v1/auth/login", json={
-        "username": "testuser", "password": "third_pw12",
+        "username": "testuser", "password": "Third_pw12!",
     })
     assert login_c.status_code == 200
     token_c = login_c.json()["data"]["access_token"]
@@ -819,6 +820,6 @@ def test_40_password_change_invalidates_all_prior_tokens():
     # 清理：改回原密码
     time.sleep(1.1)
     client.post("/api/v1/auth/change-password", json={
-        "old_password": "third_pw12",
-        "new_password": "testpass123",
+        "old_password": "Third_pw12!",
+        "new_password": "TestPass123!",
     }, headers={"Authorization": f"Bearer {token_c}"})

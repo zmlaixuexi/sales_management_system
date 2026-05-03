@@ -44,7 +44,7 @@ def setup_module(module):
         user = User(
             id=uuid.uuid4(),
             username="edge_tester",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="边界测试员",
             is_active=True,
             is_superuser=True,
@@ -97,7 +97,7 @@ def _auth():
 def test_01_login():
     """登录获取 Token"""
     resp = client.post("/api/v1/auth/login", json={
-        "username": "edge_tester", "password": "testpass123",
+        "username": "edge_tester", "password": "TestPass123!",
     })
     assert resp.status_code == 200
     _tokens["access"] = resp.json()["data"]["access_token"]
@@ -360,7 +360,7 @@ def test_27_expired_token():
 def test_28_malformed_uuid_returns_422():
     """格式错误的 ID 通过请求体传递应由 Pydantic 拦截返回 422"""
     if not _tokens.get("access"):
-        login_resp = client.post("/api/v1/auth/login", json={"username": "edge_tester", "password": "testpass123"})
+        login_resp = client.post("/api/v1/auth/login", json={"username": "edge_tester", "password": "TestPass123!"})
         _tokens["access"] = login_resp.json()["data"]["access_token"]
     # 客户转移接口的 owner_user_id 现在由 Pydantic schema 验证 UUID 格式
     resp = client.post(f"/api/v1/customers/{_customer_id}/transfer", json={
@@ -381,7 +381,7 @@ def test_29_get_or_404_invalid_uuid():
 def test_30_export_payments_data_scope():
     """导出收款接口返回 CSV"""
     if not _tokens.get("access"):
-        login_resp = client.post("/api/v1/auth/login", json={"username": "edge_tester", "password": "testpass123"})
+        login_resp = client.post("/api/v1/auth/login", json={"username": "edge_tester", "password": "TestPass123!"})
         _tokens["access"] = login_resp.json()["data"]["access_token"]
     resp = client.get("/api/v1/exports/payments", headers=_auth())
     assert resp.status_code == 200

@@ -53,7 +53,7 @@ def setup_module(module):
         user = User(
             id=uuid.uuid4(),
             username="e2e_tester",
-            hashed_password=hash_password("testpass123"),
+            hashed_password=hash_password("TestPass123!"),
             display_name="端到端测试员",
             is_active=True,
             is_superuser=True,
@@ -87,7 +87,7 @@ class TestAuth:
         """登录获取 Token"""
         resp = client.post("/api/v1/auth/login", json={
             "username": "e2e_tester",
-            "password": "testpass123",
+            "password": "TestPass123!",
         })
         assert resp.status_code == 200
         data = resp.json()["data"]
