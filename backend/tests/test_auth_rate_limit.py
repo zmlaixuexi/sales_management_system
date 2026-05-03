@@ -8,6 +8,7 @@ import pytest
 from fastapi import HTTPException
 
 from app.api.v1.auth import _check_account_lock, _check_login_rate_limit, _record_login_fail
+from app.core.config import settings
 
 
 @pytest.fixture(autouse=True)
@@ -182,3 +183,84 @@ def test_account_lock_different_ips_same_username():
     with pytest.raises(HTTPException) as exc_info:
         _check_account_lock("shared_user")
     assert exc_info.value.detail["code"] == "ACCOUNT_LOCKED"
+
+
+# ─── 账户锁定配置与边界 ──────────────────────────────────────
+
+
+def test_account_lock_config_defaults():
+    """账户锁定配置默认值"""
+    from app.core.config import settings
+
+    assert settings.ACCOUNT_LOCK_MAX_FAILURES == 5
+    assert settings.ACCOUNT_LOCK_WINDOW_SECONDS == 900
+
+
+def test_account_lock_max_failures_is_positive():
+    """锁定阈值必须为正数"""
+    from app.core.config import settings
+
+    assert settings.ACCOUNT_LOCK_MAX_FAILURES > 0
+
+
+def test_account_lock_window_is_positive():
+    """锁定窗口必须为正数"""
+    from app.core.config import settings
+
+    assert settings.ACCOUNT_LOCK_WINDOW_SECONDS > 0
+
+
+def test_account_lock_threshold_minus_one_passes():
+    """失败次数 = 阈值 - 1 不触发锁定"""
+    for _ in range(settings.ACCOUNT_LOCK_MAX_FAILURES - 1):
+        _record_login_fail("1.2.3.4", "almost_locked")
+    _check_account_lock("almost_locked")  # 不抛异常
+
+
+def test_account_lock_exactly_at_threshold_blocks():
+    """失败次数恰好等于阈值触发锁定"""
+    from app.core.config import settings
+
+    for _ in range(settings.ACCOUNT_LOCK_MAX_FAILURES):
+        _record_login_fail("1.2.3.4", "exact_locked")
+    with pytest.raises(HTTPException) as exc_info:
+        _check_account_lock("exact_locked")
+    assert exc_info.value.detail["code"] == "ACCOUNT_LOCKED"
+
+
+def test_account_lock_window_expiry_allows_relogin():
+    """窗口过期后可以再次登录"""
+    import app.api.v1.auth as mod
+
+    now = time.monotonic()
+    old_time = now - settings.ACCOUNT_LOCK_WINDOW_SECONDS - 1
+    mod._account_fail_counts["expired_user"] = [old_time] * settings.ACCOUNT_LOCK_MAX_FAILURES
+    # 旧记录已过期，不触发锁定
+    _check_account_lock("expired_user")
+
+
+def test_account_lock_response_body_structure():
+    """锁定响应体包含正确的 code 和 message"""
+    for _ in range(settings.ACCOUNT_LOCK_MAX_FAILURES):
+        _record_login_fail("1.2.3.4", "struct_user")
+    with pytest.raises(HTTPException) as exc_info:
+        _check_account_lock("struct_user")
+    detail = exc_info.value.detail
+    assert isinstance(detail, dict)
+    assert detail["code"] == "ACCOUNT_LOCKED"
+    assert isinstance(detail["message"], str)
+    assert len(detail["message"]) > 0
+
+
+def test_account_lock_case_sensitive_username():
+    """用户名区分大小写（不同大小写独立计数）"""
+    for _ in range(settings.ACCOUNT_LOCK_MAX_FAILURES):
+        _record_login_fail("1.1.1.1", "TestUser")
+    # 不同大小写的用户名不受影响
+    _check_account_lock("testuser")
+    _check_account_lock("TESTUSER")
+
+
+def test_account_lock_empty_username_passes():
+    """空用户名不触发锁定（无失败记录）"""
+    _check_account_lock("")
