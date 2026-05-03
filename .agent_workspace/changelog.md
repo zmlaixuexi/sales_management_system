@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第六百四十八轮·自动循环）
+
+### 部署体验：manage.sh 添加监控启停命令 + Grafana 端口映射
+
+- manage.sh 新增 monitoring-start / monitoring-stop / monitoring-status 命令
+- docker-compose.prod.yml Grafana 添加端口映射（默认 3000）
+- 帮助文本更新
+
 ## 2026-05-03（第六百四十七轮·自动循环）
 
 ### 部署体验：docker-compose 添加 Prometheus + Grafana 监控栈

@@ -153,6 +153,32 @@ case "${1:-help}" in
         "${SCRIPT_DIR}/pre-deploy-check.sh" "${@:2}"
         ;;
 
+    monitoring-start)
+        echo ""
+        info "启动监控栈（Prometheus + Grafana）..."
+        require_env
+        docker compose -f "${COMPOSE_FILE}" --profile monitoring up -d 2>&1
+        ok "监控栈已启动"
+        info "Grafana 地址：http://localhost:${GRAFANA_PORT:-3000}"
+        info "默认账号：admin / ${GRAFANA_ADMIN_PASSWORD:-admin}"
+        echo ""
+        ;;
+
+    monitoring-stop)
+        echo ""
+        info "停止监控栈..."
+        docker compose -f "${COMPOSE_FILE}" --profile monitoring stop prometheus grafana 2>&1
+        ok "监控栈已停止"
+        echo ""
+        ;;
+
+    monitoring-status)
+        echo ""
+        info "监控栈状态："
+        docker compose -f "${COMPOSE_FILE}" --profile monitoring ps prometheus grafana 2>&1
+        echo ""
+        ;;
+
     help|*)
         echo ""
         echo "销售管理系统 — 部署管理脚本"
@@ -175,12 +201,18 @@ case "${1:-help}" in
         echo "                 恢复数据库（可选同时恢复上传文件）"
         echo "  check          运行完整部署前检查"
         echo ""
+        echo "监控命令："
+        echo "  monitoring-start   启动 Prometheus + Grafana 监控栈"
+        echo "  monitoring-stop    停止监控栈"
+        echo "  monitoring-status  查看监控栈状态"
+        echo ""
         echo "示例："
         echo "  $0 start"
         echo "  $0 logs backend"
         echo "  $0 backup /data/backups"
         echo "  $0 restore ./backups/sales_mgmt_20260503_120000.sql.gz"
         echo "  $0 check --skip-build"
+        echo "  $0 monitoring-start"
         echo ""
         ;;
 esac
