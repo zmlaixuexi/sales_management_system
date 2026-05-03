@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-04（第七百零九轮·自动循环）
+
+### 安全加固：CORS 配置验证测试（17 项覆盖预检请求、响应头、配置校验）
+
+- 新增 test_cors.py：17 项测试
+  - OPTIONS 预检请求（9 项）：200 响应、CORS 头存在、GET/POST/PUT/DELETE 方法允许、Authorization/Content-Type/X-Request-ID 头允许
+  - 实际请求响应头（2 项）：允许的 Origin 获得 CORS 头、credentials=true
+  - CORS_ORIGINS 配置校验（6 项）：通配符拒绝、空值拒绝、缺少协议拒绝、单个/多个/HTTPS origin 通过
+- 后端测试 1855（+17），全部通过
+
 ## 2026-05-04（第七百零八轮·自动循环）
 
 ### 部署体验：Alembic 迁移链完整性测试（16 项覆盖文件完整性、链连续性、配置文件）
