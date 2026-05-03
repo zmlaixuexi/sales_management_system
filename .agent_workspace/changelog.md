@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-05-04（第七百二十二轮·自动循环）
+
+### 代码质量：Pydantic Schema 验证边界测试（122 项覆盖 7 个模块字段约束、自定义验证器、文本消毒、缺省必填）
+
+**变更文件：**
+- `backend/tests/test_pydantic_schemas.py`（新建 122 项测试）
+  - LoginRequest：用户名 1-50、密码 1-100 边界
+  - RefreshRequest：token 最长 2048 边界
+  - ChangePasswordRequest：新密码最短 6、大小写/数字/特殊字符/弱密码校验
+  - UserCreate：用户名 2-50、role_ids 最多 50/UUID 校验、display_name HTML 消毒
+  - CustomerCreate/Update/Transfer：name 1-100、phone 正则 `^1[3-9]\d{9}$`、email 正则、source/level/follow_status 枚举、owner UUID、remark 500、HTML 消毒、name="" vs name=None
+  - ProductCreate/Update：name 1-100、sku 50、sale_price/cost_price 非负 Decimal 且 ≤ 9999999999.99、stock_quantity 0-9999999、sort_weight ±99999、status 枚举、category UUID
+  - OrderItemInput：quantity gt=0 且 ≤ 99999、unit_price 非负、product_id UUID
+  - OrderCreate/Update：items 1-500、customer_id UUID、remark 500、items=[] vs None
+  - PaymentCreate：amount > 0（严格正数，不同于商品价格允许 0）、≤ 9999999999.99、payment_method 5 种枚举
+  - InventoryAdjust：quantity_change ±9999999、product_id UUID
+  - 文本消毒：customer name、product remark、order remark、payment remark 的 HTML 标签和控制字符移除
+  - 缺省必填：login 缺 username、user 缺 username、customer 缺 name、order 缺 items、payment 缺 amount
+
+**测试结果：** 后端 2312/2312 ✓ / 前端 858/858 ✓ / 总计 3170 tests
+
 ## 2026-05-04（第七百二十一轮·自动循环）
 
 ### 异常路径：软删除边界测试（59 项覆盖模型字段、过滤逻辑、删除防护、引用完整性、迁移文件）
