@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-05-04（第七百三十五轮·自动循环）
+
+### 异常路径：订单状态机转换边界测试（53 项覆盖 VALID_TRANSITIONS 映射、确认/取消守卫、收款状态变更、冲正回退、终端状态、库存扣减恢复）
+
+**变更文件：**
+- `backend/tests/test_order_state_machine.py`（新建 53 项测试）
+  - VALID_TRANSITIONS 映射：5 种状态全覆盖、draft→confirmed/cancelled、confirmed→cancelled/partially_paid、cancelled/completed 为终端、禁止非法转换（draft→completed、confirmed→draft 等）
+  - STATUS_LABELS：5 种状态标签全覆盖、全中文、具体标签值验证
+  - 订单模型：默认 status=draft、列长度 30
+  - 确认守卫：仅 draft 可确认、检查库存
+  - 取消守卫：使用 VALID_TRANSITIONS、partially_paid 检查 paid_amount
+  - 编辑守卫：仅 draft 可编辑
+  - 收款状态变更：检查 confirmed/partially_paid、累加 paid_amount、付满→completed/未满→partially_paid、防止超额
+  - 收款冲正：回退到 confirmed/partially_paid、paid_amount 归零
+  - 库存：确认扣减、取消恢复、草稿取消不恢复
+  - 报表有效状态：confirmed/partially_paid/completed、排除 draft/cancelled
+  - 收款并发：inflight 锁机制
+  - Payment 模型：status 默认 normal、冲正设为 reversed
+  - API 端点认证：confirm/cancel/create/update/payments 均需认证
+
+**验证：**
+- 后端 2908/2908 ✓（新增 53 项）
+- ruff 0 errors ✓
+
 ## 2026-05-04（第七百三十四轮·自动循环）
 
 ### 异常路径：软删除过滤一致性边界测试（+30 新增覆盖 get_or_404 自动过滤、active_query、报表/导出/认证 JOIN 过滤、删除防护、导入查重）
