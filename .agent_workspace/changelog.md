@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-05-04（第七百四十八轮·自动循环）
+
+### 代码质量：后端依赖注入边界测试（51 项覆盖 parse_uuid/get_or_404/check_owner/has_permission/resp/fmt_dt/active_query/generate_sequential_code/safe_commit）
+
+**变更文件：**
+- `backend/tests/test_deps_boundaries.py`（新建 51 项测试）
+  - parse_uuid_or_400：大写/花括号/空串/label in message/VALIDATION_FAILED code/返回 UUID 类型
+  - get_or_404：字符串 UUID/UUID 对象/label in message/RESOURCE_NOT_FOUND code/无效字符串返回 404 非 500/未删除记录/无 deleted_at 模型
+  - check_owner_or_forbid：自定义 label/403 AUTH_FORBIDDEN code/same user/view_all/superuser 优先/返回 None
+  - has_permission：空字符串/超级用户空权限/精确匹配/无角色
+  - _get_user_permissions：多角色合并/返回 set
+  - resp：None data/空列表/空字典/字符串 data/success 始终 True/默认消息/自定义消息/三键
+  - fmt_dt：None/UTC datetime/naive datetime/返回 string/微秒
+  - active_query：过滤 deleted/无 deleted 字段/返回 Query/空表
+  - generate_sequential_code：格式验证/不同前缀独立/从最大序号递增/四位补零/不同日期不影响/异常格式回退
+  - safe_commit：正常/rollback 被调用/保留异常类型
+
+**测试计数：** 后端 3589（+51）、前端 1052、总计 4641
+
 ## 2026-05-04（第七百四十七轮·自动循环）
 
 ### 安全加固：输入消毒模块边界测试（101 项覆盖 escape_like/strip_html/strip_control_chars/sanitize_text/sanitize_csv_cell 常量验证、字符级边界、Unicode、幂等性）
