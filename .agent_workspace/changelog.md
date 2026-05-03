@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-05-03（第六百四十二轮·自动循环）
+
+### 可观测性：Prometheus 自定义业务指标
+
+- 新增 app/core/metrics.py：8 个业务指标（4 Counter + 1 Gauge）
+  - ORDER_CREATED / ORDER_CONFIRMED / ORDER_CANCELLED — 订单生命周期
+  - PAYMENT_REGISTERED（含 method 标签）/ PAYMENT_REVERSED — 收款操作
+  - INVENTORY_STOCKOUT — 库存不足事件
+  - LOW_STOCK_PRODUCTS — 低库存商品 Gauge
+  - LOGIN_ATTEMPTS（含 result 标签）— 登录成功/失败
+- 埋点位置：orders.py / payments.py / auth.py 的关键业务操作
+- main.py 导入 metrics 模块注册到默认 Collector
+- +12 测试：指标存在性、标签、计数器递增、Gauge 设值、注册表校验
+- 后端 1345/1345 ✓、前端 837/837 ✓
+
 ## 2026-05-03（第六百四十一轮·自动循环）
 
 ### 工程修复：pytest 全量套件顺序依赖失败（140 → 0）

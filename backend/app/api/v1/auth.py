@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import active_query, get_current_user, get_db, resp
 from app.core.config import settings
+from app.core.metrics import LOGIN_ATTEMPTS
 from app.core.security import create_access_token, create_refresh_token, hash_password, verify_password
 from app.models.user import User
 from app.schemas.auth import ChangePasswordRequest, LoginRequest, RefreshRequest, RoleBrief
@@ -57,6 +58,7 @@ def login(request: Request, req: LoginRequest, db: Session = Depends(get_db)):
     user = active_query(db, User).filter(User.username == req.username).first()
     if not user or not verify_password(req.password, user.hashed_password):
         _record_login_fail(client_ip)
+        LOGIN_ATTEMPTS.labels(result="failed").inc()
         log_action(db, action="login_failed", resource_type="user", actor_name=req.username, **meta)
         db.commit()
         raise HTTPException(
@@ -77,6 +79,7 @@ def login(request: Request, req: LoginRequest, db: Session = Depends(get_db)):
         resource_id=str(user.id), actor_id=user.id, actor_name=user.display_name or user.username,
         **meta,
     )
+    LOGIN_ATTEMPTS.labels(result="success").inc()
     db.commit()
 
     return resp({

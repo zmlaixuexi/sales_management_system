@@ -22,6 +22,7 @@ from app.api.deps import (
     require_permission,
     resp,
 )
+from app.core.metrics import INVENTORY_STOCKOUT, ORDER_CANCELLED, ORDER_CONFIRMED, ORDER_CREATED
 from app.core.sanitize import escape_like
 from app.models.audit import AuditLog
 from app.models.customer import Customer
@@ -167,6 +168,7 @@ def _deduct_inventory(db: Session, order_id: uuid.UUID, items: list[SalesOrderIt
                 },
             )
         if product.stock_quantity < item.quantity:
+            INVENTORY_STOCKOUT.inc()
             raise HTTPException(
                 status_code=400,
                 detail={
@@ -330,6 +332,7 @@ def create_order(
         },
     )
     db.commit()
+    ORDER_CREATED.labels(status="draft").inc()
 
     can_view_cost = has_permission(current_user, "product:view_cost")
     result: dict = {
@@ -518,6 +521,7 @@ def confirm_order(
         },
     )
     db.commit()
+    ORDER_CONFIRMED.inc()
 
     return resp(data={"id": str(order.id), "status": order.status}, message="确认成功")
 
@@ -582,6 +586,7 @@ def cancel_order(
         },
     )
     db.commit()
+    ORDER_CANCELLED.inc()
 
     return resp(data={"id": str(order.id), "status": order.status}, message="取消成功")
 

@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from prometheus_fastapi_instrumentator import Instrumentator
 
 import app.core.logging
+import app.core.metrics as _business_metrics  # noqa: F401
 from app.api.v1.router import api_router
 from app.core.body_limit import BodyLimitMiddleware
 from app.core.config import settings

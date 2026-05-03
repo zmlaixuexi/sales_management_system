@@ -18,6 +18,7 @@ from app.api.deps import (
     require_permission,
     resp,
 )
+from app.core.metrics import PAYMENT_REGISTERED, PAYMENT_REVERSED
 from app.models.order import Payment, SalesOrder
 from app.models.user import User
 from app.schemas.payment import PaymentCreate, PaymentCreated, PaymentReversed
@@ -103,6 +104,7 @@ def create_payment(
         },
     )
     db.commit()
+    PAYMENT_REGISTERED.labels(method=result["method"]).inc()
 
     return resp(
         data={
@@ -164,5 +166,6 @@ def reverse_payment(
         after_data={"amount": str(payment.amount), "status": "reversed", "order_id": str(payment.order_id)},
     )
     db.commit()
+    PAYMENT_REVERSED.inc()
 
     return resp(data={"id": str(payment.id), "status": "reversed"}, message="冲正成功")
