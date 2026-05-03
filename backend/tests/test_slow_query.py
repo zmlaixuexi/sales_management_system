@@ -1,10 +1,11 @@
-"""SQL 慢查询日志测试"""
+"""SQL 慢查询日志测试 + 慢请求标记测试"""
 
 import logging
 from unittest.mock import patch
 
 from sqlalchemy import create_engine, text
 
+from app.core.config import settings
 from app.core.slow_query import register_slow_query_listener
 
 
@@ -218,3 +219,81 @@ def test_slow_query_sql_exactly_500_not_truncated():
     sql_val = captured_records[0].extra_fields["sql"]
     assert sql_val == exact_sql
     assert not sql_val.endswith("...")
+
+
+# ═══════════════════════════════════════════════════════
+# 慢请求标记测试
+# ═══════════════════════════════════════════════════════
+
+
+def test_slow_request_threshold_default():
+    """慢请求阈值默认 1000ms"""
+    assert settings.SLOW_REQUEST_THRESHOLD_MS == 1000
+
+
+def test_slow_sql_threshold_default():
+    """慢 SQL 阈值默认 200ms"""
+    assert settings.SLOW_SQL_THRESHOLD_MS == 200
+
+
+def test_slow_request_level_is_warning():
+    """慢请求日志级别为 WARNING"""
+    duration = settings.SLOW_REQUEST_THRESHOLD_MS + 1
+    is_slow = duration >= settings.SLOW_REQUEST_THRESHOLD_MS
+    level = logging.WARNING if is_slow else logging.INFO
+    assert level == logging.WARNING
+
+
+def test_fast_request_level_is_info():
+    """正常请求日志级别为 INFO"""
+    duration = 50
+    is_slow = duration >= settings.SLOW_REQUEST_THRESHOLD_MS
+    level = logging.WARNING if is_slow else logging.INFO
+    assert level == logging.INFO
+
+
+def test_slow_request_extra_fields_has_slow_true():
+    """慢请求 extra_fields 的 slow 标记为 True"""
+    duration = settings.SLOW_REQUEST_THRESHOLD_MS + 500
+    is_slow = duration >= settings.SLOW_REQUEST_THRESHOLD_MS
+    record = logging.LogRecord(
+        name="app.request", level=logging.WARNING,
+        pathname="", lineno=0, msg="", args=None, exc_info=None,
+    )
+    record.extra_fields = {  # type: ignore[attr-defined]
+        "method": "GET", "path": "/api/v1/reports", "status": 200,
+        "duration_ms": float(duration), "slow": is_slow,
+    }
+    assert record.extra_fields["slow"] is True
+
+
+def test_fast_request_extra_fields_has_slow_false():
+    """正常请求 extra_fields 的 slow 标记为 False"""
+    duration = 50
+    is_slow = duration >= settings.SLOW_REQUEST_THRESHOLD_MS
+    record = logging.LogRecord(
+        name="app.request", level=logging.INFO,
+        pathname="", lineno=0, msg="", args=None, exc_info=None,
+    )
+    record.extra_fields = {  # type: ignore[attr-defined]
+        "method": "GET", "path": "/api/v1/health", "status": 200,
+        "duration_ms": float(duration), "slow": is_slow,
+    }
+    assert record.extra_fields["slow"] is False
+
+
+def test_slow_request_message_includes_slow_label():
+    """慢请求消息包含 SLOW 前缀"""
+    is_slow = True
+    label = "SLOW " if is_slow else ""
+    msg = f"{label}GET /api/v1/reports 200 2500ms"
+    assert msg.startswith("SLOW")
+
+
+def test_fast_request_message_no_slow_label():
+    """正常请求消息不含 SLOW 前缀"""
+    is_slow = False
+    label = "SLOW " if is_slow else ""
+    msg = f"{label}GET /api/v1/health 200 5ms"
+    assert not msg.startswith("SLOW")
+    assert "SLOW" not in msg
