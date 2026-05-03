@@ -65,7 +65,7 @@ export async function fetchOrders(params?: {
   status?: string
   customer_id?: string
 }) {
-  return get<PaginatedData<Order>>('/sales-orders', params as Record<string, unknown>)
+  return get<PaginatedData<Order>>('/sales-orders', params)
 }
 
 export async function fetchOrder(id: string) {
@@ -102,5 +102,5 @@ export interface OrderLog {
 }
 
 export async function fetchOrderLogs(id: string, params?: { page?: number; page_size?: number }) {
-  return get<PaginatedData<OrderLog>>(`/sales-orders/${id}/logs`, params as Record<string, unknown>)
+  return get<PaginatedData<OrderLog>>(`/sales-orders/${id}/logs`, params)
 }

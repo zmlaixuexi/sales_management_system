@@ -17,7 +17,7 @@ export async function fetchPayments(params?: {
   page_size?: number
   order_id?: string
 }) {
-  return get<PaginatedData<Payment>>('/payments', params as Record<string, unknown>)
+  return get<PaginatedData<Payment>>('/payments', params)
 }
 
 export async function createPayment(orderId: string, data: {

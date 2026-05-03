@@ -33,7 +33,7 @@ export async function fetchInventoryMovements(params?: {
   product_id?: string
   movement_type?: string
 }) {
-  return get<PaginatedData<InventoryMovement>>('/inventory/movements', params as Record<string, unknown>)
+  return get<PaginatedData<InventoryMovement>>('/inventory/movements', params)
 }
 
 export async function adjustInventory(data: InventoryAdjustPayload) {

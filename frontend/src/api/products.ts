@@ -54,7 +54,7 @@ export interface ProductListParams {
 }
 
 export async function fetchProducts(params: ProductListParams) {
-  return get<PaginatedData<Product>>('/products', params as Record<string, unknown>)
+  return get<PaginatedData<Product>>('/products', params)
 }
 
 export async function fetchProduct(id: string) {

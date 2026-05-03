@@ -42,7 +42,7 @@ export async function fetchUsers(params?: {
   page_size?: number
   keyword?: string
 }) {
-  return get<PaginatedData<User>>('/users', params as Record<string, unknown>)
+  return get<PaginatedData<User>>('/users', params)
 }
 
 export async function createUser(data: UserCreate) {

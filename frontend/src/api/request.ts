@@ -2,7 +2,7 @@ import apiClient from './client'
 import type { ApiResponse } from '@/types'
 
 // 封装 GET
-export async function get<T>(url: string, params?: Record<string, unknown>): Promise<ApiResponse<T>> {
+export async function get<T>(url: string, params?: Record<string, string | number | undefined>): Promise<ApiResponse<T>> {
   const res = await apiClient.get<ApiResponse<T>>(url, { params })
   return res.data
 }

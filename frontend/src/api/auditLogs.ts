@@ -37,7 +37,7 @@ export async function fetchAuditLogs(params: {
   end_date?: string;
   keyword?: string;
 }) {
-  const res = await get<AuditLogListResult>('/audit-logs', params as Record<string, unknown>)
+  const res = await get<AuditLogListResult>('/audit-logs', params)
   return res.data
 }
 

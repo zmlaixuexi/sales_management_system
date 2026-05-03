@@ -64,19 +64,19 @@ export async function fetchSalesTrend(period?: string) {
 }
 
 export async function fetchProductRanking(params?: { period?: string; limit?: number }) {
-  return get<{ items: ProductRankingItem[]; period: string }>('/reports/product-ranking', params as Record<string, unknown>)
+  return get<{ items: ProductRankingItem[]; period: string }>('/reports/product-ranking', params)
 }
 
 export async function fetchInventoryWarning(threshold?: number) {
-  const params: Record<string, unknown> = {}
+  const params: Record<string, number> = {}
   if (threshold !== undefined) params.threshold = threshold
   return get<{ items: InventoryWarningItem[]; threshold: number; total: number }>('/reports/inventory-warning', params)
 }
 
 export async function fetchCustomerRanking(params?: { period?: string; limit?: number }) {
-  return get<{ items: CustomerRankingItem[]; period: string }>('/reports/customer-ranking', params as Record<string, unknown>)
+  return get<{ items: CustomerRankingItem[]; period: string }>('/reports/customer-ranking', params)
 }
 
 export async function fetchSalespersonRanking(params?: { period?: string; limit?: number }) {
-  return get<{ items: SalespersonRankingItem[]; period: string }>('/reports/salesperson-ranking', params as Record<string, unknown>)
+  return get<{ items: SalespersonRankingItem[]; period: string }>('/reports/salesperson-ranking', params)
 }

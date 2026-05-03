@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第六百五十六轮·自动循环）
+
+### 代码质量：前端 API 层 get 函数参数类型改进 + 移除 11 处类型断言
+
+- request.ts get 函数参数类型从 `Record<string, unknown>` 改为 `Record<string, string | number | undefined>`
+- 移除 11 处 `as Record<string, unknown>` 类型断言（orders/products/customers/payments/inventory/auditLogs/users/reports）
+- 全量验证通过：后端 1367 + 前端 837 = 2204 测试
+
 ## 2026-05-03（第六百五十五轮·自动循环）
 
 ### 文档：README 补充监控部署说明 + 更新测试计数

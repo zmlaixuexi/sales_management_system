@@ -36,7 +36,7 @@ export async function fetchCustomers(params?: {
   source?: string
   owner_user_id?: string
 }) {
-  return get<PaginatedData<Customer>>('/customers', params as Record<string, unknown>)
+  return get<PaginatedData<Customer>>('/customers', params)
 }
 
 export async function fetchCustomer(id: string) {
