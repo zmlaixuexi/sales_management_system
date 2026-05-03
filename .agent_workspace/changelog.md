@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-05-04（第七百五十二轮·自动循环）
+
+### 安全加固：请求体大小限制中间件边界测试（27 项覆盖 content-length 精确边界、无 content-type、PATCH 方法、413 响应结构、配置校验、中间件注册、方法/路径/multipart 豁免）
+
+**变更文件：**
+- `backend/tests/test_body_limit_boundaries.py`（新建 27 项测试）
+  - content-length 精确边界：恰好等于 max 通过/超 1 字节拒绝/为 0 不拒绝
+  - 无 content-type 头：带 body 不拒绝/超大 body 带 content-length 被拒绝
+  - PATCH 方法：受请求体限制
+  - 413 响应结构：success=false/error.code=PAYLOAD_TOO_LARGE/message 含 MB 含限制值
+  - 配置校验：默认 1MB/可自定义/0 阻止所有/max_bytes 计算
+  - 中间件注册：BodyLimitMiddleware 已注册
+  - 方法豁免：GET/HEAD/OPTIONS 即使超大 content-length 也豁免
+  - 路径豁免：/uploads 前缀豁免/非 /uploads 不豁免
+  - multipart 豁免：multipart/form-data 豁免/multipart/mixed 不豁免/application/json 不豁免
+  - 无 content-length：直接放行不做实际 body 大小检查
+  - 源代码验证：GET/HEAD/OPTIONS 方法列表/使用 settings/413 状态码/multipart 检查
+
+**测试计数：** 后端 3698（+27）、前端 1076、总计 4774
+
 ## 2026-05-04（第七百五十一轮·自动循环）
 
 ### 测试补强：收款服务边界测试（58 项覆盖 PaymentCreate schema、register_payment 业务逻辑、金额精度、状态转换、并发防护、模型字段校验）
