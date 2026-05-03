@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 
 const _customerMocks = {
@@ -386,5 +386,91 @@ describe('CustomerDetail', () => {
         expect(item?.textContent).toBe('--')
       })
     })
+  })
+
+  it('删除 _toastDisplayed 错误静默', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _customerMocks.deleteCustomer.mockRejectedValue(err)
+    renderCustomerDetail()
+    await waitFor(() => {
+      expect(screen.getByText('编辑')).toBeInTheDocument()
+    })
+    const popconfirm = screen.getByTestId('popconfirm')
+    await act(async () => { fireEvent.click(popconfirm) })
+    await waitFor(() => {
+      expect(_customerMocks.deleteCustomer).toHaveBeenCalledWith('cust-1')
+    })
+    // 不应显示错误消息
+    expect(_messageError).not.toHaveBeenCalledWith('删除失败')
+  })
+
+  it('空更新时间显示 --', async () => {
+    _customerMocks.fetchCustomer.mockResolvedValue({
+      success: true,
+      data: { ...mockCustomerData.data, updated_at: null },
+    })
+    renderCustomerDetail()
+    await waitFor(() => {
+      const items = screen.getAllByTestId('desc-item')
+      const item = items.find((el) => el.getAttribute('data-label') === '更新时间')
+      expect(item?.textContent).toBe('--')
+    })
+  })
+
+  it('空归属销售显示 --', async () => {
+    _customerMocks.fetchCustomer.mockResolvedValue({
+      success: true,
+      data: { ...mockCustomerData.data, owner_name: null },
+    })
+    renderCustomerDetail()
+    await waitFor(() => {
+      const items = screen.getAllByTestId('desc-item')
+      const item = items.find((el) => el.getAttribute('data-label') === '归属销售')
+      expect(item?.textContent).toBe('--')
+    })
+  })
+
+  it('空跟进状态显示 --', async () => {
+    _customerMocks.fetchCustomer.mockResolvedValue({
+      success: true,
+      data: { ...mockCustomerData.data, follow_status: null },
+    })
+    renderCustomerDetail()
+    await waitFor(() => {
+      const items = screen.getAllByTestId('desc-item')
+      const item = items.find((el) => el.getAttribute('data-label') === '跟进状态')
+      expect(item?.textContent).toBe('--')
+    })
+  })
+
+  it('点击订单号导航到订单详情', async () => {
+    renderCustomerDetail()
+    await waitFor(() => {
+      expect(screen.getByTestId('row-order-1')).toBeInTheDocument()
+    })
+    // 找到订单号链接并点击
+    const link = screen.getByText('ORD-20260501-001')
+    await act(async () => { fireEvent.click(link) })
+    await waitFor(() => {
+      expect(screen.getByText('Order Detail')).toBeInTheDocument()
+    })
+  })
+
+  it('删除中再次点击不重复调用', async () => {
+    let resolveDelete: (_v: any) => void
+    _customerMocks.deleteCustomer.mockReturnValue(new Promise((r) => { resolveDelete = r }))
+    renderCustomerDetail()
+    await waitFor(() => {
+      expect(screen.getByText('编辑')).toBeInTheDocument()
+    })
+    const popconfirm = screen.getByTestId('popconfirm')
+    await act(async () => { fireEvent.click(popconfirm) })
+    await waitFor(() => {
+      expect(_customerMocks.deleteCustomer).toHaveBeenCalledTimes(1)
+    })
+    // 再次点击不应触发第二次调用
+    await act(async () => { fireEvent.click(popconfirm) })
+    expect(_customerMocks.deleteCustomer).toHaveBeenCalledTimes(1)
+    resolveDelete!({ success: true })
   })
 })
