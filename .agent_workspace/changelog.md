@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第六百八十五轮·自动循环）
+
+### 可观测性：结构化日志规范化
+
+- logging.py：JSON 格式器输出新增 app_env 字段，便于多环境日志聚合
+- request_log.py：新增 user_agent 字段，移除冗余 user_id（格式器已从 context 注入）
+- 后端测试 1487（+0），ruff 0 errors
+
 ## 2026-05-03（第六百八十四轮·自动循环）
 
 ### 安全加固：CORS 配置验证 + 生产环境 localhost 告警
