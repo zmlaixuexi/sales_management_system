@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第六百四十轮·自动循环）
+
+### 文档：testing.md 补齐 7 个遗漏测试文件
+
+- 补充 test_payment_service / test_request_id / test_request_log / test_role_helpers / test_roles_crud / test_security_headers / test_user_helpers
+- 后端测试文件数 49 → 50
+- 总计仍为 2170 tests（1333 后端 + 837 前端）
+
 ## 2026-05-03（第六百三十九轮·自动循环）
 
 ### 文档：同步 testing.md 至 2170 测试

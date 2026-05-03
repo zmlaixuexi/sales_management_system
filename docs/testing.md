@@ -5,7 +5,7 @@
 | 指标 | 值 |
 |---|---|
 | 后端测试总数 | 1333 |
-| 后端测试文件 | 49 |
+| 后端测试文件 | 50 |
 | 前端测试总数 | 837 |
 | 前端测试文件 | 41 |
 | 测试总计 | 2170 |
@@ -59,6 +59,7 @@ cd frontend && npx eslint src/
 | test_sanitize.py | （无） | 纯函数测试，无需数据库，含控制字符清理 |
 | test_health.py | （无） | 健康检查无需数据库，mock 数据库连接 |
 | test_user_management.py | test_user_mgmt.db | 管理员，用户 CRUD |
+| test_roles_crud.py | test_roles_crud.db | 角色 CRUD + 权限管理 + 边界验证 |
 | test_customer_crud.py | test_customer_crud.db | 管理员，客户详情/编辑/转移/删除 |
 | test_product_crud.py | test_product_crud.db | 管理员，商品详情/删除 |
 | test_order_crud.py | test_order_crud.db | 管理员，订单创建/详情/编辑/确认/取消/库存联动 |
@@ -77,10 +78,16 @@ cd frontend && npx eslint src/
 | test_auth_rate_limit.py | （无） | 纯函数测试，登录速率限制 _check_login_rate_limit/_record_login_fail |
 | test_product_helpers.py | （SQLite 内存） | 商品辅助函数 _batch_sales_stats/_validate_category_id/_get_default_category_id |
 | test_customer_helpers.py | （SQLite 内存） | 客户辅助函数 _validate_owner_user |
+| test_role_helpers.py | （无） | 角色辅助函数 _require_superuser/_serialize_role/_validate_permissions_exist |
+| test_user_helpers.py | （无） | 用户辅助函数 _validate_roles_exist |
 | test_order_inventory.py | （SQLite 内存） | 订单库存辅助函数 _deduct_inventory/_restore_inventory |
 | test_order_validate_items.py | （SQLite 内存） | 订单明细校验 _validate_and_prepare_items |
 | test_payment_register.py | （SQLite 内存） | 收款登记服务 register_payment |
+| test_payment_service.py | （无） | 收款并发防护辅助函数 _check_payment_inflight/_clear_payment_inflight |
 | test_body_limit.py | test_body_limit.db | 请求体大小限制中间件 |
+| test_request_id.py | （无） | 请求 ID 中间件 |
+| test_request_log.py | （无） | 请求日志中间件 |
+| test_security_headers.py | （无） | 安全响应头中间件 |
 | test_middleware.py | （无） | 中间件单元测试（BodyLimit/RequestLog/SecurityHeaders） |
 | test_slow_query.py | （无） | SQL 慢查询日志测试 |
 | test_csv_import.py | （无） | CSV 导入共享校验函数 validate_csv_upload |
