@@ -115,6 +115,16 @@ case "${1:-help}" in
         echo ""
         ;;
 
+    generate-migration)
+        MSG="${2:-auto}"
+        echo ""
+        info "生成迁移文件（消息：${MSG}）..."
+        cd "${PROJECT_DIR}/backend"
+        alembic revision --autogenerate -m "${MSG}" 2>&1
+        ok "迁移文件已生成，请检查 backend/alembic/versions/"
+        echo ""
+        ;;
+
     check)
         "${SCRIPT_DIR}/pre-deploy-check.sh" "${@:2}"
         ;;
@@ -132,6 +142,8 @@ case "${1:-help}" in
         echo "  status         查看服务运行状态"
         echo "  logs [服务名]  查看日志（默认全部，可指定 backend/nginx/postgres）"
         echo "  migrate        执行数据库迁移（alembic upgrade head）"
+        echo "  generate-migration [消息]"
+        echo "                 自动生成迁移文件（alembic revision --autogenerate）"
         echo "  check          运行完整部署前检查"
         echo ""
         echo "示例："

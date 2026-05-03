@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第六百一十轮·自动循环）
+
+### 部署体验：manage.sh 添加 generate-migration 命令
+
+- 支持从模型变更自动生成 Alembic 迁移文件
+- 用法：./deploy/manage.sh generate-migration "添加索引"
+- 更新帮助文本
+- 后端 1306/1306 ✓
+
 ## 2026-05-03（第六百零九轮·自动循环）
 
 ### 配置：同步 .env.example 与 config.py 缺失项
