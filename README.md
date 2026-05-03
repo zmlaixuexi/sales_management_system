@@ -134,12 +134,12 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（910 个）
+# 后端测试（1219 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
 
-# 前端测试（382 个）
+# 前端测试（441 个）
 cd frontend
 npm test
 
@@ -199,7 +199,7 @@ npm run build
 | 边界条件 + 安全 | 6 | SQL 注入搜索安全（3 项）、分页边界 page=0/page_size=101/page_size=-1（3 项） |
 | 软删除过滤 | 2 | 客户列表排除已删除、支付列表排除已删除订单 |
 | 外键验证 | 4 | 客户 owner_user_id 无效/不存在、订单 customer_id 不存在、订单 items 含不存在商品 |
-| **合计** | **939** | |
+| **合计** | **1219** | |
 
 ### 前端测试覆盖
 
@@ -212,19 +212,19 @@ npm run build
 | usePaginatedList | 11 | 初始加载、错误处理、筛选、分页切换、刷新、空结果、_toastDisplayed 跳过 |
 | 订单表单 | 11 | 新增模式标题/字段/提交/编辑模式（标题/fetchOrder/保存修改） |
 | auth store | 14 | login/logout/fetchUser/hasPermission/loading 状态、login success:false 不存 token、fetchUser success:false 不设 user、空权限数组 |
-| 商品列表 | 11 | 渲染/搜索/筛选/新增按钮/表格数据/空状态/错误状态+重试/loading 状态 |
-| 客户列表 | 11 | 渲染/搜索/筛选/新增按钮/表格数据/空状态/错误状态+重试/loading 状态 |
-| 订单列表 | 11 | 渲染/搜索/筛选/新建按钮/表格数据/空状态/错误状态+重试/loading 状态 |
-| 审计日志 | 11 | 渲染/筛选/表格/操作标签中文映射/资源类型中文/空值/列标题/fetchAuditActions 调用/空状态/错误状态+重试/loading 状态 |
-| 用户列表 | 14 | 渲染/搜索/表格数据/角色标签/超级管理员标记/新建按钮/空状态/loading 状态/错误重试/编辑弹窗/启用停用切换 |
+| 商品列表 | 21 | 渲染/搜索/筛选/新增按钮/表格数据/空状态/错误状态+重试/loading 状态/导出下载/删除确认/禁用按钮 |
+| 客户列表 | 15 | 渲染/搜索/筛选/新增按钮/表格数据/空状态/错误状态+重试/loading 状态/导出下载/删除确认/导入按钮 |
+| 订单列表 | 14 | 渲染/搜索/筛选/新建按钮/表格数据/空状态/错误状态+重试/loading 状态/导出下载/详情按钮/订单号跳转 |
+| 审计日志 | 15 | 渲染/筛选/表格/操作标签中文映射/资源类型中文/空值/列标题/fetchAuditActions 调用/空状态/错误状态+重试/loading 状态/操作类型选项填充/资源类型选项填充/筛选变更重置分页 |
+| 用户列表 | 16 | 渲染/搜索/表格数据/角色标签/超级管理员标记/新建按钮/空状态/loading 状态/错误重试/编辑弹窗/启用停用切换/fetchRoles 调用/角色选择器选项 |
 | 报表 API | 8 | fetchSalesSummary（含无参数）/Trend/ProductRanking/InventoryWarning（含无阈值）/CustomerRanking/SalespersonRanking |
 | 商品 API | 16 | fetchProducts（筛选/排序/派生字段）/fetchProduct（完整详情+图片）/create（可选字段）/update（价格）/delete/disable/priceHistory/uploadImage（文件信息） |
-| 收款列表 | 12 | 渲染/筛选/表格数据/loading 状态/错误重试/收款 ID 截断/空备注显示 |
+| 收款列表 | 15 | 渲染/筛选/表格数据/loading 状态/错误重试/收款 ID 截断/空备注显示/导出按钮/导出下载/订单跳转 |
 | 库存列表 | 11 | 渲染/筛选/表格数据/loading 状态/错误重试/空备注显示 |
-| 报表中心 | 11 | 渲染标题/周期选择器/五个标签页/客户排行/销售排行数据/周期切换重载/API 默认周期 |
-| 客户详情 | 9 | 加载显示客户名称/返回按钮/loading 状态 |
-| 订单详情 | 9 | 加载显示订单号/返回按钮/loading 状态 |
-| Dashboard | 11 | 渲染看板标题/期间选择器/数据卡片/趋势汇总/库存预警数据/期间选项数/切换重载 |
+| 报表中心 | 14 | 渲染标题/周期选择器/五个标签页/客户排行/销售排行数据/周期切换重载/API 默认周期/周期选项标签/商品排行空状态/客户排行错误提示 |
+| 客户详情 | 11 | 加载显示客户名称/返回按钮/loading 状态/删除确认/编辑导航 |
+| 订单详情 | 19 | 加载显示订单号/返回按钮/loading 状态/确认/取消/冲正操作/收款登记/状态标签 |
+| Dashboard | 14 | 渲染看板标题/期间选择器/数据卡片/趋势汇总/库存预警数据/期间选项数/切换重载/期间选项标签/排行数据/趋势空状态 |
 | 客户 API | 12 | fetchCustomers（完整数据）/fetchCustomer/create（可选字段）/update（联系方式）/delete/transfer（不同目标） |
 | 状态映射 | 10 | 商品/客户来源/客户等级/订单（含 partially_paid/completed）/收款状态映射完整性（导入共享常量） |
 | 订单 API | 14 | fetchOrders（关键词/客户ID/分页/无参数）/fetchOrder（完整明细+收款）/create（多商品）/update（明细）/confirm/cancel |
@@ -242,7 +242,7 @@ npm run build
 | 登录页 | 7 | 渲染标题/输入框/登录按钮/提交调用 login/登录失败错误提示/成功跳转首页/redirect 参数跳转 |
 | API client | 7 | baseURL、token 附加、无 token、timeout 15s、Content-Type、X-Request-ID 生成和唯一性 |
 | NotFound | 3 | 404 渲染/返回首页按钮/按钮点击导航 |
-| **合计** | **380** | |
+| **合计** | **441** | |
 
 ## API 概览
 
