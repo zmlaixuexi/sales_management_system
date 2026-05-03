@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-04（第六百九十四轮·自动循环）
+
+### 文档完善：API 错误码文档更新
+
+- docs/api.md：新增 5 个错误码（METHOD_NOT_ALLOWED 405、ACCOUNT_LOCKED 429、SHUTTING_DOWN 503、PAYMENT_RATE_LIMITED 400、PAYLOAD_TOO_LARGE 400）
+- 重新整理错误码表格，按 HTTP 状态码分组
+- 后端测试 1502（+0），前端测试 841（+0），全部通过
+
 ## 2026-05-04（第六百九十三轮·自动循环）
 
 ### 部署体验：Alembic 迁移验证 + 补充缺失迁移
