@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-05-04（第七百四十六轮·自动循环）
+
+### 测试补强：异常处理中间件边界测试（65 项覆盖 HTTPException 边界、Starlette 路由异常、RequestValidationError、未处理异常守卫、request_id 传播、信封一致性）
+
+**变更文件：**
+- `backend/tests/test_exception_handler_boundaries.py`（新建 65 项测试）
+  - HTTPException dict detail：code/message/status_code/success=false/无 details 默认/有 details/缺 code 默认 SYSTEM_INTERNAL_ERROR/缺 message
+  - HTTPException string detail：code=SYSTEM_INTERNAL_ERROR/message=原始字符串/status_code/no details
+  - HTTPException 各种状态码：401/403/409/429/500
+  - Starlette 404：RESOURCE_NOT_FOUND/success=false/has message
+  - Starlette 405：METHOD_NOT_ALLOWED/success=false
+  - RequestValidationError：missing field 422/VALIDATION_FAILED/loc in message/wrong type/custom validator/only first error/success=false/query param error/valid body passes/→ 分隔符
+  - 未处理异常守卫：RuntimeError→500/SYSTEM_INTERNAL_ERROR/通用消息/不泄露详情/ValueError/KeyError/success=false
+  - request_id 传播：HTTP异常/404/405/422/500 均包含/X-Request-ID 响应头/自定义请求头保留/UUID 格式/不同请求不同 ID
+  - 响应信封一致性：success+error/error 有 code+message/404/422/500 结构一致
+  - 成功响应不受影响/main.py 四个处理器注册/main.py 真实 404 格式/main.py 错误有 request_id
+  - HTTPException 非 dict 非 str：int detail/None detail/list detail
+
+**测试计数：** 后端 3437（+65）、前端 1052、总计 4489
+
 ## 2026-05-04（第七百四十五轮·自动循环）
 
 ### 安全加固：密码强度策略边界测试（160 项覆盖最小可行密码、规则优先级、完整黑名单遍历、特殊字符类别、Unicode、长度边界、返回值不变性）
