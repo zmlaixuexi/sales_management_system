@@ -1,5 +1,33 @@
 # Changelog
 
+## 2026-05-04（第七百二十五轮·自动循环）
+
+### 可观测性：慢请求检测阈值边界测试（41 项覆盖配置验证、请求/SQL 阈值、日志级别、格式、Grafana 面板、Request ID）
+
+**变更文件：**
+- `backend/tests/test_slow_thresholds.py`（新建 41 项测试）
+  - 阈值默认值：SLOW_REQUEST_THRESHOLD_MS=1000、SLOW_SQL_THRESHOLD_MS=200
+  - 阈值可配置：SLOW_REQUEST_THRESHOLD_MS/ SLOW_SQL_THRESHOLD_MS 可自定义
+  - SQL 阈值 0 禁用检测、请求阈值高于 SQL 阈值
+  - 请求边界：等于阈值为慢、低于阈值非慢、WARNING/INFO 级别
+  - SQL 边界：等于阈值记录、低于阈值不记录、parameters None/截断 200 字符
+  - SQL 截断：500 字符不截断、501 字符截断带 "..."
+  - 模块结构：request_log/slow_query 模块存在、RequestLogMiddleware/register_slow_query_listener 可调用
+  - 日志格式：text/json 配置、INFO 级别、_JsonFormatter/_TextFormatter 存在
+  - X-Response-Time 头：健康检查包含、值为数字+ms
+  - Grafana 面板：dashboard.json 存在、含 latency 面板、含 panels
+  - 数据源配置：datasources.yml 或 grafana 目录存在
+  - SQL 截断常量：500/200
+  - 请求日志：/api/ 路径、extra_fields、client_ip、user_agent
+  - Request ID：request_id_ctx 存在、可设置/读取
+
+**修复：**
+- Grafana dashboard 测试从断言 "backend"/"prometheus" 关键字改为验证 panels 结构
+
+**验证：**
+- 后端 2439/2439 ✓（新增 41 项）
+- ruff 0 errors ✓
+
 ## 2026-05-04（第七百二十四轮·自动循环）
 
 ### 部署体验：健康检查端点边界测试（38 项覆盖响应结构、Docker 健康检查、连接池配置、Prometheus 配置、Nginx 代理、健康检查脚本）
