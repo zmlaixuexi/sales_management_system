@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 
 const _auditMocks = {
@@ -218,5 +218,51 @@ describe('AuditLogs', () => {
     ]
     _paginatedListReturn.total = 3
     _paginatedListReturn.loading = false
+  })
+
+  it('操作类型筛选器填充选项', async () => {
+    renderAuditLogs()
+    await waitFor(() => {
+      expect(_auditMocks.fetchAuditActions).toHaveBeenCalled()
+    })
+    const selects = screen.getAllByTestId('action-select')
+    const actionSelect = selects[0]
+    const optionTexts = Array.from(actionSelect.querySelectorAll('option')).map((o) => o.textContent)
+    expect(optionTexts).toContain('新增商品')
+    expect(optionTexts).toContain('确认订单')
+    expect(optionTexts).toContain('登录成功')
+  })
+
+  it('资源类型筛选器填充选项', async () => {
+    renderAuditLogs()
+    await waitFor(() => {
+      expect(_auditMocks.fetchAuditActions).toHaveBeenCalled()
+    })
+    const selects = screen.getAllByTestId('action-select')
+    const resourceSelect = selects[1]
+    const optionTexts = Array.from(resourceSelect.querySelectorAll('option')).map((o) => o.textContent)
+    expect(optionTexts).toContain('商品')
+    expect(optionTexts).toContain('订单')
+    expect(optionTexts).toContain('用户')
+  })
+
+  it('操作类型筛选变更重置分页', async () => {
+    renderAuditLogs()
+    await waitFor(() => {
+      expect(_auditMocks.fetchAuditActions).toHaveBeenCalled()
+    })
+    const selects = screen.getAllByTestId('action-select')
+    fireEvent.change(selects[0], { target: { value: 'product_create' } })
+    expect(_paginatedListReturn.setPage).toHaveBeenCalledWith(1)
+  })
+
+  it('资源类型筛选变更重置分页', async () => {
+    renderAuditLogs()
+    await waitFor(() => {
+      expect(_auditMocks.fetchAuditActions).toHaveBeenCalled()
+    })
+    const selects = screen.getAllByTestId('action-select')
+    fireEvent.change(selects[1], { target: { value: 'product' } })
+    expect(_paginatedListReturn.setPage).toHaveBeenCalledWith(1)
   })
 })
