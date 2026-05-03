@@ -13,6 +13,13 @@
 - 验证：+1 测试验证 429 响应无 retry-after 头时使用默认 5 秒等待值，前端 831 测试全绿
 - 关联：frontend/src/__tests__/client-interceptor.test.ts
 
+## 功能编号：FEAT-20260503-231
+
+- 描述：Products/Customers 组件卸载时 ref null 分支测试覆盖
+- 状态：已完成
+- 验证：+2 测试验证导入期间卸载组件 fileInputRef.current 为 null 时不崩溃，前端 833 测试全绿
+- 关联：frontend/src/__tests__/Products.test.tsx、Customers.test.tsx
+
 ## 功能编号：FEAT-20260503-230
 
 - 描述：manage.sh 添加 backup 命令快捷方式

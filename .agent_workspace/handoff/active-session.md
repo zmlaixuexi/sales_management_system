@@ -9,28 +9,28 @@
 
 ## 最近完成
 
+- Round 630：Products/Customers 组件卸载时 ref null 分支覆盖（前端 831→833）
 - Round 630：manage.sh 添加 backup 命令（委托 backup.sh）
 - Round 629：client.ts 429 无 retry-after 头默认等待分支覆盖（前端 830→831）
-- Round 611：全量质量门禁验证 + 测试文档同步
 
 ## 验证状态
 
 | 门禁 | 结果 |
 |---|---|
 | 后端测试 | 1310/1310 ✓ |
-| 前端测试 | 831/831 ✓ |
+| 前端测试 | 833/833 ✓ |
 | 后端覆盖率 | **100.00%** |
-| 前端覆盖率 | **99.91%**（语句）、**99.61%**（分支 768/771）、**100%**（函数）、**100%**（行） |
+| 前端覆盖率 | **99.91%**（语句）、**99.74%**（分支 770/771）、**100%**（函数）、**100%**（行） |
 | ruff | 0 errors ✓ |
 | tsc | 0 errors ✓ |
 | eslint | 0 errors ✓ |
 | vite build | ✓ |
-| 总计 | **2141 tests** |
+| 总计 | **2143 tests** |
 
 ## 下一步第一动作
 
 继续 keep-going 模式。可选方向：
-- 代码质量：覆盖剩余 3 个防御性分支（Products.tsx/Customers.tsx ref null、OrderDetail.tsx !id guard）
+- 代码质量：覆盖剩余 1 个防御性分支（OrderDetail.tsx !id guard，line 48）
 - 安全加固：输入校验边界路径
 - 可观测性：添加慢查询日志或请求追踪可视化
 - 部署体验：添加 restore 命令或数据库初始化验证

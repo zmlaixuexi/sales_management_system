@@ -478,6 +478,27 @@ describe('CustomersPage', () => {
     expect(mockPost).not.toHaveBeenCalled()
   })
 
+  it('导入期间卸载组件 ref 清理不崩溃', async () => {
+    const { default: apiClient } = await import('@/api/client')
+    const mockPost = apiClient.post as ReturnType<typeof vi.fn>
+    let resolvePost: (v: unknown) => void
+    mockPost.mockReturnValueOnce(new Promise((r) => { resolvePost = r }))
+
+    const { unmount } = renderCustomers()
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+    const file = new File(['data'], 'test.csv', { type: 'text/csv' })
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [file] } })
+    })
+    // 卸载组件 → fileInputRef.current 变为 null
+    unmount()
+    // 解除 pending 的 API 调用，handleImport 继续执行到 fileInputRef.current 检查
+    await act(async () => {
+      resolvePost!({ data: { success: true, message: 'ok' } })
+    })
+    // 不崩溃即可，fileInputRef.current 为 null 时不执行 .value = ''
+  })
+
   it('handleDelete _toastDisplayed 错误静默', async () => {
     const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
     _customerMocks.deleteCustomer.mockRejectedValueOnce(err)

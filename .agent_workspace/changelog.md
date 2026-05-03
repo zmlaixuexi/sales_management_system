@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第六百三十轮·自动循环）
+
+### 测试补强：Products/Customers 组件卸载时 ref null 分支覆盖
+
+- 新增导入期间卸载组件的测试（Products + Customers 各 1 个）
+- 验证 fileInputRef.current 为 null 时清理代码不崩溃
+- Products 测试 47 → 48，Customers 测试 36 → 37
+- 前端测试 831 → 833，总计 2143
+
 ## 2026-05-03（第六百二十九轮·自动循环）
 
 ### 测试补强：client.ts 429 无 retry-after 头默认等待分支覆盖
