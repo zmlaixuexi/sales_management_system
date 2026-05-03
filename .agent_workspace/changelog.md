@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第六百零八轮·自动循环）
+
+### 可观测性：/metrics 端点 basic auth 配置指引
+
+- deploy/nginx.conf 添加 basic auth 注释模板（默认禁用，取消注释即可启用）
+- 包含 htpasswd 文件生成和 docker-compose volume 挂载说明
+- 后端 1306/1306 ✓
+
 ## 2026-05-03（第六百零七轮·自动循环）
 
 ### 部署体验：添加 manage.sh 一键部署管理脚本
