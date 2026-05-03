@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-03（第五百三十一轮·自动循环）
+
+### 测试：新增请求日志中间件单元测试 6 个（1287）
+
+- API 请求 X-Response-Time 头验证
+- API 请求写入 app.request 日志
+- 非 API 路径不记录日志
+- extra_fields 结构化字段验证（method/path/status/duration_ms/slow/resp_bytes）
+- X-Response-Time 数值格式验证
+- 新建 test_request_log.py
+- 后端测试 1281→1287，总计 1797→1803
+
 ## 2026-05-03（第五百三十轮·自动循环）
 
 ### 文档：更新 README 和 testing.md 反映最新测试数量（1797）
