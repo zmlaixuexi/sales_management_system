@@ -67,6 +67,14 @@ def test_security_headers():
     assert "content-security-policy" in response.headers
     assert "permissions-policy" in response.headers
     assert response.headers["cache-control"] == "no-store"
+    assert response.headers["cross-origin-opener-policy"] == "same-origin"
+    assert response.headers["cross-origin-resource-policy"] == "same-origin"
+
+
+def test_hsts_not_present_over_http():
+    """HTTP 请求不应包含 HSTS 头"""
+    response = client.get("/api/v1/health")
+    assert "strict-transport-security" not in response.headers
 
 
 def test_request_log_records_api_calls(caplog):
