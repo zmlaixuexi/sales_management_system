@@ -502,4 +502,97 @@ describe('UsersPage', () => {
     expect(redTag).toBeTruthy()
     expect(redTag?.textContent).toBe('停用')
   })
+
+  it('切换启用状态 _toastDisplayed 错误静默', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _userMocks.updateUser.mockRejectedValue(err)
+    renderUsers()
+    const switches = screen.getAllByTestId('switch')
+    await act(async () => { fireEvent.click(switches[0]) })
+    await waitFor(() => {
+      expect(_userMocks.updateUser).toHaveBeenCalled()
+    })
+    expect(_messageError).not.toHaveBeenCalledWith('操作失败')
+  })
+
+  it('角色无 display_name 时显示 name', () => {
+    _userMocks.fetchUsers.mockReturnValue({
+      data: {
+        items: [{
+          id: 'user-011', username: 'test', display_name: '测试',
+          phone: null, email: null, is_active: true, is_superuser: false,
+          roles: [{ id: 'r-x', name: 'custom_role', display_name: null }],
+          created_at: null, updated_at: null,
+        }],
+        total: 1,
+      },
+    })
+    renderUsers()
+    // 当 display_name 为 null 时，角色标签应显示 name
+    expect(screen.getByText('custom_role')).toBeInTheDocument()
+  })
+
+  it('新建用户保存 _toastDisplayed 错误静默', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _mockForm.validateFields.mockResolvedValueOnce({
+      username: 'u', password: 'Pass123',
+    })
+    _userMocks.createUser.mockRejectedValueOnce(err)
+    renderUsers()
+
+    await act(async () => { fireEvent.click(screen.getByText('新建用户')) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeInTheDocument() })
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => {
+      expect(_userMocks.createUser).toHaveBeenCalled()
+    })
+    expect(_messageError).not.toHaveBeenCalledWith('创建用户失败')
+  })
+
+  it('编辑用户空 display_name/phone/email 填充空字符串', async () => {
+    _userMocks.fetchUsers.mockReturnValue({
+      data: {
+        items: [{
+          id: 'user-012', username: 'nulls', display_name: null,
+          phone: null, email: null, is_active: true, is_superuser: false,
+          roles: [], created_at: null, updated_at: null,
+        }],
+        total: 1,
+      },
+    })
+    renderUsers()
+    const editBtns = screen.getAllByText('编辑')
+    await act(async () => { fireEvent.click(editBtns[0]) })
+    await waitFor(() => {
+      expect(_mockForm.setFieldsValue).toHaveBeenCalledWith(
+        expect.objectContaining({ display_name: '', phone: '', email: '' }),
+      )
+    })
+  })
+
+  it('保存时空 display_name/phone/email 发送 undefined', async () => {
+    _mockForm.validateFields.mockResolvedValueOnce({
+      username: 'min', password: 'Pass123',
+      display_name: '', phone: '', email: '', role_ids: [],
+    })
+    _userMocks.createUser.mockResolvedValueOnce({ success: true, data: {} })
+    renderUsers()
+
+    await act(async () => { fireEvent.click(screen.getByText('新建用户')) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeInTheDocument() })
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => {
+      expect(_userMocks.createUser).toHaveBeenCalledWith(
+        expect.objectContaining({ display_name: undefined, phone: undefined, email: undefined }),
+      )
+    })
+  })
+
+  it('fetchRoles 返回非数组不崩溃', async () => {
+    _userMocks.fetchRoles.mockResolvedValue({ success: true, data: null })
+    renderUsers()
+    await waitFor(() => {
+      expect(screen.getByText('新建用户')).toBeInTheDocument()
+    })
+  })
 })
