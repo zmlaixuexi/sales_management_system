@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第五百八十一轮·自动循环）
+
+### 测试：补强 CustomerForm 分支覆盖率至 100%
+
+- CustomerForm.test.tsx +4：fetchCustomer success=false、_toastDisplayed 静默、
+  更新/创建 success=false 不导航
+- 整体分支覆盖率 90.14% → 90.66%，总测试数 732 → 737
+
 ## 2026-05-03（第五百八十轮·自动循环）
 
 ### 测试：补强 Dashboard 分支覆盖率，81.81% → 90.9%
