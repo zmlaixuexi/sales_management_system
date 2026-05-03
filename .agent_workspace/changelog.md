@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第五百七十六轮·自动循环）
+
+### 测试：补强 Roles + Users 分支覆盖率
+
+- Roles.test.tsx +13：fetchRoles 非数组/success=false、_toastDisplayed 静默（3 处）、空值填充/显示、权限非对象、用户数格式。Roles 分支 74.41% → 93.02%
+- Users.test.tsx +7：_toastDisplayed 静默（切换/新建）、角色无 display_name、空值填充/发送、fetchRoles 非数组。Users 分支 75.71% → 85.71%
+- 整体分支覆盖率 84.95% → 86.9%，总测试数 685 → 699
+
 ## 2026-05-03（第五百七十五轮·自动循环）
 
 ### 测试：补强 ReportsCenter 分支覆盖率，62.5% → 87.5%
