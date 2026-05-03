@@ -158,6 +158,28 @@ describe('apiClient 响应拦截器', () => {
       vi.useRealTimers()
     })
 
+    it('429 重试后使用 apiClient 重发原始请求', async () => {
+      const handler = apiClient.interceptors.response.handlers[0]?.rejected
+      if (!handler) throw new Error('No error handler')
+
+      const config = { headers: {}, _retry: false, _retry429: false }
+      const error = {
+        config,
+        response: { status: 429, headers: { 'retry-after': '0' }, data: {} },
+      }
+
+      // Patch adapter to prevent real HTTP call on retry
+      const originalAdapter = apiClient.defaults.adapter
+      apiClient.defaults.adapter = async () => ({ data: 'retried', status: 200, statusText: 'OK', headers: {}, config: {} } as never)
+
+      const result = await handler(error)
+      expect(config._retry429).toBe(true)
+      expect(result.data).toBe('retried')
+
+      // Restore
+      apiClient.defaults.adapter = originalAdapter
+    })
+
     it('429 已重试过显示错误提示', async () => {
       try {
         await triggerErrorInterceptor(429, { config: { _retry429: true } })
