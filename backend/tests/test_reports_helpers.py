@@ -9,6 +9,7 @@ from fastapi import HTTPException
 from app.api.v1.reports import (
     _apply_data_scope,
     _date_range,
+    _order_period_filter,
 )
 
 # ─── _date_range ─────────────────────────────────────────────
@@ -117,3 +118,39 @@ def test_apply_data_scope_sales_only_own():
     with patch("app.api.v1.reports.has_permission", return_value=False):
         _apply_data_scope(query, user)
     query.filter.assert_called_once()
+
+
+# ─── _order_period_filter ───────────────────────────────────
+
+
+@patch("app.api.v1.reports._date_range")
+def test_order_period_filter_returns_filtered_query(mock_date_range):
+    """返回添加了过滤条件的查询"""
+    mock_date_range.return_value = (date(2026, 5, 1), date(2026, 5, 3))
+    query = MagicMock()
+    filtered_query = MagicMock()
+    query.filter.return_value = filtered_query
+    result, start, end = _order_period_filter(query, "7d")
+    assert result is filtered_query
+    assert start == date(2026, 5, 1)
+    assert end == date(2026, 5, 3)
+
+
+@patch("app.api.v1.reports._date_range")
+def test_order_period_filter_calls_date_range(mock_date_range):
+    """正确传递 period 参数给 _date_range"""
+    mock_date_range.return_value = (date(2026, 5, 1), date(2026, 5, 3))
+    query = MagicMock()
+    query.filter.return_value = query
+    _order_period_filter(query, "this_month")
+    mock_date_range.assert_called_once_with("this_month")
+
+
+@patch("app.api.v1.reports._date_range")
+def test_order_period_filter_invalid_period_propagates(mock_date_range):
+    """不支持的 period 向上传播异常"""
+    mock_date_range.side_effect = HTTPException(status_code=400, detail="bad period")
+    query = MagicMock()
+    with pytest.raises(HTTPException) as exc_info:
+        _order_period_filter(query, "invalid")
+    assert exc_info.value.status_code == 400

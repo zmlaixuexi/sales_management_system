@@ -1,7 +1,8 @@
-"""商品辅助函数单元测试 — _batch_sales_stats / _validate_category_id / _get_default_category_id"""
+"""商品辅助函数单元测试 — _batch_sales_stats / _validate_category_id / _get_default_category_id / _generate_sku"""
 
 import uuid
 from datetime import UTC
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi import HTTPException
@@ -10,6 +11,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.api.v1.products import (
     _batch_sales_stats,
+    _generate_sku,
     _get_default_category_id,
     _validate_category_id,
 )
@@ -180,3 +182,25 @@ def test_batch_sales_stats_multiple_orders_aggregate(db):
     result = _batch_sales_stats(db, [p1])
     assert result[p1]["sales_quantity"] == 5
     assert result[p1]["sales_amount"] == "500.00"
+
+
+# ─── _generate_sku ────────────────────────────────────────────
+
+
+@patch("app.api.v1.products.generate_sequential_code")
+def test_generate_sku_delegates(mock_gen):
+    """委托给 generate_sequential_code 并使用 SPU- 前缀"""
+    mock_gen.return_value = "SPU-20260503-0001"
+    db = MagicMock()
+    result = _generate_sku(db)
+    assert result == "SPU-20260503-0001"
+    mock_gen.assert_called_once()
+
+
+@patch("app.api.v1.products.generate_sequential_code")
+def test_generate_sku_passes_db(mock_gen):
+    """传递 db session 给底层函数"""
+    mock_gen.return_value = "SPU-001"
+    db = MagicMock()
+    _generate_sku(db)
+    assert mock_gen.call_args[0][0] is db

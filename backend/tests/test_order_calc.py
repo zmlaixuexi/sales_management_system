@@ -1,10 +1,10 @@
-"""订单金额计算函数单元测试 — _calc_order_totals / _prepare_item"""
+"""订单金额计算函数单元测试 — _calc_order_totals / _prepare_item / _generate_order_no"""
 
 import uuid
 from decimal import Decimal
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
-from app.api.v1.orders import _calc_order_totals, _prepare_item
+from app.api.v1.orders import _calc_order_totals, _generate_order_no, _prepare_item
 
 # ─── _calc_order_totals ─────────────────────────────────────
 
@@ -126,3 +126,25 @@ def test_prepare_item_snapshots():
     assert result["product_image_url_snapshot"] == "https://example.com/img.jpg"
     assert result["cost_price_snapshot"] == Decimal("60.00")
     assert result["quantity"] == 5
+
+
+# ─── _generate_order_no ──────────────────────────────────────
+
+
+@patch("app.api.v1.orders.generate_sequential_code")
+def test_generate_order_no_delegates(mock_gen):
+    """委托给 generate_sequential_code 并使用 ORD- 前缀"""
+    mock_gen.return_value = "ORD-20260503-0001"
+    db = MagicMock()
+    result = _generate_order_no(db)
+    assert result == "ORD-20260503-0001"
+    mock_gen.assert_called_once()
+
+
+@patch("app.api.v1.orders.generate_sequential_code")
+def test_generate_order_no_passes_db(mock_gen):
+    """传递 db session 给底层函数"""
+    mock_gen.return_value = "ORD-001"
+    db = MagicMock()
+    _generate_order_no(db)
+    assert mock_gen.call_args[0][0] is db
