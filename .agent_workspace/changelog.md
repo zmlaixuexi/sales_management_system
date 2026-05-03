@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-05-04（第七百轮·自动循环）
+
+### 代码质量：API 路由与文档一致性自动校验测试（6 项回归守卫）
+
+- 新增 test_route_docs_consistency.py：6 项自动化校验
+  - test_all_routes_are_documented：每个后端路由必须在 docs/api.md 有对应文档
+  - test_no_documented_ghost_routes：文档中不应有不存在的幽灵路由
+  - test_route_count_reasonable：路由总数在合理范围（40-80）
+  - test_all_crud_resources_have_delete：核心 CRUD 资源有 DELETE 端点
+  - test_auth_endpoints_complete：5 个认证端点齐全
+  - test_export_endpoints_complete：4 种导出端点齐全
+- 后端测试 1587（+6），全部通过
+
 ## 2026-05-04（第六百九十九轮·自动循环）
 
 ### 部署体验：Docker Compose 生产环境加固
