@@ -1,5 +1,32 @@
 # Changelog
 
+## 2026-05-04（第七百三十三轮·自动循环）
+
+### 异常路径：文件上传边界测试（53 项覆盖扩展名/MIME 白名单、魔数验证、大小限制、配置验证、模型字段、端点认证）
+
+**变更文件：**
+- `backend/tests/test_file_upload_boundaries.py`（新建 53 项测试）
+  - 允许的扩展名：jpg/jpeg/png/webp（4 种），拒绝 svg/gif/bmp
+  - 允许的 MIME 类型：image/jpeg/png/webp（3 种），拒绝 svg+xml/gif
+  - 魔数签名：JPEG(ff d8 ff)、PNG(89PNG)、WebP(RIFF+WEBP)、全类型覆盖
+  - _validate_image：拒绝非法扩展名/MIME/超大文件，接受合法 jpg/png/webp，拒绝 exe/php/html/svg
+  - _validate_magic_bytes：拒绝空内容/错误签名/PHP 伪装，接受合法 JPEG/PNG 头
+  - 大小限制配置：MAX_IMAGE_SIZE_MB>0 且在 1-100 范围、MAX_SIZE_BYTES 正确计算
+  - 上传目录配置：UPLOAD_DIR/UPLOAD_PUBLIC_BASE_URL 非空、storage_type=local
+  - File/ProductImage 模型字段存在性
+  - API 端点认证：上传/获取/删除均需认证、非法 UUID→422
+  - 扩展名大小写不敏感：JPG/JpG/PNG 均通过
+  - 边界大小值：恰好最大通过、超 1 字节拒绝、0 字节通过
+
+**关键发现：**
+- 验证函数抛出 HTTPException 而非 ValueError
+- SVG 被白名单拒绝（无 XSS 风险）
+- 文件内容使用 UUID 命名存储，原始文件名仅存数据库
+
+**验证：**
+- 后端 2825/2825 ✓（新增 53 项）
+- ruff 0 errors ✓
+
 ## 2026-05-04（第七百三十二轮·自动循环）
 
 ### 安全加固：JWT token 边界测试（+32 新增覆盖配置验证、API 认证端点、OAuth2 方案、密码哈希、Auth Schema、password_changed_at）
