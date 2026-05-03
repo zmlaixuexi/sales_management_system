@@ -503,4 +503,45 @@ describe('CustomerDetail', () => {
     // Should show empty orders
     expect(screen.getByText('暂无关联订单')).toBeInTheDocument()
   })
+
+  it('点击返回列表按钮导航到客户列表', async () => {
+    renderCustomerDetail()
+    await waitFor(() => {
+      expect(screen.getByText('返回列表')).toBeInTheDocument()
+    })
+    const buttons = screen.getAllByTestId('button')
+    const backBtn = buttons.find((b) => b.textContent?.includes('返回列表'))
+    backBtn!.click()
+    await waitFor(() => {
+      expect(screen.getByText('Customers List')).toBeInTheDocument()
+    })
+  })
+
+  it('空创建时间显示 --', async () => {
+    _customerMocks.fetchCustomer.mockResolvedValue({
+      success: true,
+      data: { ...mockCustomerData.data, created_at: null },
+    })
+    renderCustomerDetail()
+    await waitFor(() => {
+      const items = screen.getAllByTestId('desc-item')
+      const item = items.find((el) => el.getAttribute('data-label') === '创建时间')
+      expect(item?.textContent).toBe('--')
+    })
+  })
+
+  it('无 id 时不调用 API', async () => {
+    render(
+      <MemoryRouter initialEntries={['/customers']}>
+        <Routes>
+          <Route path="/customers" element={<CustomerDetail />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+    await waitFor(() => {
+      expect(screen.getByText('加载中...')).toBeInTheDocument()
+    })
+    expect(_customerMocks.fetchCustomer).not.toHaveBeenCalled()
+    expect(_orderMocks.fetchOrders).not.toHaveBeenCalled()
+  })
 })
