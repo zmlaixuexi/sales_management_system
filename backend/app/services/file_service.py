@@ -124,7 +124,7 @@ def cleanup_orphan_files(db: Session, max_age_hours: int = 24) -> int:
     """
     from datetime import timedelta
 
-    from sqlalchemy import func, select
+    from sqlalchemy import select
 
     from app.models.product import ProductImage
 

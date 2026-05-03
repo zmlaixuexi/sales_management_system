@@ -1,5 +1,7 @@
 """文件服务校验函数单元测试"""
 
+from datetime import UTC
+
 import pytest
 from fastapi import HTTPException
 
@@ -89,17 +91,17 @@ def test_validate_magic_bytes_empty():
 def test_cleanup_orphan_files_removes_old_unbound(tmp_path):
     """超过 24 小时未绑定商品的文件被清理"""
     import uuid
-    from datetime import datetime, timedelta, timezone
+    from datetime import datetime, timedelta
 
     from sqlalchemy import create_engine
-    from sqlalchemy.orm import Session, sessionmaker
+    from sqlalchemy.orm import sessionmaker
 
-    from app.models.product import File, ProductImage, Base
+    from app.models.product import Base, File
 
     engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
     Base.metadata.create_all(engine)
-    SessionLocal = sessionmaker(bind=engine)
-    db = SessionLocal()
+    session_local = sessionmaker(bind=engine)
+    db = session_local()
 
     upload_dir = tmp_path / "uploads" / "products"
     upload_dir.mkdir(parents=True)
@@ -114,7 +116,7 @@ def test_cleanup_orphan_files_removes_old_unbound(tmp_path):
         content_type="image/jpeg",
         size_bytes=100,
         public_url="/uploads/products/old.jpg",
-        created_at=datetime.now(timezone.utc) - timedelta(hours=25),
+        created_at=datetime.now(UTC) - timedelta(hours=25),
     )
     db.add(old_file)
     db.flush()
@@ -140,17 +142,17 @@ def test_cleanup_orphan_files_removes_old_unbound(tmp_path):
 def test_cleanup_orphan_files_keeps_bound_files(tmp_path):
     """已绑定商品的文件不被清理"""
     import uuid
-    from datetime import datetime, timedelta, timezone
+    from datetime import datetime, timedelta
 
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
 
-    from app.models.product import File, Product, ProductImage, Base
+    from app.models.product import Base, File, Product, ProductImage
 
     engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
     Base.metadata.create_all(engine)
-    SessionLocal = sessionmaker(bind=engine)
-    db = SessionLocal()
+    session_local = sessionmaker(bind=engine)
+    db = session_local()
 
     # 创建商品
     product = Product(
@@ -170,7 +172,7 @@ def test_cleanup_orphan_files_keeps_bound_files(tmp_path):
         original_name="bound.jpg",
         content_type="image/jpeg",
         size_bytes=100,
-        created_at=datetime.now(timezone.utc) - timedelta(hours=25),
+        created_at=datetime.now(UTC) - timedelta(hours=25),
     )
     db.add(bound_file)
     db.flush()
@@ -193,17 +195,17 @@ def test_cleanup_orphan_files_keeps_bound_files(tmp_path):
 def test_cleanup_orphan_files_keeps_recent_unbound(tmp_path):
     """未绑定但不超过 24 小时的文件不被清理"""
     import uuid
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
 
-    from app.models.product import File, Base
+    from app.models.product import Base, File
 
     engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
     Base.metadata.create_all(engine)
-    SessionLocal = sessionmaker(bind=engine)
-    db = SessionLocal()
+    session_local = sessionmaker(bind=engine)
+    db = session_local()
 
     recent_file = File(
         id=uuid.uuid4(),
@@ -211,7 +213,7 @@ def test_cleanup_orphan_files_keeps_recent_unbound(tmp_path):
         original_name="recent.jpg",
         content_type="image/jpeg",
         size_bytes=100,
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
     )
     db.add(recent_file)
     db.flush()
@@ -226,17 +228,17 @@ def test_cleanup_orphan_files_keeps_recent_unbound(tmp_path):
 def test_cleanup_orphan_files_returns_count(tmp_path):
     """返回清理的文件数量"""
     import uuid
-    from datetime import datetime, timedelta, timezone
+    from datetime import datetime, timedelta
 
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
 
-    from app.models.product import File, Base
+    from app.models.product import Base, File
 
     engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
     Base.metadata.create_all(engine)
-    SessionLocal = sessionmaker(bind=engine)
-    db = SessionLocal()
+    session_local = sessionmaker(bind=engine)
+    db = session_local()
 
     for _ in range(3):
         f = File(
@@ -245,7 +247,7 @@ def test_cleanup_orphan_files_returns_count(tmp_path):
             original_name="old.jpg",
             content_type="image/jpeg",
             size_bytes=100,
-            created_at=datetime.now(timezone.utc) - timedelta(hours=30),
+            created_at=datetime.now(UTC) - timedelta(hours=30),
         )
         db.add(f)
     db.flush()
