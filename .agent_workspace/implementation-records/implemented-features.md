@@ -13,6 +13,13 @@
 - 验证：+1 测试验证 429 响应无 retry-after 头时使用默认 5 秒等待值，前端 831 测试全绿
 - 关联：frontend/src/__tests__/client-interceptor.test.ts
 
+## 功能编号：FEAT-20260503-235
+
+- 描述：sanitize_text 增加控制字符清理（strip_control_chars）
+- 状态：已完成
+- 验证：+7 测试验证 null byte/bell/escape 移除、tab/newline/cr 保留、组合清理，后端 1333 测试全绿
+- 关联：backend/app/core/sanitize.py、backend/tests/test_sanitize.py
+
 ## 功能编号：FEAT-20260503-234
 
 - 描述：后端配置值域校验（Pydantic field_validator）

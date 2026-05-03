@@ -1,6 +1,6 @@
 """输入清理工具测试"""
 
-from app.core.sanitize import escape_like, strip_html
+from app.core.sanitize import escape_like, sanitize_text, strip_control_chars, strip_html
 
 
 def test_escape_like_percent():
@@ -155,3 +155,35 @@ def test_sanitize_payment_remark_strips_html():
     data = PaymentCreate(amount="100", payment_method="cash", remark="<script>alert(1)</script>收款")
     assert "<script>" not in data.remark
     assert "收款" in data.remark
+
+
+# ─── strip_control_chars ────────────────────────────────────
+
+
+def test_strip_control_chars_removes_null_byte():
+    assert strip_control_chars("hello\x00world") == "helloworld"
+
+
+def test_strip_control_chars_removes_bell():
+    assert strip_control_chars("alert\x07") == "alert"
+
+
+def test_strip_control_chars_removes_escape():
+    assert strip_control_chars("text\x1b") == "text"
+
+
+def test_strip_control_chars_preserves_tab_newline_cr():
+    assert strip_control_chars("line1\nline2\ttab\r\n") == "line1\nline2\ttab\r\n"
+
+
+def test_strip_control_chars_no_control():
+    assert strip_control_chars("normal text 123") == "normal text 123"
+
+
+def test_strip_control_chars_empty():
+    assert strip_control_chars("") == ""
+
+
+def test_sanitize_text_strips_control_chars_and_html():
+    result = sanitize_text("<b>bold</b>\x00text")
+    assert result == "boldtext"

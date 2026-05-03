@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第六百三十八轮·自动循环）
+
+### 安全加固：sanitize_text 增加控制字符清理
+
+- sanitize.py 新增 strip_control_chars() 函数，移除 ASCII 控制字符（保留 \t \n \r）
+- sanitize_text() 现在同时清理 HTML 标签和控制字符
+- +7 测试：null byte/bell/escape 移除、tab/newline/cr 保留、组合清理
+- 后端测试 1326 → 1333，总计 2170
+
 ## 2026-05-03（第六百三十七轮·自动循环）
 
 ### 文档：同步 testing.md 至 2163 测试
