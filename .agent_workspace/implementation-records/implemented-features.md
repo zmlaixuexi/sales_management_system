@@ -6,6 +6,13 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-209
+
+- 描述：CustomerDetail 测试补强 — Popconfirm mock 增加 onClick={onConfirm}、删除确认调用 deleteCustomer 测试、编辑按钮跳转编辑页测试
+- 状态：已完成
+- 验证：427 前端测试全绿
+- 关联：CustomerDetail.test.tsx（9→11 tests）
+
 ## 功能编号：FEAT-20260503-208
 
 - 名称：审计日志前端 resource_id 精确筛选 UI
