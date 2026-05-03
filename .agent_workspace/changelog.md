@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第六百零九轮·自动循环）
+
+### 配置：同步 .env.example 与 config.py 缺失项
+
+- backend/.env.example 补充 LOGIN_FAIL_MAX、LOGIN_FAIL_WINDOW_SECONDS、HSTS_MAX_AGE
+- .env.example 补充 HSTS_MAX_AGE
+- 后端 1306/1306 ✓
+
 ## 2026-05-03（第六百零八轮·自动循环）
 
 ### 可观测性：/metrics 端点 basic auth 配置指引
