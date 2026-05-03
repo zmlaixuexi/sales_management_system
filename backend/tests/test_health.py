@@ -356,3 +356,30 @@ def test_metrics_tracks_requests():
     assert response.status_code == 200
     text = response.text
     assert "http_requests_total" in text
+
+
+def test_metrics_exposes_custom_business_metrics():
+    """/metrics 端点包含自定义业务指标"""
+    response = client.get("/metrics")
+    assert response.status_code == 200
+    text = response.text
+    for metric_name in [
+        "business_order_created",
+        "business_order_confirmed",
+        "business_order_cancelled",
+        "business_payment_registered",
+        "business_payment_reversed",
+        "business_inventory_stockout",
+        "business_low_stock_products",
+        "business_login_attempts",
+    ]:
+        assert metric_name in text, f"自定义指标 {metric_name} 未在 /metrics 输出中"
+
+
+def test_metrics_login_attempts_has_labels():
+    """LOGIN_ATTEMPTS 指标在 /metrics 中包含 result 标签"""
+    from app.core.metrics import LOGIN_ATTEMPTS
+    LOGIN_ATTEMPTS.labels(result="test").inc()
+    response = client.get("/metrics")
+    text = response.text
+    assert 'business_login_attempts_total{result="test"}' in text

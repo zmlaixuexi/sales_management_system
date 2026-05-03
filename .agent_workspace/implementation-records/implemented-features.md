@@ -6,6 +6,13 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-232
+
+- 描述：/metrics 端点集成测试 + testing.md 同步
+- 状态：已完成
+- 验证：test_health.py 新增 2 测试验证自定义业务指标在 /metrics 输出中暴露
+- 关联：tests/test_health.py、docs/testing.md
+
 ## 功能编号：FEAT-20260503-231
 
 - 描述：Prometheus 自定义业务指标（订单/收款/库存/认证）
