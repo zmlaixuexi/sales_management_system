@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第六百轮·自动循环）
+
+### 测试：补强路由导航和响应拦截器覆盖
+
+- routes-index.test.tsx +16：覆盖所有子路由导航（inventory、customers、orders、payments、audit-logs、reports、users、roles 等）
+- client-interceptor.test.ts +1：成功响应处理函数 fulfilled handler
+- 前端覆盖率：语句 97.82% → 99.24%、行 98.31% → 99.90%、函数 94.20% → 98.30%
+- 总测试数 811 → 828（+17）
+
 ## 2026-05-03（第五九十九轮·自动循环）
 
 ### 验证：全量构建验证通过
