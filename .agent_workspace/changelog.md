@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-05-03（第五百零五轮·自动循环）
+
+### 修复：后端测试隔离问题
+
+根因分析：
+1. test_order_crud/test_inventory_crud/test_payment_crud 在模块级设置 dependency_overrides，
+   收集阶段破坏其他模块的 save/restore 链
+2. auth.py _login_fail_counts 跨模块累积，达到阈值后阻止合法登录返回 429
+
+修复：
+- 三个文件移除模块级 override 赋值
+- conftest.py 模块切换时清空 _login_fail_counts
+- 连续三次全量运行 1237/1237 测试均通过，间歇性失败不再复现
+
 ## 2026-05-03（第五百零四轮·自动循环）
 
 ### 验证：全回归验证通过
