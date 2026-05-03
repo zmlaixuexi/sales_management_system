@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 
 const _userMocks = {
@@ -45,6 +45,13 @@ vi.mock('@/hooks/usePaginatedList', () => ({
 
 const _messageSuccess = vi.fn()
 const _messageError = vi.fn()
+
+const _mockForm = {
+  resetFields: vi.fn(),
+  setFieldsValue: vi.fn(),
+  validateFields: vi.fn(() => Promise.resolve({})),
+}
+
 vi.mock('antd', () => {
   function FormItem({ children, label }: any) {
     return <div data-testid="form-item" data-label={label}>{children}</div>
@@ -71,7 +78,7 @@ vi.mock('antd', () => {
       </div>
       )),
     Button: ({ children, onClick, type, icon }: any) => (
-      <button data-testid="button" data-type={type} onClick={onClick}>{icon}{children}</button>
+      <button data-testid="button" data-type={type} type="button" onClick={onClick}>{icon}{children}</button>
     ),
     Input: Object.assign(
       ({ value, onChange, placeholder }: any) => (
@@ -85,14 +92,19 @@ vi.mock('antd', () => {
       </select>
     ),
     Switch: ({ checked, onChange }: any) => (
-      <button data-testid="switch" data-checked={checked} onClick={() => onChange?.(!checked)} />
+      <button data-testid="switch" data-checked={checked} type="button" onClick={() => onChange?.(!checked)} />
     ),
     Tag: ({ children, color }: any) => <span data-testid="tag" data-color={color}>{children}</span>,
     Space: ({ children }: any) => <span>{children}</span>,
-    Modal: ({ title, children, open }: any) => open ? <div data-testid="modal" data-title={title}>{children}</div> : null,
+    Modal: ({ title, children, open, onOk }: any) => open ? (
+      <div data-testid="modal" data-title={title}>
+        {children}
+        <button data-testid="modal-ok" type="button" onClick={onOk}>保存</button>
+      </div>
+    ) : null,
     Form: Object.assign(
       ({ children }: any) => <div>{children}</div>,
-      { Item: FormItem, useForm: () => [{ resetFields: vi.fn(), setFieldsValue: vi.fn(), validateFields: vi.fn() }] },
+      { Item: FormItem, useForm: () => [_mockForm] },
     ),
     message: { success: (...args: any[]) => _messageSuccess(...args), error: (...args: any[]) => _messageError(...args) },
   }
@@ -316,5 +328,135 @@ describe('UsersPage', () => {
     })
     // 弹窗存在即可验证关闭逻辑存在
     expect(screen.getByTestId('modal')).toBeTruthy()
+  })
+
+  it('新建用户保存成功', async () => {
+    _mockForm.validateFields.mockResolvedValueOnce({
+      username: 'newuser', password: 'Pass123',
+      display_name: '新用户', phone: '13800009999',
+      email: 'new@test.com', role_ids: ['role-1'],
+    })
+    _userMocks.createUser.mockResolvedValueOnce({ success: true, data: {} })
+    renderUsers()
+
+    await act(async () => { fireEvent.click(screen.getByText('新建用户')) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeInTheDocument() })
+
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => {
+      expect(_userMocks.createUser).toHaveBeenCalledWith(
+        expect.objectContaining({ username: 'newuser', password: 'Pass123' }),
+      )
+      expect(_messageSuccess).toHaveBeenCalledWith('用户已创建')
+    })
+  })
+
+  it('编辑用户保存成功', async () => {
+    _mockForm.validateFields.mockResolvedValueOnce({
+      display_name: '修改名', phone: '13800008888',
+      email: 'edit@test.com', is_active: false, role_ids: ['role-2'],
+    })
+    _userMocks.updateUser.mockResolvedValueOnce({ success: true, data: {} })
+    renderUsers()
+
+    const editBtns = screen.getAllByText('编辑')
+    await act(async () => { fireEvent.click(editBtns[0]) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeInTheDocument() })
+
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => {
+      expect(_userMocks.updateUser).toHaveBeenCalledWith(
+        'user-001',
+        expect.objectContaining({ display_name: '修改名', is_active: false }),
+      )
+      expect(_messageSuccess).toHaveBeenCalledWith('用户已更新')
+    })
+  })
+
+  it('保存失败显示错误消息', async () => {
+    _mockForm.validateFields.mockResolvedValueOnce({
+      username: 'fail', password: 'Fail123',
+    })
+    _userMocks.createUser.mockRejectedValueOnce(new Error('创建失败'))
+    renderUsers()
+
+    await act(async () => { fireEvent.click(screen.getByText('新建用户')) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeInTheDocument() })
+
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => {
+      expect(_messageError).toHaveBeenCalledWith('创建用户失败')
+    })
+  })
+
+  it('表单验证失败不调用 API', async () => {
+    _mockForm.validateFields.mockRejectedValueOnce(new Error('validation error'))
+    renderUsers()
+
+    await act(async () => { fireEvent.click(screen.getByText('新建用户')) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeInTheDocument() })
+
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => {
+      expect(_mockForm.validateFields).toHaveBeenCalled()
+    })
+    expect(_userMocks.createUser).not.toHaveBeenCalled()
+    expect(_userMocks.updateUser).not.toHaveBeenCalled()
+  })
+
+  it('搜索输入 onChange 调用 setKeyword', async () => {
+    renderUsers()
+    const input = screen.getByPlaceholderText('搜索用户名')
+    await act(async () => { fireEvent.change(input, { target: { value: 'admin' } }) })
+    expect(_paginatedListReturn.setKeyword).toHaveBeenCalled()
+  })
+
+  it('启用切换成功显示"已启用"', async () => {
+    // sales01 is_active=true, toggling to false -> checked=false
+    _userMocks.updateUser.mockResolvedValueOnce({ success: true, data: {} })
+    renderUsers()
+    const switches = screen.getAllByTestId('switch')
+    await act(async () => { fireEvent.click(switches[1]) })
+    await waitFor(() => {
+      expect(_messageSuccess).toHaveBeenCalledWith('已停用')
+    })
+  })
+
+  it('无角色用户显示"无角色"标签', () => {
+    const noRoleUser = {
+      data: {
+        items: [{
+          id: 'user-003', username: 'norole', display_name: null,
+          phone: null, email: null, is_active: true, is_superuser: false,
+          roles: [], created_at: null, updated_at: null,
+        }],
+        total: 1,
+      },
+    }
+    _userMocks.fetchUsers.mockReturnValue(noRoleUser)
+    renderUsers()
+    expect(screen.getByText('无角色')).toBeInTheDocument()
+    // 恢复
+    _userMocks.fetchUsers.mockReturnValue(mockUsersData)
+  })
+
+  it('新建弹窗显示用户名和密码字段', async () => {
+    renderUsers()
+    await act(async () => { fireEvent.click(screen.getByText('新建用户')) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeInTheDocument() })
+    const labels = screen.getAllByTestId('form-item').map((fi) => fi.getAttribute('data-label'))
+    expect(labels).toContain('用户名')
+    expect(labels).toContain('密码')
+  })
+
+  it('编辑弹窗不显示用户名和密码字段', async () => {
+    renderUsers()
+    const editBtns = screen.getAllByText('编辑')
+    await act(async () => { fireEvent.click(editBtns[0]) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeInTheDocument() })
+    const labels = screen.getAllByTestId('form-item').map((fi) => fi.getAttribute('data-label'))
+    expect(labels).not.toContain('用户名')
+    expect(labels).not.toContain('密码')
+    expect(labels).toContain('启用状态')
   })
 })
