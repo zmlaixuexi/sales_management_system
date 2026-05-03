@@ -315,3 +315,22 @@ def test_openapi_disabled_in_production(monkeypatch):
     assert docs_url is None
     assert redoc_url is None
     assert openapi_url is None
+
+
+def test_health_returns_503_during_shutdown(monkeypatch):
+    """关闭期间健康检查返回 503"""
+    import app.main as main_mod
+    monkeypatch.setattr(main_mod, "_shutting_down", True)
+    response = client.get("/api/v1/health")
+    assert response.status_code == 503
+    data = response.json()
+    assert data["success"] is False
+    assert data["error"]["code"] == "SHUTTING_DOWN"
+
+
+def test_health_returns_200_after_restart(monkeypatch):
+    """重启后关闭标志重置，健康检查恢复正常"""
+    import app.main as main_mod
+    monkeypatch.setattr(main_mod, "_shutting_down", False)
+    response = client.get("/api/v1/health")
+    assert response.status_code == 200

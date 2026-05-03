@@ -1,6 +1,7 @@
 import subprocess
 
 from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -26,6 +27,14 @@ GIT_REVISION = _get_git_revision()
 @router.get("/health")
 def health_check():
     """服务健康检查（含数据库连接状态和连接池信息）"""
+    from app.main import _shutting_down
+
+    if _shutting_down:
+        return JSONResponse(
+            status_code=503,
+            content={"success": False, "error": {"code": "SHUTTING_DOWN", "message": "服务正在关闭"}},
+        )
+
     checks: dict = {"status": "ok", "version": "0.1.0", "revision": GIT_REVISION}
     db_ok = False
     try:

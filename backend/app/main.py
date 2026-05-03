@@ -20,9 +20,15 @@ from app.db.session import engine
 
 logger = logging.getLogger(__name__)
 
+# 关闭状态标志，供健康检查读取
+_shutting_down = False
+
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    global _shutting_down
+    _shutting_down = False
+
     # 确保上传目录存在
     upload_dir = Path(settings.UPLOAD_DIR)
     upload_dir.mkdir(parents=True, exist_ok=True)
@@ -46,9 +52,11 @@ async def lifespan(_app: FastAPI):
 
     yield
 
-    # 优雅关闭：释放数据库连接池
-    logger.info("服务关闭 — 释放数据库连接池")
+    # 优雅关闭：设置关闭标志，健康检查返回 503
+    _shutting_down = True
+    logger.info("服务关闭 — 停止接受新请求，释放数据库连接池")
     engine.dispose()
+    logger.info("服务关闭完成")
 
 
 OPENAPI_TAGS = [
