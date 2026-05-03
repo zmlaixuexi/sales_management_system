@@ -122,11 +122,12 @@ make db-seed           # 初始化种子数据
 ├── deploy/                  # 部署配置
 │   ├── docker-compose.dev.yml
 │   ├── docker-compose.prod.yml
+│   ├── prometheus.yml       # Prometheus 采集配置
+│   ├── grafana/             # Grafana 仪表盘和 provisioning
 │   ├── nginx.conf
+│   ├── manage.sh            # 部署管理脚本（含监控启停）
 │   ├── backup.sh
-│   ├── restore.sh
-│   ├── backup.ps1
-│   └── restore.ps1
+│   └── restore.sh
 ├── docs/                    # 文档
 └── .env.example             # 环境变量示例
 ```
@@ -134,12 +135,12 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（1290 个，覆盖率 100%）
+# 后端测试（1367 个，覆盖率 100%）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
 
-# 前端测试（516 个）
+# 前端测试（837 个）
 cd frontend
 npm test
 
@@ -269,6 +270,51 @@ npm run build
 | 报表 | `/api/v1/reports` | 销售汇总、趋势、排行、客户排行、销售人员排行、库存预警 |
 | 操作日志 | `/api/v1/audit-logs` | 操作日志查询 |
 | 数据导出 | `/api/v1/exports` | 商品、客户、订单、收款 CSV 导出 |
+
+## 监控（Prometheus + Grafana）
+
+生产环境内置可选的监控栈，基于 Prometheus 采集指标、Grafana 可视化。
+
+### 启动监控
+
+```bash
+cd deploy
+./manage.sh monitoring-start
+```
+
+监控服务使用 Docker Compose `monitoring` profile，不会随主服务自动启动，需手动启用。
+
+### 访问
+
+| 服务 | 地址 | 说明 |
+|---|---|---|
+| Grafana | `http://localhost:3000` | 默认账号 admin/admin |
+| Prometheus | `http://localhost:9090` | 指标查询和调试 |
+| 后端 Metrics | `http://localhost:8000/metrics` | Prometheus 抓取端点 |
+
+### 内置仪表盘
+
+Grafana 自动加载 12 面板业务运营仪表盘（`deploy/grafana/dashboard.json`），覆盖：
+
+- 订单创建/确认/取消速率、取消率
+- 收款登记（按方式分布）/ 冲正速率
+- 库存不足事件、低库存商品数
+- 登录成功/失败速率
+- HTTP 请求速率（按状态码）、API 延迟 P95
+
+### 管理命令
+
+```bash
+./manage.sh monitoring-start   # 启动 Prometheus + Grafana
+./manage.sh monitoring-stop    # 停止监控栈
+./manage.sh monitoring-status  # 查看监控栈状态
+```
+
+### 自定义配置
+
+- Prometheus 采集间隔：修改 `deploy/prometheus.yml`（默认 15s）
+- Grafana 端口：设置环境变量 `GRAFANA_PORT`（默认 3000）
+- 数据持久化：Docker 命名卷 `prometheus_data` 和 `grafana_data`
 
 ## 当前限制
 
