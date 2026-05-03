@@ -6,6 +6,34 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-225
+
+- 描述：登录失败速率限制参数可配置化
+- 状态：已完成
+- 验证：LOGIN_FAIL_MAX/LOGIN_FAIL_WINDOW_SECONDS 提取到 Settings，1287 后端测试全绿
+- 关联：backend/app/core/config.py、backend/app/api/v1/auth.py、.env.example
+
+## 功能编号：FEAT-20260503-224
+
+- 描述：后端中间件单元测试补强 — 请求 ID、安全响应头、请求日志
+- 状态：已完成
+- 验证：新建 3 个测试文件 22 个测试（request_id 4 + security_headers 8 + request_log 6 + 隔离修复），1287 后端测试全绿
+- 关联：backend/tests/test_request_id.py、test_security_headers.py、test_request_log.py
+
+## 功能编号：FEAT-20260503-223
+
+- 描述：后端服务层与辅助函数测试补强 — 收款服务并发防护、角色/用户辅助函数、报表/订单/商品辅助函数
+- 状态：已完成
+- 验证：新建 4 个测试文件 32 个测试，1281 后端测试全绿
+- 关联：test_payment_service.py（9）、test_role_helpers.py（16）、test_user_helpers.py（4）、test_reports_helpers/test_order_calc/test_product_helpers（+7）
+
+## 功能编号：FEAT-20260503-222
+
+- 描述：前端 useSubmit mock ESLint 修复 + OrderForm/CustomerForm/ProductForm 边界值测试
+- 状态：已完成
+- 验证：3 处 ESLint 错误修复（onSubmit→_onSubmit），516 前端测试全绿
+- 关联：frontend/src/__tests__/{OrderForm,CustomerForm,ProductForm}.test.tsx
+
 ## 功能编号：FEAT-20260503-219
 
 - 描述：角色权限管理页面 — 后端 CRUD API + 前端页面 + 路由菜单 + 测试
