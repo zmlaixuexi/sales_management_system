@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-05-04（第七百三十轮·自动循环）
+
+### 异常路径：日期范围查询边界测试（76 项覆盖 _date_range 计算、PeriodType 约束、datetime 边界转换、导出日期验证、报表端点一致性）
+
+**变更文件：**
+- `backend/tests/test_date_range_boundaries.py`（新建 76 项测试）
+  - _date_range 计算：today/7d/30d/this_month/last_month 起止日期正确、跨度验证、start<=end、无效 period 抛 HTTPException 400
+  - _order_period_filter：datetime 边界转换（min_time/max_time）、返回类型验证、filter 调用验证
+  - PeriodType Literal：5 个可选值验证、类型约束
+  - 报表 API period 验证：5 个合法值接受、invalid/empty 返回 422、5 端点×5 period 参数化覆盖
+  - 导出端点日期验证：FastAPI date 类型自动解析、非法日期格式(abc/斜杠/datetime)返回 422、ISO 格式接受
+  - 审计日志日期参数：start_date/end_date 字符串类型被接受（无 FastAPI 校验）
+  - datetime 精度：microseconds、combine 行为验证
+  - 库存预警端点：无 period 参数、忽略 period
+  - 默认 period：sales-summary/sales-trend Query 默认 period='30d'
+
+**关键发现：**
+- `_date_range("last_month")` 返回 `(上月1日, today)` 而非 `(上月1日, 上月末)` — 设计如此，非 bug
+- 审计日志 start_date/end_date 为 `str | None`，无格式校验，依赖数据库隐式类型转换
+- 导出端点使用 Python `date` 类型，FastAPI 自动校验 ISO 格式
+
+**验证：**
+- 后端 2669/2669 ✓（新增 76 项）
+- ruff 0 errors ✓
+
 ## 2026-05-04（第七百二十九轮·自动循环）
 
 ### 异常路径：分页参数边界测试（44 项覆盖 PaginationParams 约束、offset 计算、响应结构、API 参数验证、跨端点一致性、极端值）
