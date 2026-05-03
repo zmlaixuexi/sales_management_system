@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-04（第六百八十七轮·自动循环）
+
+### 可观测性：请求日志新增 query_string 字段
+
+- request_log.py：extra_fields 新增 query_string（无查询参数时为 None）
+- 后端测试 1491（+0），ruff 0 errors
+
 ## 2026-05-04（第六百八十六轮·自动循环）
 
 ### 安全加固：JWT_SECRET_KEY 强度校验
