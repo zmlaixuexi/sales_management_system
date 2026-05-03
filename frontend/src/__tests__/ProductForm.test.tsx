@@ -61,7 +61,14 @@ vi.mock('antd', () => ({
     <div data-testid="card" data-title={title} data-loading={loading ? 'true' : 'false'}>{children}</div>
   ),
   Space: ({ children }: any) => <span>{children}</span>,
-  Upload: ({ children }: any) => <div data-testid="upload">{children}</div>,
+  Upload: ({ children, beforeUpload }: any) => (
+    <div data-testid="upload" onClick={() => {
+      if (beforeUpload) {
+        const fakeFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' })
+        beforeUpload(fakeFile)
+      }
+    }}>{children}</div>
+  ),
   Image: ({ src }: any) => <img data-testid="image" src={src} />,
   Select: ({ options, value, onChange }: any) => (
     <select data-testid="select" value={value} onChange={(e: any) => onChange?.(e.target.value)}>
@@ -396,20 +403,38 @@ describe('ProductForm', () => {
   })
 
   describe('图片上传', () => {
-    it('上传成功设置图片 URL', async () => {
+    it('上传成功设置图片 URL 并显示图片', async () => {
       _productApi.uploadImage.mockResolvedValue({
         success: true,
         data: { url: 'http://img/uploaded.jpg' },
       })
+      const { message } = await import('antd')
       renderNewProduct()
 
-      // 通过 beforeUpload 回调直接测试 handleImageUpload
-      // Upload mock 的 beforeUpload 需要触发
       const uploadDiv = screen.getByTestId('upload')
-      const uploadBtn = uploadDiv.querySelector('button')
-      expect(uploadBtn).toBeTruthy()
-      // 按钮文本为"选择图片"（初始无图）
-      expect(uploadBtn?.textContent).toContain('选择图片')
+      await act(async () => { fireEvent.click(uploadDiv) })
+
+      await waitFor(() => {
+        expect(_productApi.uploadImage).toHaveBeenCalled()
+        expect(message.success).toHaveBeenCalledWith('图片上传成功')
+      })
+      // 图片 URL 设置后应显示 Image 组件
+      const img = screen.getByTestId('image')
+      expect(img.getAttribute('src')).toBe('http://img/uploaded.jpg')
+    })
+
+    it('上传失败显示错误提示', async () => {
+      _productApi.uploadImage.mockRejectedValue(new Error('上传失败'))
+      const { message } = await import('antd')
+      renderNewProduct()
+
+      const uploadDiv = screen.getByTestId('upload')
+      await act(async () => { fireEvent.click(uploadDiv) })
+
+      await waitFor(() => {
+        expect(_productApi.uploadImage).toHaveBeenCalled()
+        expect(message.error).toHaveBeenCalledWith('图片上传失败')
+      })
     })
   })
 
