@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-04（第六百八十八轮·自动循环）
+
+### 测试补强：安全响应头审计 — COOP/CORP + HSTS
+
+- test_health.py：test_security_headers 新增 COOP/CORP 断言
+- test_health.py：新增 test_hsts_not_present_over_http 验证 HTTP 下不含 HSTS 头
+- 安全响应头中间件已覆盖 10 个头（无需代码修改）
+- 后端测试 1492（+1），ruff 0 errors
+
 ## 2026-05-04（第六百八十七轮·自动循环）
 
 ### 可观测性：请求日志新增 query_string 字段
