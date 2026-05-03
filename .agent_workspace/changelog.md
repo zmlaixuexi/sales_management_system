@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-05-04（第七百二十四轮·自动循环）
+
+### 部署体验：健康检查端点边界测试（38 项覆盖响应结构、Docker 健康检查、连接池配置、Prometheus 配置、Nginx 代理、健康检查脚本）
+
+**变更文件：**
+- `backend/tests/test_health_boundaries.py`（新建 38 项测试）
+  - 响应结构：database/version/revision 字段、pool 数值类型、pool 非负、无需认证、仅 GET
+  - 版本端点：revision 字段、无需认证
+  - Docker Compose 健康检查：prod/dev backend/postgres/nginx、检查数据库状态、间隔 ≤30s、重试 ≤5
+  - Dockerfile：HEALTHCHECK 指令、检查 database
+  - 连接池配置：DB_POOL_SIZE/DB_MAX_OVERFLOW/DB_POOL_RECYCLE_SECONDS 默认值、pool_pre_ping
+  - Prometheus：配置文件存在、抓取间隔、目标包含 backend、metrics_path、prod 有 prometheus/grafana
+  - Nginx 代理：/health 和 /metrics 代理、健康检查不写访问日志
+  - 健康检查脚本：存在、检查后端、检查前端
+  - 生产 Compose：连接池配置覆盖
+  - Metrics 排除：/health 和 /version 不计入指标
+
+**测试结果：** 后端 2398/2398 ✓ / 前端 858/858 ✓ / 总计 3256 tests
+
 ## 2026-05-04（第七百二十三轮·自动循环）
 
 ### 安全加固：CSRF 防护验证测试（48 项覆盖 CORS 配置、安全响应头、Cookie 使用、认证模式、Nginx 安全）
