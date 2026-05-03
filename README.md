@@ -135,7 +135,7 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（1372 个，覆盖率 100%）
+# 后端测试（1444 个，覆盖率 100%）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
@@ -206,7 +206,15 @@ npm run build
 | 边界条件 + 安全 | 6 | SQL 注入搜索安全（3 项）、分页边界 page=0/page_size=101/page_size=-1（3 项） |
 | 软删除过滤 | 2 | 客户列表排除已删除、支付列表排除已删除订单 |
 | 外键验证 | 4 | 客户 owner_user_id 无效/不存在、订单 customer_id 不存在、订单 items 含不存在商品 |
-| **合计** | **1290** | |
+| 并发安全 | 7 | _deduct_inventory with_for_update 结构验证、竞态检测、多商品部分失败原子性、库存为零拒绝、多次回滚累积 |
+| 订单状态机 | 13 | 已取消(draft/confirmed)→confirm/update/cancel 400，已完成→confirm/cancel/update 400，部分收款→cancel(含支付)/update/confirm 400，已确认→update/confirm 400 |
+| Schema 边界验证 | 27 | ProductCreate/Update 价格上界、库存上界、排序权重范围，OrderItemInput 数量/单价上界，PaymentCreate 金额上界，InventoryAdjust 数量范围，RefreshRequest token 长度，UserCreate/Update role_ids 列表长度 |
+| CSV 注入防护 | 21 | sanitize_csv_cell 公式字符(`=+@-\t\r`)前缀、正常文本不变、中间字符不变，导出行构建函数集成验证 |
+| 配置校验 | 16 | 环境变量缺失/无效值/默认值/类型转换 |
+| 业务指标 | 12 | Prometheus 指标注册/计数/标签 |
+| 请求日志 | 6 | 请求/响应日志记录、跳过路径、慢请求标记 |
+| 支付服务 | 9 | 收款登记并发防护（inflight 检查/清除/幂等/隔离/reset） |
+| **合计** | **1444** | |
 
 ### 前端测试覆盖
 

@@ -1033,14 +1033,13 @@ def _ensure_login():
         _tokens["access"] = resp.json()["data"]["access_token"]
 
 
-def test_53_customer_create_invalid_owner_user_id_400():
-    """创建客户时 owner_user_id 为无效 UUID 格式返回 400"""
+def test_53_customer_create_invalid_owner_user_id_422():
+    """创建客户时 owner_user_id 为无效 UUID 格式由 Pydantic 拦截返回 422"""
     _ensure_login()
     resp = client.post("/api/v1/customers", json={
         "name": "外键测试客户", "owner_user_id": "not-a-uuid",
     }, headers=_auth())
-    assert resp.status_code == 400
-    assert resp.json()["error"]["code"] == "VALIDATION_FAILED"
+    assert resp.status_code == 422
 
 
 def test_54_customer_create_nonexistent_owner_user_id_400():

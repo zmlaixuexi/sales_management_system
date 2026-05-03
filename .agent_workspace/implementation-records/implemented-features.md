@@ -2758,3 +2758,26 @@ API 实测：商品创建/列表/详情通过
 
 测试命令：docker compose up -d
 测试结果：三服务全部运行，API 代理正常
+
+---
+
+## 功能编号：FEAT-256
+
+功能名称：客户 Schema owner_user_id UUID 格式校验
+所属模块：后端 / Schema 校验
+关联任务编号：ROUND-678
+实现日期：2026-05-03
+实现 Agent：Claude Code
+当前状态：已测试
+
+### 实现范围
+
+- CustomerCreate/CustomerUpdate/CustomerTransfer 的 owner_user_id 字段添加 UUID 格式验证
+- 验证在 Pydantic schema 层进行，无效 UUID 直接返回 422
+- test_edge_cases/test_boundary 中相关测试更新（400→422）
+- 新增 8 项 schema bounds 测试
+
+### 已执行测试
+
+测试命令：pytest tests/test_schema_bounds.py tests/test_edge_cases.py tests/test_boundary.py tests/test_customer_crud.py -q
+测试结果：1452 passed（+8 新增）

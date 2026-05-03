@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-03（第六百七十八轮·自动循环）
+
+### Schema 验证 + README 更新
+
+- customer schema owner_user_id 添加 UUID 格式校验（CustomerCreate/CustomerUpdate/CustomerTransfer）
+- test_edge_cases/test_boundary 中 malformed UUID 测试更新为 422（Pydantic 层拦截）
+- 新增 8 项 schema bounds 测试
+- README.md 后端测试数更新 1372→1452，新增 6 个测试模块行
+- 后端测试 1452（+8），前端 841，ruff 0 errors
+
 ## 2026-05-03（第六百七十七轮·自动循环）
 
 ### 记录：补充 FEAT-250~FEAT-255 实现记录

@@ -1,9 +1,10 @@
-"""Pydantic Schema 边界验证测试 — 价格上界、数量上界、列表长度"""
+"""Pydantic Schema 边界验证测试 — 价格上界、数量上界、列表长度、UUID 格式"""
 
 import pytest
 from pydantic import ValidationError
 
 from app.schemas.auth import RefreshRequest, UserCreate, UserUpdate
+from app.schemas.customer import CustomerCreate, CustomerTransfer, CustomerUpdate
 from app.schemas.inventory import InventoryAdjust
 from app.schemas.order import OrderItemInput
 from app.schemas.payment import PaymentCreate
@@ -174,3 +175,52 @@ def test_user_update_role_ids_too_many_422():
 def test_user_update_role_ids_at_max_ok():
     u = UserUpdate(role_ids=[str(i) for i in range(50)])
     assert len(u.role_ids) == 50
+
+
+# ─── CustomerCreate owner_user_id UUID 格式 ──────────────────
+
+
+def test_customer_create_owner_user_id_invalid_uuid_422():
+    with pytest.raises(ValidationError, match="归属销售 ID"):
+        CustomerCreate(name="测试", owner_user_id="not-a-uuid")
+
+
+def test_customer_create_owner_user_id_valid_uuid_ok():
+    c = CustomerCreate(name="测试", owner_user_id="12345678-1234-1234-1234-123456789abc")
+    assert c.owner_user_id == "12345678-1234-1234-1234-123456789abc"
+
+
+def test_customer_create_owner_user_id_none_ok():
+    c = CustomerCreate(name="测试", owner_user_id=None)
+    assert c.owner_user_id is None
+
+
+# ─── CustomerUpdate owner_user_id UUID 格式 ──────────────────
+
+
+def test_customer_update_owner_user_id_invalid_uuid_422():
+    with pytest.raises(ValidationError, match="归属销售 ID"):
+        CustomerUpdate(owner_user_id="bad-uuid")
+
+
+def test_customer_update_owner_user_id_valid_uuid_ok():
+    u = CustomerUpdate(owner_user_id="12345678-1234-1234-1234-123456789abc")
+    assert u.owner_user_id == "12345678-1234-1234-1234-123456789abc"
+
+
+def test_customer_update_owner_user_id_none_ok():
+    u = CustomerUpdate(owner_user_id=None)
+    assert u.owner_user_id is None
+
+
+# ─── CustomerTransfer owner_user_id UUID 格式 ────────────────
+
+
+def test_customer_transfer_owner_user_id_invalid_uuid_422():
+    with pytest.raises(ValidationError, match="归属销售 ID"):
+        CustomerTransfer(owner_user_id="not-a-uuid")
+
+
+def test_customer_transfer_owner_user_id_valid_uuid_ok():
+    t = CustomerTransfer(owner_user_id="12345678-1234-1234-1234-123456789abc")
+    assert t.owner_user_id == "12345678-1234-1234-1234-123456789abc"

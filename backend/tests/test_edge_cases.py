@@ -357,16 +357,16 @@ def test_27_expired_token():
     assert resp.status_code == 401
 
 
-def test_28_malformed_uuid_returns_404():
-    """格式错误的 ID 通过请求体传递应返回 404 而非 500"""
+def test_28_malformed_uuid_returns_422():
+    """格式错误的 ID 通过请求体传递应由 Pydantic 拦截返回 422"""
     if not _tokens.get("access"):
         login_resp = client.post("/api/v1/auth/login", json={"username": "edge_tester", "password": "testpass123"})
         _tokens["access"] = login_resp.json()["data"]["access_token"]
-    # 客户转移接口的 owner_user_id 是字符串参数，可能触发 uuid.UUID 异常
+    # 客户转移接口的 owner_user_id 现在由 Pydantic schema 验证 UUID 格式
     resp = client.post(f"/api/v1/customers/{_customer_id}/transfer", json={
         "owner_user_id": "not-a-uuid",
     }, headers=_auth())
-    assert resp.status_code == 400
+    assert resp.status_code == 422
 
 
 def test_29_get_or_404_invalid_uuid():

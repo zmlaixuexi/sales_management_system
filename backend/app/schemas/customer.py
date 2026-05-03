@@ -1,4 +1,5 @@
 import re
+import uuid as _uuid
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
@@ -43,6 +44,16 @@ class CustomerCreate(BaseModel):
             raise ValueError("手机号格式不正确")
         return v
 
+    @field_validator("owner_user_id")
+    @classmethod
+    def validate_owner_user_id(cls, v: str | None) -> str | None:
+        if v:
+            try:
+                _uuid.UUID(v)
+            except (ValueError, AttributeError):
+                raise ValueError("归属销售 ID 格式不正确") from None
+        return v
+
 
 class CustomerUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=100)
@@ -74,9 +85,28 @@ class CustomerUpdate(BaseModel):
             raise ValueError("手机号格式不正确")
         return v
 
+    @field_validator("owner_user_id")
+    @classmethod
+    def validate_owner_user_id(cls, v: str | None) -> str | None:
+        if v:
+            try:
+                _uuid.UUID(v)
+            except (ValueError, AttributeError):
+                raise ValueError("归属销售 ID 格式不正确") from None
+        return v
+
 
 class CustomerTransfer(BaseModel):
     owner_user_id: str = Field(..., description="新归属销售 ID")
+
+    @field_validator("owner_user_id")
+    @classmethod
+    def validate_owner_user_id(cls, v: str) -> str:
+        try:
+            _uuid.UUID(v)
+        except (ValueError, AttributeError):
+            raise ValueError("归属销售 ID 格式不正确") from None
+        return v
 
 
 # ── 响应模型 ──
