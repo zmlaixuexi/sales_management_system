@@ -16,6 +16,18 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1.0"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     # 不对外暴露端口，仅内部网络访问
 
   backend:
@@ -47,11 +59,30 @@ services:
       DB_MAX_OVERFLOW: ${DB_MAX_OVERFLOW:-20}
       DB_POOL_RECYCLE_SECONDS: ${DB_POOL_RECYCLE_SECONDS:-1800}
       MAX_JSON_BODY_MB: ${MAX_JSON_BODY_MB:-1}
+      ACCOUNT_LOCK_MAX_FAILURES: ${ACCOUNT_LOCK_MAX_FAILURES:-5}
+      ACCOUNT_LOCK_WINDOW_SECONDS: ${ACCOUNT_LOCK_WINDOW_SECONDS:-900}
     volumes:
       - uploads_data:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - backend
+      - frontend
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1.0"
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
     healthcheck:
       test: ["CMD", "python", "-c", "import json, urllib.request; r = urllib.request.urlopen('http://localhost:8000/api/v1/health'); d = json.loads(r.read()); assert d.get('data', {}).get('database') == 'ok'"]
       interval: 15s
@@ -90,6 +121,22 @@ services:
         condition: service_healthy
       frontend-build:
         condition: service_started
+    networks:
+      - frontend
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.5"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   prometheus:
     image: prom/prometheus:v3.3.1
@@ -99,6 +146,19 @@ services:
       - prometheus_data:/prometheus
     depends_on:
       - backend
+    networks:
+      - backend
+      - monitoring
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   grafana:
     image: grafana/grafana:11.6.0
@@ -113,8 +173,28 @@ services:
       - ./grafana:/etc/grafana/provisioning/dashboards:ro
     depends_on:
       - prometheus
+    networks:
+      - monitoring
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     profiles:
       - monitoring
+
+networks:
+  backend:
+    driver: bridge
+  frontend:
+    driver: bridge
+  monitoring:
+    driver: bridge
 
 volumes:
   postgres_data:
