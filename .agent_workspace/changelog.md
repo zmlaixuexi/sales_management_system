@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第五百八十四轮·自动循环）
+
+### 测试：补强 ProductForm 分支覆盖率，84.21% → 100%
+
+- ProductForm.test.tsx +9：fetchProduct/uploadImage success=false、_toastDisplayed 静默错误、
+  createProduct/updateProduct success=false、cost_price 空值处理
+- 整体分支覆盖率 91.95% → 92.73%，总测试数 752 → 761
+
 ## 2026-05-03（第五百八十三轮·自动循环）
 
 ### 测试：补强 OrderForm 分支覆盖率，84% → 98%
