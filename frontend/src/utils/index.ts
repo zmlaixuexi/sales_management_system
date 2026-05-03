@@ -37,5 +37,5 @@ export function getApiErrorMessage(e: unknown, fallback = '操作失败'): strin
 
 /** 检查错误是否已被拦截器展示过 toast */
 export function isToastDisplayed(e: unknown): boolean {
-  return !!(e as Error & { _toastDisplayed?: boolean })._toastDisplayed
+  return typeof e === 'object' && e !== null && '_toastDisplayed' in e && (e as { _toastDisplayed?: boolean })._toastDisplayed === true
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatAmount, formatPercent, getApiErrorMessage } from '@/utils'
+import { formatAmount, formatPercent, getApiErrorMessage, isToastDisplayed } from '@/utils'
 
 describe('formatAmount', () => {
   it('格式化数字金额为两位小数', () => {
@@ -96,5 +96,27 @@ describe('getApiErrorMessage', () => {
   it('无 error.message 且无 detail.message 时使用 fallback', () => {
     const err = { response: { data: {} } }
     expect(getApiErrorMessage(err)).toBe('操作失败')
+  })
+})
+
+describe('isToastDisplayed', () => {
+  it('带 _toastDisplayed=true 的错误返回 true', () => {
+    const err = Object.assign(new Error('test'), { _toastDisplayed: true })
+    expect(isToastDisplayed(err)).toBe(true)
+  })
+
+  it('不带 _toastDisplayed 的错误返回 false', () => {
+    expect(isToastDisplayed(new Error('test'))).toBe(false)
+  })
+
+  it('_toastDisplayed=false 返回 false', () => {
+    const err = Object.assign(new Error('test'), { _toastDisplayed: false })
+    expect(isToastDisplayed(err)).toBe(false)
+  })
+
+  it('普通对象返回 false', () => {
+    expect(isToastDisplayed({})).toBe(false)
+    expect(isToastDisplayed(null)).toBe(false)
+    expect(isToastDisplayed(undefined)).toBe(false)
   })
 })
