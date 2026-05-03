@@ -1,3 +1,4 @@
+import uuid as _uuid
 from decimal import Decimal, InvalidOperation
 from typing import Literal
 
@@ -52,6 +53,16 @@ class ProductCreate(BaseModel):
     def sanitize_text(cls, v: str | None) -> str | None:
         return _sanitize(v)
 
+    @field_validator("category_id")
+    @classmethod
+    def validate_category_id(cls, v: str | None) -> str | None:
+        if v:
+            try:
+                _uuid.UUID(v)
+            except (ValueError, AttributeError):
+                raise ValueError("分类 ID 格式不正确") from None
+        return v
+
 
 class ProductUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=100)
@@ -79,6 +90,16 @@ class ProductUpdate(BaseModel):
     @classmethod
     def sanitize_text(cls, v: str | None) -> str | None:
         return _sanitize(v)
+
+    @field_validator("category_id")
+    @classmethod
+    def validate_category_id(cls, v: str | None) -> str | None:
+        if v:
+            try:
+                _uuid.UUID(v)
+            except (ValueError, AttributeError):
+                raise ValueError("分类 ID 格式不正确") from None
+        return v
 
 
 # ── 响应模型 ──

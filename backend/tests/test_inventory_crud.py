@@ -302,12 +302,12 @@ def test_17_adjust_requires_auth():
 
 
 def test_18_adjust_invalid_product_uuid():
-    """无效商品 UUID 返回 400"""
+    """无效商品 UUID 由 Pydantic 拦截返回 422"""
     resp = client.post("/api/v1/inventory/adjustments", json={
         "product_id": "not-a-uuid",
         "quantity_change": 1,
     }, headers=_auth())
-    assert resp.status_code == 400
+    assert resp.status_code == 422
 
 
 def test_19_adjust_response_fields():

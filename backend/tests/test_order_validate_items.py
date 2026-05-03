@@ -5,6 +5,7 @@ from decimal import Decimal
 
 import pytest
 from fastapi import HTTPException
+from pydantic import ValidationError
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -117,12 +118,9 @@ def test_validate_items_empty_list(db):
 
 
 def test_validate_items_invalid_uuid(db):
-    """无效 product_id 格式抛 400"""
-    bad_item = OrderItemInput(product_id="not-a-uuid", quantity=1)
-    with pytest.raises(HTTPException) as exc_info:
-        _validate_and_prepare_items(db, [bad_item])
-    assert exc_info.value.status_code == 400
-    assert "格式无效" in str(exc_info.value.detail)
+    """无效 product_id 格式由 Pydantic 拦截"""
+    with pytest.raises(ValidationError, match="商品 ID"):
+        OrderItemInput(product_id="not-a-uuid", quantity=1)
 
 
 def test_validate_items_mixed_valid_and_invalid(db):

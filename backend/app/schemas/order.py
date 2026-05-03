@@ -1,3 +1,4 @@
+import uuid as _uuid
 from decimal import Decimal, InvalidOperation
 
 from pydantic import BaseModel, Field, field_validator
@@ -26,6 +27,15 @@ class OrderItemInput(BaseModel):
                 raise ValueError(f"成交单价不能超过 {_MAX_PRICE}")
         return v
 
+    @field_validator("product_id")
+    @classmethod
+    def validate_product_id(cls, v: str) -> str:
+        try:
+            _uuid.UUID(v)
+        except (ValueError, AttributeError):
+            raise ValueError("商品 ID 格式不正确") from None
+        return v
+
 
 class OrderCreate(BaseModel):
     customer_id: str = Field(..., description="客户 ID")
@@ -37,6 +47,15 @@ class OrderCreate(BaseModel):
     def sanitize_text(cls, v: str | None) -> str | None:
         return _sanitize(v)
 
+    @field_validator("customer_id")
+    @classmethod
+    def validate_customer_id(cls, v: str) -> str:
+        try:
+            _uuid.UUID(v)
+        except (ValueError, AttributeError):
+            raise ValueError("客户 ID 格式不正确") from None
+        return v
+
 
 class OrderUpdate(BaseModel):
     customer_id: str | None = None
@@ -47,6 +66,16 @@ class OrderUpdate(BaseModel):
     @classmethod
     def sanitize_text(cls, v: str | None) -> str | None:
         return _sanitize(v)
+
+    @field_validator("customer_id")
+    @classmethod
+    def validate_customer_id(cls, v: str | None) -> str | None:
+        if v:
+            try:
+                _uuid.UUID(v)
+            except (ValueError, AttributeError):
+                raise ValueError("客户 ID 格式不正确") from None
+        return v
 
 
 # ── 响应模型 ──

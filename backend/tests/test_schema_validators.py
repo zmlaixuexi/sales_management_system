@@ -15,20 +15,20 @@ from app.schemas.product import ProductCreate, ProductUpdate
 
 def test_order_item_unit_price_none_ok():
     """unit_price 为 None 时通过"""
-    item = OrderItemInput(product_id="p1", quantity=1, unit_price=None)
+    item = OrderItemInput(product_id="00000000-0000-0000-0000-000000000001", quantity=1, unit_price=None)
     assert item.unit_price is None
 
 
 def test_order_item_unit_price_zero_ok():
     """unit_price 为 0 时通过"""
-    item = OrderItemInput(product_id="p1", quantity=1, unit_price="0")
+    item = OrderItemInput(product_id="00000000-0000-0000-0000-000000000001", quantity=1, unit_price="0")
     assert item.unit_price == "0"
 
 
 def test_order_item_unit_price_negative_rejected():
     """unit_price 为负数被拒绝"""
     with pytest.raises(ValidationError) as exc_info:
-        OrderItemInput(product_id="p1", quantity=1, unit_price="-5")
+        OrderItemInput(product_id="00000000-0000-0000-0000-000000000001", quantity=1, unit_price="-5")
     assert "不能为负" in str(exc_info.value)
 
 
@@ -37,7 +37,11 @@ def test_order_item_unit_price_negative_rejected():
 
 def test_order_create_remark_strips_html():
     """订单备注去除 HTML"""
-    order = OrderCreate(customer_id="c1", items=[{"product_id": "p1", "quantity": 1}], remark="<b>测试</b>")
+    order = OrderCreate(
+        customer_id="00000000-0000-0000-0000-000000000002",
+        items=[{"product_id": "00000000-0000-0000-0000-000000000001", "quantity": 1}],
+        remark="<b>测试</b>",
+    )
     assert order.remark == "测试"
 
 
@@ -84,7 +88,7 @@ def test_payment_remark_strips_html():
 
 def test_inventory_adjust_remark_strips_html():
     """库存调整备注去除 HTML"""
-    adj = InventoryAdjust(product_id="p1", quantity_change=5, remark="<b>盘盈</b>")
+    adj = InventoryAdjust(product_id="00000000-0000-0000-0000-000000000001", quantity_change=5, remark="<b>盘盈</b>")
     assert adj.remark == "盘盈"
 
 
@@ -246,4 +250,4 @@ def test_payment_create_invalid_amount_rejected():
 def test_order_item_invalid_unit_price_rejected():
     """非数字成交单价被拒绝"""
     with pytest.raises(ValidationError, match="成交单价格式不正确"):
-        OrderItemInput(product_id="p1", quantity=1, unit_price="abc")
+        OrderItemInput(product_id="00000000-0000-0000-0000-000000000001", quantity=1, unit_price="abc")

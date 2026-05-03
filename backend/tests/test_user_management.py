@@ -415,15 +415,14 @@ def test_26_update_user_invalid_uuid_400():
     assert "格式无效" in resp.json()["error"]["message"]
 
 
-def test_27_create_user_malformed_role_ids_400():
-    """创建用户时 role_ids 含非 UUID 字符串返回 400"""
+def test_27_create_user_malformed_role_ids_422():
+    """创建用户时 role_ids 含非 UUID 字符串由 Pydantic 拦截返回 422"""
     resp = client.post("/api/v1/users", json={
         "username": "badroleuser",
         "password": "password123",
         "role_ids": ["not-a-uuid"],
     }, headers=_admin_auth())
-    assert resp.status_code == 400
-    assert "格式无效" in resp.json()["error"]["message"]
+    assert resp.status_code == 422
 
 
 def test_28_update_user_empty_role_ids():

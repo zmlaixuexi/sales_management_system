@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-03（第六百七十九轮·自动循环）
+
+### Schema 验证：全量 ID 字段 UUID 格式校验
+
+- order.py：OrderItemInput.product_id、OrderCreate.customer_id、OrderUpdate.customer_id
+- product.py：ProductCreate.category_id、ProductUpdate.category_id
+- inventory.py：InventoryAdjust.product_id
+- auth.py：UserCreate.role_ids、UserUpdate.role_ids（列表元素逐个校验）
+- 新增 21 项 UUID 格式测试，更新 6 项现有测试（非 UUID 占位符→有效 UUID）
+- 后端测试 1473（+21），ruff 0 errors
+
 ## 2026-05-03（第六百七十八轮·自动循环）
 
 ### Schema 验证 + README 更新

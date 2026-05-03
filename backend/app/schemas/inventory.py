@@ -1,3 +1,5 @@
+import uuid as _uuid
+
 from pydantic import BaseModel, Field, field_validator
 
 from app.core.sanitize import sanitize_text as _sanitize
@@ -12,6 +14,15 @@ class InventoryAdjust(BaseModel):
     @classmethod
     def sanitize_remark(cls, v: str | None) -> str | None:
         return _sanitize(v)
+
+    @field_validator("product_id")
+    @classmethod
+    def validate_product_id(cls, v: str) -> str:
+        try:
+            _uuid.UUID(v)
+        except (ValueError, AttributeError):
+            raise ValueError("商品 ID 格式不正确") from None
+        return v
 
 
 # ── 响应模型 ──

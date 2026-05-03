@@ -141,8 +141,8 @@ def test_sanitize_order_remark_strips_html():
     """订单备注中的 HTML 标签被移除"""
     from app.schemas.order import OrderCreate
     data = OrderCreate(
-        customer_id="fake-id",
-        items=[{"product_id": "fake-id", "quantity": 1}],
+        customer_id="00000000-0000-0000-0000-000000000002",
+        items=[{"product_id": "00000000-0000-0000-0000-000000000001", "quantity": 1}],
         remark="<b>重要</b>订单",
     )
     assert "<b>" not in data.remark

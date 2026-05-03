@@ -1,4 +1,5 @@
 import re
+import uuid as _uuid
 from datetime import datetime
 
 from pydantic import BaseModel, Field, field_validator
@@ -83,6 +84,16 @@ class UserCreate(BaseModel):
     def sanitize_phone(cls, v: str | None) -> str | None:
         return _sanitize(v)
 
+    @field_validator("role_ids")
+    @classmethod
+    def validate_role_ids(cls, v: list[str]) -> list[str]:
+        for rid in v:
+            try:
+                _uuid.UUID(rid)
+            except (ValueError, AttributeError):
+                raise ValueError(f"角色 ID 格式不正确: {rid}") from None
+        return v
+
 
 class UserUpdate(BaseModel):
     display_name: str | None = Field(None, max_length=100)
@@ -95,6 +106,17 @@ class UserUpdate(BaseModel):
     @classmethod
     def sanitize_text(cls, v: str | None) -> str | None:
         return _sanitize(v)
+
+    @field_validator("role_ids")
+    @classmethod
+    def validate_role_ids(cls, v: list[str] | None) -> list[str] | None:
+        if v is not None:
+            for rid in v:
+                try:
+                    _uuid.UUID(rid)
+                except (ValueError, AttributeError):
+                    raise ValueError(f"角色 ID 格式不正确: {rid}") from None
+        return v
 
 
 class UserBrief(BaseModel):

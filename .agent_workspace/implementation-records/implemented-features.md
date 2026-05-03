@@ -2781,3 +2781,28 @@ API 实测：商品创建/列表/详情通过
 
 测试命令：pytest tests/test_schema_bounds.py tests/test_edge_cases.py tests/test_boundary.py tests/test_customer_crud.py -q
 测试结果：1452 passed（+8 新增）
+
+---
+
+## 功能编号：FEAT-257
+
+功能名称：全量 ID 字段 UUID 格式校验
+所属模块：后端 / Schema 校验
+关联任务编号：ROUND-679
+实现日期：2026-05-03
+实现 Agent：Claude Code
+当前状态：已测试
+
+### 实现范围
+
+- order.py：OrderItemInput.product_id、OrderCreate.customer_id、OrderUpdate.customer_id 添加 UUID 格式验证
+- product.py：ProductCreate.category_id、ProductUpdate.category_id 添加 UUID 格式验证
+- inventory.py：InventoryAdjust.product_id 添加 UUID 格式验证
+- auth.py：UserCreate.role_ids、UserUpdate.role_ids 列表元素逐个校验 UUID 格式
+- 更新 6 个测试文件中非 UUID 占位符为有效 UUID
+- 新增 21 项 schema bounds 测试
+
+### 已执行测试
+
+测试命令：pytest tests/ -q
+测试结果：1473 passed（+21 新增）
