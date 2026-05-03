@@ -6,7 +6,49 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
-## 功能编号：FEAT-20260503-242
+## 功能编号：FEAT-20260503-249
+
+- 描述：启用 noUncheckedIndexedAccess TypeScript 严格模式
+- 状态：已完成
+- 验证：tsconfig.app.json 添加 noUncheckedIndexedAccess，tsc 0 errors，841 测试通过，vite build 成功
+- 关联：frontend/tsconfig.app.json
+
+## 功能编号：FEAT-20260503-248
+
+- 描述：后端全量 ruff 检查清理（import 排序 + 未使用导入 + B008 忽略规则）
+- 状态：已完成
+- 验证：ruff I001 修复 4 处 import 排序，F401 清理 1 处未用 MagicMock，tests/*.py 添加 B008 忽略
+- 关联：backend/tests/test_deps.py、backend/pyproject.toml
+
+## 功能编号：FEAT-20260503-247
+
+- 描述：边界值测试补强（sort_by SQL 注入 + 空字符串 + 特殊字符）
+- 状态：已完成
+- 验证：+6 新测试（SQL 注入防护 2 + 空字符串边界 4），后端 1370→1376
+- 关联：backend/tests/test_boundary.py
+
+## 功能编号：FEAT-20260503-246
+
+- 描述：前端 eslint 全量清理 + eslint 配置修复
+- 状态：已完成
+- 验证：禁用基础 no-unused-vars 消除与 TS 规则冲突，修复最后一个 no-explicit-any，0 errors/0 warnings
+- 关联：frontend/eslint.config.js、frontend/src/__tests__/Roles.test.tsx、frontend/src/pages/ProductForm.tsx
+
+## 功能编号：FEAT-20260503-245
+
+- 描述：isToastDisplayed 辅助函数 + null 安全修复
+- 状态：已完成
+- 验证：提取到 utils/index.ts，14 个源文件替换类型断言，修复 null/undefined 崩溃，+4 单元测试
+- 关联：frontend/src/utils/index.ts、frontend/src/pages/*.tsx、frontend/src/hooks/*.ts
+
+## 功能编号：FEAT-20260503-244
+
+- 描述：safe_commit 辅助函数 — 统一 35 处 db.commit() rollback 保护
+- 状态：已完成
+- 验证：10 个 API 文件替换裸 db.commit()，+3 单元测试，1370 后端测试通过
+- 关联：backend/app/api/deps.py、backend/app/api/v1/*.py、backend/tests/test_deps.py
+
+## 功能编号：FEAT-20260503-243
 
 - 描述：前端异常处理修复（OrderForm catch、auth store 登录异常、AppLayout 安全访问）
 - 状态：已完成
