@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-03（第五百七十轮·自动循环）
+
+### 测试：AuditLogs 测试补强，+6 测试覆盖搜索/日期/分页回调
+
+- Input.Search mock 增强：支持 onSearch/onClear 按钮
+- RangePicker mock 增强：支持 onChange 触发
+- Table mock 增强：支持 pagination.showTotal/onChange
+- 新增 6 个测试：资源ID搜索、日期范围、关键词搜索、分页总数、翻页
+- AuditLogs 覆盖率：87.5%→96.42% 语句、78.94%→94.73% 函数、91.3%→97.82% 行
+- 前端整体：94.05%→94.47% 语句、96.25%→96.53% 行
+- 总测试数：643→648
+
 ## 2026-05-03（第五百六十九轮·自动循环）
 
 ### 测试：Orders 测试补强，+2 测试覆盖分页 showTotal/onChange
