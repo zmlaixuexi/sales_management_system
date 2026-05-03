@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 
 const _orderApi = {
@@ -30,7 +30,7 @@ vi.mock('@/utils', () => ({
 vi.mock('@/hooks/useSubmit', () => ({
   useSubmit: (onSubmit: any) => ({
     submitting: false,
-    handleSubmit: onSubmit,
+    handleSubmit: (e: any) => { e?.preventDefault?.() },
   }),
 }))
 
@@ -243,5 +243,21 @@ describe('OrderForm', () => {
     const names = formItems.map((fi) => fi.getAttribute('data-name'))
     expect(names).toContain('customer_id')
     expect(names).toContain('remark')
+  })
+
+  it('返回列表按钮导航到订单列表', async () => {
+    renderNewOrder()
+    screen.getByText('返回列表').click()
+    await waitFor(() => {
+      expect(screen.getByText('Orders List')).toBeInTheDocument()
+    })
+  })
+
+  it('取消按钮导航到订单列表', async () => {
+    renderNewOrder()
+    screen.getByText('取消').click()
+    await waitFor(() => {
+      expect(screen.getByText('Orders List')).toBeInTheDocument()
+    })
   })
 })
