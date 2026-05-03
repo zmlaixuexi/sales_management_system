@@ -220,4 +220,41 @@ describe('PaymentsPage', () => {
     await (() => new Promise((r) => setTimeout(r, 0)))()
     expect(screen.getByText('Order Detail')).toBeInTheDocument()
   })
+
+  it('收款方式未知时显示原始值', () => {
+    const customData = {
+      data: {
+        items: [{
+          id: 'pay-003', order_id: 'order-003', amount: '100.00',
+          payment_method: 'crypto', status: 'normal', remark: null,
+          paid_at: null, created_at: '2026-05-01T00:00:00Z',
+        }],
+        total: 1,
+      },
+    }
+    _paymentMocks.fetchPayments.mockReturnValue(customData)
+    renderPayments()
+    expect(screen.getByText('crypto')).toBeInTheDocument()
+  })
+
+  it('状态未知时显示原始值', () => {
+    const customData = {
+      data: {
+        items: [{
+          id: 'pay-004', order_id: 'order-004', amount: '200.00',
+          payment_method: 'cash', status: 'unknown_status', remark: null,
+          paid_at: null, created_at: '2026-05-01T00:00:00Z',
+        }],
+        total: 1,
+      },
+    }
+    _paymentMocks.fetchPayments.mockReturnValue(customData)
+    renderPayments()
+    expect(screen.getByText('unknown_status')).toBeInTheDocument()
+  })
+
+  it('分页信息显示总条数', () => {
+    renderPayments()
+    expect(screen.getByText(/共 2 条/)).toBeInTheDocument()
+  })
 })
