@@ -334,3 +334,25 @@ def test_health_returns_200_after_restart(monkeypatch):
     monkeypatch.setattr(main_mod, "_shutting_down", False)
     response = client.get("/api/v1/health")
     assert response.status_code == 200
+
+
+def test_metrics_endpoint_returns_prometheus_format():
+    """/metrics 返回 Prometheus 格式指标"""
+    response = client.get("/metrics")
+    assert response.status_code == 200
+    assert "text/plain" in response.headers.get("content-type", "")
+    text = response.text
+    # 包含 http_requests_total 计数器
+    assert "http_requests_total" in text
+    # 包含请求耗时直方图
+    assert "http_request_duration_seconds" in text
+
+
+def test_metrics_tracks_requests():
+    """请求后 /metrics 指标递增"""
+    # 先请求一次健康检查产生流量
+    client.get("/api/v1/health")
+    response = client.get("/metrics")
+    assert response.status_code == 200
+    text = response.text
+    assert "http_requests_total" in text

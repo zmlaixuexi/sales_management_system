@@ -7,6 +7,7 @@ from fastapi.exceptions import HTTPException, RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from prometheus_fastapi_instrumentator import Instrumentator
 
 import app.core.logging
 from app.api.v1.router import api_router
@@ -153,6 +154,13 @@ app.include_router(api_router, prefix="/api/v1")
 
 # 速率限制（注册在路由之后，中间件执行顺序为后注册先执行）
 add_rate_limit(app)
+
+# Prometheus 指标（/metrics 端点，不鉴权）
+Instrumentator(
+    should_group_status_codes=True,
+    should_ignore_untemplated=True,
+    excluded_handlers=["/health", "/version"],
+).instrument(app).expose(app, endpoint="/metrics", include_in_schema=False)
 
 # 静态文件服务：上传的图片
 upload_path = Path(settings.UPLOAD_DIR)
