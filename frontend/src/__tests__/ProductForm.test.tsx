@@ -480,5 +480,114 @@ describe('ProductForm', () => {
         expect(screen.getByText('Products List')).toBeInTheDocument()
       })
     })
+
+    it('fetchProduct success=false 不填充表单', async () => {
+      _productApi.fetchProduct.mockResolvedValue({ success: false, data: {} })
+      renderEditProduct()
+      await waitFor(() => {
+        expect(_productApi.fetchProduct).toHaveBeenCalledWith('p-123')
+      })
+      expect(_mockForm.setFieldsValue).not.toHaveBeenCalled()
+    })
+
+    it('fetchProduct _toastDisplayed 错误静默', async () => {
+      const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+      _productApi.fetchProduct.mockRejectedValue(err)
+      const { message } = await import('antd')
+      renderEditProduct()
+      await waitFor(() => {
+        expect(_productApi.fetchProduct).toHaveBeenCalled()
+      })
+      expect(message.error).not.toHaveBeenCalledWith('加载商品信息失败')
+    })
+
+    it('fetchProduct cost_price 为空时 setFieldsValue 不设置 cost_price', async () => {
+      _productApi.fetchProduct.mockResolvedValue({
+        success: true,
+        data: {
+          name: '无成本价', cost_price: '', sale_price: '20.00',
+          sku: '', stock_quantity: 0, status: 'active', sort_weight: 0,
+          remark: null, main_image_url: null,
+        },
+      })
+      renderEditProduct()
+      await waitFor(() => {
+        expect(_mockForm.setFieldsValue).toHaveBeenCalledWith(
+          expect.objectContaining({ cost_price: undefined }),
+        )
+      })
+    })
+  })
+
+  describe('API success=false 分支', () => {
+    it('uploadImage success=false 不设置图片', async () => {
+      _productApi.uploadImage.mockResolvedValue({ success: false })
+      const { message } = await import('antd')
+      renderNewProduct()
+
+      const uploadDiv = screen.getByTestId('upload')
+      await act(async () => { fireEvent.click(uploadDiv) })
+
+      await waitFor(() => {
+        expect(_productApi.uploadImage).toHaveBeenCalled()
+      })
+      expect(message.success).not.toHaveBeenCalledWith('图片上传成功')
+      expect(screen.queryByTestId('image')).toBeNull()
+    })
+
+    it('uploadImage _toastDisplayed 错误静默', async () => {
+      const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+      _productApi.uploadImage.mockRejectedValue(err)
+      const { message } = await import('antd')
+      renderNewProduct()
+
+      const uploadDiv = screen.getByTestId('upload')
+      await act(async () => { fireEvent.click(uploadDiv) })
+
+      await waitFor(() => {
+        expect(_productApi.uploadImage).toHaveBeenCalled()
+      })
+      expect(message.error).not.toHaveBeenCalledWith('图片上传失败')
+    })
+
+    it('createProduct success=false 不导航', async () => {
+      _productApi.createProduct.mockReset()
+      _productApi.createProduct.mockResolvedValue({ success: false })
+      const { message } = await import('antd')
+      renderNewProduct()
+
+      await act(async () => {
+        await _useSubmit.callback({ name: '新商品', cost_price: 10, sale_price: 20 })
+      })
+
+      await waitFor(() => {
+        expect(_productApi.createProduct).toHaveBeenCalled()
+      })
+      expect(message.success).not.toHaveBeenCalledWith('创建成功')
+    })
+
+    it('updateProduct success=false 不导航', async () => {
+      _productApi.fetchProduct.mockResolvedValue({
+        success: true,
+        data: { name: '旧商品', cost_price: '10', sale_price: '20', sku: '', stock_quantity: 0, status: 'active', sort_weight: 0, remark: null, main_image_url: null },
+      })
+      _productApi.updateProduct.mockReset()
+      _productApi.updateProduct.mockResolvedValue({ success: false })
+      const { message } = await import('antd')
+      renderEditProduct('p-1')
+
+      await waitFor(() => {
+        expect(_useSubmit.callback).toBeTruthy()
+      })
+
+      await act(async () => {
+        await _useSubmit.callback({ name: '更新商品', cost_price: 15, sale_price: 25 })
+      })
+
+      await waitFor(() => {
+        expect(_productApi.updateProduct).toHaveBeenCalled()
+      })
+      expect(message.success).not.toHaveBeenCalledWith('更新成功')
+    })
   })
 })
