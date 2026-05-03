@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第五百七十二轮·自动循环）
+
+### 测试：修复 6 个页面 usePaginatedList fetchFn 回调覆盖率
+
+- usePaginatedList mock 增强：调用 fetchFn 参数以触发回调函数体覆盖
+- 6 个文件受益：Inventory、Payments、Products、Orders、Customers、Users
+- 行覆盖率显著提升：Inventory 92%→100%、Payments 94%→100%、Orders 96%→100%、Products 98%→100%
+- 前端整体：94.47%→94.97% 语句、89.85%→91.3% 函数、96.53%→97.09% 行
+
 ## 2026-05-03（第五百七十一轮·自动循环）
 
 ### 文档：全量质量门禁验证 + 测试报告更新至 1952 测试

@@ -2,16 +2,16 @@
 
 最后更新时间：2026-05-03
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-571
-当前任务名称：自动循环：完成第 571 轮开发推进
+当前任务编号：ROUND-572
+当前任务名称：自动循环：完成第 572 轮开发推进
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 572：修复 6 个页面 usePaginatedList fetchFn 回调覆盖率，前端行覆盖率 97.09%
 - Round 571：全量质量门禁验证 + 测试报告更新
 - Round 570：AuditLogs 测试补强 +6 测试
-- Rounds 565-569：OrderDetail/OrderForm/Payments/Products/Orders/AuditLogs 测试补强
 
 ## 验证状态
 
@@ -20,7 +20,7 @@
 | 后端测试 | 1304/1304 ✓ |
 | 前端测试 | 648/648 ✓ |
 | 后端覆盖率 | **100.00%** |
-| 前端覆盖率 | **94.47%**（语句）、**96.53%**（行） |
+| 前端覆盖率 | **94.97%**（语句）、**97.09%**（行）、**91.3%**（函数） |
 | ruff | 0 errors ✓ |
 | tsc | 0 errors ✓ |
 | eslint | 0 errors ✓ |
@@ -31,7 +31,7 @@
 ## 下一步第一动作
 
 继续 keep-going 模式。可选方向：
-- 前端覆盖率继续补强（Inventory 85%、Users 92%、分支覆盖率 80%）
+- 前端覆盖率继续补强（OrderDetail 分支 70%、Users 分支 73%）
 - 可观测性：Prometheus metrics 端点
 - 部署体验：Docker 优化或启动脚本改进
 
