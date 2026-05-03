@@ -35,6 +35,7 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
             record.extra_fields = {  # type: ignore[attr-defined]
                 "method": request.method,
                 "path": path,
+                "query_string": request.url.query or None,
                 "status": response.status_code,
                 "duration_ms": duration_ms,
                 "client_ip": request.client.host if request.client else "-",
