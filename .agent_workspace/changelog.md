@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第六百七十五轮·自动循环）
+
+### 安全加固：Pydantic Schema 边界验证完善
+
+- product/order/payment/inventory schema 添加价格上界、数量上界、列表长度限制
+- 防止 DB Numeric(12,2) 溢出导致 500 而非 422
+- 新增 test_schema_bounds.py 20 项测试，后端 1437（+20），全量门禁通过
+
 ## 2026-05-03（第六百七十四轮·自动循环）
 
 ### 测试补强：sanitize_csv_cell 直接单元测试 10 项
