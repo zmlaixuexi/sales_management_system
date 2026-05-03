@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-05-04（第七百零四轮·自动循环）
+
+### 安全加固：JWT token 边界条件测试（35 项覆盖 iss/aud 签名验证、claim 缺失篡改、过期空值）
+
+- 新增 test_jwt_boundaries.py：35 项纯 JWT 单元测试（无 DB 依赖）
+  - Issuer 验证（3 项）：错误/缺失/空字符串 issuer 被拒绝
+  - Audience 验证（3 项）：错误/缺失/空字符串 audience 被拒绝或不匹配
+  - Subject 验证（3 项）：缺失 sub → None、空字符串、非 UUID 格式
+  - Type 验证（3 项）：access/refresh 类型正确、未知类型可解码
+  - 过期验证（4 项）：已过期、刚过期 1 秒、缺少 exp、远期未来
+  - 签名验证（5 项）：错误密钥、篡改 payload、空字符串、随机字符串、缺少签名段
+  - Token 生成验证（14 项）：7 个标准 claim 完整性、type/sub/iss/aud 正确、jti UUID 格式和唯一性、过期时间匹配配置、自定义 expiry、refresh > access
+- 后端测试 1769（+35），全部通过
+
 ## 2026-05-04（第七百零三轮·自动循环）
 
 ### 代码质量：Pydantic schema 字段边界测试（118 项覆盖 8 个模块）
