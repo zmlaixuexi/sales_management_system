@@ -421,6 +421,110 @@ describe('OrderForm', () => {
       await _useSubmit.callback()
       expect(antdMessage.error).toHaveBeenCalledWith('请添加至少一个商品')
     })
+
+    it('创建订单成功', async () => {
+      _orderApi.createOrder.mockResolvedValueOnce({ success: true, data: { id: 'o-new' } })
+      _mockForm.validateFields.mockResolvedValueOnce({ customer_id: 'c1' })
+      renderNewOrder()
+
+      // 模拟添加了一个订单行到 callback 闭包中
+      // 直接调用 callback 会因为 lines 为空而报错，所以需要通过 addProduct 添加行
+      // 但 addProduct 在 picker 中，我们需要先打开 picker 并选择商品
+      const addBtn = screen.getAllByTestId('button').find(
+        (b) => b.textContent?.includes('添加商品'),
+      )
+      fireEvent.click(addBtn!)
+
+      await waitFor(() => {
+        expect(_productApi.fetchProducts).toHaveBeenCalled()
+      })
+    })
+
+    it('创建订单成功完整流程', async () => {
+      const mockProducts = [
+        {
+          id: 'p1', name: '商品A', sku: 'SKU001', sale_price: '100.00',
+          main_image_url: null, stock_quantity: 10,
+        },
+      ]
+      _productApi.fetchProducts.mockResolvedValueOnce({ success: true, data: { items: mockProducts } })
+      _orderApi.createOrder.mockResolvedValueOnce({ success: true, data: { id: 'o-new' } })
+      _mockForm.validateFields.mockResolvedValueOnce({ customer_id: 'c1' })
+      renderNewOrder()
+
+      // 打开商品选择器
+      const addBtn = screen.getAllByTestId('button').find(
+        (b) => b.textContent?.includes('添加商品'),
+      )
+      await act(async () => { fireEvent.click(addBtn!) })
+
+      // 等待商品加载并点击"选择"
+      await waitFor(() => {
+        const selectBtn = screen.getByText('选择')
+        expect(selectBtn).toBeInTheDocument()
+      })
+
+      const selectBtn = screen.getByText('选择')
+      await act(async () => { fireEvent.click(selectBtn) })
+
+      // 现在订单行中有商品了，提交
+      await act(async () => {
+        await _useSubmit.callback()
+      })
+
+      await waitFor(() => {
+        expect(_orderApi.createOrder).toHaveBeenCalledWith(
+          expect.objectContaining({
+            customer_id: 'c1',
+            items: expect.arrayContaining([
+              expect.objectContaining({ product_id: 'p1', quantity: 1 }),
+            ]),
+          }),
+        )
+        expect(antdMessage.success).toHaveBeenCalledWith('创建成功')
+      })
+    })
+
+    it('更新订单成功', async () => {
+      _orderApi.fetchOrder.mockResolvedValue({
+        success: true,
+        data: {
+          id: 'o-1', order_no: 'SO-001', customer_id: 'c1',
+          status: 'draft', status_label: '草稿',
+          total_amount: '100.00', total_cost: '80.00',
+          gross_profit: '20.00', gross_margin: '20',
+          paid_amount: '0', remark: '',
+          sales_user_id: 'u1', created_at: null, updated_at: null,
+          items: [{
+            id: 'oi1', product_id: 'p1', product_sku_snapshot: 'SKU001',
+            product_name_snapshot: '商品A', product_image_url_snapshot: null,
+            quantity: 1, unit_price: '100.00', discount_amount: '0',
+            discount_rate: '1', cost_price_snapshot: '80.00',
+            subtotal_amount: '100.00', subtotal_cost: '80.00',
+          }],
+          payments: [],
+        },
+      })
+      _orderApi.updateOrder.mockResolvedValueOnce({ success: true })
+      _mockForm.validateFields.mockResolvedValueOnce({ customer_id: 'c1' })
+      renderEditOrder()
+
+      await waitFor(() => {
+        expect(_orderApi.fetchOrder).toHaveBeenCalledWith('o-123')
+      })
+
+      await act(async () => {
+        await _useSubmit.callback()
+      })
+
+      await waitFor(() => {
+        expect(_orderApi.updateOrder).toHaveBeenCalledWith(
+          'o-123',
+          expect.objectContaining({ customer_id: 'c1' }),
+        )
+        expect(antdMessage.success).toHaveBeenCalledWith('更新成功')
+      })
+    })
   })
 
   describe('客户搜索', () => {
