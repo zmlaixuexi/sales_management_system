@@ -283,4 +283,39 @@ describe('InventoryPage', () => {
     expect(_paginatedListReturn.refresh).toHaveBeenCalled()
     _paginatedListReturn.error = false
   })
+
+  it('取消退货类型显示绿色圆点', () => {
+    const returnData = {
+      data: {
+        items: [{
+          id: 'mov-ret', product_id: 'prod-ret', movement_type: 'order_cancel_return',
+          quantity_before: 90, quantity_change: 5, quantity_after: 95,
+          related_type: 'sales_order', related_id: 'ord-ret', remark: null, created_at: '2026-05-01T00:00:00Z',
+        }],
+        total: 1,
+      },
+    }
+    _inventoryMocks.fetchInventoryMovements.mockReturnValue(returnData)
+    renderInventory()
+    expect(screen.getByText('取消退货')).toBeInTheDocument()
+  })
+
+  it('空创建时间显示 --', () => {
+    const nullDateData = {
+      data: {
+        items: [{
+          id: 'mov-nodate', product_id: 'prod-nd', movement_type: 'manual_adjust',
+          quantity_before: 10, quantity_change: 1, quantity_after: 11,
+          related_type: null, related_id: null, remark: null, created_at: null,
+        }],
+        total: 1,
+      },
+    }
+    _inventoryMocks.fetchInventoryMovements.mockReturnValue(nullDateData)
+    renderInventory()
+    const row = screen.getByTestId('row-mov-nodate')
+    const cells = row.querySelectorAll('td')
+    const dateCell = Array.from(cells).find((td) => td.getAttribute('data-col') === 'created_at')
+    expect(dateCell?.textContent).toBe('--')
+  })
 })
