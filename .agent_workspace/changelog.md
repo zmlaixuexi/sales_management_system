@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-03（第六百零五轮·自动循环）
+
+### 可观测性：添加 Prometheus metrics 端点
+
+- 集成 prometheus-fastapi-instrumentator 7.x
+- /metrics 端点暴露 http_requests_total、http_request_duration_seconds 等标准指标
+- 排除 /health 和 /version 避免健康检查流量污染指标
+- should_group_status_codes=True 聚合状态码类别（2xx/4xx/5xx）
+- +2 测试验证指标端点返回 Prometheus 格式和指标递增
+- 后端测试 1304 → 1306
+
 ## 2026-05-03（第六百零四轮·自动循环）
 
 ### 验证：全量构建验证 + TypeScript strict 确认
