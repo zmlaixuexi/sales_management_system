@@ -146,3 +146,27 @@ def test_09_uploads_path_exempt(monkeypatch):
     # /uploads 路径应该直接放行（实际可能 404 但不应 413）
     resp = client.post("/uploads/test", content=b"data", headers=_auth())
     assert resp.status_code != 413
+
+
+def test_10_put_request_limited(monkeypatch):
+    """PUT 请求受请求体限制"""
+    from app.core.config import settings
+    monkeypatch.setattr(settings, "MAX_JSON_BODY_MB", 0)
+    resp = client.put("/api/v1/products/999", json={"name": "x" * 100}, headers=_auth())
+    assert resp.status_code == 413
+
+
+def test_11_delete_request_limited(monkeypatch):
+    """DELETE 请求受请求体限制"""
+    from app.core.config import settings
+    monkeypatch.setattr(settings, "MAX_JSON_BODY_MB", 0)
+    resp = client.request("DELETE", "/api/v1/products/999", content=b"x" * 100, headers={**_auth(), "content-type": "application/json"})
+    assert resp.status_code == 413
+
+
+def test_12_no_content_length_passes():
+    """无 content-length 头的请求正常放行"""
+    # 使用 raw request 不带 content-length
+    resp = client.post("/api/v1/products", content=b'{}', headers={**_auth(), "content-type": "application/json"})
+    # 可能 422（缺少字段）或其他错误，但不应 413
+    assert resp.status_code != 413

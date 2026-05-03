@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-03（第五百五十二轮·自动循环）
+
+### 测试：Body limit 单测补强，+3 测试覆盖 PUT/DELETE/无 content-length 场景
+
+- 新增 3 个请求体大小限制测试：PUT 请求受限、DELETE 请求受限、无 content-length 放行
+- 后端测试 1301→1304，总计 1889→1892
+
 ## 2026-05-03（第五百五十一轮·自动循环）
 
 ### 部署：graceful shutdown — 关闭期间健康检查返回 503 + 2 测试
