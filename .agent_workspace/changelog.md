@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-03（第六百五十三轮·自动循环）
+
+### 代码质量：导出接口参数枚举校验 + 日期类型约束
+
+- exports.py export_products_csv：status 改为 Literal["active","inactive","disabled"]
+- exports.py export_customers_csv：source 改为 Literal["referral","online","offline","ad","other"]
+- exports.py export_orders_csv：status 改为 Literal 订单状态枚举
+- exports.py export_orders_csv/export_payments_csv：start_date/end_date 从 str 改为 date 类型
+- 2 个测试从使用无效枚举值改为有效值（disabled/ad）
+
 ## 2026-05-03（第六百五十二轮·自动循环）
 
 ### 代码质量：报表和库存接口参数枚举校验 + threshold 上限约束

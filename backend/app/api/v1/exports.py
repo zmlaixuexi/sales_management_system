@@ -1,7 +1,8 @@
 """数据导出 API — CSV 格式流式下载"""
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
+from typing import Literal
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
@@ -35,7 +36,7 @@ def _csv_filename(prefix: str) -> str:
 def export_products_csv(
     request: Request,
     keyword: str | None = None,
-    status: str | None = None,
+    status: Literal["active", "inactive", "disabled"] | None = None,
     category_id: uuid.UUID | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("product:list")),
@@ -61,7 +62,7 @@ def export_products_csv(
 def export_customers_csv(
     request: Request,
     keyword: str | None = None,
-    source: str | None = None,
+    source: Literal["referral", "online", "offline", "ad", "other"] | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("customer:list")),
 ):
@@ -83,10 +84,10 @@ def export_customers_csv(
 def export_orders_csv(
     request: Request,
     keyword: str | None = None,
-    status: str | None = None,
+    status: Literal["draft", "confirmed", "cancelled", "partially_paid", "completed"] | None = None,
     customer_id: uuid.UUID | None = None,
-    start_date: str | None = None,
-    end_date: str | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("order:list")),
 ):
@@ -95,7 +96,9 @@ def export_orders_csv(
     can_view_cost = has_permission(current_user, "product:view_cost")
     generator = export_orders(
         db, keyword=keyword, status=status, customer_id=customer_id,
-        start_date=start_date, end_date=end_date, sales_user_id=sales_user_id,
+        start_date=start_date.isoformat() if start_date else None,
+        end_date=end_date.isoformat() if end_date else None,
+        sales_user_id=sales_user_id,
         can_view_cost=can_view_cost,
     )
     log_user_action(db, request, current_user,
@@ -113,16 +116,18 @@ def export_orders_csv(
 def export_payments_csv(
     request: Request,
     order_id: uuid.UUID | None = None,
-    start_date: str | None = None,
-    end_date: str | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("payment:list")),
 ):
     """导出收款记录为 CSV"""
     sales_user_id = None if has_permission(current_user, "order:view_all") else current_user.id
     generator = export_payments(
-        db, order_id=order_id, start_date=start_date,
-        end_date=end_date, sales_user_id=sales_user_id,
+        db, order_id=order_id,
+        start_date=start_date.isoformat() if start_date else None,
+        end_date=end_date.isoformat() if end_date else None,
+        sales_user_id=sales_user_id,
     )
     log_user_action(db, request, current_user,
                     action="export_payments", resource_type="payment",

@@ -185,7 +185,7 @@ def test_07_export_requires_auth():
 
 def test_08_export_empty_filter():
     """筛选条件无匹配时导出空数据（只有表头）"""
-    resp = client.get("/api/v1/exports/products?status=nonexistent", headers=_auth())
+    resp = client.get("/api/v1/exports/products?status=disabled", headers=_auth())
     assert resp.status_code == 200
     content = resp.text
     assert "SKU" in content
@@ -380,7 +380,7 @@ def test_21_export_customers_keyword_filter():
 
 def test_22_export_customers_source_filter():
     """客户导出来源筛选"""
-    resp = client.get("/api/v1/exports/customers?source=nonexistent", headers=_auth())
+    resp = client.get("/api/v1/exports/customers?source=ad", headers=_auth())
     assert resp.status_code == 200
     lines = [line for line in resp.text.strip().split("\n") if line.strip() and "客户名称" not in line]
     assert len(lines) == 0

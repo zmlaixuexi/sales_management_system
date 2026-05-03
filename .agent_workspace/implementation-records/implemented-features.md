@@ -6,6 +6,13 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-241
+
+- 描述：导出接口参数枚举校验 + 日期类型约束
+- 状态：已完成
+- 验证：exports.py 的 status/source 改为 Literal，start_date/end_date 改为 date 类型，全部 1367 测试通过
+- 关联：app/api/v1/exports.py、tests/test_export.py
+
 ## 功能编号：FEAT-20260503-240
 
 - 描述：报表和库存接口参数枚举校验 + threshold 上限约束
