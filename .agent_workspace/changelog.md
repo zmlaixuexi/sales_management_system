@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-05-04（第七百四十四轮·自动循环）
+
+### 异常路径：并发支付竞态条件测试（33 项覆盖 inflight 原子性、线程安全、429 格式、finally 清理、多订单隔离）
+
+**变更文件：**
+- `backend/tests/test_payment_race_conditions.py`（新建 33 项测试）
+  - 429 错误格式：status_code=429/PAYMENT_RATE_LIMITED/中文消息/detail 有 code+message
+  - Inflight 集合状态：初始空/check 后包含/clear 后不含/大小匹配/clear 不存在不影响大小
+  - 多订单隔离：不同订单不阻塞/clear 一个不影响其他/100 个同时 inflight/reset 清除全部
+  - Idempotent 清除：多次 clear 同一 key/clear 未 check 过的/两次 clear 后可重新 check
+  - 线程安全：10 线程并发同一 order 只一个成功/10 线程不同 order 全成功/10 线程并发 clear 不崩溃
+  - 锁机制：_payment_lock 是 threading.Lock/_payment_inflight 是 set/key 都是字符串
+  - finally 清理保证：ValueError 异常后清除/成功后清除/HTTPException 后清除
+  - 边界 order_id：空字符串/UUID 格式/超长 1000 字符
+  - register_payment 验证：with_for_update 行锁/_check_inflight 调用/finally 中 _clear_inflight
+  - API 端点认证：payments 和 order-payments 需认证
+
+**测试计数：** 后端 3212（+33）、前端 1052、总计 4264
+
 ## 2026-05-04（第七百四十三轮·自动循环）
 
 ### 测试补强：前端 Zustand auth store 边界测试（24 项覆盖初始状态、login/fetchUser/logout、hasPermission、状态一致性）
