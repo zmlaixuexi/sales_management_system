@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-03（第六百零一轮·自动循环）
+
+### 重构：fetcher 回调改为 async/await，函数覆盖率达到 100%
+
+- 6 个页面（Inventory/Orders/Payments/Products/Users/Customers）fetcher 从 `.then(r => r.data)` 改为 `async/await`
+- 6 个测试文件 mock 增加 `p?.catch?.(() => {})` 抑制 Promise rejection
+- Dashboard 测试 auth mock 从闭包改为 selector 模式，覆盖 `s => s.hasPermission(...)` 函数
+- 前端函数覆盖率 **98.30% → 100.00%**，语句 99.24% → 99.83%
+- 所有页面组件函数覆盖率均达 100%
+
 ## 2026-05-03（第六百轮·自动循环）
 
 ### 测试：补强路由导航和响应拦截器覆盖
