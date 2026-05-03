@@ -937,3 +937,158 @@ def test_41_export_empty_payments_csv():
     assert content.startswith("﻿")
     lines = content.strip().split("\n")
     assert len(lines) == 1
+
+
+# ─── 边界条件 E2E 测试 ──────────────────────────────────────────
+
+
+def test_42_export_customers_csv_has_bom():
+    """客户导出包含 UTF-8 BOM"""
+    from app.core.security import create_access_token
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "export_tester").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+    resp = client.get("/api/v1/exports/customers", headers=headers)
+    assert resp.status_code == 200
+    assert resp.text.startswith("﻿")
+
+
+def test_43_export_orders_csv_has_bom():
+    """订单导出包含 UTF-8 BOM"""
+    from app.core.security import create_access_token
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "export_tester").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+    resp = client.get("/api/v1/exports/orders", headers=headers)
+    assert resp.status_code == 200
+    assert resp.text.startswith("﻿")
+
+
+def test_44_export_payments_csv_has_bom():
+    """收款导出包含 UTF-8 BOM"""
+    from app.core.security import create_access_token
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "export_tester").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+    resp = client.get("/api/v1/exports/payments", headers=headers)
+    assert resp.status_code == 200
+    assert resp.text.startswith("﻿")
+
+
+def test_45_export_product_with_formula_name_sanitized():
+    """导出含公式注入的商品名称被正确转义"""
+    from app.core.security import create_access_token
+    from app.models.product import Product
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "export_tester").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+        cat = db.query(ProductCategory).first()
+        db.add(Product(
+            id=uuid.uuid4(), name="=SUM(A1:A10)", sku="FORMULA-001",
+            sale_price=100, cost_price=50, stock_quantity=5,
+            category_id=cat.id, status="active",
+            created_by=user.id, updated_by=user.id,
+        ))
+        db.commit()
+    finally:
+        db.close()
+    resp = client.get("/api/v1/exports/products", headers=headers)
+    assert resp.status_code == 200
+    # 公式注入应被 sanitize_csv_cell 加前缀单引号
+    assert "'=SUM(A1:A10)" in resp.text
+
+
+def test_46_export_customer_with_emoji_name():
+    """导出含 emoji 的客户名称原样保留"""
+    from app.core.security import create_access_token
+    from app.models.customer import Customer
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "export_tester").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+        db.add(Customer(
+            id=uuid.uuid4(), name="🎉VIP客户🚀",
+            phone="13800009999", created_by=user.id,
+        ))
+        db.commit()
+    finally:
+        db.close()
+    resp = client.get("/api/v1/exports/customers", headers=headers)
+    assert resp.status_code == 200
+    assert "🎉VIP客户🚀" in resp.text
+
+
+def test_47_export_product_with_comma_in_name():
+    """导出含逗号的商品名称被 CSV 引号包裹"""
+    from app.core.security import create_access_token
+    from app.models.product import Product
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "export_tester").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+        cat = db.query(ProductCategory).first()
+        db.add(Product(
+            id=uuid.uuid4(), name="含,逗号商品", sku="COMMA-001",
+            sale_price=80, cost_price=40, stock_quantity=3,
+            category_id=cat.id, status="active",
+            created_by=user.id, updated_by=user.id,
+        ))
+        db.commit()
+    finally:
+        db.close()
+    resp = client.get("/api/v1/exports/products", headers=headers)
+    assert resp.status_code == 200
+    # csv.writer 会用双引号包裹含逗号的值
+    assert '"含,逗号商品"' in resp.text
+
+
+def test_48_export_large_decimal_prices():
+    """导出高精度价格保留原始精度"""
+    from app.core.security import create_access_token
+    from app.models.product import Product
+    from decimal import Decimal
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "export_tester").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+        cat = db.query(ProductCategory).first()
+        db.add(Product(
+            id=uuid.uuid4(), name="精密价格商品", sku="PRECISE-001",
+            sale_price=Decimal("12345.6789"), cost_price=Decimal("6789.0123"),
+            stock_quantity=1, category_id=cat.id, status="active",
+            created_by=user.id, updated_by=user.id,
+        ))
+        db.commit()
+    finally:
+        db.close()
+    resp = client.get("/api/v1/exports/products", headers=headers)
+    assert resp.status_code == 200
+    assert "12345.68" in resp.text
+    assert "6789.01" in resp.text
+
+
+def test_49_export_filename_contains_prefix():
+    """导出响应 Content-Disposition 包含正确前缀"""
+    from app.core.security import create_access_token
+    db = TestSession()
+    try:
+        user = db.query(User).filter(User.username == "export_tester").first()
+        headers = {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+    for prefix in ["products", "customers", "orders", "payments"]:
+        resp = client.get(f"/api/v1/exports/{prefix}", headers=headers)
+        assert resp.status_code == 200
+        cd = resp.headers.get("content-disposition", "")
+        assert prefix in cd
+        assert cd.endswith(".csv")
