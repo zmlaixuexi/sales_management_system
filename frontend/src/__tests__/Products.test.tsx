@@ -30,8 +30,9 @@ vi.mock('@/api/client', () => ({
   default: { post: (...args: any[]) => _apiClientPost(...args) },
 }))
 
+const _authStore = { hasPermission: vi.fn(() => true) }
 vi.mock('@/stores/auth', () => ({
-  useAuthStore: () => (code: string) => code === 'product:view_cost',
+  useAuthStore: (selector: any) => selector(_authStore),
 }))
 
 const _paginatedListReturn = {
@@ -133,6 +134,7 @@ function renderProducts() {
 describe('ProductsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    _authStore.hasPermission.mockReturnValue(true)
   })
 
   it('渲染搜索输入和状态筛选器', () => {
@@ -554,15 +556,23 @@ describe('ProductsPage', () => {
     expect(message.error).not.toHaveBeenCalledWith('停用失败')
   })
 
-  it('canViewCost=false 不显示成本利润列', () => {
-    // 需要 doMock 来覆盖已 hoisted 的 mock — 当前 mock 返回 true
-    // 验证 canViewCost=true 时列存在
+  it('canViewCost=true 显示成本利润列', () => {
     renderProducts()
     const table = screen.getByTestId('products-table')
     const headerTexts = Array.from(table.querySelectorAll('th')).map((th) => th.textContent)
     expect(headerTexts).toContain('成本价')
     expect(headerTexts).toContain('利润')
     expect(headerTexts).toContain('毛利率')
+  })
+
+  it('canViewCost=false 不显示成本利润列', () => {
+    _authStore.hasPermission.mockReturnValue(false)
+    renderProducts()
+    const table = screen.getByTestId('products-table')
+    const headerTexts = Array.from(table.querySelectorAll('th')).map((th) => th.textContent)
+    expect(headerTexts).not.toContain('成本价')
+    expect(headerTexts).not.toContain('利润')
+    expect(headerTexts).not.toContain('毛利率')
   })
 
   it('未知状态显示原始值', () => {
