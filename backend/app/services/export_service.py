@@ -9,7 +9,7 @@ from decimal import Decimal
 from sqlalchemy.orm import Session, selectinload
 
 from app.api.deps import active_query
-from app.core.sanitize import escape_like
+from app.core.sanitize import escape_like, sanitize_csv_cell
 from app.models.customer import Customer
 from app.models.order import Payment, SalesOrder
 from app.models.product import Product
@@ -27,7 +27,7 @@ def _dec(v: Decimal | None) -> str:
 def _str(v: object) -> str:
     if v is None:
         return ""
-    return str(v)
+    return sanitize_csv_cell(str(v))
 
 
 def _dt(v: object) -> str:
@@ -47,8 +47,8 @@ def _product_row(p: Product, can_view_cost: bool = True) -> list[str]:
     status_map = {"active": "上架", "inactive": "下架", "disabled": "停用"}
     cat_name = p.category.name if p.category else "未分类"
     base = [
-        p.sku or "",
-        p.name or "",
+        _str(p.sku),
+        _str(p.name),
         _dec(p.sale_price),
     ]
     if can_view_cost:
@@ -56,8 +56,8 @@ def _product_row(p: Product, can_view_cost: bool = True) -> list[str]:
     base.extend([
         str(p.stock_quantity or 0),
         status_map.get(p.status, p.status or ""),
-        cat_name,
-        p.remark or "",
+        _str(cat_name),
+        _str(p.remark),
         _dt(p.created_at),
     ])
     return base
@@ -101,15 +101,15 @@ CUSTOMER_HEADERS = ["客户名称", "联系人", "电话", "邮箱", "来源", "
 def _customer_row(c: Customer) -> list[str]:
     owner_name = c.owner.display_name if c.owner else ""
     return [
-        c.name or "",
-        c.contact_name or "",
-        c.phone or "",
-        c.email or "",
-        c.source or "",
-        c.level or "",
-        owner_name or "",
-        c.follow_status or "",
-        c.remark or "",
+        _str(c.name),
+        _str(c.contact_name),
+        _str(c.phone),
+        _str(c.email),
+        _str(c.source),
+        _str(c.level),
+        _str(owner_name),
+        _str(c.follow_status),
+        _str(c.remark),
         _dt(c.created_at),
     ]
 
@@ -169,7 +169,7 @@ STATUS_MAP = {
 
 def _order_row(o: SalesOrder, can_view_cost: bool = True) -> list[str]:
     base = [
-        o.order_no or "",
+        _str(o.order_no),
         str(o.customer_id),
         STATUS_MAP.get(o.status, o.status or ""),
         _dec(o.total_amount),
@@ -183,7 +183,7 @@ def _order_row(o: SalesOrder, can_view_cost: bool = True) -> list[str]:
     base.extend([
         _dec(o.paid_amount),
         str(len(o.items)) if o.items else "0",
-        o.remark or "",
+        _str(o.remark),
         _dt(o.created_at),
     ])
     return base
@@ -240,10 +240,10 @@ def _payment_row(p: Payment) -> list[str]:
         str(p.id),
         str(p.order_id),
         _dec(p.amount),
-        p.payment_method or "",
+        _str(p.payment_method),
         "正常" if p.status == "normal" else "已冲正",
         _dt(p.paid_at),
-        p.remark or "",
+        _str(p.remark),
         _dt(p.created_at),
     ]
 

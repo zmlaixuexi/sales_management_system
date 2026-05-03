@@ -217,3 +217,78 @@ def test_payment_row_reversed_status():
     p.created_at = datetime(2026, 5, 1)
     row = _payment_row(p)
     assert row[4] == "已冲正"
+
+
+# ─── CSV 公式注入防护 ─────────────────────────────────────────
+
+
+def test_str_sanitizes_formula_equals():
+    """以 = 开头的值应被转义"""
+    assert _str("=SUM(A1:A10)") == "'=SUM(A1:A10)"
+
+
+def test_str_sanitizes_formula_plus():
+    """以 + 开头的值应被转义"""
+    assert _str("+cmd|'/C calc'!A0") == "'+cmd|'/C calc'!A0"
+
+
+def test_str_sanitizes_formula_minus():
+    """以 - 开头的值应被转义"""
+    assert _str("-1+1|cmd") == "'-1+1|cmd"
+
+
+def test_str_sanitizes_formula_at():
+    """以 @ 开头的值应被转义"""
+    assert _str("@SUM(A1)") == "'@SUM(A1)"
+
+
+def test_str_sanitizes_formula_tab():
+    """以 \\t 开头的值应被转义"""
+    assert _str("\t=cmd") == "'\t=cmd"
+
+
+def test_str_sanitizes_formula_carriage_return():
+    """以 \\r 开头的值应被转义"""
+    assert _str("\rcmd") == "'\rcmd"
+
+
+def test_str_normal_text_not_modified():
+    """普通文本不应被转义"""
+    assert _str("正常商品名称") == "正常商品名称"
+
+
+def test_str_formula_midstring_not_modified():
+    """公式字符在字符串中间不应被转义"""
+    assert _str("价格=100") == "价格=100"
+
+
+def test_product_row_formula_name_sanitized():
+    """商品名称含公式注入时应被转义"""
+    p = _mock_product(name="=CMD|'/C calc'!A0")
+    row = _product_row(p, can_view_cost=False)
+    assert row[1] == "'=CMD|'/C calc'!A0"
+
+
+def test_customer_row_formula_phone_sanitized():
+    """客户电话含公式注入时应被转义"""
+    c = MagicMock(spec=[])
+    c.name = "正常客户"
+    c.contact_name = ""
+    c.phone = "+1-555-0123"
+    c.email = ""
+    c.source = ""
+    c.level = ""
+    c.owner = None
+    c.follow_status = ""
+    c.remark = ""
+    c.created_at = datetime(2026, 5, 1)
+    row = _customer_row(c)
+    assert row[2] == "'+1-555-0123"
+
+
+def test_order_row_formula_remark_sanitized():
+    """订单备注含公式注入时应被转义"""
+    o = _mock_order(remark="=HYPERLINK(\"http://evil.com\",\"点击\")")
+    row = _order_row(o, can_view_cost=False)
+    # remark is the second-to-last field (before created_at)
+    assert "'=HYPERLINK" in row[-2]

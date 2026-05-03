@@ -34,3 +34,13 @@ def sanitize_text(v: str | None) -> str | None:
     v = strip_html(v)
     v = strip_control_chars(v)
     return v
+
+
+_CSV_FORMULA_CHARS = {"=", "+", "-", "@", "\t", "\r"}
+
+
+def sanitize_csv_cell(value: str) -> str:
+    """防御 CSV 公式注入：若值以公式触发字符开头，前置单引号阻止 Excel 解析为公式。"""
+    if value and value[0] in _CSV_FORMULA_CHARS:
+        return f"'{value}"
+    return value
