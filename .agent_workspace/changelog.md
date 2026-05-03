@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-03（第六百八十二轮·自动循环）
+
+### 安全加固：JWT iss/aud 声明签发与验证 + 测试修复
+
+- security.py：create_access_token / create_refresh_token 添加 iss/aud 声明
+- config.py：新增 JWT_ISSUER / JWT_AUDIENCE 配置项
+- deps.py / auth.py：jwt.decode 添加 audience/issuer 参数校验
+- test_security.py：新增 _decode() 辅助函数统一带 iss/aud 验证解码
+- test_order_crud.py：2 处 jwt.decode 添加 audience/issuer 参数
+- test_audit_log.py test_68：密码修改后重新获取 token 再查审计日志
+- 后端测试 1481（+0），ruff 0 errors
+
 ## 2026-05-03（第六百八十一轮·自动循环）
 
 ### 测试补强：账户锁定行为单元测试 + 8 项测试
