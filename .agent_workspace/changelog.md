@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第六百六十二轮·自动循环）
+
+### 代码质量：修复 eslint 配置 + ProductForm 严格相等检查
+
+- 显式禁用基础 `no-unused-vars` 规则，消除与 `@typescript-eslint/no-unused-vars` 的冲突误报
+- ProductForm.tsx 中 `cost_price != null` / `sale_price != null` 改为严格相等 `!==`
+- 全量验证通过：tsc 0 errors, eslint 0 errors, 841 前端测试
+
 ## 2026-05-03（第六百六十一轮·自动循环）
 
 ### 测试补强：为 isToastDisplayed 添加 4 个单元测试 + 修复 null 安全问题
