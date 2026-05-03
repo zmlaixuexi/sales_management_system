@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-05-04（第七百四十一轮·自动循环）
+
+### 安全加固：安全头与 CORS 配置边界测试（44 项覆盖安全响应头、CORS、Body Limit、JWT 配置）
+
+**变更文件：**
+- `backend/tests/test_security_headers_cors.py`（新建 44 项测试）
+  - 安全响应头：X-Content-Type-Options=nosniff/X-Frame-Options=DENY/X-XSS-Protection/Referrer-Policy/Permissions-Policy/CSP/COOP/CORP/Cache-Control/no-store
+  - /metrics 端点也有安全头
+  - HSTS：HTTP 不设置/HSTS_MAX_AGE=31536000/>0/中间件检查 scheme
+  - CORS：默认 localhost:5173/每项以 http(s):// 开头/不含通配符/OPTIONS 预检 200/允许 Authorization+Content-Type+X-Request-ID/允许 GET POST PUT DELETE OPTIONS/credentials=True
+  - Body Limit：MAX_JSON_BODY_MB=1/>0/GET 豁免/413 PAYLOAD_TOO_LARGE/multipart 豁免/uploads 路径豁免
+  - JWT：SECRET_KEY>=8/HS256/ACCESS>0/REFRESH>0
+  - 中间件注册：SecurityHeaders/BodyLimit/CORS
+  - CORS 验证器：拒绝 */拒绝无协议/接受 http://和 https://
+  - 文件上传：MAX_IMAGE_SIZE_MB=5/>0/MAX_CSV_IMPORT_SIZE_MB>0/MAX_CSV_IMPORT_ROWS>0
+
+**测试计数：** 后端 3179（+44）、前端 1001、总计 4180
+
 ## 2026-05-04（第七百四十轮·自动循环）
 
 ### 文档完善：OpenAPI 文档一致性边界测试（60 项覆盖 schema、tags、路由、认证、分页、响应、错误码）
