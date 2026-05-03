@@ -51,25 +51,31 @@ vi.mock('@/hooks/usePaginatedList', () => ({
 }))
 
 vi.mock('antd', () => ({
-  Table: ({ dataSource, columns, rowKey, locale }: any) => (
-    <table data-testid="customers-table">
-      <thead>
-        <tr>{columns?.map((col: any) => <th key={col.dataIndex || col.title}>{col.title}</th>)}</tr>
-      </thead>
-      <tbody>
-        {dataSource?.length ? dataSource.map((row: any) => (
-          <tr key={row[rowKey]} data-testid={`row-${row[rowKey]}`}>
-            {columns?.map((col: any) => (
-              <td key={col.dataIndex} data-col={col.dataIndex}>
-                {col.render ? col.render(row[col.dataIndex], row) : row[col.dataIndex]}
-              </td>
-            ))}
-          </tr>
-        )) : (
-          <tr><td colSpan={99}>{typeof locale?.emptyText === 'string' ? locale.emptyText : locale?.emptyText}</td></tr>
-        )}
-      </tbody>
-    </table>
+  Table: ({ dataSource, columns, rowKey, locale, loading, pagination }: any) => (
+    loading ? <span>加载中...</span> : (
+    <div>
+      <table data-testid="customers-table">
+        <thead>
+          <tr>{columns?.map((col: any) => <th key={col.dataIndex || col.title}>{col.title}</th>)}</tr>
+        </thead>
+        <tbody>
+          {dataSource?.length ? dataSource.map((row: any) => (
+            <tr key={row[rowKey]} data-testid={`row-${row[rowKey]}`}>
+              {columns?.map((col: any) => (
+                <td key={col.dataIndex} data-col={col.dataIndex}>
+                  {col.render ? col.render(row[col.dataIndex], row) : row[col.dataIndex]}
+                </td>
+              ))}
+            </tr>
+          )) : (
+            <tr><td colSpan={99}>{typeof locale?.emptyText === 'string' ? locale.emptyText : locale?.emptyText}</td></tr>
+          )}
+        </tbody>
+      </table>
+      {pagination?.showTotal && <span data-testid="pagination-total">{pagination.showTotal(pagination.total)}</span>}
+      {pagination?.onChange && <button data-testid="page-change" onClick={() => pagination.onChange(2, pagination.pageSize)}>翻页</button>}
+    </div>
+    )
   ),
   Button: ({ children, onClick, icon, type, danger }: any) => (
     <button data-testid="button" data-type={type} data-danger={danger ? 'true' : undefined} onClick={onClick}>{icon}{children}</button>
@@ -418,5 +424,88 @@ describe('CustomersPage', () => {
     ]
     _paginatedListReturn.total = 3
     _paginatedListReturn.keyword = ''
+  })
+
+  it('分页显示总条数', () => {
+    renderCustomers()
+    expect(screen.getByTestId('pagination-total')).toHaveTextContent('共 3 条')
+  })
+
+  it('翻页触发 onPageChange', () => {
+    renderCustomers()
+    fireEvent.click(screen.getByTestId('page-change'))
+    expect(_paginatedListReturn.onPageChange).toHaveBeenCalled()
+  })
+
+  it('导入按钮点击触发 fileInput click', async () => {
+    renderCustomers()
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+    const clickSpy = vi.spyOn(fileInput, 'click')
+    const importBtn = screen.getAllByTestId('button').find(
+      (b) => b.textContent?.includes('导入'),
+    )
+    await act(async () => { importBtn!.click() })
+    expect(clickSpy).toHaveBeenCalled()
+    clickSpy.mockRestore()
+  })
+
+  it('导入 API 返回 success=false 不刷新', async () => {
+    const { default: apiClient } = await import('@/api/client')
+    const mockPost = apiClient.post as ReturnType<typeof vi.fn>
+    mockPost.mockResolvedValueOnce({ data: { success: false, message: '导入失败' } })
+    const { message } = await import('antd')
+
+    renderCustomers()
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+    const file = new File(['data'], 'test.csv', { type: 'text/csv' })
+    await act(async () => { fireEvent.change(fileInput, { target: { files: [file] } }) })
+
+    await waitFor(() => {
+      expect(mockPost).toHaveBeenCalled()
+    })
+    expect(_paginatedListReturn.refresh).not.toHaveBeenCalled()
+    expect(message.success).not.toHaveBeenCalled()
+  })
+
+  it('handleImport 文件为空不调用 API', async () => {
+    const { default: apiClient } = await import('@/api/client')
+    const mockPost = apiClient.post as ReturnType<typeof vi.fn>
+
+    renderCustomers()
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+    await act(async () => { fireEvent.change(fileInput, { target: { files: [] } }) })
+
+    expect(mockPost).not.toHaveBeenCalled()
+  })
+
+  it('handleDelete _toastDisplayed 错误静默', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _customerMocks.deleteCustomer.mockRejectedValueOnce(err)
+    const { message } = await import('antd')
+    renderCustomers()
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    await act(async () => { fireEvent.click(popconfirms[0]) })
+    await waitFor(() => {
+      expect(_customerMocks.deleteCustomer).toHaveBeenCalled()
+    })
+    expect(message.error).not.toHaveBeenCalledWith('删除失败')
+  })
+
+  it('未知等级显示原始值', () => {
+    _paginatedListReturn.data = [
+      { id: 'c5', name: '客户戊', contact_name: null, phone: null, source: null, level: 'platinum', owner_name: null, follow_status: null },
+    ]
+    _paginatedListReturn.total = 1
+    renderCustomers()
+    const tags = screen.getAllByTestId('tag')
+    const platinumTag = tags.find((t) => t.textContent === 'platinum')
+    expect(platinumTag).toBeTruthy()
+    expect(platinumTag?.getAttribute('data-color')).toBe('default')
+    _paginatedListReturn.data = [
+      { id: 'c1', name: '客户甲', contact_name: '张三', phone: '13800001111', source: 'referral', level: 'vip', owner_name: '销售A', follow_status: '活跃' },
+      { id: 'c2', name: '客户乙', contact_name: '李四', phone: '13800002222', source: 'online', level: 'normal', owner_name: '销售B', follow_status: '待跟进' },
+      { id: 'c3', name: '客户丙', contact_name: null, phone: null, source: null, level: null, owner_name: null, follow_status: null },
+    ]
+    _paginatedListReturn.total = 3
   })
 })
