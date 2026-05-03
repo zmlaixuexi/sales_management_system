@@ -180,6 +180,30 @@ describe('apiClient 响应拦截器', () => {
       apiClient.defaults.adapter = originalAdapter
     })
 
+    it('429 无 retry-after 头时使用默认 5 秒等待', async () => {
+      const handler = apiClient.interceptors.response.handlers[0]?.rejected
+      if (!handler) throw new Error('No error handler')
+
+      const config = { headers: {}, _retry: false, _retry429: false }
+      const error = {
+        config,
+        response: { status: 429, headers: {}, data: {} },
+      }
+
+      const originalAdapter = apiClient.defaults.adapter
+      apiClient.defaults.adapter = async () => ({ data: 'default-wait', status: 200, statusText: 'OK', headers: {}, config: {} } as never)
+
+      vi.useFakeTimers()
+      const promise = handler(error)
+      // 默认 retry-after='5' → 5000ms，Math.min(5000, 5000) = 5000
+      await vi.advanceTimersByTimeAsync(5000)
+      const result = await promise
+      expect(result.data).toBe('default-wait')
+
+      vi.useRealTimers()
+      apiClient.defaults.adapter = originalAdapter
+    })
+
     it('429 已重试过显示错误提示', async () => {
       try {
         await triggerErrorInterceptor(429, { config: { _retry429: true } })

@@ -6,6 +6,13 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-229
+
+- 描述：client.ts 429 无 retry-after 头默认等待分支测试覆盖
+- 状态：已完成
+- 验证：+1 测试验证 429 响应无 retry-after 头时使用默认 5 秒等待值，前端 831 测试全绿
+- 关联：frontend/src/__tests__/client-interceptor.test.ts
+
 ## 功能编号：FEAT-20260503-228
 
 - 描述：Nginx 配置 /metrics 反代（Prometheus 采集入口）
