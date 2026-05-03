@@ -249,4 +249,49 @@ describe('CustomersPage', () => {
     const editBtns = screen.getAllByText('编辑')
     expect(editBtns.length).toBeGreaterThanOrEqual(1)
   })
+
+  it('删除失败不崩溃', async () => {
+    _customerMocks.deleteCustomer.mockRejectedValueOnce(new Error('删除失败'))
+    renderCustomers()
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    popconfirms[0].click()
+    expect(_customerMocks.deleteCustomer).toHaveBeenCalled()
+  })
+
+  it('来源筛选器包含全部选项', () => {
+    renderCustomers()
+    const select = screen.getByTestId('source-select')
+    const options = Array.from(select.querySelectorAll('option'))
+    const optionTexts = options.map((o) => o.textContent)
+    expect(optionTexts).toContain('转介绍')
+    expect(optionTexts).toContain('线上')
+  })
+
+  it('有筛选条件时空数据显示"没有匹配的客户"', () => {
+    Object.assign(_paginatedListReturn, { data: [], total: 0, keyword: '不存在的客户' })
+    renderCustomers()
+    expect(screen.getByText('没有匹配的客户')).toBeInTheDocument()
+    _paginatedListReturn.data = [
+      { id: 'c1', name: '客户甲', contact_name: '张三', phone: '13800001111', source: 'referral', level: 'vip', owner_name: '销售A', follow_status: '活跃' },
+      { id: 'c2', name: '客户乙', contact_name: '李四', phone: '13800002222', source: 'online', level: 'normal', owner_name: '销售B', follow_status: '待跟进' },
+      { id: 'c3', name: '客户丙', contact_name: null, phone: null, source: null, level: null, owner_name: null, follow_status: null },
+    ]
+    _paginatedListReturn.total = 3
+    _paginatedListReturn.keyword = ''
+  })
+
+  it('未知来源显示原始值', () => {
+    _paginatedListReturn.data = [
+      { id: 'c4', name: '客户丁', contact_name: '王五', phone: '13900001111', source: 'unknown_source', level: 'normal', owner_name: null, follow_status: null },
+    ]
+    _paginatedListReturn.total = 1
+    renderCustomers()
+    expect(screen.getByText('unknown_source')).toBeInTheDocument()
+    _paginatedListReturn.data = [
+      { id: 'c1', name: '客户甲', contact_name: '张三', phone: '13800001111', source: 'referral', level: 'vip', owner_name: '销售A', follow_status: '活跃' },
+      { id: 'c2', name: '客户乙', contact_name: '李四', phone: '13800002222', source: 'online', level: 'normal', owner_name: '销售B', follow_status: '待跟进' },
+      { id: 'c3', name: '客户丙', contact_name: null, phone: null, source: null, level: null, owner_name: null, follow_status: null },
+    ]
+    _paginatedListReturn.total = 3
+  })
 })
