@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-03（第五百二十五轮·自动循环）
+
+### 修复：useSubmit mock 未使用参数 ESLint 错误（3 处）
+
+- CustomerForm.test.tsx、OrderForm.test.tsx、ProductForm.test.tsx 中 `onSubmit` → `_onSubmit`
+- ESLint 3→0 errors，前端测试 516 不变
+
 ## 2026-05-03（第五百二十四轮·自动循环）
 
 ### 测试：OrderForm 页面新增 3 个边界值测试（23 个）
