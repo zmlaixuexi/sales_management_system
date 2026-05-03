@@ -572,4 +572,55 @@ describe('ReportsCenter', () => {
     })
     expect(_messageError).not.toHaveBeenCalledWith('加载库存预警失败')
   })
+
+  it('fetchSalesSummary success=false 不设置概览数据', async () => {
+    _reportMocks.fetchSalesSummary.mockResolvedValue({ success: false, data: null })
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(_reportMocks.fetchSalesSummary).toHaveBeenCalledWith('30d')
+    })
+    const stats = screen.getAllByTestId('statistic')
+    const salesStat = stats.find((s) => s.getAttribute('data-title') === '销售总额')
+    expect(salesStat?.textContent).toContain('¥0')
+  })
+
+  it('fetchSalesTrend success=false 不设置趋势数据', async () => {
+    _reportMocks.fetchSalesTrend.mockResolvedValue({ success: false, data: null })
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('暂无趋势数据')).toBeInTheDocument()
+    })
+  })
+
+  it('fetchProductRanking success=false 不设置商品数据', async () => {
+    _reportMocks.fetchProductRanking.mockResolvedValue({ success: false, data: null })
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('暂无商品排行数据')).toBeInTheDocument()
+    })
+  })
+
+  it('fetchCustomerRanking success=false 不设置客户数据', async () => {
+    _reportMocks.fetchCustomerRanking.mockResolvedValue({ success: false, data: null })
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('暂无客户排行数据')).toBeInTheDocument()
+    })
+  })
+
+  it('fetchSalespersonRanking success=false 不设置销售数据', async () => {
+    _reportMocks.fetchSalespersonRanking.mockResolvedValue({ success: false, data: null })
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('暂无销售排行数据')).toBeInTheDocument()
+    })
+  })
+
+  it('fetchInventoryWarning success=false 不设置库存数据', async () => {
+    _reportMocks.fetchInventoryWarning.mockResolvedValue({ success: false, data: null })
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('暂无库存预警')).toBeInTheDocument()
+    })
+  })
 })
