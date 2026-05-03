@@ -20,6 +20,7 @@ from app.api.deps import (
     parse_uuid_or_400,
     require_permission,
     resp,
+    safe_commit,
 )
 from app.core.config import settings
 from app.core.sanitize import escape_like, strip_html
@@ -169,7 +170,7 @@ def create_customer(
             "contact_name": customer.contact_name,
         },
     )
-    db.commit()
+    safe_commit(db)
 
     return resp(
         data={
@@ -283,7 +284,7 @@ def update_customer(
             "level": customer.level, "contact_name": customer.contact_name,
         },
     )
-    db.commit()
+    safe_commit(db)
 
     return resp(
         data={
@@ -333,7 +334,7 @@ def delete_customer(
         before_data=before_snapshot,
         after_data={"name": customer.name, "deleted": True},
     )
-    db.commit()
+    safe_commit(db)
 
     return resp(data=None, message="删除成功")
 
@@ -367,7 +368,7 @@ def transfer_customer(
         before_data={"name": customer.name, "owner_user_id": old_owner},
         after_data={"name": customer.name, "owner_user_id": str(new_owner_id)},
     )
-    db.commit()
+    safe_commit(db)
 
     return resp(
         data={"id": str(customer.id), "owner_user_id": str(customer.owner_user_id)},
@@ -451,9 +452,8 @@ async def import_customers_csv(
         created += 1
 
     try:
-        db.commit()
+        safe_commit(db)
     except Exception:
-        db.rollback()
         raise HTTPException(
             status_code=400,
             detail={"code": "IMPORT_FAILED", "message": "导入失败，部分数据可能违反唯一性约束"},
@@ -462,7 +462,7 @@ async def import_customers_csv(
     log_user_action(db, request, current_user,
                     action="customer_import", resource_type="customer",
                     after_data={"created": created, "errors": len(errors)})
-    db.commit()
+    safe_commit(db)
 
     return resp(
         data={"created": created, "errors": errors},

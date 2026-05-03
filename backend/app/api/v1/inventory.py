@@ -16,6 +16,7 @@ from app.api.deps import (
     parse_uuid_or_400,
     require_permission,
     resp,
+    safe_commit,
 )
 from app.models.order import InventoryMovement
 from app.models.product import Product
@@ -130,7 +131,7 @@ def adjust_inventory(
         before_data={"name": product.name, "stock_quantity": before},
         after_data={"name": product.name, "stock_quantity": after, "change": quantity_change},
     )
-    db.commit()
+    safe_commit(db)
 
     return resp({
         "product_id": str(product.id),

@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db, require_permission, resp
+from app.api.deps import get_current_user, get_db, require_permission, resp, safe_commit
 from app.models.product import File, ProductImage
 from app.models.user import User
 from app.services.audit_service import log_user_action
@@ -37,7 +37,7 @@ async def upload_image_api(
         resource_id=str(file_record.id),
         after_data={"original_name": file_record.original_name, "size_bytes": file_record.size_bytes},
     )
-    db.commit()
+    safe_commit(db)
 
     return resp({
         "id": str(file_record.id),
@@ -113,6 +113,6 @@ def delete_image(
         before_data={"original_name": file_record.original_name, "object_key": file_record.object_key},
     )
     delete_file(db, file_id)
-    db.commit()
+    safe_commit(db)
 
     return resp(None, "删除成功")

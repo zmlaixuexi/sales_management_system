@@ -9,6 +9,7 @@ from app.api.deps import (
     get_db,
     parse_uuid_or_400,
     resp,
+    safe_commit,
 )
 from app.core.sanitize import sanitize_text as _sanitize
 from app.models.user import Permission, Role, RolePermission, User, UserRole
@@ -134,7 +135,7 @@ def create_role(
         for pid in parsed_ids:
             db.add(RolePermission(role_id=role.id, permission_id=pid))
 
-    db.commit()
+    safe_commit(db)
     db.refresh(role)
 
     log_user_action(
@@ -142,7 +143,7 @@ def create_role(
         action="role_create", resource_type="role", resource_id=str(role.id),
         after_data={"name": role.name, "display_name": role.display_name},
     )
-    db.commit()
+    safe_commit(db)
 
     return resp(_serialize_role(role), "创建成功")
 
@@ -186,7 +187,7 @@ def update_role(
         for pid in parsed_ids:
             db.add(RolePermission(role_id=role.id, permission_id=pid))
 
-    db.commit()
+    safe_commit(db)
     db.refresh(role)
 
     log_user_action(
@@ -195,7 +196,7 @@ def update_role(
         before_data=before,
         after_data={"name": role.name, "display_name": role.display_name},
     )
-    db.commit()
+    safe_commit(db)
 
     return resp(_serialize_role(role), "更新成功")
 
@@ -232,7 +233,7 @@ def delete_role(
         action="role_delete", resource_type="role", resource_id=str(role.id),
         before_data={"name": role.name, "display_name": role.display_name},
     )
-    db.commit()
+    safe_commit(db)
 
     return resp(message="删除成功")
 

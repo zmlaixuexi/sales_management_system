@@ -140,6 +140,18 @@ def active_query(db: Session, model: type[Base]):
     return query
 
 
+def safe_commit(db: Session) -> None:
+    """提交事务，失败时自动回滚并重新抛出异常。
+
+    防止 db.commit() 抛出 IntegrityError 等异常后 session 处于不可用状态。
+    """
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+
 def resp(data=None, message: str = "操作成功") -> dict:
     """构建标准成功响应字典。"""
     from app.core.request_id import request_id_ctx

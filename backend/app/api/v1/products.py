@@ -22,6 +22,7 @@ from app.api.deps import (
     parse_uuid_or_400,
     require_permission,
     resp,
+    safe_commit,
 )
 from app.core.config import settings
 from app.core.sanitize import escape_like, strip_html
@@ -261,7 +262,7 @@ def create_product(
             "stock_quantity": product.stock_quantity,
         },
     )
-    db.commit()
+    safe_commit(db)
 
     can_view_cost = has_permission(current_user, "product:view_cost")
     result: dict = {
@@ -455,7 +456,7 @@ def update_product(
             "stock_quantity": product.stock_quantity,
         },
     )
-    db.commit()
+    safe_commit(db)
 
     unit_profit, gross_margin = _calc_profit(product.sale_price, product.cost_price)
 
@@ -514,7 +515,7 @@ def delete_product(
         before_data=before_snapshot,
         after_data={"name": product.name, "sku": product.sku, "deleted": True},
     )
-    db.commit()
+    safe_commit(db)
 
     return resp(data=None, message="删除成功")
 
@@ -539,7 +540,7 @@ def disable_product(
         before_data={"name": product.name, "sku": product.sku, "status": old_status},
         after_data={"name": product.name, "status": "disabled"},
     )
-    db.commit()
+    safe_commit(db)
 
     return resp(data={"id": str(product.id), "status": product.status}, message="停用成功")
 
@@ -671,9 +672,8 @@ async def import_products_csv(
         created += 1
 
     try:
-        db.commit()
+        safe_commit(db)
     except Exception:
-        db.rollback()
         raise HTTPException(
             status_code=400,
             detail={"code": "IMPORT_FAILED", "message": "导入失败，部分数据可能违反唯一性约束"},
@@ -682,7 +682,7 @@ async def import_products_csv(
     log_user_action(db, request, current_user,
                     action="product_import", resource_type="product",
                     after_data={"created": created, "errors": len(errors)})
-    db.commit()
+    safe_commit(db)
 
     return resp(
         data={"created": created, "errors": errors},

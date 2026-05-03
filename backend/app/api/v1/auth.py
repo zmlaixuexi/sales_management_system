@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from app.api.deps import active_query, get_current_user, get_db, resp
+from app.api.deps import active_query, get_current_user, get_db, resp, safe_commit
 from app.core.config import settings
 from app.core.metrics import LOGIN_ATTEMPTS
 from app.core.security import create_access_token, create_refresh_token, hash_password, verify_password
@@ -60,7 +60,7 @@ def login(request: Request, req: LoginRequest, db: Session = Depends(get_db)):
         _record_login_fail(client_ip)
         LOGIN_ATTEMPTS.labels(result="failed").inc()
         log_action(db, action="login_failed", resource_type="user", actor_name=req.username, **meta)
-        db.commit()
+        safe_commit(db)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"code": "AUTH_UNAUTHORIZED", "message": "用户名或密码错误"},
@@ -80,7 +80,7 @@ def login(request: Request, req: LoginRequest, db: Session = Depends(get_db)):
         **meta,
     )
     LOGIN_ATTEMPTS.labels(result="success").inc()
-    db.commit()
+    safe_commit(db)
 
     return resp({
         "access_token": access_token,
@@ -172,6 +172,6 @@ def change_password(
         after_data={"username": current_user.username, "action": "password_change"},
         **meta,
     )
-    db.commit()
+    safe_commit(db)
 
     return resp(message="密码修改成功")

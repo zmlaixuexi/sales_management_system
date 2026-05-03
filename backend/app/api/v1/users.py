@@ -11,6 +11,7 @@ from app.api.deps import (
     paginated_resp,
     parse_uuid_or_400,
     resp,
+    safe_commit,
 )
 from app.core.sanitize import escape_like
 from app.core.security import hash_password
@@ -110,7 +111,7 @@ def create_user(
         for rid in parsed_role_ids:
             db.add(UserRole(user_id=user.id, role_id=rid))
 
-    db.commit()
+    safe_commit(db)
     db.refresh(user)
 
     log_user_action(
@@ -118,7 +119,7 @@ def create_user(
         action="user_create", resource_type="user", resource_id=str(user.id),
         after_data={"username": user.username, "display_name": user.display_name, "is_active": user.is_active},
     )
-    db.commit()
+    safe_commit(db)
 
     return resp({"id": str(user.id), "username": user.username}, "创建成功")
 
@@ -168,7 +169,7 @@ def update_user(
         for rid in parsed_role_ids:
             db.add(UserRole(user_id=user.id, role_id=rid))
 
-    db.commit()
+    safe_commit(db)
 
     after: dict = {"username": user.username, "display_name": user.display_name}
     if req.is_active is not None:
@@ -179,7 +180,7 @@ def update_user(
         before_data=before,
         after_data=after,
     )
-    db.commit()
+    safe_commit(db)
 
     return resp(message="更新成功")
 

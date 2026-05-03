@@ -22,6 +22,7 @@ from app.api.deps import (
     parse_uuid_or_400,
     require_permission,
     resp,
+    safe_commit,
 )
 from app.core.metrics import INVENTORY_STOCKOUT, ORDER_CANCELLED, ORDER_CONFIRMED, ORDER_CREATED
 from app.core.sanitize import escape_like
@@ -329,7 +330,7 @@ def create_order(
             ],
         },
     )
-    db.commit()
+    safe_commit(db)
     ORDER_CREATED.labels(status="draft").inc()
 
     can_view_cost = has_permission(current_user, "product:view_cost")
@@ -476,7 +477,7 @@ def update_order(
         before_data=before_snapshot,
         after_data=after_payload,
     )
-    db.commit()
+    safe_commit(db)
 
     return resp(data={"id": str(order.id), "order_no": order.order_no}, message="更新成功")
 
@@ -518,7 +519,7 @@ def confirm_order(
             "total_amount": str(order.total_amount), "customer_id": str(order.customer_id),
         },
     )
-    db.commit()
+    safe_commit(db)
     ORDER_CONFIRMED.inc()
 
     return resp(data={"id": str(order.id), "status": order.status}, message="确认成功")
@@ -583,7 +584,7 @@ def cancel_order(
             "total_amount": str(order.total_amount), "customer_id": str(order.customer_id),
         },
     )
-    db.commit()
+    safe_commit(db)
     ORDER_CANCELLED.inc()
 
     return resp(data={"id": str(order.id), "status": order.status}, message="取消成功")
@@ -667,7 +668,7 @@ def create_order_payment(
             "method": result["method"],
         },
     )
-    db.commit()
+    safe_commit(db)
 
     return resp(
         data={

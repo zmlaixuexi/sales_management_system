@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, has_permission, require_permission
+from app.api.deps import get_db, has_permission, require_permission, safe_commit
 from app.models.user import User
 from app.services.audit_service import log_user_action
 from app.services.export_service import (
@@ -50,7 +50,7 @@ def export_products_csv(
     log_user_action(db, request, current_user,
                     action="export_products", resource_type="product",
                     after_data={"keyword": keyword, "status": status})
-    db.commit()
+    safe_commit(db)
     return StreamingResponse(
         generator,
         media_type="text/csv; charset=utf-8",
@@ -72,7 +72,7 @@ def export_customers_csv(
     log_user_action(db, request, current_user,
                     action="export_customers", resource_type="customer",
                     after_data={"keyword": keyword, "source": source})
-    db.commit()
+    safe_commit(db)
     return StreamingResponse(
         generator,
         media_type="text/csv; charset=utf-8",
@@ -104,7 +104,7 @@ def export_orders_csv(
     log_user_action(db, request, current_user,
                     action="export_orders", resource_type="order",
                     after_data={"keyword": keyword, "status": status})
-    db.commit()
+    safe_commit(db)
     return StreamingResponse(
         generator,
         media_type="text/csv; charset=utf-8",
@@ -132,7 +132,7 @@ def export_payments_csv(
     log_user_action(db, request, current_user,
                     action="export_payments", resource_type="payment",
                     after_data={"order_id": str(order_id) if order_id else None})
-    db.commit()
+    safe_commit(db)
     return StreamingResponse(
         generator,
         media_type="text/csv; charset=utf-8",
