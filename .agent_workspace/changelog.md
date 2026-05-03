@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-04（第六百九十三轮·自动循环）
+
+### 部署体验：Alembic 迁移验证 + 补充缺失迁移
+
+- 验证迁移链完整性：7 个版本（初始→客户→订单→审计日志→复合索引→软删除索引→password_changed_at）
+- 验证 16 个模型表与 16 个迁移表完全匹配
+- 发现 users.password_changed_at 列缺失迁移（Round 680 添加的模型变更未反映到数据库 schema）
+- 新增迁移脚本 a1b2c3d4e5f6：ALTER TABLE users ADD COLUMN password_changed_at
+- 后端测试 1502（+0），迁移链 7 个版本
+
 ## 2026-05-04（第六百九十二轮·自动循环）
 
 ### 安全加固：API 级别 XSS/SQL 注入向量端到端测试
