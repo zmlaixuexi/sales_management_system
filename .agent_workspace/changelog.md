@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-04（第六百九十八轮·自动循环）
+
+### 安全加固：密码强度验证增强（大小写+数字+特殊字符+弱密码黑名单）
+
+- 新增 app/core/password_strength.py：validate_password_strength() 函数
+  - 至少一个大写字母、一个小写字母、一个数字、一个特殊字符
+  - 50 个常见弱密码黑名单（大小写不敏感匹配）
+- 更新 schemas/auth.py：UserCreate 和 ChangePasswordRequest 统一调用新验证函数
+- 更新 23 个测试文件中的密码为新策略合规密码（testpass123 → TestPass123!）
+- 新增 test_password_strength.py：15 项单元测试（6 种弱密码拒绝 + 强密码通过 + Schema 集成）
+- 后端测试 1581（+19），全部通过
+
 ## 2026-05-04（第六百九十七轮·自动循环）
 
 ### 测试补强：导出功能边界条件测试（+31 新增）
