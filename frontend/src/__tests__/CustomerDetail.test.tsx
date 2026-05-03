@@ -225,4 +225,44 @@ describe('CustomerDetail', () => {
       expect(screen.getByText('Edit Form')).toBeInTheDocument()
     })
   })
+
+  it('删除失败不崩溃', async () => {
+    _customerMocks.deleteCustomer.mockRejectedValue(new Error('删除失败'))
+    renderCustomerDetail()
+    await waitFor(() => {
+      expect(screen.getByText('编辑')).toBeInTheDocument()
+    })
+    const popconfirm = screen.getByTestId('popconfirm')
+    popconfirm.click()
+    await waitFor(() => {
+      expect(_customerMocks.deleteCustomer).toHaveBeenCalledWith('cust-1')
+    })
+  })
+
+  it('无关联订单显示"暂无关联订单"', async () => {
+    _orderMocks.fetchOrders.mockResolvedValue({
+      success: true,
+      data: { items: [], total: 0 },
+    })
+    renderCustomerDetail()
+    await waitFor(() => {
+      expect(screen.getByText('暂无关联订单')).toBeInTheDocument()
+    })
+  })
+
+  it('来源显示中文映射', async () => {
+    renderCustomerDetail()
+    await waitFor(() => {
+      expect(screen.getByText('转介绍')).toBeInTheDocument()
+    })
+  })
+
+  it('订单加载失败不阻塞页面', async () => {
+    _orderMocks.fetchOrders.mockRejectedValue(new Error('订单接口错误'))
+    renderCustomerDetail()
+    await waitFor(() => {
+      const cards = screen.getAllByTestId('card')
+      expect(cards[0].getAttribute('data-title')).toBe('测试客户')
+    })
+  })
 })
