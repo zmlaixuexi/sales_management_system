@@ -1117,4 +1117,82 @@ describe('OrderDetail', () => {
       expect(screen.getByText('暂无操作日志')).toBeInTheDocument()
     })
   })
+
+  it('fetchOrder success=false 不设置订单数据', async () => {
+    _orderMocks.fetchOrder.mockResolvedValue({ success: false, data: null })
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(_orderMocks.fetchOrder).toHaveBeenCalledWith('order-1')
+    })
+    expect(screen.getByText('加载中...')).toBeInTheDocument()
+  })
+
+  it('确认中再次点击不重复调用 confirmOrder', async () => {
+    let resolveConfirm: (_v: any) => void
+    _orderMocks.confirmOrder.mockReturnValue(new Promise((r) => { resolveConfirm = r }))
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('确认订单')).toBeInTheDocument()
+    })
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    const confirmPop = popconfirms.find((p) => p.getAttribute('data-title')?.includes('确认订单'))
+    await act(async () => { fireEvent.click(confirmPop!) })
+    await waitFor(() => {
+      expect(_orderMocks.confirmOrder).toHaveBeenCalledTimes(1)
+    })
+    await act(async () => { fireEvent.click(confirmPop!) })
+    expect(_orderMocks.confirmOrder).toHaveBeenCalledTimes(1)
+    resolveConfirm!({ success: true, data: { id: 'order-1', status: 'confirmed' } })
+  })
+
+  it('取消中再次点击不重复调用 cancelOrder', async () => {
+    let resolveCancel: (_v: any) => void
+    _orderMocks.cancelOrder.mockReturnValue(new Promise((r) => { resolveCancel = r }))
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('取消订单')).toBeInTheDocument()
+    })
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    const cancelPop = popconfirms.find((p) => p.getAttribute('data-title')?.includes('取消该订单'))
+    await act(async () => { fireEvent.click(cancelPop!) })
+    await waitFor(() => {
+      expect(_orderMocks.cancelOrder).toHaveBeenCalledTimes(1)
+    })
+    await act(async () => { fireEvent.click(cancelPop!) })
+    expect(_orderMocks.cancelOrder).toHaveBeenCalledTimes(1)
+    resolveCancel!({ success: true, data: { id: 'order-1', status: 'cancelled' } })
+  })
+
+  it('冲正中再次点击不重复调用 reversePayment', async () => {
+    let resolveReverse: (_v: any) => void
+    _paymentMocks.reversePayment.mockReturnValue(new Promise((r) => { resolveReverse = r }))
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('冲正')).toBeInTheDocument()
+    })
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    const reversePop = popconfirms.find((p) => p.getAttribute('data-title')?.includes('冲正'))
+    await act(async () => { fireEvent.click(reversePop!) })
+    await waitFor(() => {
+      expect(_paymentMocks.reversePayment).toHaveBeenCalledTimes(1)
+    })
+    await act(async () => { fireEvent.click(reversePop!) })
+    expect(_paymentMocks.reversePayment).toHaveBeenCalledTimes(1)
+    resolveReverse!({ success: true })
+  })
+
+  it('无 id 参数时 loadOrder 和 loadLogs 不调用 API', async () => {
+    render(
+      <MemoryRouter initialEntries={['/orders']}>
+        <Routes>
+          <Route path="/orders" element={<OrderDetail />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+    await waitFor(() => {
+      expect(screen.getByText('加载中...')).toBeInTheDocument()
+    })
+    expect(_orderMocks.fetchOrder).not.toHaveBeenCalled()
+    expect(_orderMocks.fetchOrderLogs).not.toHaveBeenCalled()
+  })
 })
