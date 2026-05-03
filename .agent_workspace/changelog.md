@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-03（第六百零三轮·自动循环）
+
+### 安全审计：全部通过，无需修复
+
+- 所有 47 个 API 端点均有 auth 装饰器（require_permission 或 get_current_user）
+- 文件上传：扩展名白名单 + MIME 校验 + magic bytes 验证 + 大小限制 + UUID 命名
+- 输入消毒：sanitize_text（strip_html）覆盖全部 schema（auth/product/order/customer/payment/inventory）
+- CORS：可配置白名单，非通配符
+- 中间件：速率限制 + 安全响应头 + 请求体大小限制 + 请求 ID 追踪 + 请求日志
+- 无 console.log/debugger/TODO/FIXME、无原始 SQL（health check SELECT 1 除外）
+
 ## 2026-05-03（第六百零二轮·自动循环）
 
 ### 工程：数据库索引审计与补充
