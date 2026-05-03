@@ -229,4 +229,61 @@ describe('OrdersPage', () => {
     const orderLink = buttons.find((b) => b.textContent?.includes('ORD-20260501'))
     expect(orderLink).toBeTruthy()
   })
+
+  it('未知状态显示原始值', () => {
+    _paginatedListReturn.data = [
+      { id: 'o4', order_no: 'ORD-004', status: 'unknown', item_count: 0, total_amount: '0', paid_amount: '0', gross_profit: '0', gross_margin: '0', created_at: '2026-05-01T00:00:00Z' },
+    ]
+    _paginatedListReturn.total = 1
+    renderOrders()
+    const tags = screen.getAllByTestId('tag')
+    const tagTexts = tags.map((t) => t.textContent)
+    expect(tagTexts).toContain('unknown')
+    _paginatedListReturn.data = [
+      { id: 'o1', order_no: 'ORD-20260501-001', status: 'draft', item_count: 3, total_amount: '1000', paid_amount: '0', gross_profit: '400', gross_margin: '40', created_at: '2026-05-01T10:00:00Z' },
+      { id: 'o2', order_no: 'ORD-20260501-002', status: 'completed', item_count: 1, total_amount: '500', paid_amount: '500', gross_profit: '200', gross_margin: '40', created_at: '2026-05-01T12:00:00Z' },
+      { id: 'o3', order_no: 'ORD-20260501-003', status: 'cancelled', item_count: 2, total_amount: '300', paid_amount: '0', gross_profit: '0', gross_margin: '0', created_at: null },
+    ]
+    _paginatedListReturn.total = 3
+  })
+
+  it('状态筛选器包含全部选项', () => {
+    renderOrders()
+    const select = screen.getByTestId('status-select')
+    const options = Array.from(select.querySelectorAll('option'))
+    const optionTexts = options.map((o) => o.textContent)
+    expect(optionTexts).toContain('草稿')
+    expect(optionTexts).toContain('已完成')
+    expect(optionTexts).toContain('已取消')
+  })
+
+  it('有筛选条件时空数据显示"没有匹配的订单"', () => {
+    Object.assign(_paginatedListReturn, { data: [], total: 0, keyword: '不存在的订单' })
+    renderOrders()
+    expect(screen.getByText('没有匹配的订单')).toBeInTheDocument()
+    _paginatedListReturn.data = [
+      { id: 'o1', order_no: 'ORD-20260501-001', status: 'draft', item_count: 3, total_amount: '1000', paid_amount: '0', gross_profit: '400', gross_margin: '40', created_at: '2026-05-01T10:00:00Z' },
+      { id: 'o2', order_no: 'ORD-20260501-002', status: 'completed', item_count: 1, total_amount: '500', paid_amount: '500', gross_profit: '200', gross_margin: '40', created_at: '2026-05-01T12:00:00Z' },
+      { id: 'o3', order_no: 'ORD-20260501-003', status: 'cancelled', item_count: 2, total_amount: '300', paid_amount: '0', gross_profit: '0', gross_margin: '0', created_at: null },
+    ]
+    _paginatedListReturn.total = 3
+    _paginatedListReturn.keyword = ''
+  })
+
+  it('毛利和毛利率列显示（canViewCost=true）', () => {
+    renderOrders()
+    const table = screen.getByTestId('orders-table')
+    const headerTexts = Array.from(table.querySelectorAll('th')).map((th) => th.textContent)
+    expect(headerTexts).toContain('毛利')
+    expect(headerTexts).toContain('毛利率')
+    const row1 = screen.getByTestId('row-o1')
+    expect(row1.textContent).toContain('¥400')
+    expect(row1.textContent).toContain('40%')
+  })
+
+  it('搜索框 placeholder 为"搜索订单号"', () => {
+    renderOrders()
+    const input = screen.getByTestId('search-input')
+    expect(input).toHaveAttribute('placeholder', '搜索订单号')
+  })
 })
