@@ -35,25 +35,29 @@ vi.mock('@/hooks/usePaginatedList', () => ({
 }))
 
 vi.mock('antd', () => ({
-  Table: ({ dataSource, columns, rowKey, locale }: any) => (
-    <table data-testid="audit-table">
-      <thead>
-        <tr>{columns?.map((col: any) => <th key={col.dataIndex || col.title}>{col.title}</th>)}</tr>
-      </thead>
-      <tbody>
-        {dataSource?.length ? dataSource.map((row: any) => (
-          <tr key={row[rowKey]} data-testid={`row-${row[rowKey]}`}>
-            {columns?.map((col: any) => (
-              <td key={col.dataIndex} data-col={col.dataIndex}>
-                {col.render ? col.render(row[col.dataIndex], row) : row[col.dataIndex]}
-              </td>
-            ))}
-          </tr>
-        )) : (
-          <tr><td colSpan={99}>{typeof locale?.emptyText === 'string' ? locale.emptyText : locale?.emptyText}</td></tr>
-        )}
-      </tbody>
-    </table>
+  Table: ({ dataSource, columns, rowKey, locale, pagination }: any) => (
+    <div>
+      <table data-testid="audit-table">
+        <thead>
+          <tr>{columns?.map((col: any) => <th key={col.dataIndex || col.title}>{col.title}</th>)}</tr>
+        </thead>
+        <tbody>
+          {dataSource?.length ? dataSource.map((row: any) => (
+            <tr key={row[rowKey]} data-testid={`row-${row[rowKey]}`}>
+              {columns?.map((col: any) => (
+                <td key={col.dataIndex} data-col={col.dataIndex}>
+                  {col.render ? col.render(row[col.dataIndex], row) : row[col.dataIndex]}
+                </td>
+              ))}
+            </tr>
+          )) : (
+            <tr><td colSpan={99}>{typeof locale?.emptyText === 'string' ? locale.emptyText : locale?.emptyText}</td></tr>
+          )}
+        </tbody>
+      </table>
+      {pagination?.showTotal && <span data-testid="pagination-total">{pagination.showTotal(pagination.total)}</span>}
+      {pagination?.onChange && <button data-testid="page-change" onClick={() => pagination.onChange(2, pagination.pageSize)}>翻页</button>}
+    </div>
   ),
   Select: ({ value, onChange, options, placeholder }: any) => (
     <select data-testid="action-select" value={value || ''} onChange={(e: any) => onChange?.(e.target.value)}>
@@ -66,8 +70,12 @@ vi.mock('antd', () => ({
       <input data-testid="search-input" placeholder={placeholder} value={value || ''} onChange={(e: any) => onChange?.(e)} />
     ),
     {
-      Search: ({ placeholder }: any) => (
-        <input data-testid="search-input" placeholder={placeholder} />
+      Search: ({ placeholder, onSearch, onClear }: any) => (
+        <div>
+          <input data-testid="search-input" placeholder={placeholder} />
+          <button data-testid={`search-btn-${placeholder}`} onClick={() => onSearch?.('test-search')}>搜索</button>
+          {onClear && <button data-testid={`clear-btn-${placeholder}`} onClick={onClear}>清除</button>}
+        </div>
       ),
     },
   ),
@@ -78,7 +86,11 @@ vi.mock('antd', () => ({
     Text: ({ children }: any) => <span>{children}</span>,
   },
   Tooltip: ({ children }: any) => <span>{children}</span>,
-  DatePicker: { RangePicker: () => <input data-testid="date-range" /> },
+  DatePicker: { RangePicker: ({ onChange }: any) => (
+    <div data-testid="date-range">
+      <button data-testid="date-range-change" onClick={() => onChange?.(null)}>设置日期</button>
+    </div>
+  ) },
   message: { error: vi.fn(), success: vi.fn() },
 }))
 
@@ -304,5 +316,40 @@ describe('AuditLogs', () => {
     await waitFor(() => {
       expect(screen.getByText('操作日志')).toBeInTheDocument()
     })
+  })
+
+  it('资源ID搜索触发 setResourceIdFilter 和 setPage', async () => {
+    renderAuditLogs()
+    await waitFor(() => { expect(_auditMocks.fetchAuditActions).toHaveBeenCalled() })
+    const searchBtn = screen.getByTestId('search-btn-资源ID精确筛选')
+    fireEvent.click(searchBtn)
+    expect(_paginatedListReturn.setPage).toHaveBeenCalledWith(1)
+  })
+
+  it('日期范围变更触发 setPage', async () => {
+    renderAuditLogs()
+    await waitFor(() => { expect(_auditMocks.fetchAuditActions).toHaveBeenCalled() })
+    const dateBtn = screen.getByTestId('date-range-change')
+    fireEvent.click(dateBtn)
+    expect(_paginatedListReturn.setPage).toHaveBeenCalledWith(1)
+  })
+
+  it('关键词搜索触发 setKeyword', async () => {
+    renderAuditLogs()
+    await waitFor(() => { expect(_auditMocks.fetchAuditActions).toHaveBeenCalled() })
+    const searchBtn = screen.getByTestId('search-btn-搜索操作人或资源ID')
+    fireEvent.click(searchBtn)
+    expect(_paginatedListReturn.setKeyword).toHaveBeenCalledWith('test-search')
+  })
+
+  it('分页显示总条数', () => {
+    renderAuditLogs()
+    expect(screen.getByTestId('pagination-total')).toHaveTextContent('共 3 条')
+  })
+
+  it('翻页触发 onPageChange', () => {
+    renderAuditLogs()
+    fireEvent.click(screen.getByTestId('page-change'))
+    expect(_paginatedListReturn.onPageChange).toHaveBeenCalled()
   })
 })
