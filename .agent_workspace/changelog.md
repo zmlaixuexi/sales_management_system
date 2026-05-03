@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-05-04（第七百二十八轮·自动循环）
+
+### 文档完善：API 路由一致性边界测试（59 项覆盖路由注册、方法验证、UUID 参数、OpenAPI 文档、前缀一致性）
+
+**变更文件：**
+- `backend/tests/test_api_routes.py`（新建 59 项测试）
+  - 健康检查：GET /health + /version 存在、仅 GET 方法
+  - 认证路由：login/refresh/logout/change-password/me 存在及认证要求
+  - 用户路由：list/create/update/roles 存在及认证要求
+  - 角色路由：list/permissions/create 存在及认证要求
+  - 商品路由：list/create/import 存在及认证要求
+  - 客户路由：list/import/transfer 存在及认证要求
+  - 订单路由：list/confirm/cancel/logs 存在及认证要求
+  - 收款路由：list/reverse 存在及认证要求
+  - 库存路由：movements/adjustments 存在及认证要求
+  - 报表路由：6 个报表端点存在性
+  - 操作日志：list/actions 存在性
+  - 导出路由：4 个导出端点存在性
+  - 文件路由：images 上传认证要求
+  - OpenAPI 文档：Swagger UI/ReDoc/JSON 可访问、包含所有 14 个模块路径、版本 0.1.0
+  - 404 响应：标准 JSON 格式
+  - UUID 验证：非 UUID 路径参数返回 401/422
+  - Metrics：/metrics 存在、不在 /api/v1 下
+  - 路由器注册：至少 13 个子路由器、/api/v1 前缀
+
+**验证：**
+- 后端 2549/2549 ✓（新增 59 项）
+- ruff 0 errors ✓
+
 ## 2026-05-04（第七百二十七轮·自动循环）
 
 ### 安全加固：输入消毒与 XSS 防护边界测试（51 项覆盖密码强度、strip_html、控制字符、CSV 注入、安全头、body limit、配置验证）
