@@ -125,6 +125,15 @@ case "${1:-help}" in
         echo ""
         ;;
 
+    cleanup-files)
+        HOURS="${2:-24}"
+        echo ""
+        info "清理未绑定商品超过 ${HOURS} 小时的孤立图片..."
+        docker compose -f "${COMPOSE_FILE}" exec backend python -c \
+            "from app.db.session import SessionLocal; from app.services.file_service import cleanup_orphan_files; db=SessionLocal(); n=cleanup_orphan_files(db,${HOURS}); db.commit(); db.close(); print(f'已清理 {n} 个孤立文件')" 2>&1
+        echo ""
+        ;;
+
     check)
         "${SCRIPT_DIR}/pre-deploy-check.sh" "${@:2}"
         ;;
@@ -144,6 +153,8 @@ case "${1:-help}" in
         echo "  migrate        执行数据库迁移（alembic upgrade head）"
         echo "  generate-migration [消息]"
         echo "                 自动生成迁移文件（alembic revision --autogenerate）"
+        echo "  cleanup-files [小时]"
+        echo "                 清理未绑定商品的孤立图片（默认 24 小时）"
         echo "  check          运行完整部署前检查"
         echo ""
         echo "示例："
