@@ -473,4 +473,34 @@ describe('CustomerDetail', () => {
     expect(_customerMocks.deleteCustomer).toHaveBeenCalledTimes(1)
     resolveDelete!({ success: true })
   })
+
+  it('fetchCustomer success=false 不设置客户', async () => {
+    _customerMocks.fetchCustomer.mockResolvedValue({ success: false, data: null })
+    renderCustomerDetail()
+    await waitFor(() => {
+      expect(_customerMocks.fetchCustomer).toHaveBeenCalledWith('cust-1')
+    })
+    // Should show loading state (no customer data)
+    expect(screen.getByText('加载中...')).toBeInTheDocument()
+  })
+
+  it('loadCustomer _toastDisplayed 错误静默', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _customerMocks.fetchCustomer.mockRejectedValue(err)
+    renderCustomerDetail()
+    await waitFor(() => {
+      expect(_customerMocks.fetchCustomer).toHaveBeenCalledWith('cust-1')
+    })
+    expect(_messageError).not.toHaveBeenCalledWith('加载客户详情失败')
+  })
+
+  it('fetchOrders success=false 不设置订单', async () => {
+    _orderMocks.fetchOrders.mockResolvedValue({ success: false, data: null })
+    renderCustomerDetail()
+    await waitFor(() => {
+      expect(_orderMocks.fetchOrders).toHaveBeenCalled()
+    })
+    // Should show empty orders
+    expect(screen.getByText('暂无关联订单')).toBeInTheDocument()
+  })
 })
