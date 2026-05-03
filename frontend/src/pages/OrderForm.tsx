@@ -12,7 +12,7 @@ import { fetchCustomers } from '@/api/customers'
 import type { Customer } from '@/api/customers'
 import { fetchProducts } from '@/api/products'
 import type { Product } from '@/api/products'
-import { formatAmount, getApiErrorMessage } from '@/utils'
+import { formatAmount, getApiErrorMessage, isToastDisplayed } from '@/utils'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 interface OrderLine {
@@ -91,7 +91,7 @@ export default function OrderForm() {
           })))
         })
         .catch((e: unknown) => {
-          if (!(e as Record<string, boolean>)?._toastDisplayed) message.error(getApiErrorMessage(e, '加载订单信息失败'))
+          if (!isToastDisplayed(e)) message.error(getApiErrorMessage(e, '加载订单信息失败'))
           navigate('/orders', { replace: true })
         })
         .finally(() => setLoading(false))

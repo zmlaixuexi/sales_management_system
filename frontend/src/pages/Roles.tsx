@@ -4,7 +4,7 @@ import { PlusOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { fetchRoles, fetchPermissions, createRole, updateRole, deleteRole } from '@/api/roles'
 import type { RoleItem, PermissionItem } from '@/api/roles'
-import { getApiErrorMessage } from '@/utils'
+import { getApiErrorMessage, isToastDisplayed } from '@/utils'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function RolesPage() {
@@ -23,7 +23,7 @@ export default function RolesPage() {
       const res = await fetchRoles()
       if (res.success && Array.isArray(res.data)) setRoles(res.data)
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error(getApiErrorMessage(e, '加载角色列表失败'))
+      if (!isToastDisplayed(e)) message.error(getApiErrorMessage(e, '加载角色列表失败'))
     } finally {
       setLoading(false)
     }
@@ -84,7 +84,7 @@ export default function RolesPage() {
         }
       }
     } catch (e: unknown) {
-      if ((e as Record<string, boolean>)?._toastDisplayed) return
+      if (isToastDisplayed(e)) return
       const msg = editingRole ? '更新角色失败' : '创建角色失败'
       message.error(getApiErrorMessage(e, msg))
     } finally {
@@ -100,7 +100,7 @@ export default function RolesPage() {
         loadRoles()
       }
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error(getApiErrorMessage(e, '删除角色失败'))
+      if (!isToastDisplayed(e)) message.error(getApiErrorMessage(e, '删除角色失败'))
     }
   }
 

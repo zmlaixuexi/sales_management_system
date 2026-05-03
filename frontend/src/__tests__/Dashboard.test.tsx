@@ -21,6 +21,7 @@ vi.mock('@/api/reports', () => ({
 vi.mock('@/utils', () => ({
   formatAmount: (v: any) => String(v),
   formatPercent: (v: any) => `${v}%`,
+  isToastDisplayed: (e: any) => !!e?._toastDisplayed,
 }))
 
 vi.mock('@/stores/auth', () => ({

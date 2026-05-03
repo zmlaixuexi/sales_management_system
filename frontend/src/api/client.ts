@@ -22,6 +22,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config
+    if (!originalRequest) return Promise.reject(error)
 
     // 429 速率限制：等待后自动重试一次
     if (error.response?.status === 429 && !originalRequest._retry429) {
@@ -85,7 +86,7 @@ apiClient.interceptors.response.use(
     }
 
     if (_displayed) {
-      ;(error as unknown as Record<string, boolean>)._toastDisplayed = true
+      ;(error as Error & { _toastDisplayed?: boolean })._toastDisplayed = true
     }
     return Promise.reject(error)
   },

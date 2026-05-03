@@ -34,6 +34,7 @@ vi.mock('@/api/payments', () => ({
 
 vi.mock('@/utils', () => ({
   formatAmount: (v: any) => String(v),
+  isToastDisplayed: (e: any) => !!e?._toastDisplayed,
 }))
 
 vi.mock('@/api/request', () => ({

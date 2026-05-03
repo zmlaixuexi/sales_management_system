@@ -9,7 +9,7 @@ import { fetchCustomer, deleteCustomer } from '@/api/customers'
 import type { Customer } from '@/api/customers'
 import { fetchOrders } from '@/api/orders'
 import type { Order } from '@/api/orders'
-import { formatAmount, getApiErrorMessage } from '@/utils'
+import { formatAmount, getApiErrorMessage, isToastDisplayed } from '@/utils'
 import { customerSourceMap as sourceMap, customerLevelMap as levelMap, orderStatusMap } from '@/constants/statusMaps'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
 
@@ -30,7 +30,7 @@ export default function CustomerDetail() {
       const res = await fetchCustomer(id)
       if (res.success) setCustomer(res.data)
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error('加载客户详情失败')
+      if (!isToastDisplayed(e)) message.error('加载客户详情失败')
     } finally {
       setLoading(false)
     }
@@ -58,7 +58,7 @@ export default function CustomerDetail() {
       message.success('客户已删除')
       navigate('/customers')
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error(getApiErrorMessage(e, '删除失败'))
+      if (!isToastDisplayed(e)) message.error(getApiErrorMessage(e, '删除失败'))
     } finally {
       setDeleting(false)
     }

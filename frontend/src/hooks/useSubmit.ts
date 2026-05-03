@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react'
 import { message } from 'antd'
-import { getApiErrorMessage } from '@/utils'
+import { getApiErrorMessage, isToastDisplayed } from '@/utils'
 
 /**
  * 封装表单提交的 loading / 防重复提交 / 错误提示逻辑。
@@ -29,7 +29,7 @@ export function useSubmit<T>(
       // Ant Design 表单校验错误（errorFields）不弹提示
       if (e && typeof e === 'object' && 'errorFields' in e) return
       // 拦截器已展示过 toast 时跳过，避免重复提示
-      if ((e as Record<string, boolean>)?._toastDisplayed) return
+      if (isToastDisplayed(e)) return
       message.error(getApiErrorMessage(e, fallbackError))
     } finally {
       setSubmitting(false)

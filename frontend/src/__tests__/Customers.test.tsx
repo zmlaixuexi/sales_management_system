@@ -15,6 +15,7 @@ vi.mock('@/api/customers', () => ({
 
 vi.mock('@/utils', () => ({
   getApiErrorMessage: (_e: any, fallback: string) => fallback,
+  isToastDisplayed: (e: any) => !!e?._toastDisplayed,
 }))
 
 vi.mock('@/api/request', () => ({

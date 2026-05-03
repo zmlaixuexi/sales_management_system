@@ -19,6 +19,7 @@ vi.mock('@/api/users', () => ({
 
 vi.mock('@/utils', () => ({
   getApiErrorMessage: (_e: any, fallback: string) => fallback,
+  isToastDisplayed: (e: any) => !!e?._toastDisplayed,
 }))
 
 const _paginatedListReturn: any = {

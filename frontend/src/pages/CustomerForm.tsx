@@ -4,7 +4,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import { fetchCustomer, createCustomer, updateCustomer, type CustomerFormValues } from '@/api/customers'
 import { useSubmit } from '@/hooks/useSubmit'
-import { getApiErrorMessage } from '@/utils'
+import { getApiErrorMessage, isToastDisplayed } from '@/utils'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function CustomerForm() {
@@ -34,7 +34,7 @@ export default function CustomerForm() {
           }
         })
         .catch((e: unknown) => {
-          if (!(e as Record<string, boolean>)?._toastDisplayed) message.error(getApiErrorMessage(e, '加载客户信息失败'))
+          if (!isToastDisplayed(e)) message.error(getApiErrorMessage(e, '加载客户信息失败'))
           navigate('/customers', { replace: true })
         })
         .finally(() => setLoading(false))

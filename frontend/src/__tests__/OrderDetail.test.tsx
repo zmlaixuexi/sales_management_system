@@ -51,6 +51,7 @@ vi.mock('@/utils', () => ({
   formatAmount: (v: any) => String(v),
   formatPercent: (v: any) => `${v}%`,
   getApiErrorMessage: (_e: any, fallback: string) => fallback,
+  isToastDisplayed: (e: any) => !!e?._toastDisplayed,
 }))
 
 const _messageError = vi.fn()

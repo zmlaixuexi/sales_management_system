@@ -6,7 +6,7 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, StopOutlined, SearchOutline
 import { useNavigate } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
 import { fetchProducts, deleteProduct, disableProduct } from '@/api/products'
-import { getApiErrorMessage } from '@/utils'
+import { getApiErrorMessage, isToastDisplayed } from '@/utils'
 import type { Product } from '@/api/products'
 import { formatAmount, formatPercent } from '@/utils'
 import { downloadCsv } from '@/api/request'
@@ -51,7 +51,7 @@ export default function ProductsPage() {
       message.success('删除成功')
       loadData()
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error(getApiErrorMessage(e, '删除失败'))
+      if (!isToastDisplayed(e)) message.error(getApiErrorMessage(e, '删除失败'))
     }
   }
 
@@ -61,7 +61,7 @@ export default function ProductsPage() {
       message.success('停用成功')
       loadData()
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error(getApiErrorMessage(e, '停用失败'))
+      if (!isToastDisplayed(e)) message.error(getApiErrorMessage(e, '停用失败'))
     }
   }
 

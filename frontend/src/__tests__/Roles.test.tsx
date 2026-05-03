@@ -20,6 +20,7 @@ vi.mock('@/api/roles', () => ({
 
 vi.mock('@/utils', () => ({
   getApiErrorMessage: (_e: unknown, fallback: string) => fallback,
+  isToastDisplayed: (e: any) => !!e?._toastDisplayed,
 }))
 
 vi.mock('@/hooks/usePaginatedList', () => ({

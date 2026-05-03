@@ -3,6 +3,7 @@ import { Table, Select, DatePicker, Input, Tag, Space, Typography, Tooltip, mess
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { fetchAuditLogs, fetchAuditActions, type AuditLogItem } from '@/api/auditLogs';
+import { isToastDisplayed } from '@/utils';
 import { usePaginatedList } from '@/hooks/usePaginatedList';
 import useDocumentTitle from '@/hooks/useDocumentTitle';
 
@@ -72,7 +73,7 @@ export default function AuditLogs() {
       setActions(data.actions || []);
       setResourceTypes(data.resource_types || []);
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error('加载筛选选项失败')
+      if (!isToastDisplayed(e)) message.error('加载筛选选项失败')
     }
   }, []);
 

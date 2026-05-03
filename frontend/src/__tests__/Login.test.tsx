@@ -68,6 +68,7 @@ vi.mock('@/utils', () => ({
     const err = e as { message?: string }
     return err.message || fallback
   },
+  isToastDisplayed: (e: any) => !!e?._toastDisplayed,
 }))
 
 import Login from '@/pages/Login'

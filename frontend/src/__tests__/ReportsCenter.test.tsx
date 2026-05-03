@@ -23,6 +23,7 @@ vi.mock('@/api/reports', () => ({
 
 vi.mock('@/utils', () => ({
   formatAmount: (v: any) => String(v),
+  isToastDisplayed: (e: any) => !!e?._toastDisplayed,
 }))
 
 const _messageError = vi.fn()

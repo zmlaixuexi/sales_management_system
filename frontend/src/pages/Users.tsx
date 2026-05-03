@@ -5,7 +5,7 @@ import type { ColumnsType } from 'antd/es/table'
 import { fetchUsers, createUser, updateUser, fetchRoles } from '@/api/users'
 import type { User, RoleItem } from '@/api/users'
 import { usePaginatedList } from '@/hooks/usePaginatedList'
-import { getApiErrorMessage } from '@/utils'
+import { getApiErrorMessage, isToastDisplayed } from '@/utils'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function UsersPage() {
@@ -83,7 +83,7 @@ export default function UsersPage() {
         }
       }
     } catch (e: unknown) {
-      if ((e as Record<string, boolean>)?._toastDisplayed) return
+      if (isToastDisplayed(e)) return
       const msg = editingUser ? '更新用户失败' : '创建用户失败'
       message.error(getApiErrorMessage(e, msg))
     } finally {
@@ -99,7 +99,7 @@ export default function UsersPage() {
         refresh()
       }
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error(getApiErrorMessage(e, '操作失败'))
+      if (!isToastDisplayed(e)) message.error(getApiErrorMessage(e, '操作失败'))
     }
   }
 

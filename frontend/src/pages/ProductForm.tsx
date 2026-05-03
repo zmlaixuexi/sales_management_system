@@ -5,7 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { fetchProduct, createProduct, updateProduct, uploadImage } from '@/api/products'
 import type { ProductDetail } from '@/api/products'
 import { useSubmit } from '@/hooks/useSubmit'
-import { getApiErrorMessage } from '@/utils'
+import { getApiErrorMessage, isToastDisplayed } from '@/utils'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function ProductForm() {
@@ -41,7 +41,7 @@ export default function ProductForm() {
           }
         })
         .catch((e: unknown) => {
-          if (!(e as Record<string, boolean>)?._toastDisplayed) message.error(getApiErrorMessage(e, '加载商品信息失败'))
+          if (!isToastDisplayed(e)) message.error(getApiErrorMessage(e, '加载商品信息失败'))
           navigate('/products', { replace: true })
         })
         .finally(() => setLoading(false))
@@ -57,7 +57,7 @@ export default function ProductForm() {
         message.success('图片上传成功')
       }
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error('图片上传失败')
+      if (!isToastDisplayed(e)) message.error('图片上传失败')
     } finally {
       setImageUploading(false)
     }

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { message } from 'antd'
+import { isToastDisplayed } from '@/utils'
 
 interface PaginatedResult<T> {
   items: T[]
@@ -39,7 +40,7 @@ export function usePaginatedList<T>(
     } catch (e: unknown) {
       setError(true)
       // 拦截器已展示过 toast 时跳过，避免重复提示
-      if ((e as Record<string, boolean>)?._toastDisplayed) {
+      if (isToastDisplayed(e)) {
         // nothing
       } else {
         message.error(errorMessage)

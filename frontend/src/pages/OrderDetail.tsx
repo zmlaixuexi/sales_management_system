@@ -9,7 +9,7 @@ import type { ColumnsType } from 'antd/es/table'
 import { fetchOrder, confirmOrder, cancelOrder, fetchOrderLogs } from '@/api/orders'
 import type { OrderDetail as OrderDetailData, OrderItem, OrderPayment, OrderLog } from '@/api/orders'
 import { createPayment, reversePayment } from '@/api/payments'
-import { formatAmount, formatPercent, getApiErrorMessage } from '@/utils'
+import { formatAmount, formatPercent, getApiErrorMessage, isToastDisplayed } from '@/utils'
 import { orderStatusMap as statusMap, paymentMethodMap as paymentMethodLabels } from '@/constants/statusMaps'
 import { useAuthStore } from '@/stores/auth'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
@@ -40,7 +40,7 @@ export default function OrderDetail() {
       const res = await fetchOrder(id)
       if (res.success) setOrder(res.data)
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error('加载订单详情失败')
+      if (!isToastDisplayed(e)) message.error('加载订单详情失败')
     } finally {
       setLoading(false)
     }
@@ -75,7 +75,7 @@ export default function OrderDetail() {
         loadOrder()
       }
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error(getApiErrorMessage(e, '确认失败'))
+      if (!isToastDisplayed(e)) message.error(getApiErrorMessage(e, '确认失败'))
     } finally {
       setActionLoading(null)
     }
@@ -91,7 +91,7 @@ export default function OrderDetail() {
         loadOrder()
       }
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error(getApiErrorMessage(e, '取消失败'))
+      if (!isToastDisplayed(e)) message.error(getApiErrorMessage(e, '取消失败'))
     } finally {
       setActionLoading(null)
     }
@@ -117,7 +117,7 @@ export default function OrderDetail() {
         loadOrder()
       }
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error(getApiErrorMessage(e, '收款登记失败'))
+      if (!isToastDisplayed(e)) message.error(getApiErrorMessage(e, '收款登记失败'))
     } finally {
       setActionLoading(null)
     }
@@ -133,7 +133,7 @@ export default function OrderDetail() {
         loadOrder()
       }
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error(getApiErrorMessage(e, '冲正失败'))
+      if (!isToastDisplayed(e)) message.error(getApiErrorMessage(e, '冲正失败'))
     } finally {
       setActionLoading(null)
     }

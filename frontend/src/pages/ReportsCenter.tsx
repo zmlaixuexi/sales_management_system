@@ -17,7 +17,7 @@ import type {
   SalespersonRankingItem,
   InventoryWarningItem,
 } from '@/api/reports'
-import { formatAmount } from '@/utils'
+import { formatAmount, isToastDisplayed } from '@/utils'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 const periodOptions = [
@@ -46,7 +46,7 @@ export default function ReportsCenter() {
       const res = await fetchSalesSummary(p)
       if (res.success) setSummary(res.data)
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error('加载销售概览失败')
+      if (!isToastDisplayed(e)) message.error('加载销售概览失败')
     } finally {
       setLoading(null)
     }
@@ -58,7 +58,7 @@ export default function ReportsCenter() {
       const res = await fetchSalesTrend(p)
       if (res.success) setTrendItems(res.data.items)
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error('加载销售趋势失败')
+      if (!isToastDisplayed(e)) message.error('加载销售趋势失败')
     } finally {
       setLoading(null)
     }
@@ -70,7 +70,7 @@ export default function ReportsCenter() {
       const res = await fetchProductRanking({ period: p, limit: 20 })
       if (res.success) setProducts(res.data.items)
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error('加载商品排行失败')
+      if (!isToastDisplayed(e)) message.error('加载商品排行失败')
     } finally {
       setLoading(null)
     }
@@ -82,7 +82,7 @@ export default function ReportsCenter() {
       const res = await fetchCustomerRanking({ period: p, limit: 20 })
       if (res.success) setCustomers(res.data.items)
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error('加载客户排行失败')
+      if (!isToastDisplayed(e)) message.error('加载客户排行失败')
     } finally {
       setLoading(null)
     }
@@ -94,7 +94,7 @@ export default function ReportsCenter() {
       const res = await fetchSalespersonRanking({ period: p, limit: 20 })
       if (res.success) setSalespersons(res.data.items)
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error('加载销售排行失败')
+      if (!isToastDisplayed(e)) message.error('加载销售排行失败')
     } finally {
       setLoading(null)
     }
@@ -109,7 +109,7 @@ export default function ReportsCenter() {
         setInventoryTotal(res.data.total)
       }
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error('加载库存预警失败')
+      if (!isToastDisplayed(e)) message.error('加载库存预警失败')
     } finally {
       setLoading(null)
     }

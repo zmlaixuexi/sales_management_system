@@ -9,7 +9,7 @@ import {
   fetchSalesSummary, fetchSalesTrend, fetchProductRanking, fetchInventoryWarning,
 } from '@/api/reports'
 import type { ProductRankingItem, InventoryWarningItem, SalesTrendItem } from '@/api/reports'
-import { formatAmount } from '@/utils'
+import { formatAmount, isToastDisplayed } from '@/utils'
 import { useAuthStore } from '@/stores/auth'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
 
@@ -52,7 +52,7 @@ export default function Dashboard() {
         setWarningThreshold(warnRes.data.threshold)
       }
     } catch (e: unknown) {
-      if (!(e as Record<string, boolean>)?._toastDisplayed) message.error('加载看板数据失败，请稍后重试')
+      if (!isToastDisplayed(e)) message.error('加载看板数据失败，请稍后重试')
     } finally {
       setLoading(false)
     }

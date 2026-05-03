@@ -34,6 +34,7 @@ vi.mock('@/api/products', () => ({
 vi.mock('@/utils', () => ({
   formatAmount: (v: any) => String(v),
   getApiErrorMessage: (_e: any, fallback: string) => fallback,
+  isToastDisplayed: (e: any) => !!e?._toastDisplayed,
 }))
 
 const _useSubmit = { callback: null as any, submitting: false }
