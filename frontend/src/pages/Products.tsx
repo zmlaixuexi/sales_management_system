@@ -21,7 +21,7 @@ export default function ProductsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { data, total, loading, error, page, pageSize, keyword, setPage, setKeyword, onPageChange, refresh: loadData } = usePaginatedList<Product>(
-    (params) => fetchProducts(params).then(r => r.data),
+    async (params) => { const r = await fetchProducts(params); return r.data },
     { status: statusFilter },
     '加载商品列表失败',
   )

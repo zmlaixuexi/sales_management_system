@@ -36,7 +36,7 @@ const _paginatedListReturn: any = {
 
 vi.mock('@/hooks/usePaginatedList', () => ({
   usePaginatedList: (fetchFn: any, _filters: any, _errorMsg: string) => {
-    try { fetchFn({ page: 1, page_size: 20 }) } catch { /* mock 返回非 Promise，.then() 会报错 */ }
+    try { const p = fetchFn({ page: 1, page_size: 20 }); p?.catch?.(() => {}) } catch { /* mock 返回非 Promise 时抛错 */ }
     const result = _userMocks.fetchUsers()
     _paginatedListReturn.data = result?.data?.items ?? []
     _paginatedListReturn.total = result?.data?.total ?? 0

@@ -13,7 +13,7 @@ export default function PaymentsPage() {
   const navigate = useNavigate()
 
   const { data, total, loading, error, page, pageSize, onPageChange, refresh } = usePaginatedList<Payment>(
-    (params) => fetchPayments(params).then(r => r.data),
+    async (params) => { const r = await fetchPayments(params); return r.data },
     {},
     '加载收款列表失败',
   )

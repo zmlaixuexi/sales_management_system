@@ -24,7 +24,7 @@ vi.mock('@/utils', () => ({
 }))
 
 vi.mock('@/stores/auth', () => ({
-  useAuthStore: () => (code: string) => code === 'report:profit',
+  useAuthStore: (selector: any) => selector({ hasPermission: (code: string) => code === 'report:profit' }),
 }))
 
 vi.mock('antd', () => {

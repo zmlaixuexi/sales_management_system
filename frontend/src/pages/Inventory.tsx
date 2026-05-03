@@ -16,7 +16,7 @@ const relatedTypeMap: Record<string, string> = {
 
 export default function InventoryPage() {
   const { data, total, loading, error, page, pageSize, onPageChange, refresh } = usePaginatedList<InventoryMovement>(
-    (params) => fetchInventoryMovements(params).then(r => r.data),
+    async (params) => { const r = await fetchInventoryMovements(params); return r.data },
     {},
     '加载库存流水失败',
   )

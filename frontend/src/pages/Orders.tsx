@@ -17,7 +17,7 @@ export default function OrdersPage() {
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined)
 
   const { data, total, loading, error, page, pageSize, keyword, setPage, setKeyword, onPageChange, refresh } = usePaginatedList<Order>(
-    (params) => fetchOrders(params).then(r => r.data),
+    async (params) => { const r = await fetchOrders(params); return r.data },
     { status: statusFilter },
     '加载订单列表失败',
   )

@@ -15,7 +15,7 @@ export default function UsersPage() {
   const [form] = Form.useForm()
 
   const { data, total, loading, error, page, pageSize, keyword, setKeyword, onPageChange, refresh } = usePaginatedList<User>(
-    (params) => fetchUsers(params).then(r => r.data),
+    async (params) => { const r = await fetchUsers(params); return r.data },
     {},
     '加载用户列表失败',
   )

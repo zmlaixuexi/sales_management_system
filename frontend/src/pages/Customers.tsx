@@ -17,7 +17,7 @@ export default function CustomersPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { data, total, loading, error, page, pageSize, keyword, setPage, setKeyword, onPageChange, refresh: loadData } = usePaginatedList<Customer>(
-    (params) => fetchCustomers(params).then(r => r.data),
+    async (params) => { const r = await fetchCustomers(params); return r.data },
     { source: sourceFilter },
     '加载客户列表失败',
   )

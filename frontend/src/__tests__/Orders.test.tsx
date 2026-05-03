@@ -41,7 +41,7 @@ const _paginatedListReturn = {
 
 vi.mock('@/hooks/usePaginatedList', () => ({
   usePaginatedList: (fetchFn: any) => {
-    try { fetchFn({ page: 1, page_size: 20 }) } catch { /* mock 返回非 Promise，.then() 会报错 */ }
+    try { const p = fetchFn({ page: 1, page_size: 20 }); p?.catch?.(() => {}) } catch { /* mock 返回非 Promise 时抛错 */ }
     return _paginatedListReturn
   },
 }))
