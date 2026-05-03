@@ -97,7 +97,7 @@ def _prepare_item(
             status_code=400,
             detail={
                 "code": "PRICE_BELOW_COST",
-                "message": f"商品「{product.name}」成交单价 {price} 低于成本价 {product.cost_price}",
+                "message": f"商品「{product.name}」成交单价低于成本价，无法提交",
             },
         )
     sale_price = product.sale_price
@@ -173,10 +173,7 @@ def _deduct_inventory(db: Session, order_id: uuid.UUID, items: list[SalesOrderIt
                 status_code=400,
                 detail={
                     "code": "INVENTORY_NOT_ENOUGH",
-                    "message": (
-                        f"商品 {product.name} 库存不足"
-                        f"（当前 {product.stock_quantity}，需要 {item.quantity}）"
-                    ),
+                    "message": f"商品 {product.name} 库存不足，无法确认",
                 },
             )
         before = product.stock_quantity

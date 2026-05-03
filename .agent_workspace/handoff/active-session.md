@@ -9,9 +9,9 @@
 
 ## 最近完成
 
+- Round 649（续）：订单错误消息移除敏感信息泄露（成本价、库存数量）
 - Round 649：Pydantic schema 金额字段 Decimal 解析保护 + 价格非负验证（+9 测试）
 - Round 648：manage.sh 添加监控启停命令 + Grafana 端口映射
-- Round 647：docker-compose 添加 Prometheus + Grafana 监控栈
 
 ## 验证状态
 
@@ -28,9 +28,10 @@
 ## 下一步第一动作
 
 继续 keep-going 模式。可选方向：
-- 代码质量：后端更多边界路径探索
-- 安全加固：更多输入校验边界
+- 安全加固：列表接口 status/source 枚举参数校验（审计报告 4.2-4.4）
+- 安全加固：OpenAPI 响应文档补充（审计报告 5.1-5.7）
 - 文档：README 补充监控部署说明
+- 代码质量：db.commit() 显式 rollback 保护
 
 ## 阻塞问题
 
