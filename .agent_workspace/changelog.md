@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-05-04（第七百一十二轮·自动循环）
+
+### 代码质量：API 分页格式一致性测试（25 项覆盖参数默认值/边界、7 端点结构、单元函数、total 一致性）
+
+- 新增 test_pagination_consistency.py：25 项测试
+  - 登录（1 项）
+  - 参数默认值（2 项）：page=1、page_size=20 默认值，自定义值
+  - 参数边界（7 项）：page=0/-1/9999、page_size=0/1/100/101
+  - 7 端点结构一致性（7 项）：customers/products/orders/payments/users/audit-logs/inventory-movements
+  - 单元函数（6 项）：paginate 元组、空查询、paginated_resp 结构/自定义消息、PaginationParams 默认/自定义
+  - 跨端点一致性（2 项）：total >= len(items)、不同 page 的 total 相同
+- 后端测试 1897（+25），全部通过
+
 ## 2026-05-04（第七百一十一轮·自动循环）
 
 ### 安全加固：账户锁定策略边界测试（+8 新增覆盖配置默认值、阈值边界、窗口过期、大小写敏感）
