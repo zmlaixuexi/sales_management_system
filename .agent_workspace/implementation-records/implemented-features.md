@@ -6,6 +6,13 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-210
+
+- 描述：AuditLogs 筛选交互测试 — 操作类型/资源类型选项从 API 填充、筛选变更重置分页 setPage(1)
+- 状态：已完成
+- 验证：431 前端测试全绿
+- 关联：AuditLogs.test.tsx（11→15 tests）
+
 ## 功能编号：FEAT-20260503-209
 
 - 描述：CustomerDetail 测试补强 — Popconfirm mock 增加 onClick={onConfirm}、删除确认调用 deleteCustomer 测试、编辑按钮跳转编辑页测试
