@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-04（第七百零七轮·自动循环）
+
+### 安全加固：审计日志完整性测试（+20 新增覆盖脱敏函数、模型字段、动作类型、数据脱敏存储）
+
+- 扩展 test_audit_service.py：在原有 14 项基础上新增 20 项单元测试
+  - _mask_sensitive 脱敏函数（+4）：大小写不敏感、所有关键词遍历、嵌套 dict 不递归、部分 key 匹配
+  - model_to_dict（+1）：返回 dict 类型
+  - log_action 数据存储（+4）：before_data/after_data 脱敏存储、None 数据存为 None、Unicode 保持不转义
+  - AuditLog 模型字段完整性（+7）：12 列完整性、action/resource_type/ip_address/user_agent/request_id/actor_name 长度约束
+  - 审计动作类型完整性（+4）：31 种 action 和 7 种 resource_type 长度校验、数量守卫
+- 后端测试 1822（+20），全部通过
+
 ## 2026-05-04（第七百零六轮·自动循环）
 
 ### 可观测性：请求 ID 链路追踪完整性测试（+12 新增覆盖自动生成、透传、错误响应、唯一性）
