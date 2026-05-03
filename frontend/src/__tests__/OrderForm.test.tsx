@@ -70,7 +70,9 @@ vi.mock('antd', () => ({
     (props: any) => <input data-testid="input" {...props} />,
     { TextArea: (props: any) => <textarea data-testid="textarea" {...props} /> },
   ),
-  InputNumber: (props: any) => <input data-testid="input-number" type="number" {...props} />,
+  InputNumber: ({ value, onChange, ...rest }: any) => (
+    <input data-testid="input-number" type="number" value={value} {...rest} onChange={(e: any) => onChange?.(parseFloat(e.target.value))} />
+  ),
   Button: ({ children, onClick, icon, type, danger, disabled }: any) => (
     <button data-testid="button" data-type={type} data-danger={danger ? 'true' : undefined} disabled={disabled} onClick={onClick}>{icon}{children}</button>
   ),
@@ -532,6 +534,171 @@ describe('OrderForm', () => {
       renderNewOrder()
       const selects = screen.getAllByTestId('select')
       expect(selects[0].getAttribute('data-testid')).toBe('select')
+    })
+  })
+
+  describe('客户列表渲染', () => {
+    it('客户列表渲染包含电话号码', async () => {
+      _customerApi.fetchCustomers.mockResolvedValueOnce({
+        success: true,
+        data: {
+          items: [
+            { id: 'c1', name: '客户A', phone: '13800138000' },
+            { id: 'c2', name: '客户B', phone: '' },
+          ],
+        },
+      })
+      renderNewOrder()
+      await waitFor(() => {
+        expect(screen.getByText('客户A (13800138000)')).toBeInTheDocument()
+      })
+      expect(screen.getByText('客户B')).toBeInTheDocument()
+    })
+  })
+
+  describe('订单行操作', () => {
+    const mockProducts = [
+      { id: 'p1', name: '商品A', sku: 'SKU001', sale_price: '100.00', main_image_url: null, stock_quantity: 10 },
+    ]
+
+    it('删除订单行', async () => {
+      _productApi.fetchProducts.mockResolvedValue({ success: true, data: { items: mockProducts } })
+      renderNewOrder()
+
+      // 添加商品
+      const addBtn = screen.getAllByTestId('button').find(b => b.textContent?.includes('添加商品'))
+      await act(async () => { fireEvent.click(addBtn!) })
+      await waitFor(() => { expect(screen.getByText('选择')).toBeInTheDocument() })
+      await act(async () => { fireEvent.click(screen.getByText('选择')) })
+
+      await waitFor(() => {
+        expect(screen.getByText('共 1 项')).toBeInTheDocument()
+      })
+
+      // 点击删除按钮
+      const deleteBtn = screen.getAllByTestId('button').find(b => b.textContent?.includes('🗑️'))
+      expect(deleteBtn).toBeTruthy()
+      await act(async () => { fireEvent.click(deleteBtn!) })
+
+      await waitFor(() => {
+        expect(screen.getByText('共 0 项')).toBeInTheDocument()
+      })
+    })
+
+    it('修改数量更新小计', async () => {
+      _productApi.fetchProducts.mockResolvedValue({ success: true, data: { items: mockProducts } })
+      renderNewOrder()
+
+      // 添加商品
+      const addBtn = screen.getAllByTestId('button').find(b => b.textContent?.includes('添加商品'))
+      await act(async () => { fireEvent.click(addBtn!) })
+      await waitFor(() => { expect(screen.getByText('选择')).toBeInTheDocument() })
+      await act(async () => { fireEvent.click(screen.getByText('选择')) })
+
+      await waitFor(() => {
+        expect(screen.getByText('共 1 项')).toBeInTheDocument()
+      })
+
+      // 修改数量（第一个 input-number 是数量，第二个是单价）
+      const inputs = screen.getAllByTestId('input-number')
+      expect(inputs.length).toBeGreaterThanOrEqual(1)
+      await act(async () => {
+        fireEvent.change(inputs[0], { target: { value: '3' } })
+      })
+
+      // 小计应为 3 * 100 = 300
+      await waitFor(() => {
+        expect(screen.getByTestId('table-footer').textContent).toContain('300')
+      })
+    })
+
+    it('修改单价更新小计', async () => {
+      _productApi.fetchProducts.mockResolvedValue({ success: true, data: { items: mockProducts } })
+      renderNewOrder()
+
+      const addBtn = screen.getAllByTestId('button').find(b => b.textContent?.includes('添加商品'))
+      await act(async () => { fireEvent.click(addBtn!) })
+      await waitFor(() => { expect(screen.getByText('选择')).toBeInTheDocument() })
+      await act(async () => { fireEvent.click(screen.getByText('选择')) })
+
+      await waitFor(() => {
+        expect(screen.getByText('共 1 项')).toBeInTheDocument()
+      })
+
+      // 第二个 input-number 是单价
+      const inputs = screen.getAllByTestId('input-number')
+      expect(inputs.length).toBeGreaterThanOrEqual(2)
+      await act(async () => {
+        fireEvent.change(inputs[1], { target: { value: '50' } })
+      })
+
+      // 小计应为 1 * 50 = 50
+      await waitFor(() => {
+        expect(screen.getByTestId('table-footer').textContent).toContain('50')
+      })
+    })
+
+    it('添加重复商品显示警告', async () => {
+      _productApi.fetchProducts.mockResolvedValue({ success: true, data: { items: mockProducts } })
+      renderNewOrder()
+
+      // 添加商品
+      const addBtn = screen.getAllByTestId('button').find(b => b.textContent?.includes('添加商品'))
+      await act(async () => { fireEvent.click(addBtn!) })
+      await waitFor(() => { expect(screen.getByText('选择')).toBeInTheDocument() })
+      await act(async () => { fireEvent.click(screen.getByText('选择')) })
+
+      // 关闭选择器后重新打开
+      await waitFor(() => {
+        expect(screen.getByText('共 1 项')).toBeInTheDocument()
+      })
+
+      // 再次打开选择器（picker 已关闭因为 addProduct 设置了 setProductPickerOpen(false)）
+      _productApi.fetchProducts.mockResolvedValue({ success: true, data: { items: mockProducts } })
+      const addBtn2 = screen.getAllByTestId('button').find(b => b.textContent?.includes('添加商品'))
+      await act(async () => { fireEvent.click(addBtn2!) })
+
+      await waitFor(() => {
+        const selectBtn = screen.getAllByTestId('button').find(b => b.textContent?.includes('选择'))
+        // 已添加商品的"选择"按钮应被禁用
+        expect(selectBtn?.hasAttribute('disabled')).toBe(true)
+      })
+    })
+
+    it('商品搜索输入触发重新加载', async () => {
+      _productApi.fetchProducts.mockResolvedValue({ success: true, data: { items: mockProducts } })
+      renderNewOrder()
+
+      const addBtn = screen.getAllByTestId('button').find(b => b.textContent?.includes('添加商品'))
+      await act(async () => { fireEvent.click(addBtn!) })
+
+      await waitFor(() => {
+        expect(_productApi.fetchProducts).toHaveBeenCalledTimes(1)
+      })
+
+      // 搜索商品
+      const searchInput = screen.getByPlaceholderText('搜索商品名称')
+      await act(async () => {
+        fireEvent.change(searchInput, { target: { value: '商品A' } })
+      })
+
+      await waitFor(() => {
+        expect(_productApi.fetchProducts).toHaveBeenCalledWith(
+          expect.objectContaining({ keyword: '商品A' }),
+        )
+      })
+    })
+  })
+
+  describe('编辑模式错误处理', () => {
+    it('加载订单失败显示错误并导航回列表', async () => {
+      _orderApi.fetchOrder.mockRejectedValue(new Error('加载失败'))
+      renderEditOrder()
+
+      await waitFor(() => {
+        expect(antdMessage.error).toHaveBeenCalledWith('加载订单信息失败')
+        expect(screen.getByText('Orders List')).toBeInTheDocument()
+      })
     })
   })
 })
