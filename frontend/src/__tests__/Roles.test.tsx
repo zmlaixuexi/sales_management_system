@@ -639,4 +639,48 @@ describe('RolesPage', () => {
       expect(screen.getByText('0 人')).toBeInTheDocument()
     })
   })
+
+  it('updateRole success=false 不显示成功消息', async () => {
+    _rolesApi.updateRole.mockResolvedValueOnce({ success: false })
+    _rolesApi.fetchRoles.mockResolvedValue({ success: true, data: mockRoles })
+    renderRoles()
+    await waitFor(() => { expect(screen.getByText('角色权限管理')).toBeInTheDocument() })
+    const editBtns = screen.getAllByText('编辑')
+    await act(async () => { fireEvent.click(editBtns[0]) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeVisible() })
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => {
+      expect(_rolesApi.updateRole).toHaveBeenCalled()
+    })
+    const { message } = await import('antd')
+    expect(message.success).not.toHaveBeenCalledWith('角色已更新')
+  })
+
+  it('createRole success=false 不显示成功消息', async () => {
+    _rolesApi.createRole.mockResolvedValueOnce({ success: false })
+    renderRoles()
+    await act(async () => { fireEvent.click(screen.getByText('新建角色')) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeVisible() })
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => {
+      expect(_rolesApi.createRole).toHaveBeenCalled()
+    })
+    const { message } = await import('antd')
+    expect(message.success).not.toHaveBeenCalledWith('角色已创建')
+  })
+
+  it('deleteRole success=false 不显示成功消息', async () => {
+    _rolesApi.deleteRole.mockResolvedValueOnce({ success: false })
+    renderRoles()
+    await waitFor(() => {
+      expect(screen.getAllByTestId('popconfirm').length).toBeGreaterThanOrEqual(1)
+    })
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    await act(async () => { fireEvent.click(popconfirms[1]) })
+    await waitFor(() => {
+      expect(_rolesApi.deleteRole).toHaveBeenCalledWith('r-2')
+    })
+    const { message } = await import('antd')
+    expect(message.success).not.toHaveBeenCalledWith('角色已删除')
+  })
 })
