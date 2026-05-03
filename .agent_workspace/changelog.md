@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-04（第七百一十六轮·自动循环）
+
+### 部署体验：Docker Compose 配置验证测试（52 项覆盖文件完整性、prod/dev 结构、Nginx 配置、Dockerfile 安全）
+
+- 新增 test_docker_compose.py：52 项静态分析测试
+  - 文件完整性（9 项）：deploy 目录、prod/dev compose、nginx.conf、Dockerfile、.dockerignore
+  - prod Compose 结构（17 项）：服务完整性、健康检查、依赖关系、安全加固、资源限制、日志配置、网络/数据卷、PostgreSQL 不暴露端口、Grafana profile
+  - dev Compose 结构（7 项）：服务完整性、健康检查、依赖、源码挂载、端口暴露、环境变量
+  - Nginx 配置（12 项）：upstream、API/uploads/health/metrics 代理、安全头、版本隐藏、gzip、SPA 回退、隐藏文件拒绝
+  - Dockerfile 验证（8 项）：多阶段构建、非 root 用户、健康检查、端口暴露、slim/alpine 镜像、构建参数
+- 后端测试 2039（+52），全部通过
+
 ## 2026-05-04（第七百一十五轮·自动循环）
 
 ### 可观测性：Prometheus 指标覆盖率测试（+27 新增覆盖命名规范、标签独立性、Gauge 行为、/metrics 集成）
