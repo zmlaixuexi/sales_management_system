@@ -30,6 +30,10 @@ vi.mock('@/api/client', () => ({
   default: { post: (...args: any[]) => _apiClientPost(...args) },
 }))
 
+vi.mock('@/stores/auth', () => ({
+  useAuthStore: () => (code: string) => code === 'product:view_cost',
+}))
+
 const _paginatedListReturn = {
   data: [
     { id: '1', name: '商品A', sku: 'SKU-001', category_name: '分类1', sale_price: '100', cost_price: '60', unit_profit: '40', gross_margin: '40', stock_quantity: 10, status: 'active', main_image_url: null },
@@ -300,5 +304,54 @@ describe('ProductsPage', () => {
     ]
     _paginatedListReturn.total = 2
     _paginatedListReturn.keyword = ''
+  })
+
+  it('删除失败不崩溃', async () => {
+    _productMocks.deleteProduct.mockRejectedValueOnce(new Error('删除失败'))
+    renderProducts()
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    popconfirms[0].click()
+    expect(_productMocks.deleteProduct).toHaveBeenCalled()
+  })
+
+  it('停用失败不崩溃', async () => {
+    _productMocks.disableProduct.mockRejectedValueOnce(new Error('停用失败'))
+    renderProducts()
+    const buttons = screen.getAllByTestId('button')
+    const disableBtn = buttons.find((b) => b.textContent?.includes('停用'))
+    expect(disableBtn).toBeTruthy()
+    disableBtn!.click()
+    expect(_productMocks.disableProduct).toHaveBeenCalled()
+  })
+
+  it('状态筛选器包含全部选项', () => {
+    renderProducts()
+    const select = screen.getByTestId('status-select')
+    const options = Array.from(select.querySelectorAll('option'))
+    const optionTexts = options.map((o) => o.textContent)
+    expect(optionTexts).toContain('上架')
+    expect(optionTexts).toContain('下架')
+    expect(optionTexts).toContain('停用')
+  })
+
+  it('分类为空显示 --', () => {
+    _paginatedListReturn.data = [
+      { id: '3', name: '商品C', sku: 'SKU-003', category_name: null, sale_price: '50', cost_price: '30', unit_profit: '20', gross_margin: '40', stock_quantity: 0, status: 'active', main_image_url: null },
+    ]
+    _paginatedListReturn.total = 1
+    renderProducts()
+    const row = screen.getByTestId('row-3')
+    expect(row.textContent).toContain('--')
+    _paginatedListReturn.data = [
+      { id: '1', name: '商品A', sku: 'SKU-001', category_name: '分类1', sale_price: '100', cost_price: '60', unit_profit: '40', gross_margin: '40', stock_quantity: 10, status: 'active', main_image_url: null },
+      { id: '2', name: '商品B', sku: 'SKU-002', category_name: '分类2', sale_price: '200', cost_price: '120', unit_profit: '80', gross_margin: '40', stock_quantity: 5, status: 'inactive', main_image_url: null },
+    ]
+    _paginatedListReturn.total = 2
+  })
+
+  it('无图片显示 --', () => {
+    renderProducts()
+    const row1 = screen.getByTestId('row-1')
+    expect(row1.textContent).toContain('--')
   })
 })
