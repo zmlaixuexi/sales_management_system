@@ -267,4 +267,23 @@ describe('PaymentsPage', () => {
     pageBtn.click()
     expect(_paginatedListReturn.onPageChange).toHaveBeenCalled()
   })
+
+  it('空创建时间显示 --', () => {
+    const nullDateData = {
+      data: {
+        items: [{
+          id: 'pay-null', order_id: 'order-null', amount: '100.00',
+          payment_method: 'cash', status: 'completed', remark: null,
+          paid_at: null, created_at: null,
+        }],
+        total: 1,
+      },
+    }
+    _paymentMocks.fetchPayments.mockReturnValue(nullDateData)
+    renderPayments()
+    const row = screen.getByTestId('row-pay-null')
+    const cells = row.querySelectorAll('td')
+    const dateCell = Array.from(cells).find((td) => td.getAttribute('data-col') === 'created_at')
+    expect(dateCell?.textContent).toBe('--')
+  })
 })
