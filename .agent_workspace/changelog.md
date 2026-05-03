@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-04（第七百零八轮·自动循环）
+
+### 部署体验：Alembic 迁移链完整性测试（16 项覆盖文件完整性、链连续性、配置文件）
+
+- 新增 test_alembic_integrity.py：16 项静态分析测试（无需数据库）
+  - 迁移文件基础完整性（5 项）：7 个迁移文件数量、revision ID 存在且 12 字符、中文 docstring、upgrade/downgrade 函数存在
+  - 迁移链连续性（7 项）：单根单头、无孤儿 down_revision、无重复 revision、线性链、链长度 7、预期顺序守卫
+  - Alembic 配置文件（4 项）：alembic.ini、env.py、versions/ 目录、script.py.mako 模板存在
+- 后端测试 1838（+16），全部通过
+
 ## 2026-05-04（第七百零七轮·自动循环）
 
 ### 安全加固：审计日志完整性测试（+20 新增覆盖脱敏函数、模型字段、动作类型、数据脱敏存储）
