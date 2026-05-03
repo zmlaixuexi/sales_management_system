@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-03（第六百零七轮·自动循环）
+
+### 部署体验：添加 manage.sh 一键部署管理脚本
+
+- deploy/manage.sh 支持 start/stop/restart/status/logs/migrate/check 命令
+- start 命令自动运行 pre-deploy-check + docker compose up --build
+- logs 命令支持指定服务名查看日志（backend/nginx/postgres）
+- migrate 命令单独执行 alembic upgrade head
+- 集成部署前检查脚本（快速模式跳过测试和构建）
+- 后端 1306/1306 ✓
+
 ## 2026-05-03（第六百零六轮·自动循环）
 
 ### 部署体验：Nginx 配置 /metrics 反代
