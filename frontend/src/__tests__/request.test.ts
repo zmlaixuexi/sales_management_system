@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { get, post, put, del, upload } from '@/api/request'
+import { get, post, put, del, upload, downloadCsv } from '@/api/request'
 
 // 模拟 apiClient
 vi.mock('@/api/client', () => ({
@@ -96,5 +96,78 @@ describe('request 封装函数', () => {
     const result = await put('/products/123')
     expect(mockClient.put).toHaveBeenCalledWith('/products/123', undefined)
     expect(result.success).toBe(true)
+  })
+})
+
+describe('downloadCsv', () => {
+  beforeEach(() => {
+    // jsdom 未实现 URL.createObjectURL/revokeObjectURL
+    globalThis.URL.createObjectURL = vi.fn().mockReturnValue('blob:http://test/fake')
+    globalThis.URL.revokeObjectURL = vi.fn()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('过滤 undefined 和空字符串参数', async () => {
+    mockClient.get.mockResolvedValueOnce({
+      data: new Blob(['a'], { type: 'text/csv' }),
+      headers: { 'content-disposition': 'filename=out.csv' },
+    })
+    await downloadCsv('/exports/products', { a: '1', b: '', c: undefined })
+    expect(mockClient.get).toHaveBeenCalledWith('/exports/products', {
+      params: { a: '1' },
+      responseType: 'blob',
+    })
+  })
+
+  it('无参数时传空对象', async () => {
+    mockClient.get.mockResolvedValueOnce({
+      data: new Blob(['a'], { type: 'text/csv' }),
+      headers: { 'content-disposition': 'filename=out.csv' },
+    })
+    await downloadCsv('/exports/products')
+    expect(mockClient.get).toHaveBeenCalledWith('/exports/products', {
+      params: {},
+      responseType: 'blob',
+    })
+  })
+
+  it('检测 JSON 错误 blob 抛出 error.message', async () => {
+    const errorJson = JSON.stringify({ error: { message: '导出权限不足' } })
+    mockClient.get.mockResolvedValueOnce({
+      data: new Blob([errorJson], { type: 'application/json' }),
+      headers: {},
+    })
+    await expect(downloadCsv('/exports/products')).rejects.toThrow('导出权限不足')
+  })
+
+  it('JSON 错误 fallback 到 message 字段', async () => {
+    const errorJson = JSON.stringify({ message: '服务器内部错误' })
+    mockClient.get.mockResolvedValueOnce({
+      data: new Blob([errorJson], { type: 'application/json' }),
+      headers: {},
+    })
+    await expect(downloadCsv('/exports/products')).rejects.toThrow('服务器内部错误')
+  })
+
+  it('JSON 错误无消息字段使用默认文案', async () => {
+    const errorJson = JSON.stringify({ code: 'UNKNOWN' })
+    mockClient.get.mockResolvedValueOnce({
+      data: new Blob([errorJson], { type: 'application/json' }),
+      headers: {},
+    })
+    await expect(downloadCsv('/exports/products')).rejects.toThrow('导出失败')
+  })
+
+  it('成功下载调用 createObjectURL 和 revokeObjectURL', async () => {
+    mockClient.get.mockResolvedValueOnce({
+      data: new Blob(['x'], { type: 'text/csv' }),
+      headers: { 'content-disposition': 'filename=data.csv' },
+    })
+    await downloadCsv('/exports/products')
+    expect(URL.createObjectURL).toHaveBeenCalled()
+    expect(URL.revokeObjectURL).toHaveBeenCalled()
   })
 })

@@ -213,6 +213,68 @@ describe('apiClient 响应拦截器', () => {
 
       expect(mockMessageError).toHaveBeenCalledWith('请求过于频繁，请稍后再试')
     })
+
+    it('429 Retry-After 大于 5000 时上限为 5 秒', async () => {
+      const handler = apiClient.interceptors.response.handlers[0]?.rejected
+      if (!handler) throw new Error('No error handler')
+
+      const config = { headers: {}, _retry: false, _retry429: false }
+      const error = {
+        config,
+        response: { status: 429, headers: { 'retry-after': '100' }, data: {} },
+      }
+      const originalAdapter = apiClient.defaults.adapter
+      apiClient.defaults.adapter = async () => ({ data: 'capped', status: 200, statusText: 'OK', headers: {}, config: {} } as never)
+
+      vi.useFakeTimers()
+      const promise = handler(error)
+      // Retry-After=100 → 100*1000=100000ms，Math.min(100000, 5000)=5000
+      await vi.advanceTimersByTimeAsync(5000)
+      const result = await promise
+      expect(result.data).toBe('capped')
+      vi.useRealTimers()
+      apiClient.defaults.adapter = originalAdapter
+    })
+
+    it('429 Retry-After 非数字时立即重试', async () => {
+      const handler = apiClient.interceptors.response.handlers[0]?.rejected
+      if (!handler) throw new Error('No error handler')
+
+      const config = { headers: {}, _retry: false, _retry429: false }
+      const error = {
+        config,
+        response: { status: 429, headers: { 'retry-after': 'abc' }, data: {} },
+      }
+      const originalAdapter = apiClient.defaults.adapter
+      apiClient.defaults.adapter = async () => ({ data: 'nan-retry', status: 200, statusText: 'OK', headers: {}, config: {} } as never)
+
+      // parseInt('abc')=NaN, NaN*1000=NaN, setTimeout(cb, NaN)≈setTimeout(cb, 0)
+      const result = await handler(error)
+      expect(result.data).toBe('nan-retry')
+      apiClient.defaults.adapter = originalAdapter
+    })
+
+    it('429 Retry-After 为空字符串使用默认 5 秒', async () => {
+      const handler = apiClient.interceptors.response.handlers[0]?.rejected
+      if (!handler) throw new Error('No error handler')
+
+      const config = { headers: {}, _retry: false, _retry429: false }
+      const error = {
+        config,
+        response: { status: 429, headers: { 'retry-after': '' }, data: {} },
+      }
+      const originalAdapter = apiClient.defaults.adapter
+      apiClient.defaults.adapter = async () => ({ data: 'empty-hdr', status: 200, statusText: 'OK', headers: {}, config: {} } as never)
+
+      vi.useFakeTimers()
+      const promise = handler(error)
+      // ''||'5'='5'，parseInt('5')*1000=5000
+      await vi.advanceTimersByTimeAsync(5000)
+      const result = await promise
+      expect(result.data).toBe('empty-hdr')
+      vi.useRealTimers()
+      apiClient.defaults.adapter = originalAdapter
+    })
   })
 
   it('展示 toast 后设置 _toastDisplayed 标记', async () => {
@@ -309,5 +371,105 @@ describe('apiClient 响应拦截器', () => {
     expect(handler).toBeDefined()
     const response = { status: 200, data: { foo: 'bar' } }
     expect(handler!(response as never)).toEqual(response)
+  })
+
+  it('无 config 的错误直接 reject 不显示 toast', async () => {
+    const handler = apiClient.interceptors.response.handlers[0]?.rejected
+    if (!handler) throw new Error('No error handler')
+
+    const error = { response: { status: 500, data: {} } }
+    await expect(handler(error)).rejects.toEqual(error)
+    expect(mockMessageError).not.toHaveBeenCalled()
+  })
+
+  it('401 refresh 保存新 refresh_token', async () => {
+    localStorage.setItem('access_token', 'old')
+    localStorage.setItem('refresh_token', 'old-refresh')
+    mockAxiosPost.mockResolvedValueOnce({
+      data: { data: { access_token: 'new-a', refresh_token: 'new-r' } },
+    })
+    const requestSpy = vi.spyOn(apiClient, 'request').mockResolvedValueOnce({ data: 'ok' } as never)
+    try { await triggerErrorInterceptor(401) } catch {}
+    expect(localStorage.getItem('refresh_token')).toBe('new-r')
+    requestSpy.mockRestore()
+  })
+
+  it('401 refresh URL 使用 apiClient.defaults.baseURL', async () => {
+    localStorage.setItem('refresh_token', 'r')
+    mockAxiosPost.mockResolvedValueOnce({
+      data: { data: { access_token: 'a', refresh_token: 'r' } },
+    })
+    const requestSpy = vi.spyOn(apiClient, 'request').mockResolvedValueOnce({ data: 'ok' } as never)
+    try { await triggerErrorInterceptor(401) } catch {}
+    expect(mockAxiosPost).toHaveBeenCalledWith(
+      `${apiClient.defaults.baseURL}/auth/refresh`,
+      expect.any(Object),
+    )
+    requestSpy.mockRestore()
+  })
+
+  it('401 refresh 成功后重试使用新 access_token', async () => {
+    localStorage.setItem('access_token', 'old')
+    localStorage.setItem('refresh_token', 'old-refresh')
+    mockAxiosPost.mockResolvedValueOnce({
+      data: { data: { access_token: 'brand-new', refresh_token: 'new-r' } },
+    })
+    const originalAdapter = apiClient.defaults.adapter
+    apiClient.defaults.adapter = async () => ({ data: 'ok', status: 200, statusText: 'OK', headers: {}, config: {} } as never)
+
+    const handler = apiClient.interceptors.response.handlers[0]?.rejected
+    if (!handler) throw new Error('No error handler')
+    const config = { headers: {}, _retry: false, _retry429: false }
+    const error = { config, response: { status: 401, headers: {}, data: {} } }
+
+    try { await handler(error) } catch {}
+    // refresh 后 config.Authorization 被更新为新 token
+    expect(config.headers.Authorization).toBe('Bearer brand-new')
+    apiClient.defaults.adapter = originalAdapter
+  })
+})
+
+describe('apiClient 请求拦截器', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it('无 token 时不设置 Authorization 头', () => {
+    const handler = apiClient.interceptors.request.handlers[0]?.fulfilled
+    if (!handler) throw new Error('No request handler')
+
+    const config = { headers: {} }
+    const result = handler(config as never)
+    expect(result.headers.Authorization).toBeUndefined()
+  })
+
+  it('有 token 时设置 Bearer 前缀', () => {
+    localStorage.setItem('access_token', 'jwt-abc')
+    const handler = apiClient.interceptors.request.handlers[0]?.fulfilled
+    if (!handler) throw new Error('No request handler')
+
+    const config = { headers: {} }
+    const result = handler(config as never)
+    expect(result.headers.Authorization).toBe('Bearer jwt-abc')
+  })
+
+  it('X-Request-ID 为 UUID 格式', () => {
+    const handler = apiClient.interceptors.request.handlers[0]?.fulfilled
+    if (!handler) throw new Error('No request handler')
+
+    const config = { headers: {} }
+    const result = handler(config as never)
+    expect(result.headers['X-Request-ID']).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+    )
+  })
+
+  it('每次请求生成不同的 X-Request-ID', () => {
+    const handler = apiClient.interceptors.request.handlers[0]?.fulfilled
+    if (!handler) throw new Error('No request handler')
+
+    const result1 = handler({ headers: {} } as never)
+    const result2 = handler({ headers: {} } as never)
+    expect(result1.headers['X-Request-ID']).not.toBe(result2.headers['X-Request-ID'])
   })
 })
