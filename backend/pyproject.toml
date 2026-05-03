@@ -53,6 +53,7 @@ ignore = ["RUF001", "RUF002", "RUF003"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["tests"]
+addopts = "--import-mode=importlib"
 asyncio_mode = "auto"
 markers = [
     "crud: CRUD 操作测试",

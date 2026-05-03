@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第六百四十一轮·自动循环）
+
+### 工程修复：pytest 全量套件顺序依赖失败（140 → 0）
+
+- 根因：pytest 默认 import_mode=prepend 导致裸 `from helpers import ...` 在特定测试顺序下触发 ModuleNotFoundError
+- 修复：pyproject.toml 添加 `addopts = "--import-mode=importlib"`
+- 附带修复：useDocumentTitle.ts ref 清理闭包问题 + 移除未使用的 vi 导入
+- 后端 1333/1333 ✓、前端 837/837 ✓、ruff/tsc/eslint/vite-build ✓
+
 ## 2026-05-03（第六百四十轮·自动循环）
 
 ### 文档：testing.md 补齐 7 个遗漏测试文件

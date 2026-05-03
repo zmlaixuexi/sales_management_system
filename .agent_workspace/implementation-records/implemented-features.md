@@ -6,6 +6,14 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-230
+
+- 描述：修复 pytest 全量套件 import_mode=prepend 导致的 140 个测试顺序依赖失败
+- 状态：已完成
+- 验证：pyproject.toml 添加 `addopts = “--import-mode=importlib”`，全量 1333 测试通过，0 warnings
+- 根因：裸 `from helpers import ...` 在 prepend 模式下，当某些模块先被导入后，helpers 不在 sys.path 搜索范围内
+- 关联：backend/pyproject.toml
+
 ## 功能编号：FEAT-20260503-229
 
 - 描述：client.ts 429 无 retry-after 头默认等待分支测试覆盖

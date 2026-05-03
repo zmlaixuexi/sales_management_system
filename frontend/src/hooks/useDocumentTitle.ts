@@ -11,13 +11,14 @@ export default function useDocumentTitle(title?: string) {
   const prevTitleRef = useRef(document.title)
 
   useEffect(() => {
+    const prev = prevTitleRef.current
     if (title) {
       document.title = `${title} - ${APP_TITLE}`
     } else {
       document.title = APP_TITLE
     }
     return () => {
-      document.title = prevTitleRef.current
+      document.title = prev
     }
   }, [title])
 }
