@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-03（第六百八十三轮·自动循环）
+
+### 代码质量：未使用导入/变量扫描 + 测试隔离修复 + ESLint 配置补全
+
+- ruff F401/F811/F841 扫描：后端 app/ 和 tests/ 全部通过（零未使用导入/变量）
+- deps.py：移除 get_current_user 内冗余的 `from datetime import datetime`（顶部已导入）
+- test_audit_log.py test_36：密码修改后重新获取 token，避免 password_changed_at 竞争条件
+- test_audit_log.py test_52：处理 audit log resource_id 可能为 None 的情况
+- eslint.config.js：添加 `destructuredArrayIgnorePattern: '^_'` 支持 `_detail` 等解构变量
+- 后端测试 1481（+0），ruff 0 errors，eslint 0 errors
+
 ## 2026-05-03（第六百八十二轮·自动循环）
 
 ### 安全加固：JWT iss/aud 声明签发与验证 + 测试修复
