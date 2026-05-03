@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-05-04（第七百四十三轮·自动循环）
+
+### 测试补强：前端 Zustand auth store 边界测试（24 项覆盖初始状态、login/fetchUser/logout、hasPermission、状态一致性）
+
+**变更文件：**
+- `frontend/src/__tests__/auth-store-boundaries.test.ts`（新建 24 项测试）
+  - 初始状态：loading=false/token=null（localStorage 无）/user=null/token 从 localStorage 读取
+  - Login 边界：fetchUser 被调用/失败后 loading 重置/API success:false 后 loading 重置/fetchUser 失败清除 token
+  - Logout 边界：清除两个 localStorage key/hasPermission 变 false/API 失败仍清除本地状态
+  - fetchUser 边界：成功后有正确字段/失败清 token+user+localStorage/成功不改变 token
+  - hasPermission 边界：超级用户空数组仍 true/精确匹配（product:list ≠ product）/空字符串 false/不改变 store 状态
+  - CurrentUser 类型：display_name=null 正常/多角色/多权限
+  - setState 后立即生效
+  - 连续两次 login 都存储最新 token
+
+**测试计数：** 后端 3179、前端 1052（+24）、总计 4231
+
 ## 2026-05-04（第七百四十二轮·自动循环）
 
 ### 代码质量：前端 hooks 边界测试（27 项覆盖 useSubmit 并发/锁定/异常、usePaginatedList 初始状态/null 安全/filters）
