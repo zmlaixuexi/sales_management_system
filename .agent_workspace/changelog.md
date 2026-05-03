@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第六百五十七轮·自动循环）
+
+### 代码质量：前端表单类型安全改进
+
+- CustomerForm：移除 `as unknown as Parameters<typeof createCustomer>[0]` 双重类型断言，使用 CustomerFormValues 类型
+- ProductForm：改进表单值类型断言，InputNumber 值明确标注为 number 类型后再转 string
+- 消除了 CustomerForm 中的 `as unknown as` 反模式
+
 ## 2026-05-03（第六百五十六轮·自动循环）
 
 ### 代码质量：前端 API 层 get 函数参数类型改进 + 移除 11 处类型断言

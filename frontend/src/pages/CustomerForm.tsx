@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Form, Input, Button, Card, Space, Select, message } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
-import { fetchCustomer, createCustomer, updateCustomer } from '@/api/customers'
+import { fetchCustomer, createCustomer, updateCustomer, type CustomerFormValues } from '@/api/customers'
 import { useSubmit } from '@/hooks/useSubmit'
 import { getApiErrorMessage } from '@/utils'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
@@ -41,7 +41,7 @@ export default function CustomerForm() {
     }
   }, [id, form, navigate])
 
-  const { submitting, handleSubmit } = useSubmit(async (values: Record<string, unknown>) => {
+  const { submitting, handleSubmit } = useSubmit(async (values: CustomerFormValues) => {
     if (isEdit && id) {
       const res = await updateCustomer(id, values)
       if (res.success) {
@@ -49,7 +49,7 @@ export default function CustomerForm() {
         navigate('/customers')
       }
     } else {
-      const res = await createCustomer(values as unknown as Parameters<typeof createCustomer>[0])
+      const res = await createCustomer(values)
       if (res.success) {
         message.success('创建成功')
         navigate('/customers')

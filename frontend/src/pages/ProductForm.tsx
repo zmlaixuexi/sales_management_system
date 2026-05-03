@@ -65,16 +65,24 @@ export default function ProductForm() {
   }
 
   const { submitting, handleSubmit } = useSubmit(async (values: Record<string, unknown>) => {
+    const name = values.name as string
+    const cost_price = values.cost_price as number | undefined
+    const sale_price = values.sale_price as number | undefined
+    const sku = values.sku as string | undefined
+    const stock_quantity = values.stock_quantity as number | undefined
+    const status = values.status as string | undefined
+    const sort_weight = values.sort_weight as number | undefined
+    const remark = values.remark as string | undefined
     const payload = {
-      name: values.name as string,
-      cost_price: String(values.cost_price),
-      sale_price: String(values.sale_price),
+      name,
+      cost_price: cost_price != null ? String(cost_price) : undefined,
+      sale_price: sale_price != null ? String(sale_price) : undefined,
       main_image_url: mainImageUrl ?? undefined,
-      sku: values.sku as string | undefined,
-      stock_quantity: values.stock_quantity as number | undefined,
-      status: values.status as string | undefined,
-      sort_weight: values.sort_weight as number | undefined,
-      remark: values.remark as string | undefined,
+      sku,
+      stock_quantity,
+      status,
+      sort_weight,
+      remark,
     }
     if (isEdit && id) {
       const res = await updateProduct(id, payload)
