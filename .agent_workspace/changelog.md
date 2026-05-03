@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-05-04（第七百三十九轮·自动循环）
+
+### 可观测性：日志格式一致性边界测试（84 项覆盖日志配置、格式器、中间件、审计服务）
+
+**变更文件：**
+- `backend/tests/test_observability_logging.py`（新建 84 项测试）
+  - 日志配置：LOG_LEVEL=INFO/LOG_FORMAT=text/级别合法/SLOW_REQUEST_THRESHOLD_MS=1000>0/SLOW_SQL_THRESHOLD_MS=200>0/APP_ENV 非空
+  - JSON 格式器：合法 JSON/必须字段(timestamp/level/logger/message/app_env)/级别匹配/logger 名称/message 内容/app_env 值/ISO 时间戳/无异常不含 exception/extra_fields 合并/ensure_ascii=False 保留中文
+  - 文本格式器：包含级别/message/时间戳
+  - 请求 ID 中间件：响应包含 X-Request-ID/UUID 格式/透传客户端 ID/每次请求唯一/ContextVar 存在/默认空串
+  - 请求日志中间件：X-Response-Time 存在/格式正确(ms)/非 API 路径不记录
+  - get_logger：返回 Logger/名称正确
+  - SENSITIVE_FIELDS：7 项(password/hashed_password/token/secret/credit_card/phone/email)
+  - _mask_sensitive：None/空 dict/password/hashed_password/token/email/phone/大小写不敏感/部分匹配/保留非敏感
+  - model_to_dict：返回 dict/UUID 转字符串/跳过 None
+  - 审计模型字段：表名/action(NOT NULL, len=50)/request_id/actor_id FK/before_data/after_data/ip_address(len=45)/user_agent(len=500)/created_at(timezone)/resource_type/resource_id
+  - 审计 API：列表需认证/actions 需认证
+  - user_id_ctx：存在/默认空
+  - 中间件注册：RequestID/RequestLog/slow_query
+  - 第三方库降级：uvicorn.access/sqlalchemy.engine >= WARNING
+  - user_agent 截断：500 字符
+
+**测试计数：** 后端 3074（+84）、前端 1001、总计 4075
+
 ## 2026-05-04（第七百三十八轮·自动循环）
 
 ### 代码质量：前端请求拦截器边界测试（84 项覆盖工具函数、拦截器、下载、类型结构）
