@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-05-04（第七百三十六轮·自动循环）
+
+### 安全加固：速率限制边界测试（40 项覆盖配置验证、响应头格式、滑动窗口行为、登录/账户锁定配置、支付并发守卫、429 格式）
+
+**变更文件：**
+- `backend/tests/test_ratelimit_boundaries.py`（新建 40 项测试）
+  - 速率限制配置：RATE_LIMIT_MAX=1000 >=0、RATE_LIMIT_WINDOW=60>0、LOGIN_FAIL_MAX=10>0、LOGIN_FAIL_WINDOW=900>0、ACCOUNT_LOCK_MAX_FAILURES=5>0、ACCOUNT_LOCK_WINDOW=900>0、LOGIN_FAIL_MAX >= ACCOUNT_LOCK_MAX_FAILURES
+  - 正常请求头：X-RateLimit-Limit/Remaining 存在、Limit 匹配配置、Remaining 递减、>=0
+  - 非 API 路径豁免：/health 和 /metrics 无限速头、/api/openapi.json 有限速头
+  - 滑动窗口：清除过期记录、保留近期记录、clear 清空桶
+  - 中间件注册：add_rate_limit/RateLimitMiddleware 存在并注册到 app
+  - 登录限速：_check_login_rate_limit/_check_account_lock/_record_login_fail 存在、内存存储
+  - 支付并发：_check_payment_inflight/_clear_payment_inflight/reset_payment_debounce 存在
+  - 429 格式：包含 success=false 和 RATE_LIMIT_EXCEEDED、有 X-RateLimit-Limit 头
+  - 无 Retry-After 头（已知限制）
+  - IP 回退到 'unknown'
+
+**验证：**
+- 后端 2948/2948 ✓（新增 40 项）
+- ruff 0 errors ✓
+
 ## 2026-05-04（第七百三十五轮·自动循环）
 
 ### 异常路径：订单状态机转换边界测试（53 项覆盖 VALID_TRANSITIONS 映射、确认/取消守卫、收款状态变更、冲正回退、终端状态、库存扣减恢复）
