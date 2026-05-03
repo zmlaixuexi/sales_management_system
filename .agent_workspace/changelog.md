@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-05-04（第七百四十九轮·自动循环）
+
+### 代码质量：前端类型与后端 API 响应结构一致性测试（24 项覆盖 ApiResponse/ApiError/PaginatedData 结构、错误码映射、类型守卫）
+
+**变更文件：**
+- `frontend/src/__tests__/type-consistency.test.ts`（新建 24 项测试）
+  - ApiResponse 结构：success/data/message 三字段/request_id 可选/data 泛型
+  - ApiError 结构：success=false/error 含 code+message/details 可选/request_id 可选
+  - PaginatedData 结构：items/page/page_size/total/空 items/与后端 paginated_resp 匹配
+  - 后端错误码常量：AUTH_UNAUTHORIZED/AUTH_FORBIDDEN/RESOURCE_NOT_FOUND/VALIDATION_FAILED/SYSTEM_INTERNAL_ERROR/PAYMENT_RATE_LIMITED/RATE_LIMIT_EXCEEDED/ACCOUNT_LOCKED 逐一验证
+  - 类型守卫：success 字段区分/联合类型
+  - 后端错误映射：HTTPException dict/422/404/500 映射到 ApiError/500 不泄露异常类名
+
+**测试计数：** 后端 3590、前端 1076（+24）、总计 4666
+
 ## 2026-05-04（第七百四十八轮·自动循环）
 
 ### 代码质量：后端依赖注入边界测试（51 项覆盖 parse_uuid/get_or_404/check_owner/has_permission/resp/fmt_dt/active_query/generate_sequential_code/safe_commit）
