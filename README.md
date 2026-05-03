@@ -134,12 +134,12 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（1237 个）
+# 后端测试（1281 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
 
-# 前端测试（510 个）
+# 前端测试（516 个）
 cd frontend
 npm test
 
@@ -175,7 +175,7 @@ npm run build
 | 订单 CRUD | 58 | 创建（正常/空明细/客户不存在/商品不存在/零数量/负价拒绝）、详情/404/列表/状态筛选/客户筛选、编辑草稿（含负价拒绝）、确认/取消/库存不足、软删除商品订单确认/取消回归、订单号回退、零利润边界、订单日志端点、取消草稿无库存变动、取消无效UUID 422、取消已完成订单 400、仅更新备注、零价阻止下单、关键字搜索、LIKE 注入防护、page_size=1 边界、降序排列验证、订单日志成本字段权限过滤、page_size=100 边界、备注 XSS 清理 |
 | 收款 | 36 | 创建（部分收款→完成、超额、零金额、草稿不可收款、订单不存在）、列表/按订单筛选/数据范围过滤、冲正/重复冲正/不存在/关联订单已删除、冲正状态回退、非所有者拒绝、列表排除已冲正、金额多小数位精度、列表降序排列验证、page_size=100 边界、备注 XSS 清理 |
 | 库存 | 26 | 手工调整（增加/减少/归零/零调整拒绝/超量拒绝/商品不存在）、流水列表/按商品筛选/按类型筛选/组合筛选/字段完整性、备注 XSS 清理、小数数量拒绝、备注长度边界、page_size=100 边界 |
-| 订单金额计算 | 10 | _calc_order_totals 金额/零值/精度，_prepare_item 价格/折扣/快照/低于成本价阻止 |
+| 订单金额计算 | 12 | _calc_order_totals 金额/零值/精度，_prepare_item 价格/折扣/快照/低于成本价阻止，_generate_order_no 委托/参数传递 |
 | 商品利润计算 | 6 | _calc_profit 基本利润/除零保护/亏损/零利润/精度/高毛利率 |
 | 审计服务函数 | 11 | _mask_sensitive 脱敏（含手机号/邮箱），model_to_dict 模型转换，get_request_meta |
 | 日志格式器 | 18 | _JsonFormatter JSON 输出/异常/extra_fields，log_action 容错，request_id/user_id contextvar 注入/空值/优先级，_TextFormatter 文本格式/日期格式，setup_logging 级别/第三方抑制/格式器选择/无效级别回退/handler 清理 |
@@ -185,14 +185,19 @@ npm run build
 | CSV 导入校验 | 9 | 文件名/扩展名/BOM/编码/大小限制/空文件/仅有表头 |
 | Schema 校验器 | 23 | 全部 Pydantic field_validator：单价非负/金额正数/密码强度/strip_html XSS 防护 |
 | 安全模块 | 14 | hash_password bcrypt 哈希/盐值、verify_password 正确/错误/空密码、create_access_token 解码/type/exp/自定义过期、create_refresh_token 解码/type/exp/长于 access |
-| 报表辅助函数 | 11 | _date_range 全分支（today/7d/30d/this_month/last_month/跨月边界/跨年边界/月初/无效 period）、_apply_data_scope 管理员/销售 |
+| 报表辅助函数 | 14 | _date_range 全分支（today/7d/30d/this_month/last_month/跨月边界/跨年边界/月初/无效 period）、_apply_data_scope 管理员/销售、_order_period_filter 查询构建/参数传递/异常传播 |
 | 慢查询 | 8 | 慢查询结构化日志记录、SQL 截断、阈值验证、request_id 关联、参数截断边界、SQL 恰好 500 字符不截断 |
-| 商品辅助函数 | 10 | _validate_category_id 存在/不存在，_get_default_category_id 已存在/自动创建，_batch_sales_stats 空列表/无订单/已确认/排除草稿取消/排除软删除/多订单汇总 |
+| 商品辅助函数 | 12 | _validate_category_id 存在/不存在，_get_default_category_id 已存在/自动创建，_batch_sales_stats 空列表/无订单/已确认/排除草稿取消/排除软删除/多订单汇总，_generate_sku 委托/参数传递 |
 | 客户辅助函数 | 4 | _validate_owner_user 活跃/不存在/已禁用/软删除 |
+| 角色辅助函数 | 9 | _require_superuser 通过/拒绝/None，_serialize_role 基本/权限/空权限/无用户/空时间戳/ISO格式，_validate_permissions_exist 全部存在/缺失/空列表 |
+| 用户辅助函数 | 4 | _validate_roles_exist 全部存在/缺失/空列表/全部缺失 |
 | 订单库存辅助函数 | 10 | _deduct_inventory 正常/库存不足/商品不存在/软删除/多明细/恰好等于需求，_restore_inventory 正常/不存在静默跳过/软删除跳过/多明细 |
 | 订单明细校验 | 10 | _validate_and_prepare_items 单个/多商品/不存在/软删除/停用/禁用/自定义单价/空列表/无效 UUID/混合 |
 | 收款登记服务 | 10 | register_payment 部分/全额/分次收款，订单不存在/草稿/取消/完成拒绝，超额/恰好剩余，操作人记录 |
+| 收款并发防护 | 9 | _check_payment_inflight 通过/重复/不同订单/集合标记，_clear_payment_inflight 清除/幂等/目标隔离，reset_payment_debounce 清空/空集合 |
 | 请求体大小限制 | 9 | GET/OPTIONS/HEAD 不受限，正常 POST 通过，超限返回 413，multipart 豁免，恰好等于限制通过，/uploads 路径豁免 |
+| 请求 ID 中间件 | 4 | 自动生成/透传已有/contextvars 读取/不同请求隔离 |
+| 安全响应头中间件 | 8 | X-Content-Type-Options/X-Frame-Options/X-XSS-Protection/Referrer-Policy/Permissions-Policy/CSP/Cache-Control + 全部存在验证 |
 | 文件上传权限 | 1 | 无 product:create 权限用户上传返回 403 |
 | 角色 CRUD | 18 | 列表（含权限详情和用户数）、权限按模块分组、创建（含重名校验）、编辑（名称/权限）、删除（用户关联保护）、不存在的角色 404、无效权限 ID 400、未认证 401、空名称 422、清空权限 |
 | 导出敏感字段 + 报表利润权限 | 6 | 导出商品/订单 CSV 成本价列权限过滤，报表概览利润字段权限过滤 |
@@ -200,7 +205,7 @@ npm run build
 | 边界条件 + 安全 | 6 | SQL 注入搜索安全（3 项）、分页边界 page=0/page_size=101/page_size=-1（3 项） |
 | 软删除过滤 | 2 | 客户列表排除已删除、支付列表排除已删除订单 |
 | 外键验证 | 4 | 客户 owner_user_id 无效/不存在、订单 customer_id 不存在、订单 items 含不存在商品 |
-| **合计** | **1237** | |
+| **合计** | **1281** | |
 
 ### 前端测试覆盖
 
@@ -209,9 +214,9 @@ npm run build
 | 拦截器 | 14 | 401 刷新重试、401 无 refresh 跳转、403/404/500 错误提示、网络错误、429 重试、_toastDisplayed 标记 |
 | utils | 19 | formatAmount / formatPercent / getApiErrorMessage 纯函数（含负数/大数/零/空字符串边界） |
 | 商品表单 | 23 | 新增模式标题/字段/提交/取消/上传/编辑模式（标题/fetchProduct/数据填充/保存修改）/fetchProduct 失败验证/提交按钮类型/商品图片字段/名称 maxLength |
-| 客户表单 | 12 | 新增模式标题/字段/提交/编辑模式（标题/fetchCustomer/数据填充/保存修改） |
+| 客户表单 | 24 | 新增模式标题/字段/提交/编辑模式（标题/fetchCustomer/数据填充/保存修改）/字段 maxLength/下拉选项/导航/失败验证/提交按钮类型/备注字段 |
 | usePaginatedList | 11 | 初始加载、错误处理、筛选、分页切换、刷新、空结果、_toastDisplayed 跳过 |
-| 订单表单 | 11 | 新增模式标题/字段/提交/编辑模式（标题/fetchOrder/保存修改） |
+| 订单表单 | 23 | 新增模式标题/字段/提交/编辑模式（标题/fetchOrder/保存修改）/失败验证/按钮 loading/textarea 备注/maxLength/导航 |
 | auth store | 14 | login/logout/fetchUser/hasPermission/loading 状态、login success:false 不存 token、fetchUser success:false 不设 user、空权限数组 |
 | 商品列表 | 26 | 渲染/搜索/筛选/新增按钮/表格数据/空状态/错误状态+重试/loading 状态/导出下载/删除确认/禁用按钮/删除失败不崩溃/停用失败不崩溃/状态筛选器选项/分类空值/无图片显示 |
 | 客户列表 | 19 | 渲染/搜索/筛选/新增按钮/表格数据/空状态/错误状态+重试/loading 状态/导出下载/删除确认/导入按钮/删除失败不崩溃/来源筛选器选项/筛选空数据/未知来源 |
@@ -244,7 +249,7 @@ npm run build
 | API client | 7 | baseURL、token 附加、无 token、timeout 15s、Content-Type、X-Request-ID 生成和唯一性 |
 | NotFound | 3 | 404 渲染/返回首页按钮/按钮点击导航 |
 | 角色权限 | 19 | 渲染标题/新建按钮/挂载加载/表格/模态框字段/权限复选框/空状态/错误后空列表/输入框/textarea/编辑模式/创建刷新/删除按钮禁用/确认删除/保存按钮/fetchPermissions 错误/删除失败/模态框关闭 |
-| **合计** | **510** | |
+| **合计** | **516** | |
 
 ## API 概览
 
