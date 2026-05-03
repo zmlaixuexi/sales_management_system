@@ -365,4 +365,96 @@ describe('Dashboard', () => {
     const bars = document.querySelectorAll('div[title]')
     expect(bars.length).toBeGreaterThanOrEqual(2)
   })
+
+  it('_toastDisplayed 错误静默不显示消息', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _reportMocks.fetchSalesSummary.mockRejectedValue(err)
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('spin')).toHaveAttribute('data-spinning', 'false')
+    })
+    expect(_messageError).not.toHaveBeenCalledWith('加载看板数据失败，请稍后重试')
+  })
+
+  it('负毛利显示红色样式', async () => {
+    _reportMocks.fetchSalesSummary.mockResolvedValue({
+      success: true,
+      data: {
+        total_amount: '1000',
+        total_cost: '1500',
+        gross_profit: '-500',
+        gross_margin: '-50',
+        order_count: 5,
+        period: '30d',
+        start_date: '2026-04-02',
+        end_date: '2026-05-02',
+      },
+    })
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('spin')).toHaveAttribute('data-spinning', 'false')
+    })
+    const stats = screen.getAllByTestId('statistic')
+    const profitStat = stats.find((s) => s.getAttribute('data-title') === '毛利')
+    expect(profitStat).toBeTruthy()
+    // 验证负毛利值正确
+    expect(profitStat?.getAttribute('data-value')).toBe('-500')
+  })
+
+  it('峰值日金额为 0 时不显示峰值信息', async () => {
+    _reportMocks.fetchSalesTrend.mockResolvedValue({
+      success: true,
+      data: {
+        items: [
+          { date: '2026-05-01', amount: '0', order_count: 0 },
+        ],
+        period: '30d',
+      },
+    })
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('spin')).toHaveAttribute('data-spinning', 'false')
+    })
+    // 峰值日金额为 0，不应显示峰值信息
+    expect(screen.queryByText(/峰值日/)).not.toBeInTheDocument()
+  })
+
+  it('长趋势数据（>30 条）进行采样', async () => {
+    const items = Array.from({ length: 40 }, (_, i) => ({
+      date: `2026-05-${String(i + 1).padStart(2, '0')}`,
+      amount: String((i + 1) * 100),
+      order_count: i + 1,
+    }))
+    _reportMocks.fetchSalesTrend.mockResolvedValue({
+      success: true,
+      data: { items, period: '30d' },
+    })
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('spin')).toHaveAttribute('data-spinning', 'false')
+    })
+    // 趋势柱状条应被采样，条数 <= 30
+    const bars = document.querySelectorAll('div[title]')
+    expect(bars.length).toBeLessThanOrEqual(31)
+    expect(bars.length).toBeGreaterThan(0)
+  })
+
+  it('零金额趋势柱显示灰色背景', async () => {
+    _reportMocks.fetchSalesTrend.mockResolvedValue({
+      success: true,
+      data: {
+        items: [
+          { date: '2026-05-01', amount: '100', order_count: 1 },
+          { date: '2026-05-02', amount: '0', order_count: 0 },
+        ],
+        period: '30d',
+      },
+    })
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('spin')).toHaveAttribute('data-spinning', 'false')
+    })
+    const bars = document.querySelectorAll('div[title]')
+    expect(bars.length).toBe(2)
+  })
 })
