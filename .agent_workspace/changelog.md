@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-05-04（第七百五十三轮·自动循环）
+
+### 需求符合性：订单折扣与金额计算边界测试（40 项覆盖负折扣加价销售、成本价保护、毛利率极端值、page_size 上界、金额精度、折扣后端计算、明细数量边界）
+
+**变更文件：**
+- `backend/tests/test_order_calc_boundaries.py`（新建 40 项测试）
+  - 负折扣（加价销售）：unit_price > sale_price 产生负 discount_amount/rate/纯计算验证
+  - 成本价保护：低于成本价拒绝 PRICE_BELOW_COST/等于成本价允许/成本+0.01 允许
+  - 毛利率极端值：零金额返回 0/正常计算/负利润负利率/零成本 100%/多行汇总/4 位小数精度
+  - page_size 上界：源码 le=100/ge=1/page le=10000
+  - OrderItemInput：quantity 1-99999/unit_price None 默认 sale_price/负值拒绝/零值/上限/超限
+  - OrderCreate/Update：明细 1-500/空拒绝/超限拒绝/备注 500/Update items 可选
+  - 折扣后端计算：OrderItemInput 无 discount 字段/_prepare_item 自动计算
+  - 金额精度：subtotal 2 位小数/calc_totals 2 位小数
+  - 模型字段：discount_amount Numeric(12,2)/discount_rate Numeric(8,4)/gross_margin Numeric(8,4)/gross_profit Numeric(12,2)
+
+**测试计数：** 后端 3738（+40）、前端 1076、总计 4814
+
 ## 2026-05-04（第七百五十二轮·自动循环）
 
 ### 安全加固：请求体大小限制中间件边界测试（27 项覆盖 content-length 精确边界、无 content-type、PATCH 方法、413 响应结构、配置校验、中间件注册、方法/路径/multipart 豁免）
