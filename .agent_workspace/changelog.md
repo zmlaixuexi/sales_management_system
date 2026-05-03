@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-05-04（第七百三十八轮·自动循环）
+
+### 代码质量：前端请求拦截器边界测试（84 项覆盖工具函数、拦截器、下载、类型结构）
+
+**变更文件：**
+- `frontend/src/__tests__/frontend-boundaries.test.ts`（新建 38 项测试）
+  - formatAmount 边界：null/undefined/整数/浮点/字符串/NaN/空串/零/负数/大数值
+  - formatPercent 边界：null/undefined/0.5/1/0/字符串/NaN/负数/超100%
+  - getApiErrorMessage 边界：error.message 优先/detail.message 回退/空 response/空串/falsy/自定义 fallback
+  - isToastDisplayed 边界：true/false/无属性/null/undefined/字符串/数字/空对象
+  - API 类型结构验证：ApiResponse 必要字段+可选 request_id、ApiError 必要字段+可选 details/request_id、PaginatedData 字段+空数组
+- `frontend/src/__tests__/interceptor-boundaries.test.ts`（新建 13 项测试）
+  - downloadCsv 文件名解析：无 filename 默认 export.csv/中文文件名/空格文件名/全空参数
+  - downloadCsv JSON 错误：error.message 优先/message 回退/默认文案
+  - downloadCsv 成功下载：createObjectURL/revokeObjectURL 调用
+- `frontend/src/__tests__/client-boundary.test.ts`（新建 33 项测试）
+  - apiClient 配置常量：timeout=15000/baseURL/拦截器数量/Content-Type
+  - 请求拦截器边界：已有 Authorization 覆盖/UUID v4 格式/连续请求 ID 唯一/空 headers/空串 token
+  - 错误优先级链：422 error.message/422 data.message/401 _retry=true/402 未知状态码/503 后端消息/error.message 优先 data.message/200 成功透传/无 config 不弹 toast
+  - 429 Retry-After 边界：小数 parseInt 截断/0 立即重试/负数立即重试/1 秒等待
+  - _toastDisplayed 标记：500/网络错误/404/403/429 已重试/400 error.message
+  - 401 刷新边界：刷新失败清 token 跳转/无 refresh_token 跳转/刷新成功用新 token/保存新 refresh_token/使用 raw axios
+
+**测试计数：** 前端 1001（+84）、后端 2990、总计 3991
+
 ## 2026-05-04（第七百三十六轮·自动循环）
 
 ### 安全加固：速率限制边界测试（40 项覆盖配置验证、响应头格式、滑动窗口行为、登录/账户锁定配置、支付并发守卫、429 格式）
