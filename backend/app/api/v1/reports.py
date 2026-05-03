@@ -2,6 +2,7 @@
 
 from datetime import date, datetime, timedelta
 from decimal import Decimal
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
@@ -23,6 +24,7 @@ router = APIRouter(
 )
 
 _VALID_ORDER_STATUSES = ["confirmed", "partially_paid", "completed"]
+PeriodType = Literal["today", "7d", "30d", "this_month", "last_month"]
 
 
 def _date_range(period: str):
@@ -75,7 +77,7 @@ def _apply_data_scope(query, current_user: User):
 
 @router.get("/sales-summary")
 def sales_summary(
-    period: str = Query("30d", description="时间段: today, 7d, 30d, this_month, last_month"),
+    period: PeriodType = Query("30d", description="时间段: today, 7d, 30d, this_month, last_month"),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("report:sales")),
 ):
@@ -119,7 +121,7 @@ def sales_summary(
 
 @router.get("/sales-trend")
 def sales_trend(
-    period: str = Query("30d"),
+    period: PeriodType = Query("30d", description="时间段: today, 7d, 30d, this_month, last_month"),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("report:sales")),
 ):
@@ -156,7 +158,7 @@ def sales_trend(
 
 @router.get("/product-ranking")
 def product_ranking(
-    period: str = Query("30d"),
+    period: PeriodType = Query("30d", description="时间段: today, 7d, 30d, this_month, last_month"),
     limit: int = Query(10, ge=1, le=50),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("report:sales")),
@@ -209,7 +211,7 @@ def product_ranking(
 
 @router.get("/customer-ranking")
 def customer_ranking(
-    period: str = Query("30d"),
+    period: PeriodType = Query("30d", description="时间段: today, 7d, 30d, this_month, last_month"),
     limit: int = Query(10, ge=1, le=50),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("report:sales")),
@@ -259,7 +261,7 @@ def customer_ranking(
 
 @router.get("/salesperson-ranking")
 def salesperson_ranking(
-    period: str = Query("30d"),
+    period: PeriodType = Query("30d", description="时间段: today, 7d, 30d, this_month, last_month"),
     limit: int = Query(10, ge=1, le=50),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("report:sales")),
@@ -309,7 +311,7 @@ def salesperson_ranking(
 
 @router.get("/inventory-warning")
 def inventory_warning(
-    threshold: int = Query(None, ge=0, description="库存预警阈值"),
+    threshold: int = Query(None, ge=0, le=1000000, description="库存预警阈值"),
     db: Session = Depends(get_db),
     _current_user: User = Depends(require_permission("report:sales")),
 ):

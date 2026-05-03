@@ -1,6 +1,7 @@
 """库存流水查询和手工调整 API"""
 
 import uuid
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
@@ -23,6 +24,11 @@ from app.schemas.inventory import InventoryAdjust, InventoryAdjusted
 from app.schemas.response import ApiResponse
 from app.services.audit_service import log_user_action
 
+MovementType = Literal[
+    "order_confirm", "order_cancel", "manual_adjust",
+    "product_create", "product_update",
+]
+
 router = APIRouter(
     prefix="/inventory", tags=["库存管理"],
     responses={
@@ -39,7 +45,7 @@ router = APIRouter(
 def list_movements(
     pagination: PaginationParams = Depends(),
     product_id: uuid.UUID | None = None,
-    movement_type: str | None = None,
+    movement_type: MovementType | None = None,
     db: Session = Depends(get_db),
     _current_user: User = Depends(require_permission("inventory:list")),
 ):

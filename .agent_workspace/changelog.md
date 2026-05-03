@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-03（第六百五十二轮·自动循环）
+
+### 代码质量：报表和库存接口参数枚举校验 + threshold 上限约束
+
+- reports.py：所有 5 个报表端点的 period 参数从 str 改为 Literal["today","7d","30d","this_month","last_month"]
+- reports.py：inventory-warning threshold 添加 le=1000000 上限约束
+- reports.py：所有 period 参数补充统一的 description 文档
+- inventory.py：list_movements 的 movement_type 改为 Literal 枚举类型
+- 6 个已有测试期望从 400 更新为 422（Query 级校验返回 422）
+
 ## 2026-05-03（第六百五十一轮·自动循环）
 
 ### 代码质量：分页 page 参数添加上限约束（le=10000）
