@@ -230,3 +230,131 @@ def test_csv_cell_empty():
 
 def test_csv_cell_number():
     assert sanitize_csv_cell("123.45") == "123.45"
+
+
+# ─── API 级别端到端注入向量测试 ──────────────────────────────────
+
+import uuid
+
+import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from app.api.deps import get_db
+from app.core.security import create_access_token, hash_password
+from app.db.session import Base
+from app.main import app
+from app.models.user import User
+
+_API_TEST_DB = "sqlite:///./test_sanitize_api.db"
+_api_engine = create_engine(_API_TEST_DB, connect_args={"check_same_thread": False})
+_ApiSession = sessionmaker(bind=_api_engine, autocommit=False, autoflush=False)
+
+_client = TestClient(app)
+_original_override = None
+
+
+def _api_admin_headers() -> dict:
+    db = _ApiSession()
+    try:
+        user = db.query(User).filter(User.username == "admin").first()
+        return {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
+    finally:
+        db.close()
+
+
+def setup_module(module):
+    global _original_override
+    _original_override = app.dependency_overrides.get(get_db)
+    app.dependency_overrides[get_db] = lambda: _ApiSession()
+    Base.metadata.create_all(bind=_api_engine)
+    db = _ApiSession()
+    db.add(User(
+        id=uuid.uuid4(), username="admin", display_name="管理员",
+        hashed_password=hash_password("testpass123"), is_superuser=True, is_active=True,
+    ))
+    db.commit()
+    db.close()
+
+
+def teardown_module(module):
+    app.dependency_overrides[get_db] = _original_override if _original_override else lambda: None
+    if _original_override is None:
+        app.dependency_overrides.pop(get_db, None)
+    _api_engine.dispose()
+    import os
+    try:
+        os.remove("test_sanitize_api.db")
+    except FileNotFoundError:
+        pass
+
+
+def test_api_xss_in_product_name_sanitized():
+    """通过 API 创建商品时 XSS 载荷被消毒"""
+    headers = _api_admin_headers()
+    resp = _client.post("/api/v1/products", json={
+        "name": "<script>alert('xss')</script>商品",
+        "sale_price": "100",
+        "cost_price": "50",
+    }, headers=headers)
+    assert resp.status_code == 200
+    name = resp.json()["data"]["name"]
+    assert "<script>" not in name
+    assert "alert" in name
+
+
+def test_api_sql_injection_in_search_safe():
+    """搜索关键字中的 SQL 注入载荷不影响服务"""
+    headers = _api_admin_headers()
+    for payload in ["'; DROP TABLE products;--", "1 OR 1=1", "' UNION SELECT * FROM users--"]:
+        resp = _client.get(f"/api/v1/products?keyword={payload}", headers=headers)
+        assert resp.status_code == 200
+        assert isinstance(resp.json()["data"]["items"], list)
+
+
+def test_api_xss_in_customer_name_sanitized():
+    """通过 API 创建客户时 XSS 载荷被消毒"""
+    headers = _api_admin_headers()
+    resp = _client.post("/api/v1/customers", json={
+        "name": "<img src=x onerror=alert(1)>客户",
+        "contact_name": "<b>张三</b>",
+        "phone": "13800138001",
+    }, headers=headers)
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert "<img" not in data["name"]
+    assert "<b>" not in data["contact_name"]
+
+
+def test_api_sql_injection_in_customer_search_safe():
+    """客户搜索中的 SQL 注入载荷不影响服务"""
+    headers = _api_admin_headers()
+    for payload in ["' OR '1'='1", "'; DELETE FROM customers;--"]:
+        resp = _client.get(f"/api/v1/customers?keyword={payload}", headers=headers)
+        assert resp.status_code == 200
+        assert isinstance(resp.json()["data"]["items"], list)
+
+
+def test_api_like_wildcard_in_search_safe():
+    """搜索关键字中的 LIKE 通配符被正确转义"""
+    headers = _api_admin_headers()
+    _client.post("/api/v1/products", json={
+        "name": "100%纯棉T恤",
+        "sale_price": "50",
+    }, headers=headers)
+    resp = _client.get("/api/v1/products?keyword=100%25", headers=headers)
+    assert resp.status_code == 200
+
+
+def test_api_control_chars_in_input_sanitized():
+    """输入中的控制字符被移除"""
+    headers = _api_admin_headers()
+    resp = _client.post("/api/v1/products", json={
+        "name": "商品\x00名称\x07",
+        "sale_price": "100",
+    }, headers=headers)
+    assert resp.status_code == 200
+    name = resp.json()["data"]["name"]
+    assert "\x00" not in name
+    assert "\x07" not in name
