@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-05-04（第七百五十轮·自动循环）
+
+### 测试补强：后端 CORS 预检请求边界测试（24 项覆盖未允许 Origin、OPTIONS 各种路径、PATCH 方法、allow-headers 边界、credentials、配置校验、安全头共存）
+
+**变更文件：**
+- `backend/tests/test_cors_boundaries.py`（新建 24 项测试）
+  - 未允许 Origin：evil.example.com 不返回 CORS 头/预检无 CORS 头/无 Origin 无 CORS
+  - OPTIONS 各种路径：/health/不存在路径/metrics/auth/login
+  - PATCH 方法：不在 CORS allow-methods 中/OPTIONS 在 allow-methods 中
+  - allow-headers 边界：自定义头不在列表中/Authorization+Content-Type+X-Request-ID 在列表中
+  - credentials 验证：GET 和 OPTIONS 均返回 credentials=true
+  - 配置校验：空格解析/localhost 合法/https 合法/ftp 拒绝/尾部斜杠合法/纯逗号拒绝/纯空格拒绝
+  - CORS 与安全头共存：GET/OPTIONS 同时含 x-content-type-options 和 x-frame-options
+  - 中间件注册：CORSMiddleware 已注册/main.py 包含 GET/POST/PUT/DELETE/OPTIONS
+
+**测试计数：** 后端 3613（+23）、前端 1076、总计 4689
+
 ## 2026-05-04（第七百四十九轮·自动循环）
 
 ### 代码质量：前端类型与后端 API 响应结构一致性测试（24 项覆盖 ApiResponse/ApiError/PaginatedData 结构、错误码映射、类型守卫）
