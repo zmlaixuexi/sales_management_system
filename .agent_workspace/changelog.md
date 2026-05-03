@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-05-04（第七百二十一轮·自动循环）
+
+### 异常路径：软删除边界测试（59 项覆盖模型字段、过滤逻辑、删除防护、引用完整性、迁移文件）
+
+**变更文件：**
+- `backend/tests/test_soft_delete.py`（新建 59 项测试）
+  - 模型字段：4 核心模型有 deleted_at、6 辅助模型无 deleted_at（parametrize）
+  - 列属性：nullable、DateTime 类型、时区感知、索引（4×4=16 parametrize）
+  - active_query：有 deleted_at 添加 filter、无 deleted_at 不添加、返回 query 对象
+  - get_or_404：无效 UUID 404、错误消息含标签、未找到 404、找到返回对象、软删除模型 filter≥2 次、普通模型 filter=1 次
+  - 删除防护：商品检查订单引用(409)、客户检查订单引用(400)
+  - 删除实现：设置 deleted_at=datetime.now()、记录审计日志、使用 safe_commit
+  - 跨表过滤：认证/报表/导出/收款/种子数据均过滤 deleted_at
+  - 迁移文件：存在、包含索引、覆盖全部 4 表
+  - safe_commit：成功提交、异常回滚、成功不回滚
+  - 端点：商品/客户 DELETE 存在、无 restore 端点
+
+**测试结果：** 后端 2190/2190 ✓ / 前端 858/858 ✓ / 总计 3048 tests
+
 ## 2026-05-04（第七百二十轮·自动循环）
 
 ### 代码质量：前端请求拦截器边界测试（+17 新增覆盖请求头、429 Retry-After 边界、401 刷新细节、downloadCsv 参数过滤与错误检测）
