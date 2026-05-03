@@ -100,7 +100,9 @@ def teardown_module(module):
         del app.dependency_overrides[get_db]
 
 
-app.dependency_overrides[get_db] = override_get_db
+app.dependency_overrides[get_db] = override_get_db  # 在 setup_module 中正式设置
+
+
 client = TestClient(app)
 
 

@@ -37,7 +37,9 @@ def override_get_db():
         db.close()
 
 
-app.dependency_overrides[get_db] = override_get_db
+app.dependency_overrides[get_db] = override_get_db  # 在 setup_module 中正式设置
+
+
 client = TestClient(app)
 
 
@@ -48,6 +50,7 @@ def _auth():
 def setup_module(module):
     global _original_override
     _original_override = app.dependency_overrides.get(get_db)
+    app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_db] = override_get_db
     Base.metadata.create_all(bind=engine)
     db = TestSession()

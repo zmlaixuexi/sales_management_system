@@ -582,7 +582,9 @@ def test_20_payment_list_pagination():
     assert data["page_size"] == 1
 
 
-app.dependency_overrides[get_db] = override_get_db
+app.dependency_overrides[get_db] = override_get_db  # 在 setup_module 中正式设置
+
+
 client = TestClient(app)
 
 

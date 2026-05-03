@@ -18,6 +18,9 @@ def pytest_runtest_setup(item):
         _prev_module = mod
         from app.core.ratelimit import clear_rate_limit
         clear_rate_limit()
+        # 清空登录失败计数器，防止跨模块累积触发 429
+        from app.api.v1.auth import _login_fail_counts
+        _login_fail_counts.clear()
 
 
 
