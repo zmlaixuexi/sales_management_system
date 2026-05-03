@@ -265,4 +265,28 @@ describe('UsersPage', () => {
       expect(_userMocks.updateUser).toHaveBeenCalled()
     })
   })
+
+  it('fetchRoles 挂载时调用', async () => {
+    renderUsers()
+    await waitFor(() => {
+      expect(_userMocks.fetchRoles).toHaveBeenCalled()
+    })
+  })
+
+  it('新建弹窗中角色选择器填充选项', async () => {
+    renderUsers()
+    await waitFor(() => {
+      expect(_userMocks.fetchRoles).toHaveBeenCalled()
+    })
+    screen.getByText('新建用户').click()
+    await waitFor(() => {
+      expect(screen.getByTestId('modal')).toBeInTheDocument()
+    })
+    const selects = screen.getAllByTestId('select')
+    const roleSelect = selects.find((s) => {
+      const options = Array.from(s.querySelectorAll('option'))
+      return options.some((o) => o.textContent === '管理员')
+    })
+    expect(roleSelect).toBeTruthy()
+  })
 })
