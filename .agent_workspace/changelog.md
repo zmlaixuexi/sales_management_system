@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第六百七十轮·自动循环）
+
+### 记录：补充 FEAT-243~FEAT-249 实现记录
+
+- 汇总第 658-669 轮所有成果，写入 implemented-features.md
+- 包含 safe_commit 事务保护、isToastDisplayed 工具函数、SQL 注入防御测试、TypeScript 严格模式、eslint 配置修复等
+- 全量验证通过：1376 后端测试 + 841 前端测试 + ruff/tsc/eslint 0 错误
+
 ## 2026-05-03（第六百六十九轮·自动循环）
 
 ### 代码质量：启用 noUncheckedIndexedAccess TypeScript 严格模式
