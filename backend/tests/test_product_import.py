@@ -348,3 +348,153 @@ def test_19_import_creates_audit_log():
         assert log.resource_type == "product"
     finally:
         db.close()
+
+
+# ─── 边界条件测试 ─────────────────────────────────────────────
+
+
+def test_20_import_whitespace_only_name():
+    """仅空白字符的商品名称视为空，跳过"""
+    csv_content = "商品名称,销售价\n   \t  ,100"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 0
+    assert any("商品名称不能为空" in e["message"] for e in resp.json()["data"]["errors"])
+
+
+def test_21_import_zero_price():
+    """零价格能正常导入"""
+    csv_content = "商品名称,销售价,成本价\n免费商品,0,0"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1
+
+
+def test_22_import_very_long_name():
+    """超长商品名称（500 字符）能正常导入"""
+    long_name = "长名商品" * 125  # 500 字符
+    csv_content = f"商品名称,销售价\n{long_name},100"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1
+
+
+def test_23_import_unicode_emoji():
+    """含 emoji 和特殊 Unicode 字符的商品名称能导入"""
+    csv_content = "商品名称,销售价\n🎉特价商品🚀,99.99"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1
+
+
+def test_24_import_negative_stock():
+    """负库存数量被解析为 0（int() 正常转换）"""
+    csv_content = "商品名称,销售价,库存数量\n负库存商品,100,-5"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1
+
+
+def test_25_import_large_stock():
+    """超大库存数量能正常导入"""
+    csv_content = "商品名称,销售价,库存数量\n大库存商品,100,99999999"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1
+
+
+def test_26_import_extra_columns_ignored():
+    """CSV 含多余列时正常导入，忽略未知列"""
+    csv_content = "商品名称,销售价,自定义列1,自定义列2\n多余列商品,88,值1,值2"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1
+
+
+def test_27_import_wrong_headers():
+    """完全不匹配的表头导致所有行跳过（名称为空）"""
+    csv_content = "产品名,价格\n未知商品,100"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 0
+    assert any("商品名称不能为空" in e["message"] for e in resp.json()["data"]["errors"])
+
+
+def test_28_import_mixed_line_endings():
+    """混合 \\r\\n 和 \\n 行尾的 CSV 能正常导入"""
+    csv_content = "商品名称,销售价\r\n换行商品A,100\r\n换行商品B,200"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 2
+
+
+def test_29_import_decimal_prices():
+    """多精度小数价格能正常导入"""
+    csv_content = "商品名称,销售价,成本价\n精密价格,123.4567,67.8910"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1
+
+
+def test_30_import_quoted_fields():
+    """CSV 引号字段含逗号能正确解析"""
+    csv_content = '"商品名称","销售价"\n"含,逗号商品",100'
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1
+
+
+def test_31_import_empty_stock_defaults_zero():
+    """空库存数量默认为 0"""
+    csv_content = "商品名称,销售价,成本价,库存数量\n无库存商品,100,50,"
+    resp = client.post(
+        "/api/v1/products/import",
+        files={"file": ("products.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1

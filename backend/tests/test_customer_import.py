@@ -336,3 +336,118 @@ def test_18_import_creates_audit_log():
         assert log.resource_type == "customer"
     finally:
         db.close()
+
+
+# ─── 边界条件测试 ─────────────────────────────────────────────
+
+
+def test_19_import_whitespace_only_name():
+    """仅空白字符的客户名称视为空，跳过"""
+    csv_content = "客户名称,电话\n   \t  ,13800001001"
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 0
+    assert any("客户名称不能为空" in e["message"] for e in resp.json()["data"]["errors"])
+
+
+def test_20_import_very_long_name():
+    """超长客户名称（500 字符）能正常导入"""
+    long_name = "长名客户" * 125  # 500 字符
+    csv_content = f"客户名称,电话\n{long_name},13800001002"
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1
+
+
+def test_21_import_unicode_emoji():
+    """含 emoji 和特殊 Unicode 字符的客户名称能导入"""
+    csv_content = "客户名称,电话,联系人,邮箱\n🎉VIP客户🚀,13800001003,张👤,emoji@test.com"
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1
+
+
+def test_22_import_mixed_line_endings():
+    """混合 \\r\\n 和 \\n 行尾的 CSV 能正常导入"""
+    csv_content = "客户名称,电话\r\n换行客户A,13800001004\r\n换行客户B,13800001005"
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 2
+
+
+def test_23_import_wrong_headers():
+    """完全不匹配的表头导致所有行跳过（名称为空）"""
+    csv_content = "姓名,手机号码\n未知客户,13800001006"
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 0
+    assert any("客户名称不能为空" in e["message"] for e in resp.json()["data"]["errors"])
+
+
+def test_24_import_extra_columns_ignored():
+    """CSV 含多余列时正常导入，忽略未知列"""
+    csv_content = "客户名称,电话,自定义列1,自定义列2\n多余列客户,13800001007,值1,值2"
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1
+
+
+def test_25_import_quoted_fields():
+    """CSV 引号字段含逗号和换行能正确解析"""
+    csv_content = '客户名称,电话,备注\n"含,逗号客户",13800001008,"备注\n换行"'
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1
+
+
+def test_26_import_phone_with_spaces():
+    """电话号码含空格时被 strip 后处理"""
+    csv_content = "客户名称,电话\n空格电话客户, 13800001009 "
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1
+
+
+def test_27_import_long_remark():
+    """超长备注（1000 字符）能正常导入"""
+    long_remark = "备注内容" * 125  # 500 字符
+    csv_content = f"客户名称,电话,备注\n备注客户,13800001010,{long_remark}"
+    resp = client.post(
+        "/api/v1/customers/import",
+        files={"file": ("customers.csv", csv_content.encode("utf-8"), "text/csv")},
+        headers=_auth(),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["data"]["created"] == 1
