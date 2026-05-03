@@ -75,8 +75,8 @@ export default function ProductForm() {
     const remark = values.remark as string | undefined
     const payload = {
       name,
-      cost_price: cost_price != null ? String(cost_price) : undefined,
-      sale_price: sale_price != null ? String(sale_price) : undefined,
+      cost_price: cost_price !== null && cost_price !== undefined ? String(cost_price) : undefined,
+      sale_price: sale_price !== null && sale_price !== undefined ? String(sale_price) : undefined,
       main_image_url: mainImageUrl ?? undefined,
       sku,
       stock_quantity,
