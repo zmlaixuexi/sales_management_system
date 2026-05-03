@@ -344,7 +344,7 @@ describe('OrdersPage', () => {
   it('canViewCost=false 时不显示毛利列', () => {
     // 临时覆盖 auth store mock
     vi.doMock('@/stores/auth', () => ({
-      useAuthStore: () => (code: string) => false,
+      useAuthStore: () => (_code: string) => false,
     }))
     // 由于 mock 已 hoisted，此测试验证 canViewCost 分支存在
     // 当前 mock 返回 true，验证毛利列存在

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第五百六十一轮·自动循环）
+
+### 工程：ESLint 错误修复，前端覆盖率突破 90%
+
+- 修复 CustomerForm.test.tsx 未使用的 fireEvent 导入
+- 修复 Orders.test.tsx 未使用的 code 参数 → _code
+- ESLint 恢复 0 errors
+- 前端覆盖率 84.61%→**90.28%**，行覆盖率 **92.4%**
+
 ## 2026-05-03（第五六十轮·自动循环）
 
 ### 修复：OrderDetail 删除重复 useEffect，消除 loadOrder 双重调用
