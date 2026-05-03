@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-03（第六百三十一轮·自动循环）
+
+### 文档：testing.md 同步至当前测试状态
+
+- 前端测试总数 830 → 833，总计 2140 → 2143
+- 前端分支覆盖率 99.48% → 99.74%
+- client-interceptor.test.ts 18 → 19（补充 429 无 retry-after 描述）
+- Products.test.tsx 26 → 48（补充导入/卸载/成本权限等描述）
+- Customers.test.tsx 19 → 37（补充导入/卸载/翻页等描述）
+
 ## 2026-05-03（第六百三十轮·自动循环）
 
 ### 测试补强：Products/Customers 组件卸载时 ref null 分支覆盖
