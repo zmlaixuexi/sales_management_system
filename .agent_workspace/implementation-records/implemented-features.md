@@ -6,6 +6,13 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-239
+
+- 描述：分页 page 参数添加上限约束（le=10000），防止慢查询 DoS
+- 状态：已完成
+- 验证：PaginationParams.page 添加 le=10000，+3 Query 约束测试，全部 1367 测试通过
+- 关联：app/api/deps.py、tests/test_deps.py、tests/test_boundary.py
+
 ## 功能编号：FEAT-20260503-238
 
 - 描述：列表接口 status/source 枚举参数 Query 级校验

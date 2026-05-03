@@ -2248,8 +2248,8 @@ def test_134_pagination_very_large_page():
     """超大页码返回 200 + 空 items"""
     headers = _auth()
     for endpoint in ["/api/v1/products", "/api/v1/customers", "/api/v1/sales-orders"]:
-        resp = client.get(f"{endpoint}?page=999999", headers=headers)
-        assert resp.status_code == 200, f"{endpoint} page=999999 应返回 200: {resp.status_code}"
+        resp = client.get(f"{endpoint}?page=9999", headers=headers)
+        assert resp.status_code == 200, f"{endpoint} page=9999 应返回 200: {resp.status_code}"
         assert resp.json()["data"]["items"] == [], f"{endpoint} 超大页码应返回空列表"
 
 

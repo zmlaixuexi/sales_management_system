@@ -19,7 +19,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 @dataclass
 class PaginationParams:
     """通用分页参数，作为 Depends 注入。"""
-    page: int = Query(1, ge=1)
+    page: int = Query(1, ge=1, le=10000)
     page_size: int = Query(20, ge=1, le=100)
 
 

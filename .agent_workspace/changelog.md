@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第六百五十一轮·自动循环）
+
+### 代码质量：分页 page 参数添加上限约束（le=10000）
+
+- deps.py PaginationParams.page 添加 le=10000 约束，防止恶意超大偏移量导致慢查询
+- test_boundary.py test_134 测试页码从 999999 更新为 9999（在上限内）
+- test_deps.py 新增 3 个 PaginationParams Query 约束测试（max ok / over max rejected / zero rejected）
+
 ## 2026-05-03（第六百五十轮·自动循环）
 
 ### 安全加固：列表接口 status/source 枚举参数 Query 级校验

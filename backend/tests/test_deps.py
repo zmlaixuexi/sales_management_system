@@ -318,3 +318,58 @@ def test_paginate_empty(db: Session):
     items, total = paginate(query, page=1, page_size=10)
     assert total == 0
     assert items == []
+
+
+# ---- PaginationParams 约束 ----
+
+
+def test_pagination_params_page_max_ok():
+    """page = 10000 正常通过 Query 校验"""
+    from fastapi import FastAPI, Depends
+    from fastapi.testclient import TestClient
+    from app.api.deps import PaginationParams
+
+    test_app = FastAPI()
+
+    @test_app.get("/test")
+    def test_endpoint(p: PaginationParams = Depends()):
+        return {"page": p.page, "page_size": p.page_size}
+
+    client = TestClient(test_app)
+    resp = client.get("/test?page=10000&page_size=20")
+    assert resp.status_code == 200
+    assert resp.json()["page"] == 10000
+
+
+def test_pagination_params_page_over_max_rejected():
+    """page = 10001 被 Query 校验拒绝为 422"""
+    from fastapi import FastAPI, Depends
+    from fastapi.testclient import TestClient
+    from app.api.deps import PaginationParams
+
+    test_app = FastAPI()
+
+    @test_app.get("/test")
+    def test_endpoint(p: PaginationParams = Depends()):
+        return {"page": p.page, "page_size": p.page_size}
+
+    client = TestClient(test_app)
+    resp = client.get("/test?page=10001&page_size=20")
+    assert resp.status_code == 422
+
+
+def test_pagination_params_page_zero_rejected():
+    """page = 0 被拒绝"""
+    from fastapi import FastAPI, Depends
+    from fastapi.testclient import TestClient
+    from app.api.deps import PaginationParams
+
+    test_app = FastAPI()
+
+    @test_app.get("/test")
+    def test_endpoint(p: PaginationParams = Depends()):
+        return {"page": p.page, "page_size": p.page_size}
+
+    client = TestClient(test_app)
+    resp = client.get("/test?page=0&page_size=20")
+    assert resp.status_code == 422
