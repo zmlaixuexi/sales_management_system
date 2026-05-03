@@ -14,7 +14,7 @@
 
 ## 功能模块
 
-- **认证与权限**：JWT 登录/刷新/退出，角色权限体系（RBAC），数据范围权限，敏感字段过滤，登录失败速率限制，完整登录页面。
+- **认证与权限**：JWT 登录/刷新/退出，角色权限体系（RBAC），数据范围权限，敏感字段过滤，登录失败速率限制，完整登录页面，角色权限管理页面。
 - **商品管理**：商品 CRUD、图片上传、SKU 自动生成、利润/毛利率自动计算、价格变更记录、派生销售字段（sales_quantity/sales_amount）。
 - **客户管理**：客户 CRUD、手机号重复检测、归属转移。
 - **订单管理**：草稿创建、确认（扣减库存）、取消（回滚库存）、状态机（draft→confirmed→completed/cancelled）、操作日志查询、支付路径对齐规范。
@@ -98,7 +98,7 @@ make db-seed           # 初始化种子数据
 ```
 ├── backend/                 # FastAPI 后端
 │   ├── app/
-│   │   ├── api/v1/          # API 路由（auth, products, customers, orders, payments, inventory, reports, audit_logs, exports, users）
+│   │   ├── api/v1/          # API 路由（auth, products, customers, orders, payments, inventory, reports, audit_logs, exports, users, roles）
 │   │   ├── core/            # 配置、安全工具、日志、速率限制
 │   │   ├── db/              # 数据库会话
 │   │   ├── models/          # SQLAlchemy 模型
@@ -134,12 +134,12 @@ make db-seed           # 初始化种子数据
 ## 测试
 
 ```bash
-# 后端测试（1219 个）
+# 后端测试（1237 个）
 cd backend
 source .venv/bin/activate
 pytest tests/ -v
 
-# 前端测试（441 个）
+# 前端测试（463 个）
 cd frontend
 npm test
 
@@ -194,12 +194,13 @@ npm run build
 | 收款登记服务 | 10 | register_payment 部分/全额/分次收款，订单不存在/草稿/取消/完成拒绝，超额/恰好剩余，操作人记录 |
 | 请求体大小限制 | 9 | GET/OPTIONS/HEAD 不受限，正常 POST 通过，超限返回 413，multipart 豁免，恰好等于限制通过，/uploads 路径豁免 |
 | 文件上传权限 | 1 | 无 product:create 权限用户上传返回 403 |
+| 角色 CRUD | 18 | 列表（含权限详情和用户数）、权限按模块分组、创建（含重名校验）、编辑（名称/权限）、删除（用户关联保护）、不存在的角色 404、无效权限 ID 400、未认证 401、空名称 422、清空权限 |
 | 导出敏感字段 + 报表利润权限 | 6 | 导出商品/订单 CSV 成本价列权限过滤，报表概览利润字段权限过滤 |
 | 对象级权限 | 11 | 客户/订单 detail/update/delete/transfer 非 owner 返回 403，管理员绕过 |
 | 边界条件 + 安全 | 6 | SQL 注入搜索安全（3 项）、分页边界 page=0/page_size=101/page_size=-1（3 项） |
 | 软删除过滤 | 2 | 客户列表排除已删除、支付列表排除已删除订单 |
 | 外键验证 | 4 | 客户 owner_user_id 无效/不存在、订单 customer_id 不存在、订单 items 含不存在商品 |
-| **合计** | **1219** | |
+| **合计** | **1237** | |
 
 ### 前端测试覆盖
 
@@ -242,7 +243,8 @@ npm run build
 | 登录页 | 7 | 渲染标题/输入框/登录按钮/提交调用 login/登录失败错误提示/成功跳转首页/redirect 参数跳转 |
 | API client | 7 | baseURL、token 附加、无 token、timeout 15s、Content-Type、X-Request-ID 生成和唯一性 |
 | NotFound | 3 | 404 渲染/返回首页按钮/按钮点击导航 |
-| **合计** | **441** | |
+| 角色权限 | 16 | 渲染标题/新建按钮/挂载加载/表格/模态框字段/权限复选框/空状态/错误后空列表/输入框/textarea/编辑模式/创建刷新/删除按钮禁用/确认删除/保存按钮 |
+| **合计** | **463** | |
 
 ## API 概览
 
@@ -252,6 +254,7 @@ npm run build
 |---|---|---|
 | 认证 | `/api/v1/auth` | 登录、刷新、退出、当前用户 |
 | 用户 | `/api/v1/users` | 用户列表、创建、编辑、角色管理 |
+| 角色 | `/api/v1/roles` | 角色列表（含权限详情）、权限列表（按模块分组）、创建、编辑、删除 |
 | 商品 | `/api/v1/products` | 商品 CRUD + 停用 + 价格历史 + CSV 批量导入 |
 | 文件 | `/api/v1/files` | 图片上传 |
 | 客户 | `/api/v1/customers` | 客户 CRUD + 归属转移 + CSV 批量导入 |
