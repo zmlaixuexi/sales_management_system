@@ -1,15 +1,21 @@
-"""角色辅助函数单元测试 — _require_superuser / _serialize_role"""
+"""角色辅助函数单元测试 — _require_superuser / _serialize_role / _validate_permissions_exist"""
 
+import uuid
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
 import pytest
 from fastapi import HTTPException
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 from app.api.v1.roles import (
     _require_superuser,
     _serialize_role,
+    _validate_permissions_exist,
 )
+from app.db.session import Base
+from app.models.user import Permission
 
 # ─── _require_superuser ────────────────────────────────────────
 
@@ -121,3 +127,44 @@ def test_serialize_role_isoformat():
     result = _serialize_role(role)
     assert result["created_at"] == dt.isoformat()
     assert result["updated_at"] == dt.isoformat()
+
+
+# ─── _validate_permissions_exist ────────────────────────────────
+
+
+@pytest.fixture()
+def db():
+    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    Base.metadata.create_all(bind=engine)
+    maker = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+    session = maker()
+    yield session
+    session.close()
+    Base.metadata.drop_all(bind=engine)
+    engine.dispose()
+
+
+def test_validate_permissions_exist_all_found(db):
+    """所有权限 ID 存在时不抛异常"""
+    pid1 = uuid.uuid4()
+    pid2 = uuid.uuid4()
+    db.add(Permission(id=pid1, code="order:view", name="查看", module="订单"))
+    db.add(Permission(id=pid2, code="order:create", name="创建", module="订单"))
+    db.commit()
+    _validate_permissions_exist(db, [pid1, pid2])  # 不抛异常
+
+
+def test_validate_permissions_exist_missing(db):
+    """有不存在的权限 ID 时抛 400"""
+    pid = uuid.uuid4()
+    db.add(Permission(id=pid, code="order:view", name="查看", module="订单"))
+    db.commit()
+    with pytest.raises(HTTPException) as exc_info:
+        _validate_permissions_exist(db, [pid, uuid.uuid4()])
+    assert exc_info.value.status_code == 400
+    assert "权限不存在" in str(exc_info.value.detail)
+
+
+def test_validate_permissions_exist_empty_list(db):
+    """空列表不抛异常"""
+    _validate_permissions_exist(db, [])  # 不抛异常
