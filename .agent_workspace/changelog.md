@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-05-04（第七百二十七轮·自动循环）
+
+### 安全加固：输入消毒与 XSS 防护边界测试（51 项覆盖密码强度、strip_html、控制字符、CSV 注入、安全头、body limit、配置验证）
+
+**变更文件：**
+- `backend/tests/test_security_boundaries.py`（新建 51 项测试）
+  - 密码强度：强密码通过、缺大写/小写/数字/特殊字符各被拒、黑名单 P@ssw0rd/P@ssw0rd! 被拒、大小写不敏感
+  - strip_html：onclick/svg onload/javascript href 被移除、多标签/未闭合/br/空字符串边界
+  - 控制字符：全范围 0x00-0x1f+0x7f 验证、保留 \\t\\n\\r、DEL 移除
+  - sanitize_text：None/空/纯空格/HTML+控制组合
+  - escape_like：全%/全_/Unicode/混合特殊字符
+  - CSV 注入：==/空格+等号/负数/+公式/@符号前缀
+  - 安全头：x-content-type-options/x-frame-options/x-xss-protection/referrer-policy/CSP/cache-control
+  - body limit：默认 1MB、中间件存在、注册到 app
+  - 黑名单：>=50 条、含常见弱密码
+  - 配置验证：JWT 过期正数、速率限制 >=0、图片/CSV 限制 >0
+  - 前后端一致性：密码正则
+
+**修复：**
+- strip_html 对数学表达式 `< 2 >` 的误匹配（记录为已知限制）
+
+**验证：**
+- 后端 2490/2490 ✓（新增 51 项）
+- ruff 0 errors ✓
+
 ## 2026-05-04（第七百二十六轮·自动循环）
 
 ### 代码质量：前端表单验证边界测试（59 项覆盖手机号/密码正则、长度边界、必填字段、InputNumber 约束、前后端一致性）
