@@ -223,4 +223,38 @@ describe('apiClient 响应拦截器', () => {
 
     expect(mockMessageError).toHaveBeenCalledWith('商品已被引用，不能删除')
   })
+
+  it('401 有 refresh_token 但刷新失败时清除 token 并跳转', async () => {
+    localStorage.setItem('access_token', 'old-token')
+    localStorage.setItem('refresh_token', 'expired-refresh')
+    mockAxiosPost.mockRejectedValueOnce(new Error('refresh expired'))
+    delete window.location
+    window.location = { href: '' } as Location
+
+    try {
+      await triggerErrorInterceptor(401)
+    } catch {
+      // expected
+    }
+
+    expect(mockAxiosPost).toHaveBeenCalledWith(
+      expect.stringContaining('/auth/refresh'),
+      { refresh_token: 'expired-refresh' },
+    )
+    expect(localStorage.getItem('access_token')).toBeNull()
+    expect(localStorage.getItem('refresh_token')).toBeNull()
+    expect(window.location.href).toBe('/login')
+  })
+
+  it('非 401 错误有 data.message 但无 error.message 时显示 data.message', async () => {
+    try {
+      await triggerErrorInterceptor(422, {
+        data: { success: false, message: '参数格式不正确' },
+      })
+    } catch {
+      // expected
+    }
+
+    expect(mockMessageError).toHaveBeenCalledWith('参数格式不正确')
+  })
 })
