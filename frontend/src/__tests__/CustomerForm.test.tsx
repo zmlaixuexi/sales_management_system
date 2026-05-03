@@ -18,7 +18,7 @@ vi.mock('@/api/customers', () => ({
 vi.mock('@/hooks/useSubmit', () => ({
   useSubmit: (onSubmit: any) => ({
     submitting: false,
-    handleSubmit: (e: any) => { e?.preventDefault?.(); onSubmit({}) },
+    handleSubmit: (e: any) => { e?.preventDefault?.() },
   }),
 }))
 
@@ -255,5 +255,19 @@ describe('CustomerForm', () => {
     const optionTexts = options.map((o) => o.textContent)
     expect(optionTexts).toContain('新客户')
     expect(optionTexts).toContain('已成交')
+  })
+
+  it('返回列表按钮导航到客户列表', async () => {
+    renderNewCustomer()
+    screen.getByText('返回列表').click()
+    await (() => new Promise((r) => setTimeout(r, 0)))()
+    expect(screen.getByText('Customers List')).toBeInTheDocument()
+  })
+
+  it('取消按钮导航到客户列表', async () => {
+    renderNewCustomer()
+    screen.getByText('取消').click()
+    await (() => new Promise((r) => setTimeout(r, 0)))()
+    expect(screen.getByText('Customers List')).toBeInTheDocument()
   })
 })
