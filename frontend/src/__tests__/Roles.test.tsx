@@ -497,4 +497,146 @@ describe('RolesPage', () => {
       expect(message.error).toHaveBeenCalledWith('更新角色失败')
     })
   })
+
+  it('fetchRoles 返回非数组不崩溃', async () => {
+    _rolesApi.fetchRoles.mockResolvedValue({ success: true, data: null })
+    renderRoles()
+    await waitFor(() => {
+      expect(screen.getByText('暂无角色数据')).toBeInTheDocument()
+    })
+  })
+
+  it('fetchRoles 返回 success=false 不设置角色', async () => {
+    _rolesApi.fetchRoles.mockResolvedValue({ success: false, data: [] })
+    renderRoles()
+    await waitFor(() => {
+      expect(screen.getByText('暂无角色数据')).toBeInTheDocument()
+    })
+  })
+
+  it('loadRoles _toastDisplayed 错误静默', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _rolesApi.fetchRoles.mockRejectedValue(err)
+    const { message } = await import('antd')
+    renderRoles()
+    await waitFor(() => {
+      expect(screen.getByText('暂无角色数据')).toBeInTheDocument()
+    })
+    expect(message.error).not.toHaveBeenCalledWith('加载角色列表失败')
+  })
+
+  it('handleSave _toastDisplayed 错误静默', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _mockForm.validateFields.mockRejectedValueOnce(err)
+    const { message } = await import('antd')
+    renderRoles()
+
+    await act(async () => { fireEvent.click(screen.getByText('新建角色')) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeVisible() })
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => { expect(_mockForm.validateFields).toHaveBeenCalled() })
+    expect(message.error).not.toHaveBeenCalledWith('创建角色失败')
+  })
+
+  it('handleDelete _toastDisplayed 错误静默', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _rolesApi.deleteRole.mockRejectedValue(err)
+    const { message } = await import('antd')
+    renderRoles()
+    await waitFor(() => {
+      expect(screen.getAllByTestId('popconfirm').length).toBeGreaterThanOrEqual(1)
+    })
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    await act(async () => { fireEvent.click(popconfirms[1]) })
+    await waitFor(() => {
+      expect(_rolesApi.deleteRole).toHaveBeenCalledWith('r-2')
+    })
+    expect(message.error).not.toHaveBeenCalledWith('删除角色失败')
+  })
+
+  it('角色空 display_name 显示 --', async () => {
+    _rolesApi.fetchRoles.mockResolvedValue({
+      success: true,
+      data: [{
+        id: 'r-4', name: 'no_display', display_name: null,
+        description: '有描述', permissions: [], user_count: 0,
+        created_at: null, updated_at: null,
+      }],
+    })
+    renderRoles()
+    await waitFor(() => {
+      expect(screen.getByText('no_display')).toBeInTheDocument()
+      expect(screen.getByText('--')).toBeInTheDocument()
+    })
+  })
+
+  it('角色空 description 显示 --', async () => {
+    _rolesApi.fetchRoles.mockResolvedValue({
+      success: true,
+      data: [{
+        id: 'r-5', name: 'no_desc', display_name: '有名称',
+        description: null, permissions: [], user_count: 0,
+        created_at: null, updated_at: null,
+      }],
+    })
+    renderRoles()
+    await waitFor(() => {
+      // 两列都有空值，都会渲染 '--'
+      const dashes = screen.getAllByText('--')
+      expect(dashes.length).toBeGreaterThanOrEqual(1)
+    })
+  })
+
+  it('编辑角色空 display_name/description 填充空字符串', async () => {
+    _rolesApi.fetchRoles.mockResolvedValue({
+      success: true,
+      data: [{
+        id: 'r-6', name: 'nulls', display_name: null,
+        description: null, permissions: [],
+        user_count: 0, created_at: null, updated_at: null,
+      }],
+    })
+    renderRoles()
+    await waitFor(() => { expect(screen.getByText('编辑')).toBeInTheDocument() })
+    const editBtns = screen.getAllByText('编辑')
+    await act(async () => { fireEvent.click(editBtns[0]) })
+    await waitFor(() => {
+      expect(_mockForm.setFieldsValue).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'nulls', display_name: '', description: '' }),
+      )
+    })
+  })
+
+  it('保存时空 display_name/description 发送 undefined', async () => {
+    _mockForm.validateFields.mockResolvedValueOnce({
+      name: 'minimal', display_name: '', description: '', permission_ids: [],
+    })
+    _rolesApi.createRole.mockResolvedValueOnce({ success: true })
+    renderRoles()
+
+    await act(async () => { fireEvent.click(screen.getByText('新建角色')) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeVisible() })
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => {
+      expect(_rolesApi.createRole).toHaveBeenCalledWith(
+        expect.objectContaining({ display_name: undefined, description: undefined }),
+      )
+    })
+  })
+
+  it('fetchPermissions 返回非对象不崩溃', async () => {
+    _rolesApi.fetchPermissions.mockResolvedValue({ success: true, data: null })
+    renderRoles()
+    await waitFor(() => {
+      expect(screen.getByText('角色权限管理')).toBeInTheDocument()
+    })
+  })
+
+  it('关联用户数显示"X 人"', async () => {
+    renderRoles()
+    await waitFor(() => {
+      expect(screen.getByText('2 人')).toBeInTheDocument()
+      expect(screen.getByText('0 人')).toBeInTheDocument()
+    })
+  })
 })
