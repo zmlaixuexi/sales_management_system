@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-03（第六百零二轮·自动循环）
+
+### 工程：数据库索引审计与补充
+
+- SalesOrderItem.product_id 添加 index（库存查询、订单关联）
+- InventoryMovement.created_at 添加 index（分页排序）
+- Payment.status 添加 index（状态筛选）
+- Payment.created_at 添加 index（分页排序）
+- 后端 1304 测试全绿，部署时需生成 Alembic 迁移
+- 同步审查：无 console.log/debugger/TODO/FIXME、Docker/Nginx 配置完善
+
 ## 2026-05-03（第六百零一轮·自动循环）
 
 ### 重构：fetcher 回调改为 async/await，函数覆盖率达到 100%
