@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-03（第六百四十九轮·自动循环）
+
+### 安全加固：Pydantic schema 金额字段 Decimal 解析保护 + 价格非负验证
+
+- product.py：新增 `_validate_price` 辅助函数，ProductCreate/ProductUpdate 的 sale_price、cost_price 添加 field_validator（格式校验 + 非负校验）
+- payment.py：PaymentCreate.amount 添加 InvalidOperation 异常捕获，返回友好错误信息
+- order.py：OrderItemInput.unit_price 添加 InvalidOperation 异常捕获
+- 新增 9 个 schema 验证器单元测试（test_schema_validators.py）
+- 9 个已有测试的期望状态码从 400 更新为 422（Pydantic schema 层返回 422）
+
 ## 2026-05-03（第六百四十八轮·自动循环）
 
 ### 部署体验：manage.sh 添加监控启停命令 + Grafana 端口映射

@@ -1,3 +1,4 @@
+from decimal import Decimal, InvalidOperation
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
@@ -5,6 +6,18 @@ from pydantic import BaseModel, Field, field_validator
 from app.core.sanitize import sanitize_text as _sanitize
 
 ProductStatus = Literal["active", "inactive", "disabled"]
+
+
+def _validate_price(v: str | None, field_name: str) -> str | None:
+    if v is None:
+        return v
+    try:
+        d = Decimal(v)
+    except InvalidOperation:
+        raise ValueError(f"{field_name}格式不正确") from None
+    if d < 0:
+        raise ValueError(f"{field_name}不能为负数")
+    return v
 
 
 class ProductCreate(BaseModel):
@@ -18,6 +31,16 @@ class ProductCreate(BaseModel):
     status: ProductStatus = Field("active", description="状态：active/inactive/disabled")
     sort_weight: int = Field(0, description="排序权重")
     remark: str | None = Field(None, max_length=500, description="备注")
+
+    @field_validator("sale_price")
+    @classmethod
+    def validate_sale_price(cls, v: str) -> str:
+        return _validate_price(v, "销售价") or v
+
+    @field_validator("cost_price")
+    @classmethod
+    def validate_cost_price(cls, v: str) -> str:
+        return _validate_price(v, "成本价") or v
 
     @field_validator("name", "remark")
     @classmethod
@@ -36,6 +59,16 @@ class ProductUpdate(BaseModel):
     status: ProductStatus | None = None
     sort_weight: int | None = None
     remark: str | None = Field(None, max_length=500)
+
+    @field_validator("sale_price")
+    @classmethod
+    def validate_sale_price(cls, v: str | None) -> str | None:
+        return _validate_price(v, "销售价")
+
+    @field_validator("cost_price")
+    @classmethod
+    def validate_cost_price(cls, v: str | None) -> str | None:
+        return _validate_price(v, "成本价")
 
     @field_validator("name", "remark")
     @classmethod

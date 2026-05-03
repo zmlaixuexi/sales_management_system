@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -13,8 +13,13 @@ class OrderItemInput(BaseModel):
     @field_validator("unit_price")
     @classmethod
     def unit_price_must_be_non_negative(cls, v: str | None) -> str | None:
-        if v is not None and Decimal(v) < 0:
-            raise ValueError("成交单价不能为负")
+        if v is not None:
+            try:
+                d = Decimal(v)
+            except InvalidOperation:
+                raise ValueError("成交单价格式不正确") from None
+            if d < 0:
+                raise ValueError("成交单价不能为负")
         return v
 
 

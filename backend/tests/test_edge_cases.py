@@ -118,7 +118,7 @@ def test_03_product_create_negative_price():
     resp = client.post("/api/v1/products", json={
         "name": "负价商品", "sale_price": "-10", "cost_price": "5",
     }, headers=_auth())
-    assert resp.status_code == 400
+    assert resp.status_code == 422
 
 
 def test_04_product_create_duplicate_sku():

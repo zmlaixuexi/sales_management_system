@@ -6,6 +6,14 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-236
+
+- 描述：Pydantic schema 金额字段 Decimal 解析保护 + 价格非负验证
+- 状态：已完成
+- 验证：product/payment/order schema 的金额字段添加 InvalidOperation 捕获和非负校验，+9 单元测试，全部 1361 测试通过
+- 安全影响：防止非数字金额字符串（如 "abc"）导致服务端 500 错误，统一返回 422 友好消息
+- 关联：app/schemas/product.py、app/schemas/payment.py、app/schemas/order.py、tests/test_schema_validators.py
+
 ## 功能编号：FEAT-20260503-235
 
 - 描述：docker-compose 添加 Prometheus + Grafana 监控栈

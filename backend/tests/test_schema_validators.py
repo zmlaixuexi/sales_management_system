@@ -183,3 +183,67 @@ def test_change_password_short_rejected():
     """新密码太短被拒绝"""
     with pytest.raises(ValidationError):
         ChangePasswordRequest(old_password="old123", new_password="ab1")
+
+
+# ─── ProductCreate sale_price / cost_price 验证 ──────────────
+
+
+def test_product_create_negative_sale_price_rejected():
+    """负销售价被拒绝"""
+    with pytest.raises(ValidationError, match="销售价不能为负数"):
+        ProductCreate(name="测试", sale_price="-10", cost_price="5")
+
+
+def test_product_create_negative_cost_price_rejected():
+    """负成本价被拒绝"""
+    with pytest.raises(ValidationError, match="成本价不能为负数"):
+        ProductCreate(name="测试", sale_price="10", cost_price="-5")
+
+
+def test_product_create_invalid_sale_price_rejected():
+    """非数字销售价被拒绝"""
+    with pytest.raises(ValidationError, match="销售价格式不正确"):
+        ProductCreate(name="测试", sale_price="abc", cost_price="5")
+
+
+def test_product_create_invalid_cost_price_rejected():
+    """非数字成本价被拒绝"""
+    with pytest.raises(ValidationError, match="成本价格式不正确"):
+        ProductCreate(name="测试", sale_price="10", cost_price="xyz")
+
+
+def test_product_create_zero_prices_ok():
+    """零价格通过"""
+    p = ProductCreate(name="测试", sale_price="0", cost_price="0")
+    assert p.sale_price == "0"
+    assert p.cost_price == "0"
+
+
+def test_product_update_negative_sale_price_rejected():
+    """编辑时负销售价被拒绝"""
+    with pytest.raises(ValidationError, match="销售价不能为负数"):
+        ProductUpdate(sale_price="-10")
+
+
+def test_product_update_invalid_cost_price_rejected():
+    """编辑时非数字成本价被拒绝"""
+    with pytest.raises(ValidationError, match="成本价格式不正确"):
+        ProductUpdate(cost_price="bad")
+
+
+# ─── PaymentCreate.amount Decimal 解析保护 ──────────────────
+
+
+def test_payment_create_invalid_amount_rejected():
+    """非数字金额被拒绝"""
+    with pytest.raises(ValidationError, match="金额格式不正确"):
+        PaymentCreate(amount="hello", payment_method="cash")
+
+
+# ─── OrderItemInput.unit_price Decimal 解析保护 ─────────────
+
+
+def test_order_item_invalid_unit_price_rejected():
+    """非数字成交单价被拒绝"""
+    with pytest.raises(ValidationError, match="成交单价格式不正确"):
+        OrderItemInput(product_id="p1", quantity=1, unit_price="abc")

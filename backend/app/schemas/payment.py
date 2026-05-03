@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
@@ -18,7 +18,11 @@ class PaymentCreate(BaseModel):
     @field_validator("amount")
     @classmethod
     def amount_must_be_positive(cls, v: str) -> str:
-        if Decimal(v) <= 0:
+        try:
+            d = Decimal(v)
+        except InvalidOperation:
+            raise ValueError("金额格式不正确") from None
+        if d <= 0:
             raise ValueError("收款金额必须大于 0")
         return v
 

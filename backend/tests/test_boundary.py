@@ -1830,12 +1830,12 @@ def test_97_product_create_negative_price():
     resp = client.post("/api/v1/products", json={
         "name": "负销售价商品97a", "sale_price": "-10", "cost_price": "5",
     }, headers=headers)
-    assert resp.status_code == 400, f"负销售价应返回 400: {resp.status_code} {resp.json()}"
+    assert resp.status_code == 422, f"负销售价应返回 422: {resp.status_code} {resp.json()}"
 
     resp = client.post("/api/v1/products", json={
         "name": "负成本价商品97b", "sale_price": "10", "cost_price": "-5",
     }, headers=headers)
-    assert resp.status_code == 400, f"负成本价应返回 400: {resp.status_code} {resp.json()}"
+    assert resp.status_code == 422, f"负成本价应返回 422: {resp.status_code} {resp.json()}"
 
 
 def test_98_product_update_negative_price():
@@ -1848,10 +1848,10 @@ def test_98_product_update_negative_price():
     pid = resp.json()["data"]["id"]
 
     resp = client.put(f"/api/v1/products/{pid}", json={"sale_price": "-10"}, headers=headers)
-    assert resp.status_code == 400, f"负销售价应返回 400: {resp.status_code} {resp.json()}"
+    assert resp.status_code == 422, f"负销售价应返回 422: {resp.status_code} {resp.json()}"
 
     resp = client.put(f"/api/v1/products/{pid}", json={"cost_price": "-5"}, headers=headers)
-    assert resp.status_code == 400, f"负成本价应返回 400: {resp.status_code} {resp.json()}"
+    assert resp.status_code == 422, f"负成本价应返回 422: {resp.status_code} {resp.json()}"
 
 
 def test_99_product_create_negative_stock():

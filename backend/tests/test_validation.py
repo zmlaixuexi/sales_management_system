@@ -121,7 +121,7 @@ def test_04_product_update_negative_price():
     resp = client.put(f"/api/v1/products/{_product_id}", json={
         "sale_price": "-50",
     }, headers=_auth())
-    assert resp.status_code == 400
+    assert resp.status_code == 422
 
 
 def test_05_product_update_empty_name():
@@ -154,7 +154,7 @@ def test_07_product_update_invalid_price():
     resp = client.put(f"/api/v1/products/{_product_id}", json={
         "sale_price": "abc",
     }, headers=_auth())
-    assert resp.status_code == 400
+    assert resp.status_code == 422
 
 
 def test_08_product_disable_not_found():

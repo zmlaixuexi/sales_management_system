@@ -172,7 +172,7 @@ def test_03d_update_product_cost_price_negative():
     resp = client.put(f"/api/v1/products/{_product_id}", json={
         "cost_price": "-10.00",
     }, headers=_auth())
-    assert resp.status_code == 400
+    assert resp.status_code == 422
     assert "成本价不能为负" in resp.json()["error"]["message"]
 
 
@@ -195,8 +195,8 @@ def test_03g_update_product_cost_price_format_error():
     resp = client.put(f"/api/v1/products/{_product_id}", json={
         "cost_price": "abc",
     }, headers=_auth())
-    assert resp.status_code == 400
-    assert "成本价格式错误" in resp.json()["error"]["message"]
+    assert resp.status_code == 422
+    assert "成本价格式不正确" in resp.json()["error"]["message"]
 
 
 def test_03h_update_product_category():
@@ -390,7 +390,7 @@ def test_11_create_bad_price_rejected():
     resp = client.post("/api/v1/products", json={
         "name": "测试", "sale_price": "abc", "cost_price": "5", "stock_quantity": 1,
     }, headers=_auth())
-    assert resp.status_code == 400
+    assert resp.status_code == 422
     assert resp.json()["error"]["code"] == "VALIDATION_FAILED"
 
 
