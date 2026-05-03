@@ -18,6 +18,7 @@ from app.api.deps import (
     paginated_resp,
     parse_uuid_or_400,
     resp,
+    safe_commit,
 )
 from app.db.session import Base
 from app.models.user import User
@@ -373,3 +374,75 @@ def test_pagination_params_page_zero_rejected():
     client = TestClient(test_app)
     resp = client.get("/test?page=0&page_size=20")
     assert resp.status_code == 422
+
+
+# ---- safe_commit ----
+
+
+def test_safe_commit_success(db: Session):
+    """正常提交不抛异常"""
+    obj = _FakeModel(name="safe_commit_test")
+    db.add(obj)
+    safe_commit(db)
+    assert db.query(_FakeModel).filter(_FakeModel.name == "safe_commit_test").first() is not None
+
+
+def test_safe_commit_rollback_on_failure(db: Session):
+    """commit 失败时自动 rollback，session 保持可用"""
+    obj = _FakeModel(name="rollback_test")
+    db.add(obj)
+    safe_commit(db)
+
+    # 制造唯一约束冲突：code 列无唯一约束，用 name 重复 + 手动异常模拟
+    # 更直接的方式：让 commit 抛异常，验证 rollback 被调用
+    from unittest.mock import MagicMock
+
+    original_commit = db.commit
+    call_count = {"rollback": 0}
+    original_rollback = db.rollback
+
+    def _failing_commit():
+        raise RuntimeError("simulated commit failure")
+
+    def _counting_rollback():
+        call_count["rollback"] += 1
+        return original_rollback()
+
+    db.commit = _failing_commit
+    db.rollback = _counting_rollback
+
+    with pytest.raises(RuntimeError, match="simulated commit failure"):
+        safe_commit(db)
+
+    assert call_count["rollback"] == 1
+
+    # 恢复 session 方法，验证 session 仍可用
+    db.commit = original_commit
+    db.rollback = original_rollback
+    db.add(_FakeModel(name="after_recovery"))
+    safe_commit(db)
+    assert db.query(_FakeModel).filter(_FakeModel.name == "after_recovery").first() is not None
+
+
+def test_safe_commit_reraises_original_exception(db: Session):
+    """重新抛出原始异常类型（不只是 Exception）"""
+    from sqlalchemy.exc import IntegrityError
+    from unittest.mock import MagicMock
+
+    original_commit = db.commit
+    original_rollback = db.rollback
+
+    def _integrity_error():
+        raise IntegrityError("", "", Exception())
+
+    db.commit = _integrity_error
+    db.rollback = MagicMock()
+
+    with pytest.raises(IntegrityError):
+        safe_commit(db)
+
+    assert db.rollback.call_count == 1
+
+    # 恢复 session 方法避免影响 teardown
+    db.commit = original_commit
+    db.rollback = original_rollback
