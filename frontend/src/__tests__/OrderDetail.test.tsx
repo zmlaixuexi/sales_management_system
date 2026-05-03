@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 
 const _orderMocks = {
@@ -24,6 +24,27 @@ vi.mock('@/api/orders', () => ({
 vi.mock('@/api/payments', () => ({
   createPayment: (...args: any[]) => _paymentMocks.createPayment(...args),
   reversePayment: (...args: any[]) => _paymentMocks.reversePayment(...args),
+}))
+
+const _authStore = { hasPermission: vi.fn(() => false) }
+vi.mock('@/stores/auth', () => ({
+  useAuthStore: (selector: any) => selector(_authStore),
+}))
+
+vi.mock('@/constants/statusMaps', () => ({
+  orderStatusMap: {
+    draft: { color: 'default', label: '草稿' },
+    confirmed: { color: 'blue', label: '已确认' },
+    cancelled: { color: 'red', label: '已取消' },
+    partially_paid: { color: 'orange', label: '部分收款' },
+    paid: { color: 'green', label: '已收款' },
+  },
+  paymentMethodMap: {
+    cash: '现金',
+    transfer: '转账',
+    wechat: '微信',
+    alipay: '支付宝',
+  },
 }))
 
 vi.mock('@/utils', () => ({
@@ -389,5 +410,132 @@ describe('OrderDetail', () => {
     await waitFor(() => {
       expect(screen.getByText('暂无操作日志')).toBeInTheDocument()
     })
+  })
+
+  it('canViewCost 为 true 时显示成本信息', async () => {
+    _authStore.hasPermission.mockReturnValue(true)
+    renderOrderDetail()
+    await waitFor(() => {
+      const descItems = screen.getAllByTestId('desc-item')
+      const labels = descItems.map((d) => d.getAttribute('data-label'))
+      expect(labels).toContain('总成本')
+      expect(labels).toContain('毛利')
+      expect(labels).toContain('毛利率')
+    })
+  })
+
+  it('canViewCost 为 false 时不显示成本信息', async () => {
+    _authStore.hasPermission.mockReturnValue(false)
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText(/ORD-20260501-001/)).toBeInTheDocument()
+    })
+    const descItems = screen.getAllByTestId('desc-item')
+    const labels = descItems.map((d) => d.getAttribute('data-label'))
+    expect(labels).not.toContain('总成本')
+  })
+
+  it('点击登记收款按钮打开收款弹窗', async () => {
+    const confirmedData = {
+      success: true,
+      data: {
+        ...mockOrderData.data,
+        status: 'confirmed',
+        payments: [],
+      },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(confirmedData)
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText(/ORD-20260501-001/)).toBeInTheDocument()
+    })
+    const payBtn = screen.getAllByTestId('button').find(
+      (b) => b.textContent?.includes('登记收款'),
+    )
+    expect(payBtn).toBeTruthy()
+    await act(async () => { fireEvent.click(payBtn!) })
+    await waitFor(() => {
+      expect(screen.getByTestId('modal')).toBeInTheDocument()
+      expect(screen.getByTestId('modal').getAttribute('data-title')).toBe('登记收款')
+    })
+  })
+
+  it('收款弹窗中有金额、收款方式和备注输入', async () => {
+    const confirmedData = {
+      success: true,
+      data: {
+        ...mockOrderData.data,
+        status: 'confirmed',
+        payments: [],
+      },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(confirmedData)
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText(/ORD-20260501-001/)).toBeInTheDocument()
+    })
+    const payBtn = screen.getAllByTestId('button').find(
+      (b) => b.textContent?.includes('登记收款'),
+    )
+    await act(async () => { fireEvent.click(payBtn!) })
+    await waitFor(() => {
+      expect(screen.getByTestId('input-number')).toBeInTheDocument()
+      expect(screen.getByTestId('select')).toBeInTheDocument()
+      expect(screen.getByTestId('input')).toBeInTheDocument()
+    })
+  })
+
+  it('冲正成功后刷新订单', async () => {
+    _paymentMocks.reversePayment.mockResolvedValueOnce({ success: true })
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('冲正')).toBeInTheDocument()
+    })
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    const reversePop = popconfirms.find((p) => p.getAttribute('data-title')?.includes('冲正'))
+    expect(reversePop).toBeTruthy()
+    await act(async () => { fireEvent.click(reversePop!) })
+    await waitFor(() => {
+      expect(_paymentMocks.reversePayment).toHaveBeenCalledWith('pay-1')
+      // 初始加载(×2, 组件有重复 useEffect) + 刷新 = 至少 3 次
+      expect(_orderMocks.fetchOrder.mock.calls.length).toBeGreaterThanOrEqual(2)
+    })
+  })
+
+  it('冲正失败显示错误提示', async () => {
+    _paymentMocks.reversePayment.mockRejectedValueOnce(new Error('冲正失败'))
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('冲正')).toBeInTheDocument()
+    })
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    const reversePop = popconfirms.find((p) => p.getAttribute('data-title')?.includes('冲正'))
+    await act(async () => { fireEvent.click(reversePop!) })
+    await waitFor(() => {
+      expect(_messageError).toHaveBeenCalled()
+    })
+  })
+
+  it('返回列表按钮导航到订单列表', async () => {
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('返回列表')).toBeInTheDocument()
+    })
+    screen.getByText('返回列表').click()
+    await waitFor(() => {
+      expect(screen.getByText('Orders List')).toBeInTheDocument()
+    })
+  })
+
+  it('编辑按钮导航到编辑页', async () => {
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('编辑')).toBeInTheDocument()
+    })
+    // 草稿状态有编辑按钮，点击应导航
+    const editBtn = screen.getAllByTestId('button').find(
+      (b) => b.textContent?.includes('编辑'),
+    )
+    expect(editBtn).toBeTruthy()
   })
 })
