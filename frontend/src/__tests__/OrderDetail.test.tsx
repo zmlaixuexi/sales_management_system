@@ -41,7 +41,7 @@ vi.mock('antd', () => ({
     ({ children }: any) => <div data-testid="descriptions">{children}</div>,
     { Item: ({ children, label }: any) => <div data-testid="desc-item" data-label={label}>{children}</div> },
   ),
-  Table: ({ dataSource, columns, rowKey, footer }: any) => (
+  Table: ({ dataSource, columns, rowKey, footer, locale }: any) => (
     <div>
       <table data-testid="table">
         <tbody>
@@ -56,6 +56,7 @@ vi.mock('antd', () => ({
           ))}
         </tbody>
       </table>
+      {(!dataSource || dataSource.length === 0) && locale?.emptyText && <span>{locale.emptyText}</span>}
       {footer && <div data-testid="table-footer">{footer()}</div>}
     </div>
   ),
@@ -347,5 +348,46 @@ describe('OrderDetail', () => {
     // 确认按钮不应出现
     const confirmBtn = buttons.find((b) => b.textContent?.includes('确认订单'))
     expect(confirmBtn).toBeFalsy()
+  })
+
+  it('取消订单失败显示错误提示', async () => {
+    _orderMocks.cancelOrder.mockRejectedValueOnce(new Error('cancel failed'))
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('取消订单')).toBeInTheDocument()
+    })
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    const cancelPop = popconfirms.find((p) => p.getAttribute('data-title')?.includes('取消该订单'))
+    cancelPop!.click()
+    await waitFor(() => {
+      expect(_messageError).toHaveBeenCalled()
+    })
+  })
+
+  it('无订单明细显示"暂无订单明细"', async () => {
+    const emptyItemsData = {
+      success: true,
+      data: {
+        ...mockOrderData.data,
+        items: [],
+        payments: [],
+      },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(emptyItemsData)
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('暂无订单明细')).toBeInTheDocument()
+    })
+  })
+
+  it('无操作日志显示"暂无操作日志"', async () => {
+    _orderMocks.fetchOrderLogs.mockResolvedValue({
+      success: true,
+      data: { items: [], page: 1, page_size: 10, total: 0 },
+    })
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('暂无操作日志')).toBeInTheDocument()
+    })
   })
 })
