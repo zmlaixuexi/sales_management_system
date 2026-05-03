@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-05-04（第七百二十六轮·自动循环）
+
+### 代码质量：前端表单验证边界测试（59 项覆盖手机号/密码正则、长度边界、必填字段、InputNumber 约束、前后端一致性）
+
+**变更文件：**
+- `frontend/src/__tests__/form-validation-boundaries.test.ts`（新建 59 项测试）
+  - 手机号正则：11 位边界、合法/非法前缀、字母/空值、CustomerForm/Users 源码一致性
+  - 密码正则：字母+数字/纯字母/纯数字/空值/特殊字符边界、Users 源码验证
+  - 用户名长度：min=2、max=50、required、maxLength=50 源码验证
+  - 密码长度：min=6、max=100、required 源码验证
+  - 邮箱验证：type='email'、max=100、CustomerForm/Users 源码一致性
+  - 客户名称：required、maxLength=100/30/500 源码验证
+  - 商品表单：name/cost_price/sale_price required、min=0、precision=2、maxLength=100/50
+  - 订单表单：customer_id required、空商品行校验、quantity min=1、unit_price min=0、重复商品检查、remark maxLength=500
+  - 角色表单：name required/max=50、display_name max=100、description max=255、maxLength=50/255
+  - 登录表单：username/password required
+  - useSubmit：errorFields 吞没验证
+  - 前后端一致性：手机号/密码正则与后端 Pydantic 匹配
+
+**验证：**
+- 前端 917/917 ✓（新增 59 项）
+- eslint 0 errors ✓
+
 ## 2026-05-04（第七百二十五轮·自动循环）
 
 ### 可观测性：慢请求检测阈值边界测试（41 项覆盖配置验证、请求/SQL 阈值、日志级别、格式、Grafana 面板、Request ID）
