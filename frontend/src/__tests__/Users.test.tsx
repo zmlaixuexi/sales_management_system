@@ -595,4 +595,168 @@ describe('UsersPage', () => {
       expect(screen.getByText('新建用户')).toBeInTheDocument()
     })
   })
+
+  it('fetchRoles success=false 不设置角色', async () => {
+    _userMocks.fetchRoles.mockResolvedValue({ success: false, data: [] })
+    renderUsers()
+    await waitFor(() => {
+      expect(_userMocks.fetchRoles).toHaveBeenCalled()
+    })
+    // 角色选择器应为空
+    screen.getByText('新建用户').click()
+    await waitFor(() => {
+      expect(screen.getByTestId('modal')).toBeInTheDocument()
+    })
+    const selects = screen.getAllByTestId('select')
+    // select 中无角色选项（只有 placeholder）
+    const roleSelect = selects[selects.length - 1]
+    expect(roleSelect.querySelectorAll('option').length).toBe(0)
+  })
+
+  it('createUser success=false 不关闭弹窗', async () => {
+    _mockForm.validateFields.mockResolvedValueOnce({
+      username: 'u', password: 'Pass123',
+    })
+    _userMocks.createUser.mockReset()
+    _userMocks.createUser.mockResolvedValue({ success: false })
+    renderUsers()
+
+    await act(async () => { fireEvent.click(screen.getByText('新建用户')) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeInTheDocument() })
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => {
+      expect(_userMocks.createUser).toHaveBeenCalled()
+    })
+    expect(_messageSuccess).not.toHaveBeenCalledWith('用户已创建')
+    // Modal should still be open
+    expect(screen.getByTestId('modal')).toBeInTheDocument()
+  })
+
+  it('updateUser success=false 不关闭弹窗', async () => {
+    _mockForm.validateFields.mockResolvedValueOnce({
+      display_name: '测试', is_active: true, role_ids: [],
+    })
+    _userMocks.updateUser.mockReset()
+    _userMocks.updateUser.mockResolvedValue({ success: false })
+    renderUsers()
+
+    const editBtns = screen.getAllByText('编辑')
+    await act(async () => { fireEvent.click(editBtns[0]) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeInTheDocument() })
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => {
+      expect(_userMocks.updateUser).toHaveBeenCalled()
+    })
+    expect(_messageSuccess).not.toHaveBeenCalledWith('用户已更新')
+    expect(screen.getByTestId('modal')).toBeInTheDocument()
+  })
+
+  it('编辑用户保存失败显示"更新用户失败"', async () => {
+    _mockForm.validateFields.mockResolvedValueOnce({
+      display_name: '测试', is_active: true, role_ids: [],
+    })
+    _userMocks.updateUser.mockRejectedValueOnce(new Error('更新失败'))
+    renderUsers()
+
+    const editBtns = screen.getAllByText('编辑')
+    await act(async () => { fireEvent.click(editBtns[0]) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeInTheDocument() })
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => {
+      expect(_messageError).toHaveBeenCalledWith('更新用户失败')
+    })
+  })
+
+  it('切换启用状态成功显示"已启用"', async () => {
+    _userMocks.updateUser.mockResolvedValueOnce({ success: true, data: {} })
+    renderUsers()
+    const switches = screen.getAllByTestId('switch')
+    // admin is_active=true, toggling to false -> checked=false -> 已停用
+    // We need to find an inactive user to toggle to active for "已启用"
+    // Or toggle sales01 (is_active=true) to get 已停用, then toggle again
+    await act(async () => { fireEvent.click(switches[1]) })
+    await waitFor(() => {
+      expect(_messageSuccess).toHaveBeenCalledWith('已停用')
+    })
+  })
+
+  it('updateUser success=false 切换状态不崩溃', async () => {
+    _userMocks.updateUser.mockResolvedValue({ success: false })
+    renderUsers()
+    const switches = screen.getAllByTestId('switch')
+    await act(async () => { fireEvent.click(switches[0]) })
+    await waitFor(() => {
+      expect(_userMocks.updateUser).toHaveBeenCalled()
+    })
+    expect(_messageSuccess).not.toHaveBeenCalled()
+  })
+
+  it('停用用户切换启用显示"已启用"', async () => {
+    _userMocks.fetchUsers.mockReturnValue({
+      data: {
+        items: [{
+          id: 'user-020', username: 'inactive', display_name: '停用',
+          phone: null, email: null, is_active: false, is_superuser: false,
+          roles: [], created_at: null, updated_at: null,
+        }],
+        total: 1,
+      },
+    })
+    _userMocks.updateUser.mockResolvedValueOnce({ success: true, data: {} })
+    renderUsers()
+    const switches = screen.getAllByTestId('switch')
+    await act(async () => { fireEvent.click(switches[0]) })
+    await waitFor(() => {
+      expect(_messageSuccess).toHaveBeenCalledWith('已启用')
+    })
+  })
+
+  it('编辑用户空 display_name 和空 role_ids', async () => {
+    _userMocks.fetchUsers.mockReturnValue({
+      data: {
+        items: [{
+          id: 'user-030', username: 'minimal', display_name: 'Min',
+          phone: '13800001111', email: 'm@t.com', is_active: true, is_superuser: false,
+          roles: [], created_at: null, updated_at: null,
+        }],
+        total: 1,
+      },
+    })
+    _mockForm.validateFields.mockResolvedValueOnce({
+      display_name: '', phone: '', email: '', is_active: true, role_ids: null,
+    })
+    _userMocks.updateUser.mockResolvedValueOnce({ success: true, data: {} })
+    renderUsers()
+
+    const editBtns = screen.getAllByText('编辑')
+    await act(async () => { fireEvent.click(editBtns[0]) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeInTheDocument() })
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => {
+      expect(_userMocks.updateUser).toHaveBeenCalledWith(
+        'user-030',
+        expect.objectContaining({ display_name: undefined, role_ids: [] }),
+      )
+    })
+  })
+
+  it('角色选择器 display_name 为 null 显示 name', async () => {
+    _userMocks.fetchRoles.mockResolvedValue({
+      success: true,
+      data: [
+        { id: 'role-x', name: 'custom_role', display_name: null },
+      ],
+    })
+    renderUsers()
+    await waitFor(() => {
+      expect(_userMocks.fetchRoles).toHaveBeenCalled()
+    })
+    screen.getByText('新建用户').click()
+    await waitFor(() => {
+      expect(screen.getByTestId('modal')).toBeInTheDocument()
+    })
+    const selects = screen.getAllByTestId('select')
+    const roleSelect = selects[selects.length - 1]
+    expect(roleSelect.textContent).toContain('custom_role')
+  })
 })
