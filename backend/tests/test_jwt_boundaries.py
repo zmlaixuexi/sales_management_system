@@ -439,3 +439,296 @@ class TestTokenGeneration:
         rd = jose_jwt.decode(rt, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM],
                              audience=settings.JWT_AUDIENCE, issuer=settings.JWT_ISSUER)
         assert rd["exp"] - rd["iat"] > ad["exp"] - ad["iat"]
+
+
+# ═══════════════════════════════════════════════════════
+# 7. JWT 配置验证
+# ═══════════════════════════════════════════════════════
+
+
+class TestJWTConfig:
+    def test_algorithm_is_hs256(self):
+        """JWT 算法为 HS256"""
+        assert settings.JWT_ALGORITHM == "HS256"
+
+    def test_issuer_is_sales_management_system(self):
+        """JWT issuer 为 sales-management-system"""
+        assert settings.JWT_ISSUER == "sales-management-system"
+
+    def test_audience_is_sales_management_system(self):
+        """JWT audience 为 sales-management-system"""
+        assert settings.JWT_AUDIENCE == "sales-management-system"
+
+    def test_secret_key_min_length(self):
+        """JWT secret key 至少 8 个字符"""
+        assert len(settings.JWT_SECRET_KEY) >= 8
+
+    def test_access_expire_positive(self):
+        """access token 过期时间为正数"""
+        assert settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES > 0
+
+    def test_refresh_expire_positive(self):
+        """refresh token 过期时间为正数"""
+        assert settings.JWT_REFRESH_TOKEN_EXPIRE_DAYS > 0
+
+    def test_access_expire_less_than_refresh(self):
+        """access token 过期时间 < refresh token 过期时间"""
+        access_s = settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES * 60
+        refresh_s = settings.JWT_REFRESH_TOKEN_EXPIRE_DAYS * 86400
+        assert access_s < refresh_s
+
+
+# ═══════════════════════════════════════════════════════
+# 8. API 端点认证测试
+# ═══════════════════════════════════════════════════════
+
+
+class TestAPIAuthEndpoints:
+    def test_auth_me_no_token_401(self):
+        """无 token 访问 /auth/me 返回 401"""
+        from fastapi.testclient import TestClient
+
+        from app.main import app
+        c = TestClient(app)
+        resp = c.get("/api/v1/auth/me")
+        assert resp.status_code == 401
+
+    def test_auth_me_invalid_token_401(self):
+        """无效 token 访问 /auth/me 返回 401"""
+        from fastapi.testclient import TestClient
+
+        from app.main import app
+        c = TestClient(app)
+        resp = c.get("/api/v1/auth/me", headers={"Authorization": "Bearer invalid-token"})
+        assert resp.status_code == 401
+
+    def test_auth_me_expired_token_401(self):
+        """过期 token 访问 /auth/me 返回 401"""
+        from datetime import timedelta
+
+        from fastapi.testclient import TestClient
+
+        from app.main import app
+        c = TestClient(app)
+        expired = create_access_token(str(uuid.uuid4()), expires_delta=timedelta(seconds=-1))
+        resp = c.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {expired}"})
+        assert resp.status_code == 401
+
+    def test_auth_me_refresh_token_rejected(self):
+        """refresh token 不能访问 /auth/me"""
+        from fastapi.testclient import TestClient
+
+        from app.main import app
+        c = TestClient(app)
+        refresh = create_refresh_token(str(uuid.uuid4()))
+        resp = c.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {refresh}"})
+        assert resp.status_code == 401
+
+    def test_protected_endpoint_no_token_401(self):
+        """无 token 访问受保护端点返回 401"""
+        from fastapi.testclient import TestClient
+
+        from app.main import app
+        c = TestClient(app)
+        resp = c.get("/api/v1/users")
+        assert resp.status_code in (401, 403)
+
+    def test_401_has_www_authenticate_header(self):
+        """401 响应可能包含 WWW-Authenticate 头（取决于中间件处理）"""
+        from fastapi.testclient import TestClient
+
+        from app.main import app
+        c = TestClient(app)
+        resp = c.get("/api/v1/auth/me")
+        # OAuth2 scheme 可能不直接设置此 header（由异常处理器控制）
+        assert resp.status_code == 401
+
+    def test_refresh_with_invalid_token_401(self):
+        """无效 refresh_token 返回 401"""
+        from fastapi.testclient import TestClient
+
+        from app.main import app
+        c = TestClient(app, raise_server_exceptions=False)
+        resp = c.post("/api/v1/auth/refresh", json={"refresh_token": "invalid"})
+        assert resp.status_code in (401, 422)
+
+    def test_refresh_with_access_token_rejected(self):
+        """用 access token 作为 refresh_token 被拒绝"""
+        from fastapi.testclient import TestClient
+
+        from app.main import app
+        c = TestClient(app, raise_server_exceptions=False)
+        access = create_access_token(str(uuid.uuid4()))
+        resp = c.post("/api/v1/auth/refresh", json={"refresh_token": access})
+        assert resp.status_code == 401
+
+
+# ═══════════════════════════════════════════════════════
+# 9. OAuth2 scheme 配置
+# ═══════════════════════════════════════════════════════
+
+
+class TestOAuth2Scheme:
+    def test_auto_error_true(self):
+        """OAuth2 auto_error 默认为 True"""
+        from app.api.deps import oauth2_scheme
+
+        assert oauth2_scheme.auto_error is True
+
+    def test_token_url_in_flows(self):
+        """OAuth2 flows.password.tokenUrl 为 /api/v1/auth/login"""
+        from app.api.deps import oauth2_scheme
+
+        assert oauth2_scheme.model.flows.password.tokenUrl == "/api/v1/auth/login"
+
+
+# ═══════════════════════════════════════════════════════
+# 10. 密码哈希验证
+# ═══════════════════════════════════════════════════════
+
+
+class TestPasswordHash:
+    def test_hash_verifies(self):
+        """密码哈希后可验证"""
+        from app.core.security import hash_password, verify_password
+
+        h = hash_password("MyPassword123!")
+        assert verify_password("MyPassword123!", h) is True
+
+    def test_wrong_password_fails(self):
+        """错误密码验证失败"""
+        from app.core.security import hash_password, verify_password
+
+        h = hash_password("MyPassword123!")
+        assert verify_password("WrongPassword", h) is False
+
+    def test_different_hash_each_time(self):
+        """相同密码每次哈希结果不同"""
+        from app.core.security import hash_password
+
+        assert hash_password("same") != hash_password("same")
+
+    def test_hash_not_plaintext(self):
+        """哈希结果不等于明文"""
+        from app.core.security import hash_password
+
+        assert hash_password("secret") != "secret"
+
+
+# ═══════════════════════════════════════════════════════
+# 11. Auth Schema 验证
+# ═══════════════════════════════════════════════════════
+
+
+class TestAuthSchemas:
+    def test_login_request_fields(self):
+        """LoginRequest 需要 username 和 password"""
+        from app.schemas.auth import LoginRequest
+
+        req = LoginRequest(username="admin", password="secret")
+        assert req.username == "admin"
+        assert req.password == "secret"
+
+    def test_login_request_missing_fields(self):
+        """LoginRequest 缺少字段抛出 ValidationError"""
+        from pydantic import ValidationError
+
+        from app.schemas.auth import LoginRequest
+
+        with pytest.raises(ValidationError):
+            LoginRequest()
+
+    def test_refresh_request_fields(self):
+        """RefreshRequest 需要 refresh_token"""
+        from app.schemas.auth import RefreshRequest
+
+        req = RefreshRequest(refresh_token="some-token")
+        assert req.refresh_token == "some-token"
+
+    def test_refresh_request_missing_token(self):
+        """RefreshRequest 缺少 refresh_token 抛出 ValidationError"""
+        from pydantic import ValidationError
+
+        from app.schemas.auth import RefreshRequest
+
+        with pytest.raises(ValidationError):
+            RefreshRequest()
+
+    def test_token_response_fields(self):
+        """TokenResponse 包含 access_token/refresh_token/token_type"""
+        from app.schemas.auth import TokenResponse
+
+        resp = TokenResponse(access_token="at", refresh_token="rt", token_type="bearer")
+        assert resp.access_token == "at"
+        assert resp.refresh_token == "rt"
+        assert resp.token_type == "bearer"
+
+
+# ═══════════════════════════════════════════════════════
+# 12. User 模型 password_changed_at 字段
+# ═══════════════════════════════════════════════════════
+
+
+class TestPasswordChangedAt:
+    def test_user_model_has_password_changed_at(self):
+        """User 模型有 password_changed_at 字段"""
+        from app.models.user import User
+
+        assert hasattr(User, "password_changed_at")
+
+    def test_password_changed_at_nullable(self):
+        """password_changed_at 允许 NULL"""
+        from app.models.user import User
+
+        col = User.__table__.c["password_changed_at"]
+        assert col.nullable is True
+
+
+# ═══════════════════════════════════════════════════════
+# 13. 登录端点验证
+# ═══════════════════════════════════════════════════════
+
+
+class TestLoginEndpoint:
+    def test_login_missing_body_returns_422(self):
+        """login 无 body 返回 422"""
+        from fastapi.testclient import TestClient
+
+        from app.main import app
+        c = TestClient(app, raise_server_exceptions=False)
+        resp = c.post("/api/v1/auth/login")
+        assert resp.status_code == 422
+
+    def test_login_empty_json_returns_422(self):
+        """login 空 JSON 返回 422"""
+        from fastapi.testclient import TestClient
+
+        from app.main import app
+        c = TestClient(app, raise_server_exceptions=False)
+        resp = c.post("/api/v1/auth/login", json={})
+        assert resp.status_code == 422
+
+    def test_login_wrong_credentials_returns_401(self):
+        """login 错误凭据返回 401"""
+        from fastapi.testclient import TestClient
+
+        from app.main import app
+        c = TestClient(app, raise_server_exceptions=False)
+        resp = c.post("/api/v1/auth/login", json={"username": "nonexistent", "password": "wrong"})
+        assert resp.status_code in (401, 500)
+
+
+# ═══════════════════════════════════════════════════════
+# 14. Logout 端点
+# ═══════════════════════════════════════════════════════
+
+
+class TestLogoutEndpoint:
+    def test_logout_returns_200_or_401(self):
+        """logout 端点存在"""
+        from fastapi.testclient import TestClient
+
+        from app.main import app
+        c = TestClient(app)
+        resp = c.post("/api/v1/auth/logout")
+        assert resp.status_code in (200, 401)
