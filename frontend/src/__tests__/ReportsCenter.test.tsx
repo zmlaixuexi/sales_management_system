@@ -261,4 +261,36 @@ describe('ReportsCenter', () => {
       expect(_reportMocks.fetchSalesSummary).toHaveBeenCalledWith('7d')
     })
   })
+
+  it('周期选择器包含正确标签', async () => {
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByTestId('select')).toBeInTheDocument()
+    })
+    const select = screen.getByTestId('select')
+    const optionTexts = Array.from(select.querySelectorAll('option')).map((o) => o.textContent)
+    expect(optionTexts).toContain('今日')
+    expect(optionTexts).toContain('近7天')
+    expect(optionTexts).toContain('近30天')
+    expect(optionTexts).toContain('本月')
+  })
+
+  it('无排行数据时显示空状态', async () => {
+    _reportMocks.fetchProductRanking.mockResolvedValue({
+      success: true,
+      data: { items: [], period: '30d' },
+    })
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(screen.getByText('暂无商品排行数据')).toBeInTheDocument()
+    })
+  })
+
+  it('客户排行加载失败显示错误提示', async () => {
+    _reportMocks.fetchCustomerRanking.mockRejectedValue(new Error('network'))
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(_messageError).toHaveBeenCalledWith('加载客户排行失败')
+    })
+  })
 })
