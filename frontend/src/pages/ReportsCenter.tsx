@@ -18,6 +18,7 @@ import type {
   InventoryWarningItem,
 } from '@/api/reports'
 import { formatAmount } from '@/utils'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 const periodOptions = [
   { value: 'today', label: '今日' },
@@ -28,6 +29,7 @@ const periodOptions = [
 ]
 
 export default function ReportsCenter() {
+  useDocumentTitle('报表中心')
   const [period, setPeriod] = useState('30d')
   const [summary, setSummary] = useState<SalesSummary | null>(null)
   const [trendItems, setTrendItems] = useState<SalesTrendItem[]>([])

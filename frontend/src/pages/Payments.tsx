@@ -8,8 +8,10 @@ import { formatAmount } from '@/utils'
 import { usePaginatedList } from '@/hooks/usePaginatedList'
 import { downloadCsv } from '@/api/request'
 import { paymentStatusMap as statusMap, paymentMethodMap } from '@/constants/statusMaps'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function PaymentsPage() {
+  useDocumentTitle('收款管理')
   const navigate = useNavigate()
 
   const { data, total, loading, error, page, pageSize, onPageChange, refresh } = usePaginatedList<Payment>(

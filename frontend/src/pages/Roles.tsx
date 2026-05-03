@@ -5,8 +5,10 @@ import type { ColumnsType } from 'antd/es/table'
 import { fetchRoles, fetchPermissions, createRole, updateRole, deleteRole } from '@/api/roles'
 import type { RoleItem, PermissionItem } from '@/api/roles'
 import { getApiErrorMessage } from '@/utils'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function RolesPage() {
+  useDocumentTitle('角色管理')
   const [roles, setRoles] = useState<RoleItem[]>([])
   const [permissions, setPermissions] = useState<Record<string, PermissionItem[]>>({})
   const [loading, setLoading] = useState(false)

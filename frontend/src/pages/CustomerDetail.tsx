@@ -11,8 +11,10 @@ import { fetchOrders } from '@/api/orders'
 import type { Order } from '@/api/orders'
 import { formatAmount, getApiErrorMessage } from '@/utils'
 import { customerSourceMap as sourceMap, customerLevelMap as levelMap, orderStatusMap } from '@/constants/statusMaps'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function CustomerDetail() {
+  useDocumentTitle('客户详情')
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const [customer, setCustomer] = useState<Customer | null>(null)

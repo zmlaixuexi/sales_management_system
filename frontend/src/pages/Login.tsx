@@ -4,10 +4,12 @@ import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '@/stores/auth'
 import { getApiErrorMessage } from '@/utils'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 const { Title } = Typography
 
 export default function Login() {
+  useDocumentTitle('登录')
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const login = useAuthStore((s) => s.login)

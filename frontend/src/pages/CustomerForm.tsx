@@ -5,8 +5,10 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { fetchCustomer, createCustomer, updateCustomer } from '@/api/customers'
 import { useSubmit } from '@/hooks/useSubmit'
 import { getApiErrorMessage } from '@/utils'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function CustomerForm() {
+  useDocumentTitle('客户编辑')
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const isEdit = Boolean(id)

@@ -11,6 +11,7 @@ import {
 import type { ProductRankingItem, InventoryWarningItem, SalesTrendItem } from '@/api/reports'
 import { formatAmount } from '@/utils'
 import { useAuthStore } from '@/stores/auth'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 const periodOptions = [
   { label: '今日', value: 'today' },
@@ -21,6 +22,7 @@ const periodOptions = [
 ]
 
 export default function Dashboard() {
+  useDocumentTitle('首页看板')
   const canViewProfit = useAuthStore(s => s.hasPermission('report:profit'))
   const [period, setPeriod] = useState('30d')
   const [summary, setSummary] = useState<{

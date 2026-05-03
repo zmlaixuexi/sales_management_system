@@ -6,8 +6,10 @@ import { fetchUsers, createUser, updateUser, fetchRoles } from '@/api/users'
 import type { User, RoleItem } from '@/api/users'
 import { usePaginatedList } from '@/hooks/usePaginatedList'
 import { getApiErrorMessage } from '@/utils'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function UsersPage() {
+  useDocumentTitle('用户管理')
   const [roles, setRoles] = useState<RoleItem[]>([])
   const [modalOpen, setModalOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)

@@ -12,8 +12,10 @@ import { createPayment, reversePayment } from '@/api/payments'
 import { formatAmount, formatPercent, getApiErrorMessage } from '@/utils'
 import { orderStatusMap as statusMap, paymentMethodMap as paymentMethodLabels } from '@/constants/statusMaps'
 import { useAuthStore } from '@/stores/auth'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function OrderDetail() {
+  useDocumentTitle('订单详情')
   const canViewCost = useAuthStore(s => s.hasPermission('product:view_cost'))
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()

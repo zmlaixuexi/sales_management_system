@@ -6,8 +6,10 @@ import { fetchProduct, createProduct, updateProduct, uploadImage } from '@/api/p
 import type { ProductDetail } from '@/api/products'
 import { useSubmit } from '@/hooks/useSubmit'
 import { getApiErrorMessage } from '@/utils'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function ProductForm() {
+  useDocumentTitle('商品编辑')
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const isEdit = Boolean(id)

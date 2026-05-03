@@ -10,8 +10,10 @@ import { downloadCsv } from '@/api/request'
 import { usePaginatedList } from '@/hooks/usePaginatedList'
 import { orderStatusMap as statusMap } from '@/constants/statusMaps'
 import { useAuthStore } from '@/stores/auth'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function OrdersPage() {
+  useDocumentTitle('订单管理')
   const navigate = useNavigate()
   const canViewCost = useAuthStore(s => s.hasPermission('product:view_cost'))
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined)

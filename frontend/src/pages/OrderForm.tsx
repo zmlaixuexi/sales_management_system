@@ -13,6 +13,7 @@ import type { Customer } from '@/api/customers'
 import { fetchProducts } from '@/api/products'
 import type { Product } from '@/api/products'
 import { formatAmount, getApiErrorMessage } from '@/utils'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 interface OrderLine {
   key: string
@@ -27,6 +28,7 @@ interface OrderLine {
 }
 
 export default function OrderForm() {
+  useDocumentTitle('订单编辑')
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const isEdit = Boolean(id)

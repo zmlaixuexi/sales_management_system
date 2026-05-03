@@ -4,6 +4,7 @@ import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { fetchAuditLogs, fetchAuditActions, type AuditLogItem } from '@/api/auditLogs';
 import { usePaginatedList } from '@/hooks/usePaginatedList';
+import useDocumentTitle from '@/hooks/useDocumentTitle';
 
 const { RangePicker } = DatePicker;
 const { Text } = Typography;
@@ -43,6 +44,7 @@ const RESOURCE_LABELS: Record<string, string> = {
 };
 
 export default function AuditLogs() {
+  useDocumentTitle('操作日志');
   const [actionFilter, setActionFilter] = useState<string | undefined>();
   const [resourceFilter, setResourceFilter] = useState<string | undefined>();
   const [resourceIdFilter, setResourceIdFilter] = useState<string | undefined>();

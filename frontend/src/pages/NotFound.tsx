@@ -1,7 +1,9 @@
 import { Button, Result } from 'antd'
 import { useNavigate } from 'react-router-dom'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 function NotFound() {
+  useDocumentTitle('页面不存在')
   const navigate = useNavigate()
   return (
     <Result

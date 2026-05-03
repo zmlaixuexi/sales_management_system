@@ -3,6 +3,7 @@ import type { ColumnsType } from 'antd/es/table'
 import { fetchInventoryMovements } from '@/api/inventory'
 import type { InventoryMovement } from '@/api/inventory'
 import { usePaginatedList } from '@/hooks/usePaginatedList'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 const movementTypeMap: Record<string, { label: string; color: string }> = {
   manual_adjust: { label: '手动调整', color: 'blue' },
@@ -15,6 +16,7 @@ const relatedTypeMap: Record<string, string> = {
 }
 
 export default function InventoryPage() {
+  useDocumentTitle('库存管理')
   const { data, total, loading, error, page, pageSize, onPageChange, refresh } = usePaginatedList<InventoryMovement>(
     async (params) => { const r = await fetchInventoryMovements(params); return r.data },
     {},

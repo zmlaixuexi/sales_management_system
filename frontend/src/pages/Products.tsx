@@ -14,8 +14,10 @@ import apiClient from '@/api/client'
 import { usePaginatedList } from '@/hooks/usePaginatedList'
 import { productStatusMap as statusMap } from '@/constants/statusMaps'
 import { useAuthStore } from '@/stores/auth'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function ProductsPage() {
+  useDocumentTitle('商品管理')
   const navigate = useNavigate()
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined)
   const fileInputRef = useRef<HTMLInputElement>(null)

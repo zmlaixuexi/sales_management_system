@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第六百三十三轮·自动循环）
+
+### 用户体验：添加 useDocumentTitle hook 实现页面标题管理
+
+- 新增 useDocumentTitle hook，支持设置浏览器标签页标题，卸载时自动恢复
+- +4 测试：标题格式、默认标题、卸载恢复、标题变化更新
+- 应用到全部 17 个页面组件（Dashboard/Products/Customers/Orders/Payments/Inventory/Reports/AuditLogs/Users/Roles/Login/NotFound 及各详情/表单页）
+- 前端测试 833 → 837，总计 2147
+
 ## 2026-05-03（第六百三十二轮·自动循环）
 
 ### 部署体验：manage.sh 添加 restore 命令

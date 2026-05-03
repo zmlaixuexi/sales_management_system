@@ -10,8 +10,10 @@ import { downloadCsv } from '@/api/request'
 import apiClient from '@/api/client'
 import { usePaginatedList } from '@/hooks/usePaginatedList'
 import { customerSourceMap as sourceMap, customerLevelMap as levelMap } from '@/constants/statusMaps'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function CustomersPage() {
+  useDocumentTitle('客户管理')
   const navigate = useNavigate()
   const [sourceFilter, setSourceFilter] = useState<string | undefined>(undefined)
   const fileInputRef = useRef<HTMLInputElement>(null)

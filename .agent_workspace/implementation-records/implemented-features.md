@@ -13,6 +13,13 @@
 - 验证：+1 测试验证 429 响应无 retry-after 头时使用默认 5 秒等待值，前端 831 测试全绿
 - 关联：frontend/src/__tests__/client-interceptor.test.ts
 
+## 功能编号：FEAT-20260503-233
+
+- 描述：useDocumentTitle hook + 全页面浏览器标题管理
+- 状态：已完成
+- 验证：+4 hook 测试，全部 17 个页面组件应用标题，前端 837 测试全绿，tsc 0 错误
+- 关联：frontend/src/hooks/useDocumentTitle.ts、所有 pages/*.tsx
+
 ## 功能编号：FEAT-20260503-232
 
 - 描述：manage.sh 添加 restore 命令快捷方式
