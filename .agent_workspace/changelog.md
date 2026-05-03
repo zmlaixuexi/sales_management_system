@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第五百三十三轮·自动循环）
+
+### 重构：登录失败速率限制参数从硬编码提取到配置
+
+- 新增 Settings: LOGIN_FAIL_MAX（默认 10）、LOGIN_FAIL_WINDOW_SECONDS（默认 900）
+- auth.py 移除模块级 _LOGIN_FAIL_MAX/_LOGIN_FAIL_WINDOW 常量，改用 settings
+- 更新 .env.example 和 README 环境变量表
+- 全量回归通过：1287 后端测试
+
 ## 2026-05-03（第五百三十二轮·自动循环）
 
 ### 修复：test_static_path_not_logged 测试隔离问题
