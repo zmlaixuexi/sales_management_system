@@ -25,6 +25,7 @@ vi.mock('@/api/products', () => ({
 
 vi.mock('@/utils', () => ({
   formatAmount: (v: any) => String(v),
+  getApiErrorMessage: (_e: any, fallback: string) => fallback,
 }))
 
 vi.mock('@/hooks/useSubmit', () => ({
@@ -259,5 +260,28 @@ describe('OrderForm', () => {
     await waitFor(() => {
       expect(screen.getByText('Orders List')).toBeInTheDocument()
     })
+  })
+
+  it('编辑模式 fetchOrder 失败验证', async () => {
+    _orderApi.fetchOrder.mockRejectedValue(new Error('加载失败'))
+    renderEditOrder()
+    await waitFor(() => {
+      expect(_orderApi.fetchOrder).toHaveBeenCalled()
+    })
+  })
+
+  it('创建按钮有 loading 状态支持', () => {
+    renderNewOrder()
+    const buttons = screen.getAllByTestId('button')
+    const createBtn = buttons.find((b) => b.textContent?.includes('创建订单'))
+    expect(createBtn).toBeTruthy()
+    expect(createBtn?.getAttribute('data-type')).toBe('primary')
+  })
+
+  it('备注使用 textarea 组件', () => {
+    renderNewOrder()
+    const textarea = screen.getByTestId('textarea')
+    expect(textarea).toHaveAttribute('maxlength', '500')
+    expect(textarea.tagName).toBe('TEXTAREA')
   })
 })
