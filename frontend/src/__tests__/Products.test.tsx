@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor, act, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 
 const _productMocks = {
@@ -78,7 +78,7 @@ vi.mock('antd', () => {
       </table>
     ),
     Button: ({ children, onClick, icon, type, danger }: any) => (
-      <button data-testid="button" data-type={type} data-danger={danger ? 'true' : undefined} onClick={onClick}>{icon}{children}</button>
+      <button data-testid="button" data-type={type} data-danger={danger ? 'true' : undefined} type="button" onClick={onClick}>{icon}{children}</button>
     ),
     Input: ({ value, onChange, placeholder }: any) => (
       <input data-testid="search-input" placeholder={placeholder} value={value || ''} onChange={(e) => onChange?.(e)} />
@@ -353,5 +353,108 @@ describe('ProductsPage', () => {
     renderProducts()
     const row1 = screen.getByTestId('row-1')
     expect(row1.textContent).toContain('--')
+  })
+
+  it('点击编辑按钮导航到编辑页', async () => {
+    renderProducts()
+    const editBtns = screen.getAllByText('编辑')
+    await act(async () => { fireEvent.click(editBtns[0]) })
+    await waitFor(() => {
+      expect(screen.getByText('Edit Page')).toBeInTheDocument()
+    })
+  })
+
+  it('点击新增商品导航到新建页', async () => {
+    renderProducts()
+    const addBtn = screen.getByText('新增商品')
+    await act(async () => { fireEvent.click(addBtn) })
+    await waitFor(() => {
+      expect(screen.getByText('New Product Page')).toBeInTheDocument()
+    })
+  })
+
+  it('状态筛选 onChange 调用 setPage', async () => {
+    renderProducts()
+    const select = screen.getByTestId('status-select')
+    await act(async () => {
+      fireEvent.change(select, { target: { value: 'active' } })
+    })
+    expect(_paginatedListReturn.setPage).toHaveBeenCalledWith(1)
+  })
+
+  it('搜索输入 onChange 调用 setKeyword', async () => {
+    renderProducts()
+    const input = screen.getByTestId('search-input')
+    await act(async () => {
+      fireEvent.change(input, { target: { value: '商品' } })
+    })
+    expect(_paginatedListReturn.setKeyword).toHaveBeenCalled()
+  })
+
+  it('删除成功后刷新列表', async () => {
+    _productMocks.deleteProduct.mockResolvedValueOnce({ success: true })
+    renderProducts()
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    await act(async () => { fireEvent.click(popconfirms[0]) })
+    await waitFor(() => {
+      expect(_productMocks.deleteProduct).toHaveBeenCalled()
+      expect(_paginatedListReturn.refresh).toHaveBeenCalled()
+    })
+  })
+
+  it('停用成功后刷新列表', async () => {
+    _productMocks.disableProduct.mockResolvedValueOnce({ success: true })
+    renderProducts()
+    const buttons = screen.getAllByTestId('button')
+    const disableBtn = buttons.find((b) => b.textContent?.includes('停用'))
+    await act(async () => { fireEvent.click(disableBtn!) })
+    await waitFor(() => {
+      expect(_productMocks.disableProduct).toHaveBeenCalled()
+      expect(_paginatedListReturn.refresh).toHaveBeenCalled()
+    })
+  })
+
+  it('CSV 导入调用 API', async () => {
+    _apiClientPost.mockResolvedValueOnce({ data: { success: true, message: '导入2条' } })
+    renderProducts()
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+    expect(fileInput).toBeTruthy()
+    const file = new File(['name,sku\n测试,SKU'], 'test.csv', { type: 'text/csv' })
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [file] } })
+    })
+    await waitFor(() => {
+      expect(_apiClientPost).toHaveBeenCalledWith('/products/import', expect.any(FormData), {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+    })
+  })
+
+  it('导入成功后刷新列表', async () => {
+    _apiClientPost.mockResolvedValueOnce({ data: { success: true, message: '导入成功' } })
+    renderProducts()
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+    const file = new File(['data'], 'test.csv', { type: 'text/csv' })
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [file] } })
+    })
+    await waitFor(() => {
+      expect(_paginatedListReturn.refresh).toHaveBeenCalled()
+    })
+  })
+
+  it('有图片时显示图片组件', () => {
+    _paginatedListReturn.data = [
+      { id: '4', name: '有图商品', sku: 'SKU-IMG', category_name: null, sale_price: '100', cost_price: '60', unit_profit: '40', gross_margin: '40', stock_quantity: 5, status: 'active', main_image_url: 'http://img/p.jpg' },
+    ]
+    _paginatedListReturn.total = 1
+    renderProducts()
+    expect(screen.getByTestId('product-image')).toBeTruthy()
+    expect(screen.getByTestId('product-image').getAttribute('src')).toBe('http://img/p.jpg')
+    _paginatedListReturn.data = [
+      { id: '1', name: '商品A', sku: 'SKU-001', category_name: '分类1', sale_price: '100', cost_price: '60', unit_profit: '40', gross_margin: '40', stock_quantity: 10, status: 'active', main_image_url: null },
+      { id: '2', name: '商品B', sku: 'SKU-002', category_name: '分类2', sale_price: '200', cost_price: '120', unit_profit: '80', gross_margin: '40', stock_quantity: 5, status: 'inactive', main_image_url: null },
+    ]
+    _paginatedListReturn.total = 2
   })
 })
