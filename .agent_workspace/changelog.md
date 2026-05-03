@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-03（第五百九十一轮·自动循环）
+
+### 测试：补强 OrderDetail 分支覆盖率，91.86% → 98.83%
+
+- OrderDetail.test.tsx +5：fetchOrder success=false、确认/取消/冲正 actionLoading 防重复点击、无 id 参数不调用 API
+- 整体分支覆盖率 97.01% → 97.79%，总测试数 795 → 800
+
 ## 2026-05-03（第五百九十轮·自动循环）
 
 ### 测试：补强 Dashboard 分支覆盖率，90.9% → 100%
