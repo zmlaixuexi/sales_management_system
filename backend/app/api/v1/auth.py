@@ -2,6 +2,7 @@
 import time
 import uuid
 from collections import defaultdict
+from datetime import UTC, datetime
 from threading import Lock
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -28,6 +29,10 @@ router = APIRouter(
 _login_fail_lock = Lock()
 _login_fail_counts: dict[str, list[float]] = defaultdict(list)
 
+# 每账户登录失败追踪：每用户名最多 ACCOUNT_LOCK_MAX_FAILURES 次失败 / ACCOUNT_LOCK_WINDOW_SECONDS 秒
+_account_fail_lock = Lock()
+_account_fail_counts: dict[str, list[float]] = defaultdict(list)
+
 
 def _check_login_rate_limit(ip: str) -> None:
     now = time.monotonic()
@@ -43,9 +48,26 @@ def _check_login_rate_limit(ip: str) -> None:
             )
 
 
-def _record_login_fail(ip: str) -> None:
+def _check_account_lock(username: str) -> None:
+    """检查账户级别的登录失败次数限制"""
+    now = time.monotonic()
+    with _account_fail_lock:
+        cutoff = now - settings.ACCOUNT_LOCK_WINDOW_SECONDS
+        timestamps = _account_fail_counts[username]
+        while timestamps and timestamps[0] < cutoff:
+            timestamps.pop(0)
+        if len(timestamps) >= settings.ACCOUNT_LOCK_MAX_FAILURES:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail={"code": "ACCOUNT_LOCKED", "message": "该账户登录失败次数过多，请稍后再试"},
+            )
+
+
+def _record_login_fail(ip: str, username: str) -> None:
     with _login_fail_lock:
         _login_fail_counts[ip].append(time.monotonic())
+    with _account_fail_lock:
+        _account_fail_counts[username].append(time.monotonic())
 
 
 @router.post("/login")
@@ -53,11 +75,12 @@ def login(request: Request, req: LoginRequest, db: Session = Depends(get_db)):
     """用户名密码登录"""
     client_ip = request.client.host if request.client else "unknown"
     _check_login_rate_limit(client_ip)
+    _check_account_lock(req.username)
 
     meta = get_request_meta(request)
     user = active_query(db, User).filter(User.username == req.username).first()
     if not user or not verify_password(req.password, user.hashed_password):
-        _record_login_fail(client_ip)
+        _record_login_fail(client_ip, req.username)
         LOGIN_ATTEMPTS.labels(result="failed").inc()
         log_action(db, action="login_failed", resource_type="user", actor_name=req.username, **meta)
         safe_commit(db)
@@ -108,6 +131,17 @@ def refresh_token(req: RefreshRequest, db: Session = Depends(get_db)):
     user = active_query(db, User).filter(User.id == uuid.UUID(user_id)).first()
     if user is None or not user.is_active:
         raise credentials_exception
+    # 密码修改后，旧 refresh token 自动失效
+    if user.password_changed_at:
+        token_iat = payload.get("iat")
+        if token_iat is not None:
+            token_issued = datetime.fromtimestamp(token_iat, tz=UTC)
+            changed_at = user.password_changed_at
+            if changed_at.tzinfo is None:
+                changed_at = changed_at.replace(tzinfo=UTC)
+            changed_at = changed_at.replace(microsecond=0)
+            if token_issued < changed_at:
+                raise credentials_exception
 
     access_token = create_access_token(subject=user_id)
     refresh_token = create_refresh_token(subject=user_id)
@@ -164,6 +198,7 @@ def change_password(
         )
 
     current_user.hashed_password = hash_password(req.new_password)
+    current_user.password_changed_at = datetime.now(UTC)
     meta = get_request_meta(request)
     log_action(
         db, action="password_change", resource_type="user",

@@ -3108,6 +3108,8 @@ def test_115_password_change_audit_log_after_data_has_username():
     }, headers=headers)
     assert resp.status_code == 200
 
+    # password_changed_at 使旧 token 失效，需重新获取
+    headers = _admin_auth()
     resp = client.get("/api/v1/audit-logs?action=password_change", headers=headers)
     assert resp.status_code == 200
     items = resp.json()["data"]["items"]

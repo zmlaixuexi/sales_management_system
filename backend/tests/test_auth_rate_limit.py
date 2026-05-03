@@ -19,6 +19,8 @@ def _reset_counts():
     original_lock = mod._login_fail_lock
     mod._login_fail_counts = defaultdict(list)
     mod._login_fail_lock = Lock()
+    mod._account_fail_counts = defaultdict(list)
+    mod._account_fail_lock = Lock()
     yield
     mod._login_fail_counts = original_counts
     mod._login_fail_lock = original_lock
@@ -27,14 +29,14 @@ def _reset_counts():
 def test_check_rate_limit_passes_under_threshold():
     """失败次数未达阈值时通过"""
     for _ in range(9):
-        _record_login_fail("1.2.3.4")
+        _record_login_fail("1.2.3.4", "user1")
     _check_login_rate_limit("1.2.3.4")  # 不抛异常
 
 
 def test_check_rate_limit_blocks_at_threshold():
     """失败次数达到阈值时抛 429"""
     for _ in range(10):
-        _record_login_fail("1.2.3.4")
+        _record_login_fail("1.2.3.4", "user1")
     with pytest.raises(HTTPException) as exc_info:
         _check_login_rate_limit("1.2.3.4")
     assert exc_info.value.status_code == 429
@@ -44,7 +46,7 @@ def test_check_rate_limit_blocks_at_threshold():
 def test_check_rate_limit_independent_ips():
     """不同 IP 独立计数"""
     for _ in range(10):
-        _record_login_fail("1.1.1.1")
+        _record_login_fail("1.1.1.1", "user1")
     # 2.2.2.2 应该不受影响
     _check_login_rate_limit("2.2.2.2")
 
@@ -53,9 +55,9 @@ def test_record_login_fail_appends_timestamp():
     """记录失败时间戳"""
     import app.api.v1.auth as mod
 
-    _record_login_fail("10.0.0.1")
+    _record_login_fail("10.0.0.1", "user1")
     assert len(mod._login_fail_counts["10.0.0.1"]) == 1
-    _record_login_fail("10.0.0.1")
+    _record_login_fail("10.0.0.1", "user1")
     assert len(mod._login_fail_counts["10.0.0.1"]) == 2
 
 
@@ -93,7 +95,7 @@ def test_check_rate_limit_mixed_expired_and_fresh_blocks():
 def test_check_rate_limit_error_code():
     """速率限制错误包含 RATE_LIMIT_EXCEEDED 错误码"""
     for _ in range(10):
-        _record_login_fail("6.6.6.6")
+        _record_login_fail("6.6.6.6", "user1")
     with pytest.raises(HTTPException) as exc_info:
         _check_login_rate_limit("6.6.6.6")
     detail = exc_info.value.detail

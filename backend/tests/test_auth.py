@@ -1,12 +1,15 @@
 import uuid
+from collections import defaultdict
 from datetime import timedelta
+from threading import Lock
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+import app.api.v1.auth as _auth_mod
 from app.api.deps import get_db
-from app.api.v1.auth import _login_fail_counts
 from app.core.security import create_access_token, create_refresh_token, hash_password
 from app.db.session import Base
 from app.main import app
@@ -51,6 +54,16 @@ def setup_module(module):
         db.commit()
     finally:
         db.close()
+
+
+@pytest.fixture(autouse=True)
+def _reset_rate_limits():
+    """每个测试前重置登录速率限制计数器"""
+    _auth_mod._login_fail_counts = defaultdict(list)
+    _auth_mod._login_fail_lock = Lock()
+    _auth_mod._account_fail_counts = defaultdict(list)
+    _auth_mod._account_fail_lock = Lock()
+    yield
 
 
 def teardown_module(module):
@@ -216,21 +229,21 @@ def test_change_password_no_digits():
 
 def test_login_rate_limit_after_failures():
     """连续登录失败 10 次后触发速率限制"""
-    _login_fail_counts.clear()
+    _auth_mod._login_fail_counts.clear()
     for _ in range(10):
         client.post("/api/v1/auth/login", json={"username": "testuser", "password": "wrongpass1"})
     resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "wrongpass1"})
     assert resp.status_code == 429
     assert "次数过多" in resp.json()["error"]["message"]
-    _login_fail_counts.clear()
+    _auth_mod._login_fail_counts.clear()
 
 
 def test_login_rate_limit_does_not_affect_success():
     """正确密码不受速率限制影响"""
-    _login_fail_counts.clear()
+    _auth_mod._login_fail_counts.clear()
     resp = client.post("/api/v1/auth/login", json={"username": "testuser", "password": "testpass123"})
     assert resp.status_code == 200
-    _login_fail_counts.clear()
+    _auth_mod._login_fail_counts.clear()
 
 
 def test_change_password_requires_auth():
@@ -608,8 +621,9 @@ def test_36_disabled_user_refresh_token_immediately_invalid():
 # ─── 密码修改后 token 行为验证 ───
 
 
-def test_37_password_change_old_access_token_still_works():
-    """修改密码后旧 access token 仍可用（无状态 JWT 无黑名单）"""
+def test_37_password_change_old_access_token_revoked():
+    """修改密码后旧 access token 自动失效"""
+    import time
     # 登录获取 token
     login_resp = client.post("/api/v1/auth/login", json={
         "username": "testuser", "password": "testpass123",
@@ -621,6 +635,9 @@ def test_37_password_change_old_access_token_still_works():
     resp = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {old_token}"})
     assert resp.status_code == 200
 
+    # 确保密码修改时间戳与 token 签发时间不在同一秒
+    time.sleep(1.1)
+
     # 修改密码
     resp = client.post("/api/v1/auth/change-password", json={
         "old_password": "testpass123",
@@ -628,9 +645,9 @@ def test_37_password_change_old_access_token_still_works():
     }, headers={"Authorization": f"Bearer {old_token}"})
     assert resp.status_code == 200
 
-    # 旧 token 仍可用（无状态 JWT，无 token 黑名单机制）
+    # 旧 token 被自动失效（password_changed_at 校验）
     resp = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {old_token}"})
-    assert resp.status_code == 200
+    assert resp.status_code == 401
 
     # 改回原密码
     login2 = client.post("/api/v1/auth/login", json={
@@ -643,14 +660,18 @@ def test_37_password_change_old_access_token_still_works():
     }, headers={"Authorization": f"Bearer {token2}"})
 
 
-def test_38_password_change_old_refresh_token_still_works():
-    """修改密码后旧 refresh token 仍可用"""
+def test_38_password_change_old_refresh_token_revoked():
+    """修改密码后旧 refresh token 自动失效"""
+    import time
     login_resp = client.post("/api/v1/auth/login", json={
         "username": "testuser", "password": "testpass123",
     })
     assert login_resp.status_code == 200
     old_refresh = login_resp.json()["data"]["refresh_token"]
     access = login_resp.json()["data"]["access_token"]
+
+    # 确保密码修改时间戳与 token 签发时间不在同一秒
+    time.sleep(1.1)
 
     # 修改密码
     resp = client.post("/api/v1/auth/change-password", json={
@@ -659,10 +680,9 @@ def test_38_password_change_old_refresh_token_still_works():
     }, headers={"Authorization": f"Bearer {access}"})
     assert resp.status_code == 200
 
-    # 旧 refresh token 仍可刷新（无状态 JWT）
+    # 旧 refresh token 被自动失效
     resp = client.post("/api/v1/auth/refresh", json={"refresh_token": old_refresh})
-    assert resp.status_code == 200
-    assert "access_token" in resp.json()["data"]
+    assert resp.status_code == 401
 
     # 改回原密码
     login2 = client.post("/api/v1/auth/login", json={

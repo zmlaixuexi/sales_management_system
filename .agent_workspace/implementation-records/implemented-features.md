@@ -2806,3 +2806,29 @@ API 实测：商品创建/列表/详情通过
 
 测试命令：pytest tests/ -q
 测试结果：1473 passed（+21 新增）
+
+---
+
+## 功能编号：FEAT-258
+
+功能名称：账户锁定 + 密码修改后 Token 自动失效
+所属模块：后端 / 安全加固
+关联任务编号：ROUND-680
+实现日期：2026-05-03
+实现 Agent：Claude Code
+当前状态：已测试
+
+### 实现范围
+
+- config.py：新增 ACCOUNT_LOCK_MAX_FAILURES（5）和 ACCOUNT_LOCK_WINDOW_SECONDS（900）配置
+- auth.py：新增 _check_account_lock + _account_fail_counts，按用户名追踪登录失败
+- user.py：User 模型新增 password_changed_at 列
+- auth.py change_password：密码修改时设置 password_changed_at = datetime.now(UTC)
+- deps.py get_current_user：JWT iat < password_changed_at 时拒绝（秒级精度截断）
+- auth.py /refresh：同步增加 password_changed_at 校验
+- 测试文件更新：test_auth、test_boundary、test_audit_log、test_auth_rate_limit
+
+### 已执行测试
+
+测试命令：pytest tests/ -q
+测试结果：1473 passed

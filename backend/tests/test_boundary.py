@@ -1781,20 +1781,31 @@ def test_94_change_password_boundary():
     resp = client.post("/api/v1/auth/change-password", json={
         "old_password": "pass123456", "new_password": "n12345",
     }, headers=headers)
-    # 改回去（先改成 n12345，再改回 pass123456）
 
     # 先检查 6 字符是否通过
     if resp.status_code == 200:
+        # password_changed_at 使旧 token 失效，需重新获取
+        headers = _auth_for_user(_user_id)
         # 改回原密码
         client.post("/api/v1/auth/change-password", json={
             "old_password": "n12345", "new_password": "pass123456",
         }, headers=headers)
 
+    # 重新获取 token（如果上一步改回成功也需要新 token）
+    headers = _auth_for_user(_user_id)
     # 5 字符新密码
     resp = client.post("/api/v1/auth/change-password", json={
         "old_password": "pass123456", "new_password": "n1234",
     }, headers=headers)
     assert resp.status_code == 422, f"5 字符新密码应被拒绝: {resp.status_code}"
+
+    # 密码修改导致 password_changed_at 更新，需刷新缓存的 _tokens
+    login_resp = client.post("/api/v1/auth/login", json={
+        "username": "boundary_admin", "password": "pass123456",
+    })
+    if login_resp.status_code == 200:
+        _tokens["access"] = login_resp.json()["data"]["access_token"]
+        _tokens["refresh"] = login_resp.json()["data"]["refresh_token"]
 
 
 def test_95_change_password_no_digit():

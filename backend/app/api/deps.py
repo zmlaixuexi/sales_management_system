@@ -1,6 +1,6 @@
 import uuid
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import Depends, HTTPException, Query, status
 from fastapi.security import OAuth2PasswordBearer
@@ -50,6 +50,19 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     user = db.query(User).filter(User.id == uuid.UUID(user_id), User.deleted_at.is_(None)).first()
     if user is None or not user.is_active:
         raise credentials_exception
+    # 密码修改后，旧 Token 自动失效
+    if user.password_changed_at:
+        token_iat = payload.get("iat")
+        if token_iat is not None:
+            from datetime import datetime
+            token_issued = datetime.fromtimestamp(token_iat, tz=UTC)
+            changed_at = user.password_changed_at
+            if changed_at.tzinfo is None:
+                changed_at = changed_at.replace(tzinfo=UTC)
+            # 截断到秒级精度，避免 JWT iat（float 秒）与 datetime 微秒精度差异导致误判
+            changed_at = changed_at.replace(microsecond=0)
+            if token_issued < changed_at:
+                raise credentials_exception
     user_id_ctx.set(user_id)
     return user
 

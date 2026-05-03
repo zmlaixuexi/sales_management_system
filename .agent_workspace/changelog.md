@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-03（第六百八十轮·自动循环）
+
+### 安全加固：账户锁定 + 密码修改后 Token 自动失效
+
+- 每账户登录失败追踪：同一用户名连续 5 次失败后锁定 15 分钟（ACCOUNT_LOCK_MAX_FAILURES / ACCOUNT_LOCK_WINDOW_SECONDS）
+- User 模型新增 password_changed_at 列：密码修改时记录时间戳
+- get_current_user + /refresh 校验 JWT iat < password_changed_at 时拒绝访问
+- 秒级精度截断避免 JWT iat（float）与 datetime 微秒精度差异
+- 测试更新：test_37/38 反转断言（旧 Token 应失效），test_94/115 刷新 Token
+- 后端测试 1473，ruff 0 errors
+
 ## 2026-05-03（第六百七十九轮·自动循环）
 
 ### Schema 验证：全量 ID 字段 UUID 格式校验
