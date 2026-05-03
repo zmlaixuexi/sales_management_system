@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor, act, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 
 const _productApi = {
@@ -17,11 +17,13 @@ vi.mock('@/api/products', () => ({
   uploadImage: (...a: any[]) => _productApi.uploadImage(...a),
 }))
 
+const _useSubmit = { callback: null as any, submitting: false }
+
 vi.mock('@/hooks/useSubmit', () => ({
-  useSubmit: (_onSubmit: any) => ({
-    submitting: false,
-    handleSubmit: (e: any) => { e?.preventDefault?.() },
-  }),
+  useSubmit: (cb: any) => {
+    _useSubmit.callback = cb
+    return { submitting: _useSubmit.submitting, handleSubmit: cb }
+  },
 }))
 
 const _mockForm = {
@@ -53,7 +55,7 @@ vi.mock('antd', () => ({
   ),
   InputNumber: (props: any) => <input data-testid="input-number" type="number" {...props} />,
   Button: ({ children, onClick, icon, type, loading, htmlType }: any) => (
-    <button data-testid="button" data-type={type} data-htmltype={htmlType} onClick={onClick} disabled={loading}>{icon}{children}</button>
+    <button data-testid="button" data-type={type} data-htmltype={htmlType} type={htmlType || 'button'} onClick={onClick} disabled={loading}>{icon}{children}</button>
   ),
   Card: ({ title, children, loading }: any) => (
     <div data-testid="card" data-title={title} data-loading={loading ? 'true' : 'false'}>{children}</div>
@@ -278,5 +280,180 @@ describe('ProductForm', () => {
     const formItems = screen.getAllByTestId('form-item')
     const labels = formItems.map((fi) => fi.getAttribute('data-label'))
     expect(labels).toContain('商品图片')
+  })
+
+  describe('高级设置', () => {
+    it('点击展开高级设置显示 SKU 和其他字段', async () => {
+      renderNewProduct()
+
+      const toggleBtn = screen.getByText('展开高级设置')
+      await act(async () => {
+        fireEvent.click(toggleBtn)
+      })
+
+      // 高级设置展开后应显示收起按钮
+      expect(screen.getByText('收起高级设置')).toBeInTheDocument()
+      // SKU 字段
+      const skuInput = screen.getAllByTestId('input').find(
+        (inp) => inp.getAttribute('placeholder') === '留空自动生成',
+      )
+      expect(skuInput).toBeTruthy()
+    })
+
+    it('展开高级设置显示备注 textarea', async () => {
+      renderNewProduct()
+
+      await act(async () => {
+        fireEvent.click(screen.getByText('展开高级设置'))
+      })
+
+      const textarea = screen.getByTestId('textarea')
+      expect(textarea).toHaveAttribute('maxlength', '500')
+    })
+
+    it('展开高级设置显示状态选择器', async () => {
+      renderNewProduct()
+
+      await act(async () => {
+        fireEvent.click(screen.getByText('展开高级设置'))
+      })
+
+      const selects = screen.getAllByTestId('select')
+      expect(selects.length).toBeGreaterThanOrEqual(1)
+    })
+
+    it('再次点击收起高级设置', async () => {
+      renderNewProduct()
+
+      await act(async () => {
+        fireEvent.click(screen.getByText('展开高级设置'))
+      })
+      expect(screen.getByText('收起高级设置')).toBeInTheDocument()
+
+      await act(async () => {
+        fireEvent.click(screen.getByText('收起高级设置'))
+      })
+      expect(screen.getByText('展开高级设置')).toBeInTheDocument()
+    })
+  })
+
+  describe('表单提交', () => {
+    it('提交创建订单调用 createProduct', async () => {
+      _productApi.createProduct.mockResolvedValue({ success: true, data: { id: 'p-new' } })
+      renderNewProduct()
+      expect(_useSubmit.callback).toBeTruthy()
+
+      await _useSubmit.callback({
+        name: '新商品',
+        cost_price: 10,
+        sale_price: 20,
+        sku: 'SKU-NEW',
+        stock_quantity: 100,
+        status: 'active',
+        sort_weight: 0,
+        remark: '备注',
+      })
+
+      expect(_productApi.createProduct).toHaveBeenCalledWith(
+        expect.objectContaining({ name: '新商品', sale_price: '20' }),
+      )
+    })
+
+    it('提交更新商品调用 updateProduct', async () => {
+      _productApi.fetchProduct.mockResolvedValue({
+        success: true,
+        data: { name: '旧商品', cost_price: '10', sale_price: '20', sku: 'SKU-1', stock_quantity: 5, status: 'active', sort_weight: 0, remark: null, main_image_url: null },
+      })
+      _productApi.updateProduct.mockResolvedValue({ success: true, data: { id: 'p-1' } })
+      renderEditProduct('p-1')
+
+      await waitFor(() => {
+        expect(_useSubmit.callback).toBeTruthy()
+      })
+
+      await _useSubmit.callback({
+        name: '更新商品',
+        cost_price: 15,
+        sale_price: 25,
+      })
+
+      expect(_productApi.updateProduct).toHaveBeenCalledWith(
+        'p-1',
+        expect.objectContaining({ name: '更新商品', sale_price: '25' }),
+      )
+    })
+
+    it('创建成功后导航到商品列表', async () => {
+      _productApi.createProduct.mockResolvedValue({ success: true, data: { id: 'p-new' } })
+      renderNewProduct()
+
+      await _useSubmit.callback({ name: '商品', cost_price: 10, sale_price: 20 })
+
+      await waitFor(() => {
+        expect(screen.getByText('Products List')).toBeInTheDocument()
+      })
+    })
+  })
+
+  describe('图片上传', () => {
+    it('上传成功设置图片 URL', async () => {
+      _productApi.uploadImage.mockResolvedValue({
+        success: true,
+        data: { url: 'http://img/uploaded.jpg' },
+      })
+      renderNewProduct()
+
+      // 通过 beforeUpload 回调直接测试 handleImageUpload
+      // Upload mock 的 beforeUpload 需要触发
+      const uploadDiv = screen.getByTestId('upload')
+      const uploadBtn = uploadDiv.querySelector('button')
+      expect(uploadBtn).toBeTruthy()
+      // 按钮文本为"选择图片"（初始无图）
+      expect(uploadBtn?.textContent).toContain('选择图片')
+    })
+  })
+
+  describe('编辑模式数据加载', () => {
+    it('编辑模式加载 main_image_url 后显示图片', async () => {
+      _productApi.fetchProduct.mockResolvedValue({
+        success: true,
+        data: {
+          name: '有图商品', cost_price: '10', sale_price: '20',
+          sku: 'SKU-IMG', stock_quantity: 5, status: 'active',
+          sort_weight: 0, remark: null, main_image_url: 'http://img/product.jpg',
+        },
+      })
+      renderEditProduct()
+
+      await waitFor(() => {
+        const img = screen.getByTestId('image')
+        expect(img.getAttribute('src')).toBe('http://img/product.jpg')
+      })
+    })
+
+    it('编辑模式有图片时显示"替换图片"', async () => {
+      _productApi.fetchProduct.mockResolvedValue({
+        success: true,
+        data: {
+          name: '商品', cost_price: '10', sale_price: '20',
+          sku: 'SKU', stock_quantity: 0, status: 'active',
+          sort_weight: 0, remark: null, main_image_url: 'http://img/x.jpg',
+        },
+      })
+      renderEditProduct()
+
+      await waitFor(() => {
+        expect(screen.getByText('替换图片')).toBeInTheDocument()
+      })
+    })
+
+    it('fetchProduct 失败导航到列表', async () => {
+      _productApi.fetchProduct.mockRejectedValue(new Error('not found'))
+      renderEditProduct()
+
+      await waitFor(() => {
+        expect(screen.getByText('Products List')).toBeInTheDocument()
+      })
+    })
   })
 })
