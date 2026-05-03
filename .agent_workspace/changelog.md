@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第五百八十五轮·自动循环）
+
+### 测试：补强 Users 分支覆盖率，85.71% → 100%
+
+- Users.test.tsx +10：fetchRoles/createUser/updateUser success=false、编辑模式保存错误、
+  停用用户切换"已启用"、空 display_name/role_ids 处理、角色 display_name=null 回退
+- 整体分支覆盖率 92.73% → 94.03%，总测试数 761 → 771
+
 ## 2026-05-03（第五百八十四轮·自动循环）
 
 ### 测试：补强 ProductForm 分支覆盖率，84.21% → 100%
