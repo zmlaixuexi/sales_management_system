@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-05-04（第七百三十四轮·自动循环）
+
+### 异常路径：软删除过滤一致性边界测试（+30 新增覆盖 get_or_404 自动过滤、active_query、报表/导出/认证 JOIN 过滤、删除防护、导入查重）
+
+**变更文件：**
+- `backend/tests/test_soft_delete.py`（在原有 59 项基础上新增 30 项，共 89+1 项）
+  - get_or_404 自动过滤：使用 hasattr 检查 deleted_at
+  - active_query 过滤：4 个核心模型的列表端点均使用 active_query
+  - 报表端点 JOIN 一致性：_order_period_filter 覆盖 SalesOrder.deleted_at、customer-ranking 过滤 Customer.deleted_at、inventory-warning 使用 active_query
+  - 导出端点一致性：products/customers/orders 使用 active_query、payments 过滤 SalesOrder.deleted_at
+  - 认证端点：login/refresh_token 使用 active_query、get_current_user 过滤 deleted_at
+  - 删除防护：商品删除检查关联订单、客户删除检查关联订单
+  - 迁移文件包含 deleted_at 列
+  - 无 deleted_at 的模型确认：Role/Permission/SalesOrderItem/Payment/InventoryMovement/ProductCategory
+  - 导入查重：商品 SKU/客户手机号 过滤已删除记录
+  - 收款列表 JOIN 过滤 SalesOrder.deleted_at
+  - 商品销售统计 JOIN 过滤 SalesOrder.deleted_at
+
+**关键发现：**
+- salesperson-ranking 端点缺少 User.deleted_at 过滤（GAP A，审计记录）
+- _batch_sales_stats 正确过滤 SalesOrder.deleted_at
+
+**验证：**
+- 后端 2855/2855 ✓（新增 30 项）
+- ruff 0 errors ✓
+
 ## 2026-05-04（第七百三十三轮·自动循环）
 
 ### 异常路径：文件上传边界测试（53 项覆盖扩展名/MIME 白名单、魔数验证、大小限制、配置验证、模型字段、端点认证）
