@@ -115,3 +115,40 @@ def delete_file(db: Session, file_id: uuid.UUID) -> bool:
 
     db.delete(file_record)
     return True
+
+
+def cleanup_orphan_files(db: Session, max_age_hours: int = 24) -> int:
+    """清理未绑定商品且超过指定时长的孤立文件
+
+    返回清理的文件数量。
+    """
+    from datetime import timedelta
+
+    from sqlalchemy import func, select
+
+    from app.models.product import ProductImage
+
+    cutoff = datetime.now() - timedelta(hours=max_age_hours)
+
+    # 查找已绑定到商品的 file_id
+    bound_file_ids = db.query(ProductImage.file_id).subquery()
+
+    # 查找未绑定且超过 max_age_hours 的文件
+    orphan_files = (
+        db.query(File)
+        .filter(File.created_at < cutoff)
+        .filter(~File.id.in_(select(bound_file_ids.c.file_id)))
+        .all()
+    )
+
+    deleted_count = 0
+    for file_record in orphan_files:
+        if file_record.object_key:
+            full_path = Path(settings.UPLOAD_DIR) / file_record.object_key
+            if full_path.exists():
+                full_path.unlink()
+        db.delete(file_record)
+        deleted_count += 1
+
+    db.flush()
+    return deleted_count

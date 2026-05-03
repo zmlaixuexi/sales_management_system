@@ -81,3 +81,176 @@ def test_validate_magic_bytes_empty():
 
     with pytest.raises(HTTPException, match="为空"):
         _validate_magic_bytes(b"", "image/jpeg")
+
+
+# ─── cleanup_orphan_files ──────────────────────────────────
+
+
+def test_cleanup_orphan_files_removes_old_unbound(tmp_path):
+    """超过 24 小时未绑定商品的文件被清理"""
+    import uuid
+    from datetime import datetime, timedelta, timezone
+
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import Session, sessionmaker
+
+    from app.models.product import File, ProductImage, Base
+
+    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    Base.metadata.create_all(engine)
+    SessionLocal = sessionmaker(bind=engine)
+    db = SessionLocal()
+
+    upload_dir = tmp_path / "uploads" / "products"
+    upload_dir.mkdir(parents=True)
+
+    # 创建一个旧文件（25 小时前）
+    old_file = File(
+        id=uuid.uuid4(),
+        storage_type="local",
+        bucket="products",
+        object_key="products/old.jpg",
+        original_name="old.jpg",
+        content_type="image/jpeg",
+        size_bytes=100,
+        public_url="/uploads/products/old.jpg",
+        created_at=datetime.now(timezone.utc) - timedelta(hours=25),
+    )
+    db.add(old_file)
+    db.flush()
+
+    # 创建旧文件的物理文件
+    (upload_dir / "old.jpg").write_bytes(b"old")
+
+    # 用 monkeypatch 无法直接使用，手动替换 UPLOAD_DIR
+    import app.services.file_service as fs_mod
+    original_upload_dir = fs_mod.settings.UPLOAD_DIR
+    fs_mod.settings.UPLOAD_DIR = str(tmp_path / "uploads")
+
+    try:
+        count = fs_mod.cleanup_orphan_files(db, max_age_hours=24)
+    finally:
+        fs_mod.settings.UPLOAD_DIR = original_upload_dir
+
+    assert count == 1
+    assert db.query(File).count() == 0
+    assert not (upload_dir / "old.jpg").exists()
+
+
+def test_cleanup_orphan_files_keeps_bound_files(tmp_path):
+    """已绑定商品的文件不被清理"""
+    import uuid
+    from datetime import datetime, timedelta, timezone
+
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+
+    from app.models.product import File, Product, ProductImage, Base
+
+    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    Base.metadata.create_all(engine)
+    SessionLocal = sessionmaker(bind=engine)
+    db = SessionLocal()
+
+    # 创建商品
+    product = Product(
+        id=uuid.uuid4(),
+        name="测试商品",
+        sku="TEST-001",
+        cost_price=10,
+        sale_price=20,
+    )
+    db.add(product)
+    db.flush()
+
+    # 创建一个旧但已绑定的文件
+    bound_file = File(
+        id=uuid.uuid4(),
+        storage_type="local",
+        original_name="bound.jpg",
+        content_type="image/jpeg",
+        size_bytes=100,
+        created_at=datetime.now(timezone.utc) - timedelta(hours=25),
+    )
+    db.add(bound_file)
+    db.flush()
+
+    pi = ProductImage(
+        id=uuid.uuid4(),
+        product_id=product.id,
+        file_id=bound_file.id,
+    )
+    db.add(pi)
+    db.flush()
+
+    import app.services.file_service as fs_mod
+    count = fs_mod.cleanup_orphan_files(db, max_age_hours=24)
+
+    assert count == 0
+    assert db.query(File).count() == 1
+
+
+def test_cleanup_orphan_files_keeps_recent_unbound(tmp_path):
+    """未绑定但不超过 24 小时的文件不被清理"""
+    import uuid
+    from datetime import datetime, timezone
+
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+
+    from app.models.product import File, Base
+
+    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    Base.metadata.create_all(engine)
+    SessionLocal = sessionmaker(bind=engine)
+    db = SessionLocal()
+
+    recent_file = File(
+        id=uuid.uuid4(),
+        storage_type="local",
+        original_name="recent.jpg",
+        content_type="image/jpeg",
+        size_bytes=100,
+        created_at=datetime.now(timezone.utc),
+    )
+    db.add(recent_file)
+    db.flush()
+
+    import app.services.file_service as fs_mod
+    count = fs_mod.cleanup_orphan_files(db, max_age_hours=24)
+
+    assert count == 0
+    assert db.query(File).count() == 1
+
+
+def test_cleanup_orphan_files_returns_count(tmp_path):
+    """返回清理的文件数量"""
+    import uuid
+    from datetime import datetime, timedelta, timezone
+
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+
+    from app.models.product import File, Base
+
+    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    Base.metadata.create_all(engine)
+    SessionLocal = sessionmaker(bind=engine)
+    db = SessionLocal()
+
+    for _ in range(3):
+        f = File(
+            id=uuid.uuid4(),
+            storage_type="local",
+            original_name="old.jpg",
+            content_type="image/jpeg",
+            size_bytes=100,
+            created_at=datetime.now(timezone.utc) - timedelta(hours=30),
+        )
+        db.add(f)
+    db.flush()
+
+    import app.services.file_service as fs_mod
+    count = fs_mod.cleanup_orphan_files(db, max_age_hours=24)
+
+    assert count == 3
