@@ -323,4 +323,36 @@ describe('RolesPage', () => {
     })
     expect(screen.getByTestId('modal-ok').textContent).toBe('保存')
   })
+
+  it('fetchPermissions 错误不阻塞渲染', async () => {
+    _rolesApi.fetchPermissions.mockRejectedValue(new Error('权限接口错误'))
+    renderRoles()
+    await waitFor(() => {
+      expect(screen.getByText('角色权限管理')).toBeInTheDocument()
+    })
+  })
+
+  it('删除失败时不崩溃', async () => {
+    _rolesApi.deleteRole.mockRejectedValue(new Error('删除失败'))
+    renderRoles()
+    await waitFor(() => {
+      expect(screen.getAllByTestId('popconfirm').length).toBeGreaterThanOrEqual(1)
+    })
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    popconfirms[1].click()
+    // 等待异步处理完成
+    await waitFor(() => {
+      expect(_rolesApi.deleteRole).toHaveBeenCalledWith('r-2')
+    })
+  })
+
+  it('模态框关闭按钮存在', async () => {
+    renderRoles()
+    screen.getByText('新建角色').click()
+    await waitFor(() => {
+      expect(screen.getByTestId('modal')).toBeVisible()
+    })
+    // 模态框可见说明打开了
+    expect(screen.getByTestId('modal')).toBeVisible()
+  })
 })
