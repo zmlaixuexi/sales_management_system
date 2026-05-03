@@ -457,4 +457,63 @@ describe('Dashboard', () => {
     const bars = document.querySelectorAll('div[title]')
     expect(bars.length).toBe(2)
   })
+
+  it('fetchSalesSummary success=false 不设置摘要数据', async () => {
+    _reportMocks.fetchSalesSummary.mockResolvedValue({ success: false, data: null })
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('spin')).toHaveAttribute('data-spinning', 'false')
+    })
+    // summary stays null → Statistic values are 0
+    const stats = screen.getAllByTestId('statistic')
+    const statMap = new Map(stats.map((s) => [s.getAttribute('data-title'), s.getAttribute('data-value')]))
+    expect(statMap.get('销售总额')).toBe('0')
+  })
+
+  it('fetchSalesTrend success=false 显示暂无数据', async () => {
+    _reportMocks.fetchSalesTrend.mockResolvedValue({ success: false, data: null })
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('spin')).toHaveAttribute('data-spinning', 'false')
+    })
+    expect(screen.getByText('暂无数据')).toBeInTheDocument()
+  })
+
+  it('fetchProductRanking success=false 显示暂无排行数据', async () => {
+    _reportMocks.fetchProductRanking.mockResolvedValue({ success: false, data: null })
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('spin')).toHaveAttribute('data-spinning', 'false')
+    })
+    expect(screen.getByText('暂无排行数据')).toBeInTheDocument()
+  })
+
+  it('fetchInventoryWarning success=false 显示暂无预警商品', async () => {
+    _reportMocks.fetchInventoryWarning.mockResolvedValue({ success: false, data: null })
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('spin')).toHaveAttribute('data-spinning', 'false')
+    })
+    expect(screen.getByText('暂无预警商品')).toBeInTheDocument()
+  })
+
+  it('商品排行负毛利显示红色', async () => {
+    _reportMocks.fetchProductRanking.mockResolvedValue({
+      success: true,
+      data: {
+        items: [
+          { rank: 1, product_id: 'p2', product_name: '亏损商品', sku: 'SKU-LOSS', total_sales: '1000', total_cost: '2000', total_quantity: 10 },
+        ],
+        period: '30d',
+      },
+    })
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('spin')).toHaveAttribute('data-spinning', 'false')
+    })
+    // total_sales=1000, total_cost=2000 → profit=-1000
+    const cell = screen.getByText('¥-1000')
+    expect(cell).toBeTruthy()
+    expect(cell.closest('span')?.getAttribute('style')).toContain('255, 77, 79')
+  })
 })
