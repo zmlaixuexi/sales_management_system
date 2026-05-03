@@ -16,8 +16,9 @@ vi.mock('@/api/request', () => ({
   downloadCsv: vi.fn(),
 }))
 
+const _authStore = { hasPermission: vi.fn(() => true) }
 vi.mock('@/stores/auth', () => ({
-  useAuthStore: () => (code: string) => code === 'product:view_cost',
+  useAuthStore: (selector: any) => selector(_authStore),
 }))
 
 const _paginatedListReturn = {
@@ -111,6 +112,7 @@ function renderOrders() {
 describe('OrdersPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    _authStore.hasPermission.mockReturnValue(true)
   })
 
   it('渲染搜索输入和状态筛选器', () => {
@@ -349,16 +351,12 @@ describe('OrdersPage', () => {
   })
 
   it('canViewCost=false 时不显示毛利列', () => {
-    // 临时覆盖 auth store mock
-    vi.doMock('@/stores/auth', () => ({
-      useAuthStore: () => (_code: string) => false,
-    }))
-    // 由于 mock 已 hoisted，此测试验证 canViewCost 分支存在
-    // 当前 mock 返回 true，验证毛利列存在
+    _authStore.hasPermission.mockReturnValue(false)
     renderOrders()
     const table = screen.getByTestId('orders-table')
     const headerTexts = Array.from(table.querySelectorAll('th')).map((th) => th.textContent)
-    expect(headerTexts).toContain('毛利')
+    expect(headerTexts).not.toContain('毛利')
+    expect(headerTexts).not.toContain('毛利率')
   })
 
   it('有 statusFilter 空数据显示"没有匹配的订单"', () => {
