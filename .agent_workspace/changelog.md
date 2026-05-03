@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-05-04（第七百二十轮·自动循环）
+
+### 代码质量：前端请求拦截器边界测试（+17 新增覆盖请求头、429 Retry-After 边界、401 刷新细节、downloadCsv 参数过滤与错误检测）
+
+**变更文件：**
+- `frontend/src/__tests__/client-interceptor.test.ts`（+11 测试）
+  - 请求拦截器：无 token 不设 Authorization、有 token 设 Bearer 前缀、X-Request-ID UUID 格式、每次请求唯一 ID
+  - 429 边界：Retry-After > 5000 上限 5 秒、非数字立即重试（NaN→0）、空字符串默认 5 秒
+  - 响应拦截器：无 config 直接 reject 不显示 toast、refresh 保存 refresh_token、refresh URL 使用 baseURL、刷新后重试使用新 token
+- `frontend/src/__tests__/request.test.ts`（+6 测试）
+  - downloadCsv：过滤 undefined/空字符串参数、无参数传空对象、JSON 错误 blob 检测（error.message / message fallback / 默认文案）、createObjectURL/revokeObjectURL 调用验证
+
+**测试结果：** 前端 858/858 ✓ / 后端 2131/2131 ✓ / 总计 2989 tests
+
 ## 2026-05-04（第七百一十八轮·自动循环）
 
 ### 代码质量：数据导出边界测试（40 项覆盖 CSV 公式注入防御、LIKE 转义、文本清理、导出服务工具函数、端点注册）
