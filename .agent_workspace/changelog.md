@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-05-04（第七百四十七轮·自动循环）
+
+### 安全加固：输入消毒模块边界测试（101 项覆盖 escape_like/strip_html/strip_control_chars/sanitize_text/sanitize_csv_cell 常量验证、字符级边界、Unicode、幂等性）
+
+**变更文件：**
+- `backend/tests/test_sanitize_boundaries.py`（新建 101 项测试）
+  - 内部常量：_LIKE_SPECIAL_CHARS={%,_,\\}/_HTML_TAG_RE 编译正则/_CONTROL_CHAR_RE 编译正则/_CSV_FORMULA_CHARS={=,+,-,@,\\t,\\r}/大小验证
+  - escape_like：空串/无特殊/纯%/纯_/纯\\\/%/_%在开头末尾/连续特殊/混合/Unicode/Unicode+特殊/长字符串/数字/空格保留
+  - strip_html：空串/无标签/简单标签/自闭合 img/自闭合 br/script/style/嵌套/带属性/注释/多属性/data-属性/标签内换行/HTML 实体保留/onclick/onerror/Unicode/相邻标签/空格保留
+  - strip_control_chars：空串/无控制/保留 \\t\\n\\r/移除 NUL/BEL/BS/VT/FF/ESC/DEL/SO/SI/0x00-0x08 全部/0x0e-0x1f 全部/多个控制字符/纯控制字符/纯允许字符/Unicode
+  - sanitize_text：None/空串/空格/Tab 保留/换行保留/HTML 移除/控制字符移除/HTML+控制/script 移除/正常文本/False 返回 False/0 返回 0/NUL 在中间
+  - sanitize_csv_cell：空串/=/+/-/@/Tab/CR/==/普通文本/正数/小数/空格开头/字母开头/单个=/单个+/公式含空格/已有引号不加
+  - 组合与集成：sanitize_text→csv/返回类型/幂等性（escape_like 普通/特殊、strip_html、strip_control、sanitize_text、sanitize_csv）
+
+**测试计数：** 后端 3538（+101）、前端 1052、总计 4590
+
 ## 2026-05-04（第七百四十六轮·自动循环）
 
 ### 测试补强：异常处理中间件边界测试（65 项覆盖 HTTPException 边界、Starlette 路由异常、RequestValidationError、未处理异常守卫、request_id 传播、信封一致性）
