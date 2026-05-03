@@ -74,7 +74,7 @@ vi.mock('antd', () => ({
     <input data-testid="input-number" type="number" value={value} {...rest} onChange={(e: any) => onChange?.(parseFloat(e.target.value))} />
   ),
   Button: ({ children, onClick, icon, type, danger, disabled }: any) => (
-    <button data-testid="button" data-type={type} data-danger={danger ? 'true' : undefined} disabled={disabled} onClick={onClick}>{icon}{children}</button>
+    <button data-testid="button" data-type={type} data-danger={danger ? 'true' : undefined} data-disabled={disabled ? 'true' : undefined} onClick={onClick}>{icon}{children}</button>
   ),
   Card: ({ title, children, extra }: any) => (
     <div data-testid="card" data-title={title}>{extra}{children}</div>
@@ -661,7 +661,7 @@ describe('OrderForm', () => {
       await waitFor(() => {
         const selectBtn = screen.getAllByTestId('button').find(b => b.textContent?.includes('选择'))
         // 已添加商品的"选择"按钮应被禁用
-        expect(selectBtn?.hasAttribute('disabled')).toBe(true)
+        expect(selectBtn?.getAttribute('data-disabled')).toBe('true')
       })
     })
 
@@ -698,6 +698,141 @@ describe('OrderForm', () => {
       await waitFor(() => {
         expect(antdMessage.error).toHaveBeenCalledWith('加载订单信息失败')
         expect(screen.getByText('Orders List')).toBeInTheDocument()
+      })
+    })
+
+    it('_toastDisplayed 错误不显示消息', async () => {
+      const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+      _orderApi.fetchOrder.mockRejectedValue(err)
+      renderEditOrder()
+      await waitFor(() => {
+        expect(_orderApi.fetchOrder).toHaveBeenCalled()
+      })
+      expect(antdMessage.error).not.toHaveBeenCalledWith('加载订单信息失败')
+    })
+
+    it('fetchOrder success=false 不填充表单', async () => {
+      _orderApi.fetchOrder.mockResolvedValue({ success: false, data: { items: [] } })
+      renderEditOrder()
+      await waitFor(() => {
+        expect(_orderApi.fetchOrder).toHaveBeenCalledWith('o-123')
+      })
+      expect(_mockForm.setFieldsValue).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('API success=false 分支', () => {
+    it('fetchCustomers success=false 不设置客户列表', async () => {
+      _customerApi.fetchCustomers.mockResolvedValue({ success: false, data: { items: [] } })
+      renderNewOrder()
+      await waitFor(() => {
+        expect(_customerApi.fetchCustomers).toHaveBeenCalled()
+      })
+      // 客户选择器不会有选项
+      const selects = screen.getAllByTestId('select')
+      expect(selects[0].querySelectorAll('option').length).toBe(1) // 仅 placeholder
+    })
+
+    it('fetchProducts success=false 不设置商品列表', async () => {
+      _productApi.fetchProducts.mockResolvedValue({ success: false, data: { items: [] } })
+      renderNewOrder()
+
+      const addBtn = screen.getAllByTestId('button').find(b => b.textContent?.includes('添加商品'))
+      await act(async () => { fireEvent.click(addBtn!) })
+
+      await waitFor(() => {
+        expect(_productApi.fetchProducts).toHaveBeenCalled()
+      })
+    })
+
+    it('createOrder success=false 不导航', async () => {
+      const mockProducts = [
+        { id: 'p1', name: '商品A', sku: 'SKU001', sale_price: '100.00', main_image_url: null, stock_quantity: 10 },
+      ]
+      _productApi.fetchProducts.mockResolvedValue({ success: true, data: { items: mockProducts } })
+      _mockForm.validateFields.mockResolvedValue({ customer_id: 'c1' })
+      // Reset to clear any stale mockResolvedValueOnce from prior tests
+      _orderApi.createOrder.mockReset()
+      _orderApi.createOrder.mockResolvedValue({ success: false })
+      renderNewOrder()
+
+      const addBtn = screen.getAllByTestId('button').find(b => b.textContent?.includes('添加商品'))
+      await act(async () => { fireEvent.click(addBtn!) })
+      await waitFor(() => { expect(screen.getByText('选择')).toBeInTheDocument() })
+      await act(async () => { fireEvent.click(screen.getByText('选择')) })
+      await waitFor(() => { expect(screen.getByText('共 1 项')).toBeInTheDocument() })
+
+      await act(async () => { await _useSubmit.callback() })
+
+      await waitFor(() => {
+        expect(_orderApi.createOrder).toHaveBeenCalled()
+      })
+      expect(antdMessage.success).not.toHaveBeenCalledWith('创建成功')
+    })
+
+    it('updateOrder success=false 不导航', async () => {
+      _orderApi.fetchOrder.mockResolvedValue({
+        success: true,
+        data: {
+          id: 'o-1', order_no: 'SO-001', customer_id: 'c1',
+          status: 'draft', status_label: '草稿',
+          total_amount: '100.00', total_cost: '80.00',
+          gross_profit: '20.00', gross_margin: '20',
+          paid_amount: '0', remark: '',
+          sales_user_id: 'u1', created_at: null, updated_at: null,
+          items: [{
+            id: 'oi1', product_id: 'p1', product_sku_snapshot: 'SKU001',
+            product_name_snapshot: '商品A', product_image_url_snapshot: null,
+            quantity: 1, unit_price: '100.00', discount_amount: '0',
+            discount_rate: '1', cost_price_snapshot: '80.00',
+            subtotal_amount: '100.00', subtotal_cost: '80.00',
+          }],
+          payments: [],
+        },
+      })
+      _orderApi.updateOrder.mockResolvedValueOnce({ success: false })
+      _mockForm.validateFields.mockResolvedValueOnce({ customer_id: 'c1' })
+      renderEditOrder()
+
+      await waitFor(() => { expect(_orderApi.fetchOrder).toHaveBeenCalledWith('o-123') })
+
+      await act(async () => { await _useSubmit.callback() })
+
+      await waitFor(() => {
+        expect(_orderApi.updateOrder).toHaveBeenCalled()
+      })
+      expect(antdMessage.success).not.toHaveBeenCalledWith('更新成功')
+    })
+  })
+
+  describe('重复商品警告', () => {
+    it('点击已添加商品触发警告', async () => {
+      const mockProducts = [
+        { id: 'p1', name: '商品A', sku: 'SKU001', sale_price: '100.00', main_image_url: null, stock_quantity: 10 },
+      ]
+      _productApi.fetchProducts.mockResolvedValue({ success: true, data: { items: mockProducts } })
+      renderNewOrder()
+
+      // 添加商品
+      const addBtn = screen.getAllByTestId('button').find(b => b.textContent?.includes('添加商品'))
+      await act(async () => { fireEvent.click(addBtn!) })
+      await waitFor(() => { expect(screen.getByText('选择')).toBeInTheDocument() })
+      await act(async () => { fireEvent.click(screen.getByText('选择')) })
+      await waitFor(() => { expect(screen.getByText('共 1 项')).toBeInTheDocument() })
+
+      // 重新打开选择器
+      _productApi.fetchProducts.mockResolvedValue({ success: true, data: { items: mockProducts } })
+      const addBtn2 = screen.getAllByTestId('button').find(b => b.textContent?.includes('添加商品'))
+      await act(async () => { fireEvent.click(addBtn2!) })
+      await waitFor(() => { expect(screen.getByText('选择')).toBeInTheDocument() })
+
+      // 已添加商品的"选择"按钮应被标记禁用，但仍可触发 addProduct
+      const selectBtn = screen.getAllByTestId('button').find(b => b.textContent?.includes('选择'))
+      expect(selectBtn?.getAttribute('data-disabled')).toBe('true')
+      await act(async () => { fireEvent.click(selectBtn!) })
+
+      await waitFor(() => {
+        expect(antdMessage.warning).toHaveBeenCalledWith('该商品已在订单中')
       })
     })
   })
