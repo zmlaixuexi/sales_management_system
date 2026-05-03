@@ -18,7 +18,7 @@ vi.mock('@/api/products', () => ({
 }))
 
 vi.mock('@/hooks/useSubmit', () => ({
-  useSubmit: (onSubmit: any) => ({
+  useSubmit: (_onSubmit: any) => ({
     submitting: false,
     handleSubmit: (e: any) => { e?.preventDefault?.() },
   }),
