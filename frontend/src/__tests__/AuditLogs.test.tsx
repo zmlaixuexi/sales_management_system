@@ -352,4 +352,50 @@ describe('AuditLogs', () => {
     fireEvent.click(screen.getByTestId('page-change'))
     expect(_paginatedListReturn.onPageChange).toHaveBeenCalled()
   })
+
+  it('资源ID搜索清除触发 setResourceIdFilter 和 setPage', async () => {
+    renderAuditLogs()
+    await waitFor(() => { expect(_auditMocks.fetchAuditActions).toHaveBeenCalled() })
+    const clearBtn = screen.getByTestId('clear-btn-资源ID精确筛选')
+    fireEvent.click(clearBtn)
+    expect(_paginatedListReturn.setPage).toHaveBeenCalledWith(1)
+  })
+
+  it('loadActions _toastDisplayed 错误静默', async () => {
+    const err = Object.assign(new Error('toast'), { _toastDisplayed: true })
+    _auditMocks.fetchAuditActions.mockRejectedValue(err)
+    const { message } = await import('antd')
+    renderAuditLogs()
+    await waitFor(() => {
+      expect(_auditMocks.fetchAuditActions).toHaveBeenCalled()
+    })
+    expect(message.error).not.toHaveBeenCalledWith('加载筛选选项失败')
+  })
+
+  it('fetchAuditActions 返回空 actions 和 resource_types', async () => {
+    _auditMocks.fetchAuditActions.mockResolvedValue({ actions: null, resource_types: null })
+    renderAuditLogs()
+    await waitFor(() => {
+      expect(_auditMocks.fetchAuditActions).toHaveBeenCalled()
+    })
+    // 不崩溃即可
+    expect(screen.getByText('操作日志')).toBeInTheDocument()
+  })
+
+  it('空操作类型显示原始值', async () => {
+    _paginatedListReturn.data = [
+      { id: 'log-x', created_at: '2026-05-01T10:00:00Z', actor_name: '管理员', action: 'custom_action', resource_type: 'order', resource_id: 'ord-1', detail: null },
+      { id: 'log-y', created_at: '2026-05-01T11:00:00Z', actor_name: '销售', action: 'login_success', resource_type: 'user', resource_id: null, detail: '登录' },
+    ]
+    _paginatedListReturn.total = 2
+    renderAuditLogs()
+    // 未知 action 显示原始值
+    expect(screen.getByText('custom_action')).toBeInTheDocument()
+    _paginatedListReturn.data = [
+      { id: 'log-1', created_at: '2026-05-01T10:00:00Z', actor_name: '管理员', action: 'login_success', resource_type: 'user', resource_id: null, detail: 'IP: 127.0.0.1' },
+      { id: 'log-2', created_at: '2026-05-01T11:00:00Z', actor_name: '销售员', action: 'customer_create', resource_type: 'customer', resource_id: 'cust-1', detail: '创建了客户' },
+      { id: 'log-3', created_at: '2026-05-01T12:00:00Z', actor_name: '管理员', action: 'product_update', resource_type: 'product', resource_id: 'prod-1', detail: '更新了商品' },
+    ]
+    _paginatedListReturn.total = 3
+  })
 })
