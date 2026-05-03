@@ -40,7 +40,7 @@ vi.mock('@/api/request', () => ({
 }))
 
 vi.mock('antd', () => ({
-  Table: ({ dataSource, columns, rowKey, locale, loading }: any) => (
+  Table: ({ dataSource, columns, rowKey, locale, loading, pagination }: any) => (
     <div>
       {loading ? <span>加载中...</span> : (
       <table data-testid="table">
@@ -58,6 +58,8 @@ vi.mock('antd', () => ({
       </table>
       )}
       {(!dataSource || dataSource.length === 0) && !loading && locale?.emptyText && <span>{locale.emptyText}</span>}
+      {pagination?.showTotal && <span data-testid="pagination-total">{pagination.showTotal(pagination.total)}</span>}
+      {pagination?.onChange && <button data-testid="page-change" onClick={() => pagination.onChange(2, pagination.pageSize)}>翻页</button>}
     </div>
   ),
   Button: ({ children, onClick, type }: any) => (
@@ -255,6 +257,13 @@ describe('PaymentsPage', () => {
 
   it('分页信息显示总条数', () => {
     renderPayments()
-    expect(screen.getByText(/共 2 条/)).toBeInTheDocument()
+    expect(screen.getByTestId('pagination-total')).toHaveTextContent('共 2 条')
+  })
+
+  it('翻页触发 onPageChange', () => {
+    renderPayments()
+    const pageBtn = screen.getByTestId('page-change')
+    pageBtn.click()
+    expect(_paginatedListReturn.onPageChange).toHaveBeenCalled()
   })
 })
