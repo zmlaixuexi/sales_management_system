@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-04（第六百九十一轮·自动循环）
+
+### 测试补强：密码修改 Token 失效端到端测试
+
+- test_39：12 步完整生命周期（登录→使用→改密→旧 token 失效→重登→新 token 有效→改回）
+- test_40：多次密码修改后所有旧 token 累积失效验证
+- 验证 password_changed_at 字段更新、旧密码登录失败、新 refresh token 正常
+- 后端测试 1496（+2），ruff 0 errors
+
 ## 2026-05-04（第六百九十轮·自动循环）
 
 ### 部署体验：Dockerfile 添加 HEALTHCHECK 指令
