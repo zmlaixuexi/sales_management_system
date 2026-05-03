@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第六百六十轮·自动循环）
+
+### 测试补强：为 safe_commit 添加 3 个单元测试
+
+- `test_safe_commit_success`：验证正常提交通道
+- `test_safe_commit_rollback_on_failure`：验证 commit 失败时 rollback 被调用，session 恢复可用
+- `test_safe_commit_reraises_original_exception`：验证重新抛出 IntegrityError 等原始异常类型
+- 全量验证通过：后端 1370 + 前端 837 = 2207 测试
+
 ## 2026-05-03（第六百五十九轮·自动循环）
 
 ### 代码质量：添加 safe_commit 辅助函数 + 统一 35 处 db.commit() rollback 保护
