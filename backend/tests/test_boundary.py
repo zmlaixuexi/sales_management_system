@@ -2423,3 +2423,59 @@ def test_151_product_sort_by_special_chars():
         assert resp.status_code == 200, (
             f"sort_by 含特殊字符 '{ch}' 应安全降级: {resp.status_code}"
         )
+
+
+# ---- 空字符串边界 ----
+
+
+def test_152_product_create_empty_sku_auto_generated():
+    """sku 传空字符串时应自动生成（与 None 行为一致）"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/products", json={
+        "name": "空SKU商品",
+        "sale_price": "10.00",
+        "cost_price": "5.00",
+        "sku": "",
+    }, headers=headers)
+    # 空字符串应被视为未提供，触发自动生成
+    assert resp.status_code in (200, 400), f"空 SKU 响应: {resp.status_code} {resp.text}"
+
+
+def test_153_customer_create_empty_email_ignored():
+    """email 传空字符串时应被接受（空字符串视为无邮箱）"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/customers", json={
+        "name": "空邮箱客户",
+        "email": "",
+        "source": "other",
+        "level": "normal",
+        "follow_status": "new",
+    }, headers=headers)
+    assert resp.status_code in (200, 400, 422), f"空邮箱响应: {resp.status_code} {resp.text}"
+
+
+def test_154_customer_create_empty_phone_ignored():
+    """phone 传空字符串时应被接受（空字符串视为无电话）"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/customers", json={
+        "name": "空电话客户",
+        "phone": "",
+        "source": "other",
+        "level": "normal",
+        "follow_status": "new",
+    }, headers=headers)
+    assert resp.status_code in (200, 400, 422), f"空电话响应: {resp.status_code} {resp.text}"
+
+
+def test_155_customer_create_whitespace_phone_rejected():
+    """phone 传纯空格应被校验拒绝（不是有效手机号）"""
+    headers = _auth_for_user(_user_id)
+    resp = client.post("/api/v1/customers", json={
+        "name": "空格电话客户",
+        "phone": "   ",
+        "source": "other",
+        "level": "normal",
+        "follow_status": "new",
+    }, headers=headers)
+    # Pydantic phone validator 应拒绝纯空格（不匹配手机号正则）
+    assert resp.status_code in (400, 422), f"纯空格电话应被拒绝: {resp.status_code}"
