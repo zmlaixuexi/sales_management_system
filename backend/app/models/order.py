@@ -51,7 +51,7 @@ class SalesOrderItem(Base):
         UUID(as_uuid=True), ForeignKey("sales_orders.id", ondelete="CASCADE"), nullable=False, index=True
     )
     product_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("products.id"), nullable=False
+        UUID(as_uuid=True), ForeignKey("products.id"), nullable=False, index=True
     )
     product_sku_snapshot: Mapped[str | None] = mapped_column(String(64))
     product_name_snapshot: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -83,7 +83,7 @@ class InventoryMovement(Base):
     related_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     operator_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"))
     remark: Mapped[str | None] = mapped_column(Text)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
 
 
 class Payment(Base):
@@ -98,8 +98,8 @@ class Payment(Base):
     payment_method: Mapped[str] = mapped_column(String(30), nullable=False)
     paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), server_default=func.now())
     operator_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"))
-    status: Mapped[str] = mapped_column(String(20), nullable=False, default="normal")
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="normal", index=True)
     remark: Mapped[str | None] = mapped_column(Text)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
 
     order: Mapped[SalesOrder] = relationship(back_populates="payments")
