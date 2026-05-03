@@ -57,25 +57,29 @@ vi.mock('@/hooks/usePaginatedList', () => ({
 
 vi.mock('antd', () => {
   return {
-    Table: ({ dataSource, columns, rowKey, locale }: any) => (
-      <table data-testid="products-table">
-        <thead>
-          <tr>{columns?.map((col: any) => <th key={col.dataIndex}>{col.title}</th>)}</tr>
-        </thead>
-        <tbody>
-          {dataSource?.length ? dataSource.map((row: any) => (
-            <tr key={row[rowKey]} data-testid={`row-${row[rowKey]}`}>
-              {columns?.map((col: any) => (
-                <td key={col.dataIndex} data-col={col.dataIndex}>
-                  {col.render ? col.render(row[col.dataIndex], row) : row[col.dataIndex]}
-                </td>
-              ))}
-            </tr>
-          )) : (
-            <tr><td colSpan={99}>{typeof locale?.emptyText === 'string' ? locale.emptyText : locale?.emptyText}</td></tr>
-          )}
-        </tbody>
-      </table>
+    Table: ({ dataSource, columns, rowKey, locale, pagination }: any) => (
+      <div>
+        <table data-testid="products-table">
+          <thead>
+            <tr>{columns?.map((col: any) => <th key={col.dataIndex}>{col.title}</th>)}</tr>
+          </thead>
+          <tbody>
+            {dataSource?.length ? dataSource.map((row: any) => (
+              <tr key={row[rowKey]} data-testid={`row-${row[rowKey]}`}>
+                {columns?.map((col: any) => (
+                  <td key={col.dataIndex} data-col={col.dataIndex}>
+                    {col.render ? col.render(row[col.dataIndex], row) : row[col.dataIndex]}
+                  </td>
+                ))}
+              </tr>
+            )) : (
+              <tr><td colSpan={99}>{typeof locale?.emptyText === 'string' ? locale.emptyText : locale?.emptyText}</td></tr>
+            )}
+          </tbody>
+        </table>
+        {pagination?.showTotal && <span data-testid="pagination-total">{pagination.showTotal(pagination.total)}</span>}
+        {pagination?.onChange && <button data-testid="page-change" onClick={() => pagination.onChange(2, pagination.pageSize)}>翻页</button>}
+      </div>
     ),
     Button: ({ children, onClick, icon, type, danger }: any) => (
       <button data-testid="button" data-type={type} data-danger={danger ? 'true' : undefined} type="button" onClick={onClick}>{icon}{children}</button>
@@ -456,5 +460,28 @@ describe('ProductsPage', () => {
       { id: '2', name: '商品B', sku: 'SKU-002', category_name: '分类2', sale_price: '200', cost_price: '120', unit_profit: '80', gross_margin: '40', stock_quantity: 5, status: 'inactive', main_image_url: null },
     ]
     _paginatedListReturn.total = 2
+  })
+
+  it('导入按钮点击触发文件选择器', () => {
+    const clickSpy = vi.fn()
+    renderProducts()
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+    fileInput.click = clickSpy
+    const importBtn = screen.getAllByTestId('button').find(b => b.textContent?.includes('导入'))
+    expect(importBtn).toBeTruthy()
+    fireEvent.click(importBtn!)
+    expect(clickSpy).toHaveBeenCalled()
+  })
+
+  it('分页显示总条数', () => {
+    renderProducts()
+    expect(screen.getByTestId('pagination-total')).toHaveTextContent('共 2 条')
+  })
+
+  it('翻页触发 onPageChange', () => {
+    renderProducts()
+    const pageBtn = screen.getByTestId('page-change')
+    fireEvent.click(pageBtn)
+    expect(_paginatedListReturn.onPageChange).toHaveBeenCalled()
   })
 })
