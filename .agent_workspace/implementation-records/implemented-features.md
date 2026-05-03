@@ -11,7 +11,7 @@
 - 描述：角色权限管理页面 — 后端 CRUD API + 前端页面 + 路由菜单 + 测试
 - 状态：已完成
 - 验证：前端 463 测试全绿、后端 ruff 0、tsc 0
-- 关联：backend/app/api/v1/roles.py、frontend/src/pages/Roles.tsx、16 个前端测试
+- 关联：backend/app/api/v1/roles.py、frontend/src/pages/Roles.tsx、16 个前端测试、18 个后端测试
 - 对应需求：开发执行文档 7.1 节”角色权限 /settings/roles”
 
 ## 功能编号：FEAT-20260503-218
