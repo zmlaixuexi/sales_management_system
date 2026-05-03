@@ -77,6 +77,15 @@ class Settings(BaseSettings):
         # 生产环境 localhost 告警在 lifespan 中处理（validator 无法访问其他字段）
         return ",".join(origins)
 
+    @field_validator("JWT_SECRET_KEY")
+    @classmethod
+    def _validate_jwt_secret(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("JWT_SECRET_KEY 不能为空")
+        if len(v) < 8:
+            raise ValueError("JWT_SECRET_KEY 长度不能少于 8 个字符")
+        return v
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
 

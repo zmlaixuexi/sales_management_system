@@ -346,6 +346,33 @@ def test_cors_rejects_empty():
         Settings(CORS_ORIGINS="")
 
 
+# ─── JWT_SECRET_KEY 强度校验 ──────────────────────────────────
+
+
+def test_jwt_secret_rejects_empty():
+    """JWT_SECRET_KEY 不能为空"""
+    with pytest.raises(ValidationError, match="不能为空"):
+        Settings(JWT_SECRET_KEY="")
+
+
+def test_jwt_secret_rejects_whitespace_only():
+    """纯空格的 JWT_SECRET_KEY 等效为空"""
+    with pytest.raises(ValidationError, match="不能为空"):
+        Settings(JWT_SECRET_KEY="   ")
+
+
+def test_jwt_secret_rejects_short():
+    """过短的 JWT_SECRET_KEY 被拒绝"""
+    with pytest.raises(ValidationError, match="8"):
+        Settings(JWT_SECRET_KEY="short")
+
+
+def test_jwt_secret_accepts_long():
+    """足够长的 JWT_SECRET_KEY 被接受"""
+    s = Settings(JWT_SECRET_KEY="a" * 32)
+    assert len(s.JWT_SECRET_KEY) == 32
+
+
 def test_openapi_disabled_in_production(monkeypatch):
     """生产环境不应暴露 OpenAPI 文档"""
     from app.core.config import settings

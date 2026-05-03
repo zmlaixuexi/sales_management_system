@@ -36,9 +36,13 @@ async def lifespan(_app: FastAPI):
     upload_dir.mkdir(parents=True, exist_ok=True)
 
     # 生产环境安全检查
-    if settings.APP_ENV == "production" and settings.JWT_SECRET_KEY == "change-me":
-        logging.critical("JWT_SECRET_KEY 未设置，请在环境变量中配置安全密钥")
-        raise RuntimeError("JWT_SECRET_KEY 不能使用默认值")
+    if settings.APP_ENV == "production":
+        if settings.JWT_SECRET_KEY == "change-me":
+            logging.critical("JWT_SECRET_KEY 未设置，请在环境变量中配置安全密钥")
+            raise RuntimeError("JWT_SECRET_KEY 不能使用默认值")
+        if len(settings.JWT_SECRET_KEY) < 32:
+            logging.critical("JWT_SECRET_KEY 长度不足（当前 %d 字符，建议至少 32 字符）", len(settings.JWT_SECRET_KEY))
+            raise RuntimeError("JWT_SECRET_KEY 长度不足，建议使用至少 32 字符的随机密钥")
 
     # 生产环境 CORS localhost 告警
     if settings.APP_ENV == "production":
