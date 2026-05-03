@@ -9,7 +9,6 @@ from starlette.responses import Response
 
 from app.core.config import settings
 from app.core.request_id import request_id_ctx
-from app.core.user_context import user_id_ctx
 
 logger = logging.getLogger("app.request")
 
@@ -39,7 +38,7 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
                 "status": response.status_code,
                 "duration_ms": duration_ms,
                 "client_ip": request.client.host if request.client else "-",
-                "user_id": user_id_ctx.get(""),
+                "user_agent": request.headers.get("user-agent", ""),
                 "slow": is_slow,
                 "request_id": request_id_ctx.get(""),
                 "resp_bytes": resp_size,

@@ -16,6 +16,7 @@ class _JsonFormatter(logging.Formatter):
             "level": record.levelname,
             "logger": record.name,
             "message": record.getMessage(),
+            "app_env": settings.APP_ENV,
         }
         if record.exc_info and record.exc_info[0] is not None:
             log_entry["exception"] = "".join(
