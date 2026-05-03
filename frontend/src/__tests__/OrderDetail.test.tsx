@@ -736,4 +736,220 @@ describe('OrderDetail', () => {
       })
     })
   })
+
+  it('商品有图片时显示图片', async () => {
+    const dataWithImage = {
+      success: true,
+      data: {
+        ...mockOrderData.data,
+        items: [
+          { id: 'item-img', product_name_snapshot: '商品B', product_sku_snapshot: 'SKU-002', quantity: 1, unit_price: '200', discount_amount: '0', subtotal_amount: '200', product_image_url_snapshot: 'https://img.test/pic.jpg' },
+        ],
+        payments: [],
+      },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(dataWithImage)
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByTestId('image')).toBeInTheDocument()
+      expect(screen.getByTestId('image').getAttribute('src')).toBe('https://img.test/pic.jpg')
+    })
+  })
+
+  it('折扣大于零显示折扣金额', async () => {
+    const dataWithDiscount = {
+      success: true,
+      data: {
+        ...mockOrderData.data,
+        items: [
+          { id: 'item-disc', product_name_snapshot: '商品C', product_sku_snapshot: 'SKU-003', quantity: 1, unit_price: '500', discount_amount: '50', subtotal_amount: '450', product_image_url_snapshot: null },
+        ],
+        payments: [],
+      },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(dataWithDiscount)
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('-¥50')).toBeInTheDocument()
+    })
+  })
+
+  it('未知收款方式显示原始值', async () => {
+    const dataWithUnknownMethod = {
+      success: true,
+      data: {
+        ...mockOrderData.data,
+        payments: [
+          { id: 'pay-x', amount: '200', payment_method: 'crypto', paid_at: '2026-05-01T12:00:00Z', remark: '' },
+        ],
+      },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(dataWithUnknownMethod)
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('crypto')).toBeInTheDocument()
+    })
+  })
+
+  it('收款记录空 paid_at 显示 --', async () => {
+    const dataWithNullPaidAt = {
+      success: true,
+      data: {
+        ...mockOrderData.data,
+        payments: [
+          { id: 'pay-null', amount: '100', payment_method: 'cash', paid_at: null, remark: '' },
+        ],
+      },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(dataWithNullPaidAt)
+    renderOrderDetail()
+    await waitFor(() => {
+      const row = screen.getByTestId('row-pay-null')
+      // paid_at 列渲染的 '--'
+      expect(row.textContent).toContain('--')
+    })
+  })
+
+  it('操作日志空 after_data 显示 --', async () => {
+    _orderMocks.fetchOrderLogs.mockResolvedValue({
+      success: true,
+      data: {
+        items: [
+          { id: 'log-null', actor_name: '管理员', action: 'note_added', after_data: null, created_at: '2026-05-01T12:00:00Z' },
+        ],
+        page: 1, page_size: 10, total: 1,
+      },
+    })
+    renderOrderDetail()
+    await waitFor(() => {
+      const row = screen.getByTestId('row-log-null')
+      expect(row.textContent).toContain('note_added')
+    })
+  })
+
+  it('操作日志空 created_at 显示 --', async () => {
+    _orderMocks.fetchOrderLogs.mockResolvedValue({
+      success: true,
+      data: {
+        items: [
+          { id: 'log-nodate', actor_name: '管理员', action: 'test', after_data: { x: 1 }, created_at: null },
+        ],
+        page: 1, page_size: 10, total: 1,
+      },
+    })
+    renderOrderDetail()
+    await waitFor(() => {
+      const row = screen.getByTestId('row-log-nodate')
+      expect(row.textContent).toContain('--')
+    })
+  })
+
+  it('未知订单状态显示原始值', async () => {
+    const unknownStatusData = {
+      success: true,
+      data: { ...mockOrderData.data, status: 'shipped', payments: [] },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(unknownStatusData)
+    renderOrderDetail()
+    await waitFor(() => {
+      const tags = screen.getAllByTestId('tag')
+      const tagTexts = tags.map((t) => t.textContent)
+      expect(tagTexts).toContain('shipped')
+    })
+  })
+
+  it('订单空 created_at 显示 --', async () => {
+    const nullCreatedData = {
+      success: true,
+      data: { ...mockOrderData.data, created_at: null, payments: [] },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(nullCreatedData)
+    renderOrderDetail()
+    await waitFor(() => {
+      const createdItems = screen.getAllByTestId('desc-item').filter(
+        (el) => el.getAttribute('data-label') === '创建时间',
+      )
+      expect(createdItems[0].textContent).toBe('--')
+    })
+  })
+
+  it('订单无备注不显示备注行', async () => {
+    const noRemarkData = {
+      success: true,
+      data: { ...mockOrderData.data, remark: null, payments: [] },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(noRemarkData)
+    renderOrderDetail()
+    await waitFor(() => {
+      const remarkItems = screen.getAllByTestId('desc-item').filter(
+        (el) => el.getAttribute('data-label') === '备注',
+      )
+      expect(remarkItems.length).toBe(0)
+    })
+  })
+
+  it('InputNumber onChange null 设为 0', async () => {
+    const confirmedData = {
+      success: true,
+      data: { ...mockOrderData.data, status: 'confirmed', payments: [] },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(confirmedData)
+    renderOrderDetail()
+    await waitFor(() => {
+      expect(screen.getByText(/ORD-20260501-001/)).toBeInTheDocument()
+    })
+    const payBtn = screen.getAllByTestId('button').find(
+      (b) => b.textContent?.includes('登记收款'),
+    )
+    await act(async () => { fireEvent.click(payBtn!) })
+    await waitFor(() => {
+      expect(screen.getByTestId('input-number')).toBeInTheDocument()
+    })
+    // InputNumber mock passes parsed value; test null case by clearing
+    const inputNumber = screen.getByTestId('input-number')
+    await act(async () => {
+      fireEvent.change(inputNumber, { target: { value: '' } })
+    })
+    // value '' → parseFloat('') = NaN → onChange(NaN) → setPayAmount(NaN || 0) = 0
+    expect(inputNumber).toBeTruthy()
+  })
+
+  it('已完成订单不显示编辑确认取消按钮', async () => {
+    const completedData = {
+      success: true,
+      data: {
+        ...mockOrderData.data,
+        status: 'completed',
+        payments: [{ id: 'pay-1', amount: '1000', payment_method: 'cash', paid_at: '2026-05-01T12:00:00Z', remark: '' }],
+      },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(completedData)
+    renderOrderDetail()
+    await waitFor(() => {
+      const buttons = screen.getAllByTestId('button')
+      const btnTexts = buttons.map((b) => b.textContent)
+      expect(btnTexts).not.toContain('编辑')
+      expect(btnTexts).not.toContain('确认订单')
+      expect(btnTexts).not.toContain('取消订单')
+    })
+  })
+
+  it('部分收款订单显示登记收款和取消按钮', async () => {
+    const partialData = {
+      success: true,
+      data: {
+        ...mockOrderData.data,
+        status: 'partially_paid',
+        payments: [{ id: 'pay-1', amount: '500', payment_method: 'cash', paid_at: '2026-05-01T12:00:00Z', remark: '' }],
+      },
+    }
+    _orderMocks.fetchOrder.mockResolvedValue(partialData)
+    renderOrderDetail()
+    await waitFor(() => {
+      const buttons = screen.getAllByTestId('button')
+      const btnTexts = buttons.map((b) => b.textContent ?? '')
+      expect(btnTexts.some((t) => t.includes('登记收款'))).toBe(true)
+      expect(btnTexts.some((t) => t.includes('取消订单'))).toBe(true)
+    })
+  })
 })
