@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第五百七十九轮·自动循环）
+
+### 测试：补强 OrderDetail 分支覆盖率，80.23% → 91.86%
+
+- OrderDetail.test.tsx +10：确认/取消/收款/冲正 _toastDisplayed 静默（4）、加载订单 _toastDisplayed、
+  确认/取消/收款/冲正 res.success=false（4）、loadLogs success=false
+- 整体分支覆盖率 88.19% → 89.49%，总测试数 716 → 726
+
 ## 2026-05-03（第五百七十八轮·自动循环）
 
 ### 测试：补强 Products 分支覆盖率，78.12% → 93.75%
