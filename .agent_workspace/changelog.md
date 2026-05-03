@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-05-03（第五百四十一轮·自动循环）
+
+### 测试：新增 Login 页面和 roles API 前端测试，覆盖率从 73.74% 提升
+
+- Login.test.tsx：5 个测试（渲染、登录成功/失败跳转、redirect 参数）
+- roles-api.test.ts：7 个测试（fetchRoles、fetchPermissions、createRole、updateRole、deleteRole）
+- 前端测试 516→528，总计 1806→1818
+- 解决 vi.hoisted + antd JSX mock 兼容问题
+
 ## 2026-05-03（第五百四十轮·自动循环）
 
 ### 部署：增强 pre-deploy-check.sh 添加前端代码质量检查
