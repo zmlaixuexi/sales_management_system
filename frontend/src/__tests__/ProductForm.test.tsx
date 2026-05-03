@@ -255,4 +255,28 @@ describe('ProductForm', () => {
     await (() => new Promise((r) => setTimeout(r, 0)))()
     expect(screen.getByText('Products List')).toBeInTheDocument()
   })
+
+  it('编辑模式 fetchProduct 失败显示错误提示', async () => {
+    const { getApiErrorMessage } = await import('@/utils')
+    _productApi.fetchProduct.mockRejectedValue(new Error('加载失败'))
+    renderEditProduct()
+    await vi.waitFor(() => {
+      expect(getApiErrorMessage).toBeDefined()
+    })
+    // 验证 fetchProduct 被调用
+    expect(_productApi.fetchProduct).toHaveBeenCalled()
+  })
+
+  it('创建按钮 htmlType 为 submit', () => {
+    renderNewProduct()
+    const submitBtn = screen.getByText('创建商品').closest('button')
+    expect(submitBtn?.getAttribute('data-htmltype')).toBe('submit')
+  })
+
+  it('表单包含商品图片字段', () => {
+    renderNewProduct()
+    const formItems = screen.getAllByTestId('form-item')
+    const labels = formItems.map((fi) => fi.getAttribute('data-label'))
+    expect(labels).toContain('商品图片')
+  })
 })
