@@ -35,6 +35,10 @@ vi.mock('@/utils', () => ({
   formatAmount: (v: any) => String(v),
 }))
 
+vi.mock('@/api/request', () => ({
+  downloadCsv: vi.fn(),
+}))
+
 vi.mock('antd', () => ({
   Table: ({ dataSource, columns, rowKey, locale, loading }: any) => (
     <div>
@@ -62,6 +66,10 @@ vi.mock('antd', () => ({
   Tag: ({ children, color }: any) => <span data-testid="tag" data-color={color}>{children}</span>,
   Space: ({ children }: any) => <span>{children}</span>,
   message: { error: vi.fn(), success: vi.fn() },
+}))
+
+vi.mock('@ant-design/icons', () => ({
+  DownloadOutlined: () => <span>↓</span>,
 }))
 
 import PaymentsPage from '@/pages/Payments'
@@ -193,5 +201,23 @@ describe('PaymentsPage', () => {
   it('渲染导出按钮', () => {
     renderPayments()
     expect(screen.getByText('导出')).toBeInTheDocument()
+  })
+
+  it('导出按钮点击调用 downloadCsv', async () => {
+    const { downloadCsv } = await import('@/api/request')
+    renderPayments()
+    const buttons = screen.getAllByTestId('button')
+    const exportBtn = buttons.find((b) => b.textContent?.includes('导出'))
+    exportBtn!.click()
+    expect(downloadCsv).toHaveBeenCalledWith('/exports/payments')
+  })
+
+  it('订单 ID 点击跳转到订单详情', async () => {
+    renderPayments()
+    const buttons = screen.getAllByTestId('button')
+    const orderLink = buttons.find((b) => b.textContent?.includes('order-00'))
+    orderLink!.click()
+    await (() => new Promise((r) => setTimeout(r, 0)))()
+    expect(screen.getByText('Order Detail')).toBeInTheDocument()
   })
 })
