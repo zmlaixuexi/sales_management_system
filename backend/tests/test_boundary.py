@@ -2390,3 +2390,36 @@ def test_149_payment_list_sort():
     headers = _auth()
     resp = client.get("/api/v1/payments?sort_by=created_at&sort_order=desc", headers=headers)
     assert resp.status_code == 200, f"收款列表排序应返回 200: {resp.status_code}"
+
+
+# ---- sort_by SQL 注入防护 ----
+
+
+def test_150_product_sort_by_sql_injection_neutralized():
+    """sort_by 含 SQL 注入 payload 时被白名单安全忽略，不导致 500"""
+    headers = _auth_for_user(_user_id)
+    payloads = [
+        "name; DROP TABLE products--",
+        "name; SELECT * FROM users",
+        "1=1 OR",
+        "UNION SELECT id, username FROM users--",
+        "name'; DELETE FROM products WHERE '1'='1",
+    ]
+    for payload in payloads:
+        resp = client.get(f"/api/v1/products?sort_by={payload}", headers=headers)
+        # 白名单机制应安全忽略非法 sort_by，回退默认排序，返回 200
+        assert resp.status_code == 200, (
+            f"sort_by 注入 payload '{payload}' 应被白名单安全忽略，不应报错: {resp.status_code}"
+        )
+        # 确认返回正常数据结构
+        assert "data" in resp.json(), f"应返回正常数据结构: {resp.json()}"
+
+
+def test_151_product_sort_by_special_chars():
+    """sort_by 含特殊字符时安全降级"""
+    headers = _auth_for_user(_user_id)
+    for ch in ["'", '"', ";", "`", "$", "{", "}", "|", "&", "<", ">"]:
+        resp = client.get(f"/api/v1/products?sort_by=name{ch}", headers=headers)
+        assert resp.status_code == 200, (
+            f"sort_by 含特殊字符 '{ch}' 应安全降级: {resp.status_code}"
+        )
