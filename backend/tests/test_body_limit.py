@@ -160,7 +160,11 @@ def test_11_delete_request_limited(monkeypatch):
     """DELETE 请求受请求体限制"""
     from app.core.config import settings
     monkeypatch.setattr(settings, "MAX_JSON_BODY_MB", 0)
-    resp = client.request("DELETE", "/api/v1/products/999", content=b"x" * 100, headers={**_auth(), "content-type": "application/json"})
+    resp = client.request(
+        "DELETE", "/api/v1/products/999",
+        content=b"x" * 100,
+        headers={**_auth(), "content-type": "application/json"},
+    )
     assert resp.status_code == 413
 
 

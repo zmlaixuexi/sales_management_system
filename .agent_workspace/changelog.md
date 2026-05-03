@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第五百六十三轮·自动循环）
+
+### 工程：ruff 错误修复，前端构建验证通过
+
+- 修复 test_body_limit.py 行过长（136→多行拆分）
+- 修复 test_ratelimit.py import 排序
+- 全量验证：后端 1304 测试 ✓、前端 623 测试 ✓、tsc ✓、eslint ✓、ruff ✓、vite build ✓
+
 ## 2026-05-03（第五百六十二轮·自动循环）
 
 ### 测试：Dashboard 列渲染测试补强，+3 测试覆盖毛利/库存预警/趋势图表

@@ -153,7 +153,7 @@ def test_06_different_ips_independent():
 
 def test_07_clear_rate_limit_resets_buckets():
     """clear_rate_limit 清空所有 IP 的计数"""
-    from app.core.ratelimit import clear_rate_limit, _shared_buckets
+    from app.core.ratelimit import _shared_buckets, clear_rate_limit
     clear_rate_limit()
     if _shared_buckets is not None:
         assert len(_shared_buckets) == 0
