@@ -252,4 +252,36 @@ describe('Dashboard', () => {
     const options = select.querySelectorAll('option')
     expect(options.length).toBe(5)
   })
+
+  it('期间选择器包含正确标签', () => {
+    renderDashboard()
+    const select = screen.getByTestId('period-select')
+    const optionTexts = Array.from(select.querySelectorAll('option')).map((o) => o.textContent)
+    expect(optionTexts).toContain('今日')
+    expect(optionTexts).toContain('近 7 天')
+    expect(optionTexts).toContain('近 30 天')
+    expect(optionTexts).toContain('本月')
+    expect(optionTexts).toContain('上月')
+  })
+
+  it('商品排行表格渲染商品数据', async () => {
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('spin')).toHaveAttribute('data-spinning', 'false')
+    })
+    expect(screen.getByText('SKU-001')).toBeInTheDocument()
+    expect(screen.getByText('商品A')).toBeInTheDocument()
+  })
+
+  it('无趋势数据时显示空状态', async () => {
+    _reportMocks.fetchSalesTrend.mockResolvedValue({
+      success: true,
+      data: { items: [], period: '30d' },
+    })
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('spin')).toHaveAttribute('data-spinning', 'false')
+    })
+    expect(screen.getByText('暂无数据')).toBeInTheDocument()
+  })
 })
