@@ -6,6 +6,48 @@
 
 本文件记录的是已经落地的功能切片，不等同于开发文档 Definition of Done 全部满足。凡是各功能的”已知限制”中涉及权限、数据范围、敏感字段、交付文档或测试报告的内容，都必须继续视为未完成事项。
 
+## 功能编号：FEAT-20260503-255
+
+- 描述：auth schema 边界验证（refresh_token 长度、role_ids 列表上界）
+- 状态：已完成
+- 验证：RefreshToken max_length=2048、UserCreate/UserUpdate role_ids max_length=50，+7 测试
+- 关联：backend/app/schemas/auth.py、backend/tests/test_schema_bounds.py
+
+## 功能编号：FEAT-20260503-254
+
+- 描述：Pydantic Schema 边界验证完善（价格/数量/列表长度上界）
+- 状态：已完成
+- 验证：product/order/payment/inventory schema 添加上界约束，+20 测试，防止 DB Numeric 溢出
+- 关联：backend/app/schemas/product.py、backend/app/schemas/order.py、backend/app/schemas/payment.py、backend/app/schemas/inventory.py
+
+## 功能编号：FEAT-20260503-253
+
+- 描述：sanitize_csv_cell 单元测试 10 项
+- 状态：已完成
+- 验证：直接测试 sanitize_csv_cell 的 6 种公式触发字符 + 正常文本不误转
+- 关联：backend/tests/test_sanitize.py
+
+## 功能编号：FEAT-20260503-252
+
+- 描述：CSV 导出公式注入防护（sanitize_csv_cell + export_service 集成）
+- 状态：已完成
+- 验证：sanitize_csv_cell 前置单引号阻止 Excel 公式解析，4 种行构建函数统一使用 _str，+11 测试
+- 关联：backend/app/core/sanitize.py、backend/app/services/export_service.py、backend/tests/test_export_helpers.py
+
+## 功能编号：FEAT-20260503-251
+
+- 描述：订单状态机边界测试 13 项
+- 状态：已完成
+- 验证：覆盖已取消/已完成/部分收款的 confirm/cancel/update 非法转换
+- 关联：backend/tests/test_state_machine.py
+
+## 功能编号：FEAT-20260503-250
+
+- 描述：库存扣减并发安全测试 7 项 + _deduct_inventory 原子性改进
+- 状态：已完成
+- 验证：with_for_update 调用验证、竞态模拟、零库存拒绝、多商品部分失败原子性、两阶段扣减
+- 关联：backend/tests/test_concurrency.py、backend/app/api/v1/orders.py
+
 ## 功能编号：FEAT-20260503-249
 
 - 描述：启用 noUncheckedIndexedAccess TypeScript 严格模式
