@@ -1,6 +1,6 @@
 """输入清理工具测试"""
 
-from app.core.sanitize import escape_like, sanitize_text, strip_control_chars, strip_html
+from app.core.sanitize import escape_like, sanitize_csv_cell, sanitize_text, strip_control_chars, strip_html
 
 
 def test_escape_like_percent():
@@ -187,3 +187,46 @@ def test_strip_control_chars_empty():
 def test_sanitize_text_strips_control_chars_and_html():
     result = sanitize_text("<b>bold</b>\x00text")
     assert result == "boldtext"
+
+
+# ─── sanitize_csv_cell ──────────────────────────────────────────
+
+
+def test_csv_cell_equals_prefix():
+    assert sanitize_csv_cell("=SUM(A1:A10)") == "'=SUM(A1:A10)"
+
+
+def test_csv_cell_plus_prefix():
+    assert sanitize_csv_cell("+cmd|calc") == "'+cmd|calc"
+
+
+def test_csv_cell_minus_prefix():
+    assert sanitize_csv_cell("-1+1") == "'-1+1"
+
+
+def test_csv_cell_at_prefix():
+    assert sanitize_csv_cell("@SUM") == "'@SUM"
+
+
+def test_csv_cell_tab_prefix():
+    assert sanitize_csv_cell("\t=cmd") == "'\t=cmd"
+
+
+def test_csv_cell_cr_prefix():
+    assert sanitize_csv_cell("\rcmd") == "'\rcmd"
+
+
+def test_csv_cell_normal_text():
+    assert sanitize_csv_cell("普通文本") == "普通文本"
+
+
+def test_csv_cell_formula_midstring():
+    assert sanitize_csv_cell("价格=100") == "价格=100"
+
+
+def test_csv_cell_empty():
+    assert sanitize_csv_cell("") == ""
+
+
+def test_csv_cell_number():
+    assert sanitize_csv_cell("123.45") == "123.45"
