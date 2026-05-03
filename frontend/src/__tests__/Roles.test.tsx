@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 
 const _rolesApi = {
@@ -56,7 +56,7 @@ vi.mock('antd', () => ({
   ),
   InputNumber: (props: any) => <input data-testid="input-number" type="number" {...props} />,
   Button: ({ children, onClick, icon, type, danger, disabled }: any) => (
-    <button data-testid="button" data-type={type} data-danger={danger ? 'true' : undefined} disabled={disabled} onClick={onClick}>{icon}{children}</button>
+    <button data-testid="button" data-type={type} data-danger={danger ? 'true' : undefined} type="button" disabled={disabled} onClick={onClick}>{icon}{children}</button>
   ),
   Card: ({ title, children, extra }: any) => (
     <div data-testid="card" data-title={title}>{extra}{children}</div>
@@ -86,10 +86,10 @@ vi.mock('antd', () => ({
   Tag: ({ children, color }: any) => (
     <span data-testid="tag" data-color={color}>{children}</span>
   ),
-  Modal: ({ title, children, open, okText }: any) => (
+  Modal: ({ title, children, open, okText, onOk }: any) => (
     <div data-testid="modal" data-title={title} style={{ display: open ? 'block' : 'none' }}>
       {children}
-      <button data-testid="modal-ok">{okText || '确定'}</button>
+      <button data-testid="modal-ok" type="button" onClick={onOk}>{okText || '确定'}</button>
     </div>
   ),
   Select: Object.assign(
@@ -354,5 +354,115 @@ describe('RolesPage', () => {
     })
     // 模态框可见说明打开了
     expect(screen.getByTestId('modal')).toBeVisible()
+  })
+
+  it('创建角色保存成功', async () => {
+    _mockForm.validateFields.mockResolvedValueOnce({
+      name: 'new_role', display_name: '新角色',
+      description: '描述', permission_ids: ['p-1'],
+    })
+    _rolesApi.createRole.mockResolvedValueOnce({ success: true })
+    renderRoles()
+
+    await act(async () => { fireEvent.click(screen.getByText('新建角色')) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeVisible() })
+
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => {
+      expect(_rolesApi.createRole).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'new_role', display_name: '新角色' }),
+      )
+    })
+  })
+
+  it('编辑角色保存成功', async () => {
+    _mockForm.validateFields.mockResolvedValueOnce({
+      name: 'admin', display_name: '超级管理员',
+      description: '全部权限', permission_ids: ['p-1'],
+    })
+    _rolesApi.updateRole.mockResolvedValueOnce({ success: true })
+    renderRoles()
+
+    await waitFor(() => { expect(screen.getByTestId('row-r-1')).toBeInTheDocument() })
+    const editBtns = screen.getAllByText('编辑')
+    await act(async () => { fireEvent.click(editBtns[0]) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeVisible() })
+
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => {
+      expect(_rolesApi.updateRole).toHaveBeenCalledWith(
+        'r-1',
+        expect.objectContaining({ name: 'admin' }),
+      )
+    })
+  })
+
+  it('保存失败显示错误消息', async () => {
+    _mockForm.validateFields.mockResolvedValueOnce({ name: 'fail' })
+    _rolesApi.createRole.mockRejectedValueOnce(new Error('创建失败'))
+    const { message } = await import('antd')
+    renderRoles()
+
+    await act(async () => { fireEvent.click(screen.getByText('新建角色')) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeVisible() })
+
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => {
+      expect(message.error).toHaveBeenCalledWith('创建角色失败')
+    })
+  })
+
+  it('表单验证失败不调用 API', async () => {
+    _mockForm.validateFields.mockRejectedValueOnce(new Error('validation'))
+    renderRoles()
+
+    await act(async () => { fireEvent.click(screen.getByText('新建角色')) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeVisible() })
+
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => { expect(_mockForm.validateFields).toHaveBeenCalled() })
+    expect(_rolesApi.createRole).not.toHaveBeenCalled()
+  })
+
+  it('删除成功后刷新角色列表', async () => {
+    _rolesApi.deleteRole.mockResolvedValueOnce({ success: true })
+    renderRoles()
+    await waitFor(() => { expect(screen.getAllByTestId('popconfirm').length).toBeGreaterThanOrEqual(1) })
+
+    const popconfirms = screen.getAllByTestId('popconfirm')
+    await act(async () => { fireEvent.click(popconfirms[1]) })
+    await waitFor(() => {
+      expect(_rolesApi.deleteRole).toHaveBeenCalledWith('r-2')
+      // fetchRoles should be called again (initial + refresh)
+      expect(_rolesApi.fetchRoles).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  it('编辑角色填充表单值', async () => {
+    renderRoles()
+    await waitFor(() => { expect(screen.getByTestId('row-r-1')).toBeInTheDocument() })
+
+    const editBtns = screen.getAllByText('编辑')
+    await act(async () => { fireEvent.click(editBtns[0]) })
+    await waitFor(() => {
+      expect(_mockForm.setFieldsValue).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'admin', display_name: '系统管理员' }),
+      )
+    })
+  })
+
+  it('无权限角色显示"无权限"标签', async () => {
+    _rolesApi.fetchRoles.mockResolvedValue({
+      success: true,
+      data: [{
+        id: 'r-3', name: 'empty', display_name: '空角色',
+        description: null, permissions: [], user_count: 0,
+        created_at: null, updated_at: null,
+      }],
+    })
+    renderRoles()
+    await waitFor(() => {
+      expect(screen.getByText('无权限')).toBeInTheDocument()
+    })
   })
 })
