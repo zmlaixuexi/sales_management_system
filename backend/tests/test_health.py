@@ -300,6 +300,52 @@ def test_response_time_header():
     assert response.headers["x-response-time"].endswith("ms")
 
 
+# ─── CORS 配置验证 ──────────────────────────────────────────
+
+import pytest
+from pydantic import ValidationError
+
+from app.core.config import Settings
+
+
+def test_cors_rejects_wildcard():
+    """CORS_ORIGINS 不允许通配符 '*'"""
+    with pytest.raises(ValidationError, match="通配符"):
+        Settings(CORS_ORIGINS="*")
+
+
+def test_cors_rejects_invalid_scheme():
+    """CORS origin 必须以 http:// 或 https:// 开头"""
+    with pytest.raises(ValidationError, match="http://"):
+        Settings(CORS_ORIGINS="ftp://example.com")
+
+
+def test_cors_rejects_no_scheme():
+    """CORS origin 没有协议前缀应被拒绝"""
+    with pytest.raises(ValidationError, match="http://"):
+        Settings(CORS_ORIGINS="example.com")
+
+
+def test_cors_accepts_multiple_origins():
+    """允许多个合法 origin"""
+    s = Settings(CORS_ORIGINS="http://a.com, https://b.com")
+    assert "http://a.com" in s.CORS_ORIGINS
+    assert "https://b.com" in s.CORS_ORIGINS
+
+
+def test_cors_strips_whitespace():
+    """CORS origin 前后空格被去除"""
+    s = Settings(CORS_ORIGINS="  http://a.com ,  http://b.com  ")
+    assert "http://a.com" in s.CORS_ORIGINS
+    assert "http://b.com" in s.CORS_ORIGINS
+
+
+def test_cors_rejects_empty():
+    """CORS_ORIGINS 不能为空"""
+    with pytest.raises(ValidationError, match="不能为空"):
+        Settings(CORS_ORIGINS="")
+
+
 def test_openapi_disabled_in_production(monkeypatch):
     """生产环境不应暴露 OpenAPI 文档"""
     from app.core.config import settings

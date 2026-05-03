@@ -40,6 +40,13 @@ async def lifespan(_app: FastAPI):
         logging.critical("JWT_SECRET_KEY 未设置，请在环境变量中配置安全密钥")
         raise RuntimeError("JWT_SECRET_KEY 不能使用默认值")
 
+    # 生产环境 CORS localhost 告警
+    if settings.APP_ENV == "production":
+        origins = [o.strip() for o in settings.CORS_ORIGINS.split(",")]
+        localhost_origins = [o for o in origins if "localhost" in o or "127.0.0.1" in o]
+        if localhost_origins:
+            logging.warning("生产环境 CORS_ORIGINS 包含本地地址: %s", localhost_origins)
+
     # 启动配置摘要
     logger.info(
         "服务启动 — env=%s pool=%d/%d rate_limit=%d/%ds log=%s/%s",

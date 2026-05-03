@@ -1,7 +1,10 @@
+import logging
 from pathlib import Path
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings
+
+_log = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
@@ -59,6 +62,20 @@ class Settings(BaseSettings):
         if v < 0:
             raise ValueError("不能为负数")
         return v
+
+    @field_validator("CORS_ORIGINS")
+    @classmethod
+    def _validate_cors_origins(cls, v: str) -> str:
+        origins = [o.strip() for o in v.split(",") if o.strip()]
+        for origin in origins:
+            if origin == "*":
+                raise ValueError("CORS_ORIGINS 不允许使用通配符 '*'（与 allow_credentials=True 不兼容）")
+            if not origin.startswith(("http://", "https://")):
+                raise ValueError(f"CORS origin 必须以 http:// 或 https:// 开头: {origin!r}")
+        if not origins:
+            raise ValueError("CORS_ORIGINS 不能为空")
+        # 生产环境 localhost 告警在 lifespan 中处理（validator 无法访问其他字段）
+        return ",".join(origins)
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
