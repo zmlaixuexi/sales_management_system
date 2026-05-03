@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-05-04（第七百零三轮·自动循环）
+
+### 代码质量：Pydantic schema 字段边界测试（118 项覆盖 8 个模块）
+
+- 新增 test_schema_boundaries.py：118 项纯 schema 单元测试（无 DB 依赖）
+  - CustomerCreate/Update/Transfer（16 项）：name 长度 1-100、空值/超长拒绝、手机号正则、邮箱正则、source/level 枚举、owner_user_id UUID、remark 500 上限、默认值
+  - ProductCreate/Update（22 项）：售价 0/负数/上限/非法格式、库存 0/负数/上限、name 长度、status 枚举、sort_weight 范围、sku 50 上限、category_id UUID
+  - OrderCreate/Update + OrderItemInput（17 项）：quantity 1-99999、unit_price 非负/上限、items 列表 1-500、customer_id UUID、remark 500
+  - PaymentCreate（11 项）：amount 正数/零/负数/上限/非法、payment_method 5 种枚举、remark 500
+  - InventoryAdjust（11 项）：quantity_change ±9999999 范围、product_id UUID、remark 500
+  - LoginRequest/UserCreate/UserUpdate/ChangePasswordRequest/RefreshRequest（33 项）：username 2-50、password 6-100 + 强度、role_ids UUID 列表 50 上限、display_name 100、refresh_token 2048
+- 后端测试 1734（+118），全部通过
+
 ## 2026-05-04（第七百零二轮·自动循环）
 
 ### 安全加固：rate limiting 端到端测试（15 项覆盖配额递减、多方法共享、429 结构、窗口过期）
