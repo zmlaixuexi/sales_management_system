@@ -43,25 +43,29 @@ vi.mock('@/hooks/usePaginatedList', () => ({
 }))
 
 vi.mock('antd', () => ({
-  Table: ({ dataSource, columns, rowKey, locale }: any) => (
-    <table data-testid="orders-table">
-      <thead>
-        <tr>{columns?.map((col: any) => <th key={col.dataIndex || col.title}>{col.title}</th>)}</tr>
-      </thead>
-      <tbody>
-        {dataSource?.length ? dataSource.map((row: any) => (
-          <tr key={row[rowKey]} data-testid={`row-${row[rowKey]}`}>
-            {columns?.map((col: any) => (
-              <td key={col.dataIndex} data-col={col.dataIndex}>
-                {col.render ? col.render(row[col.dataIndex], row) : row[col.dataIndex]}
-              </td>
-            ))}
-          </tr>
-        )) : (
-          <tr><td colSpan={99}>{typeof locale?.emptyText === 'string' ? locale.emptyText : locale?.emptyText}</td></tr>
-        )}
-      </tbody>
-    </table>
+  Table: ({ dataSource, columns, rowKey, locale, pagination }: any) => (
+    <div>
+      <table data-testid="orders-table">
+        <thead>
+          <tr>{columns?.map((col: any) => <th key={col.dataIndex || col.title}>{col.title}</th>)}</tr>
+        </thead>
+        <tbody>
+          {dataSource?.length ? dataSource.map((row: any) => (
+            <tr key={row[rowKey]} data-testid={`row-${row[rowKey]}`}>
+              {columns?.map((col: any) => (
+                <td key={col.dataIndex} data-col={col.dataIndex}>
+                  {col.render ? col.render(row[col.dataIndex], row) : row[col.dataIndex]}
+                </td>
+              ))}
+            </tr>
+          )) : (
+            <tr><td colSpan={99}>{typeof locale?.emptyText === 'string' ? locale.emptyText : locale?.emptyText}</td></tr>
+          )}
+        </tbody>
+      </table>
+      {pagination?.showTotal && <span data-testid="pagination-total">{pagination.showTotal(pagination.total)}</span>}
+      {pagination?.onChange && <button data-testid="page-change" onClick={() => pagination.onChange(2, pagination.pageSize)}>翻页</button>}
+    </div>
   ),
   Button: ({ children, onClick, icon, type }: any) => (
     <button data-testid="button" data-type={type} type="button" onClick={onClick}>{icon}{children}</button>
@@ -368,5 +372,16 @@ describe('OrdersPage', () => {
     ]
     _paginatedListReturn.total = 3
     _paginatedListReturn.keyword = ''
+  })
+
+  it('分页显示总条数', () => {
+    renderOrders()
+    expect(screen.getByTestId('pagination-total')).toHaveTextContent('共 3 条')
+  })
+
+  it('翻页触发 onPageChange', () => {
+    renderOrders()
+    fireEvent.click(screen.getByTestId('page-change'))
+    expect(_paginatedListReturn.onPageChange).toHaveBeenCalled()
   })
 })
