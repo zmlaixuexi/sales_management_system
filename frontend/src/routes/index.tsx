@@ -45,6 +45,7 @@ const routes: RouteObject[] = [
       { path: 'audit-logs', element: lazyPage(() => import('@/pages/AuditLogs')) },
       { path: 'reports', element: lazyPage(() => import('@/pages/ReportsCenter')) },
       { path: 'users', element: lazyPage(() => import('@/pages/Users')) },
+      { path: 'roles', element: lazyPage(() => import('@/pages/Roles')) },
     ],
   },
   {

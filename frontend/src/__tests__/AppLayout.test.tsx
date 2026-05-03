@@ -44,6 +44,7 @@ vi.mock('@ant-design/icons', () => ({
   WalletOutlined: () => null,
   UserSwitchOutlined: () => null,
   InboxOutlined: () => null,
+  SafetyOutlined: () => null,
 }))
 
 import { authApi } from '@/api/auth'
@@ -156,7 +157,7 @@ describe('AppLayout', () => {
     expect(screen.getByText('销售管理系统')).toBeInTheDocument()
   })
 
-  it('菜单包含全部 9 个导航项', () => {
+  it('菜单包含全部 10 个导航项', () => {
     ;(authApi.getMe as any).mockResolvedValue({ data: { success: false } })
 
     render(
@@ -169,7 +170,7 @@ describe('AppLayout', () => {
 
     const menu = screen.getByTestId('menu')
     const buttons = menu.querySelectorAll('button[data-testid^="menu-"]')
-    expect(buttons.length).toBe(9)
+    expect(buttons.length).toBe(10)
   })
 
   it('当前路径对应的菜单项高亮', () => {
