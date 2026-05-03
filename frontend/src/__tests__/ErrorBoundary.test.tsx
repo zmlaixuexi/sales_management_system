@@ -130,4 +130,21 @@ describe('ErrorBoundary', () => {
     fireEvent.click(screen.getByText('返回首页'))
     expect(window.location.href).toContain('/')
   })
+
+  it('错误无 message 时显示默认提示', () => {
+    // 创建一个没有 message 的错误对象
+    const errorWithoutMessage = new Error()
+    errorWithoutMessage.message = ''
+
+    render(
+      <MemoryRouter>
+        <ErrorBoundary>
+          <ThrowError error={errorWithoutMessage} />
+        </ErrorBoundary>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByTestId('error-result')).toBeInTheDocument()
+    expect(screen.getByText('发生了未知错误')).toBeInTheDocument()
+  })
 })
