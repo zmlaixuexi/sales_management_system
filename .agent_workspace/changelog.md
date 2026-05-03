@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-05-03（第五百八十七轮·自动循环）
+
+### 测试：补强 CustomerDetail 分支覆盖率，87.5% → 100%
+
+- CustomerDetail.test.tsx +3：fetchCustomer/fetchOrders success=false、loadCustomer _toastDisplayed
+- 整体分支覆盖率 94.55% → 94.94%，总测试数 779 → 782
+
 ## 2026-05-03（第五百八十六轮·自动循环）
 
 ### 测试：补强 Customers 分支覆盖率，86.11% → 97.22%
