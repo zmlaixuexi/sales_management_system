@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-03（第六百零四轮·自动循环）
+
+### 验证：全量构建验证 + TypeScript strict 确认
+
+- 后端 1304/1304 ✓、前端 828/828 ✓、vite build ✓
+- TypeScript tsconfig.app.json 已启用 strict:true + noUnusedLocals + noUnusedParameters
+- tsc 0 errors 确认
+
 ## 2026-05-03（第六百零三轮·自动循环）
 
 ### 安全审计：全部通过，无需修复
