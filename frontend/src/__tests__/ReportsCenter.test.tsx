@@ -323,4 +323,28 @@ describe('ReportsCenter', () => {
       expect(screen.getByText('暂无库存预警')).toBeInTheDocument()
     })
   })
+
+  it('销售趋势加载失败显示错误提示', async () => {
+    _reportMocks.fetchSalesTrend.mockRejectedValue(new Error('network'))
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(_messageError).toHaveBeenCalledWith('加载销售趋势失败')
+    })
+  })
+
+  it('商品排行加载失败显示错误提示', async () => {
+    _reportMocks.fetchProductRanking.mockRejectedValue(new Error('network'))
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(_messageError).toHaveBeenCalledWith('加载商品排行失败')
+    })
+  })
+
+  it('库存预警加载失败显示错误提示', async () => {
+    _reportMocks.fetchInventoryWarning.mockRejectedValue(new Error('network'))
+    renderReportsCenter()
+    await waitFor(() => {
+      expect(_messageError).toHaveBeenCalledWith('加载库存预警失败')
+    })
+  })
 })

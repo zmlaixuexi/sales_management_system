@@ -58,7 +58,7 @@ vi.mock('antd', () => {
     return <div data-testid="form-item" data-label={label}>{children}</div>
   }
   return {
-    Table: ({ dataSource, columns, rowKey, locale, loading }: any) => (
+    Table: ({ dataSource, columns, rowKey, locale, loading, pagination }: any) => (
       loading ? <span>加载中...</span> : (
       <div>
         <table data-testid="table">
@@ -76,6 +76,8 @@ vi.mock('antd', () => {
             )}
           </tbody>
         </table>
+        {pagination?.showTotal && <span data-testid="pagination-total">{pagination.showTotal(pagination.total)}</span>}
+        {pagination?.onChange && <button data-testid="page-change" onClick={() => pagination.onChange(2, pagination.pageSize)}>翻页</button>}
       </div>
       )),
     Button: ({ children, onClick, type, icon }: any) => (
@@ -97,10 +99,11 @@ vi.mock('antd', () => {
     ),
     Tag: ({ children, color }: any) => <span data-testid="tag" data-color={color}>{children}</span>,
     Space: ({ children }: any) => <span>{children}</span>,
-    Modal: ({ title, children, open, onOk }: any) => open ? (
+    Modal: ({ title, children, open, onOk, onCancel }: any) => open ? (
       <div data-testid="modal" data-title={title}>
         {children}
         <button data-testid="modal-ok" type="button" onClick={onOk}>保存</button>
+        <button data-testid="modal-cancel" type="button" onClick={onCancel}>取消</button>
       </div>
     ) : null,
     Form: Object.assign(
@@ -459,5 +462,44 @@ describe('UsersPage', () => {
     expect(labels).not.toContain('用户名')
     expect(labels).not.toContain('密码')
     expect(labels).toContain('启用状态')
+  })
+
+  it('分页显示总条数', () => {
+    renderUsers()
+    expect(screen.getByTestId('pagination-total')).toHaveTextContent('共 2 条')
+  })
+
+  it('翻页触发 onPageChange', () => {
+    renderUsers()
+    fireEvent.click(screen.getByTestId('page-change'))
+    expect(_paginatedListReturn.onPageChange).toHaveBeenCalled()
+  })
+
+  it('弹窗取消按钮关闭弹窗', async () => {
+    renderUsers()
+    await act(async () => { fireEvent.click(screen.getByText('新建用户')) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeInTheDocument() })
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-cancel')) })
+    await waitFor(() => {
+      expect(screen.queryByTestId('modal')).toBeNull()
+    })
+  })
+
+  it('停用用户标签显示红色', () => {
+    _userMocks.fetchUsers.mockReturnValue({
+      data: {
+        items: [{
+          id: 'user-010', username: 'inactive_user', display_name: '停用用户',
+          phone: null, email: null, is_active: false, is_superuser: false,
+          roles: [], created_at: null, updated_at: null,
+        }],
+        total: 1,
+      },
+    })
+    renderUsers()
+    const tags = screen.getAllByTestId('tag')
+    const redTag = tags.find((t) => t.getAttribute('data-color') === 'red')
+    expect(redTag).toBeTruthy()
+    expect(redTag?.textContent).toBe('停用')
   })
 })

@@ -86,10 +86,11 @@ vi.mock('antd', () => ({
   Tag: ({ children, color }: any) => (
     <span data-testid="tag" data-color={color}>{children}</span>
   ),
-  Modal: ({ title, children, open, okText, onOk }: any) => (
+  Modal: ({ title, children, open, okText, onOk, onCancel }: any) => (
     <div data-testid="modal" data-title={title} style={{ display: open ? 'block' : 'none' }}>
       {children}
       <button data-testid="modal-ok" type="button" onClick={onOk}>{okText || '确定'}</button>
+      <button data-testid="modal-cancel" type="button" onClick={onCancel}>取消</button>
     </div>
   ),
   Select: Object.assign(
@@ -463,6 +464,37 @@ describe('RolesPage', () => {
     renderRoles()
     await waitFor(() => {
       expect(screen.getByText('无权限')).toBeInTheDocument()
+    })
+  })
+
+  it('弹窗取消按钮关闭弹窗', async () => {
+    renderRoles()
+    screen.getByText('新建角色').click()
+    await waitFor(() => {
+      expect(screen.getByTestId('modal')).toBeVisible()
+    })
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-cancel')) })
+    await waitFor(() => {
+      expect(screen.getByTestId('modal')).not.toBeVisible()
+    })
+  })
+
+  it('编辑角色保存失败显示更新错误', async () => {
+    _mockForm.validateFields.mockResolvedValueOnce({
+      name: 'admin', display_name: '管理员', description: '描述', permission_ids: [],
+    })
+    _rolesApi.updateRole.mockRejectedValueOnce(new Error('更新失败'))
+    const { message } = await import('antd')
+    renderRoles()
+
+    await waitFor(() => { expect(screen.getByTestId('row-r-1')).toBeInTheDocument() })
+    const editBtns = screen.getAllByText('编辑')
+    await act(async () => { fireEvent.click(editBtns[0]) })
+    await waitFor(() => { expect(screen.getByTestId('modal')).toBeVisible() })
+
+    await act(async () => { fireEvent.click(screen.getByTestId('modal-ok')) })
+    await waitFor(() => {
+      expect(message.error).toHaveBeenCalledWith('更新角色失败')
     })
   })
 })

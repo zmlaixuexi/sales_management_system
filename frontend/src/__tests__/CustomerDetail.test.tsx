@@ -265,4 +265,126 @@ describe('CustomerDetail', () => {
       expect(cards[0].getAttribute('data-title')).toBe('测试客户')
     })
   })
+
+  it('无等级客户不显示等级标签', async () => {
+    _customerMocks.fetchCustomer.mockResolvedValue({
+      success: true,
+      data: { ...mockCustomerData.data, level: null },
+    })
+    renderCustomerDetail()
+    await waitFor(() => {
+      const levelItems = screen.getAllByTestId('desc-item').filter(
+        (el) => el.getAttribute('data-label') === '等级',
+      )
+      expect(levelItems[0].textContent).toBe('--')
+    })
+  })
+
+  it('未知等级显示原始值', async () => {
+    _customerMocks.fetchCustomer.mockResolvedValue({
+      success: true,
+      data: { ...mockCustomerData.data, level: 'custom_level' },
+    })
+    renderCustomerDetail()
+    await waitFor(() => {
+      const tags = screen.getAllByTestId('tag')
+      const tagTexts = tags.map((t) => t.textContent)
+      expect(tagTexts).toContain('custom_level')
+    })
+  })
+
+  it('无来源客户显示 --', async () => {
+    _customerMocks.fetchCustomer.mockResolvedValue({
+      success: true,
+      data: { ...mockCustomerData.data, source: null },
+    })
+    renderCustomerDetail()
+    await waitFor(() => {
+      const sourceItems = screen.getAllByTestId('desc-item').filter(
+        (el) => el.getAttribute('data-label') === '来源',
+      )
+      expect(sourceItems[0].textContent).toBe('--')
+    })
+  })
+
+  it('未知来源显示原始值', async () => {
+    _customerMocks.fetchCustomer.mockResolvedValue({
+      success: true,
+      data: { ...mockCustomerData.data, source: 'wechat_mini' },
+    })
+    renderCustomerDetail()
+    await waitFor(() => {
+      expect(screen.getByText('wechat_mini')).toBeInTheDocument()
+    })
+  })
+
+  it('无备注不显示备注行', async () => {
+    _customerMocks.fetchCustomer.mockResolvedValue({
+      success: true,
+      data: { ...mockCustomerData.data, remark: null },
+    })
+    renderCustomerDetail()
+    await waitFor(() => {
+      const remarkItems = screen.getAllByTestId('desc-item').filter(
+        (el) => el.getAttribute('data-label') === '备注',
+      )
+      expect(remarkItems.length).toBe(0)
+    })
+  })
+
+  it('订单未知状态显示原始值', async () => {
+    _orderMocks.fetchOrders.mockResolvedValue({
+      success: true,
+      data: {
+        items: [{
+          id: 'order-x', order_no: 'ORD-X', status: 'pending_review',
+          total_amount: '100', created_at: '2026-05-01T00:00:00Z',
+        }],
+        total: 1,
+      },
+    })
+    renderCustomerDetail()
+    await waitFor(() => {
+      const tags = screen.getAllByTestId('tag')
+      const tagTexts = tags.map((t) => t.textContent)
+      expect(tagTexts).toContain('pending_review')
+    })
+  })
+
+  it('订单空创建时间显示 --', async () => {
+    _orderMocks.fetchOrders.mockResolvedValue({
+      success: true,
+      data: {
+        items: [{
+          id: 'order-y', order_no: 'ORD-Y', status: 'draft',
+          total_amount: '200', created_at: null,
+        }],
+        total: 1,
+      },
+    })
+    renderCustomerDetail()
+    await waitFor(() => {
+      const row = screen.getByTestId('row-order-y')
+      expect(row.textContent).toContain('--')
+    })
+  })
+
+  it('空联系人电话邮箱显示 --', async () => {
+    _customerMocks.fetchCustomer.mockResolvedValue({
+      success: true,
+      data: {
+        ...mockCustomerData.data,
+        contact_name: null, phone: null, email: null,
+      },
+    })
+    renderCustomerDetail()
+    await waitFor(() => {
+      const items = screen.getAllByTestId('desc-item')
+      const labels = ['联系人', '电话', '邮箱']
+      labels.forEach((label) => {
+        const item = items.find((el) => el.getAttribute('data-label') === label)
+        expect(item?.textContent).toBe('--')
+      })
+    })
+  })
 })
