@@ -1612,3 +1612,19 @@ def test_62_cancel_confirmed_order_restores_stock():
         assert prod.stock_quantity == stock_before
     finally:
         db.close()
+
+
+def test_confirm_nonexistent_order_404():
+    """确认不存在的订单返回 404"""
+    fake_id = uuid.uuid4()
+    resp = client.post(f"/api/v1/sales-orders/{fake_id}/confirm", headers=_auth())
+    assert resp.status_code == 404
+    assert resp.json()["error"]["code"] == "RESOURCE_NOT_FOUND"
+
+
+def test_cancel_nonexistent_order_404():
+    """取消不存在的订单返回 404"""
+    fake_id = uuid.uuid4()
+    resp = client.post(f"/api/v1/sales-orders/{fake_id}/cancel", headers=_auth())
+    assert resp.status_code == 404
+    assert resp.json()["error"]["code"] == "RESOURCE_NOT_FOUND"

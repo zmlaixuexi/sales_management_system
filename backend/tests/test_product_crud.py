@@ -1046,3 +1046,15 @@ def test_43_update_without_stock_uses_plain_query():
         assert prod.name == "更新后的名称"
     finally:
         db.close()
+
+
+def test_update_nonexistent_product_with_stock_404():
+    """更新不存在商品的库存数量返回 404（走 with_for_update 路径）"""
+    fake_id = uuid.uuid4()
+    resp = client.put(
+        f"/api/v1/products/{fake_id}",
+        json={"stock_quantity": 100},
+        headers=_auth(),
+    )
+    assert resp.status_code == 404
+    assert resp.json()["error"]["code"] == "RESOURCE_NOT_FOUND"
