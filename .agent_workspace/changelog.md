@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-05-04（第七百八十六轮·自动循环）
+
+### 代码质量：FastAPI 应用结构验证测试（42 项覆盖中间件/异常处理/路由/生命周期/安全/模块注册）
+
+- 新增 `backend/tests/test_app_structure_quality.py`
+- 中间件注册（8 项）：CORS/BodyLimit/SecurityHeaders/RequestLog/RequestID/RateLimit 注册验证、CORS 方法和头部覆盖
+- 异常处理器（6 项）：HTTP/Starlette/ValidationError/Exception 处理器存在性、JSONResponse 返回一致性、无堆栈泄露
+- 路由挂载与 OpenAPI（6 项）：api_router /api/v1 前缀、OpenAPI tag 覆盖 10 模块、生产环境禁用文档、应用标题、lifespan 配置
+- 生命周期管理（5 项）：上传目录创建、JWT 密钥安全性检查、密钥长度检查、优雅关闭释放连接池、CORS localhost 告警
+- 安全配置（6 项）：CORS credentials、无通配符来源、JWT 密钥验证器、密钥最小长度、静态文件挂载、Prometheus 排除端点
+- 路由模块注册（6 项）：路由文件存在、10 个 CRUD 模块注册、前缀一致性、import 完整性、健康检查端点、文件上传路由
+- 请求 ID 与日志（5 项）：中间件 import 正确性、request_id 在异常处理器中使用、BodyLimit/SecurityHeaders import
+
 ## 2026-05-04（第七百八十五轮·自动循环）
 
 ### 安全加固：认证安全回归测试（48 项覆盖密码哈希/账户锁定/登录流程/密码修改/Schema 集成）
