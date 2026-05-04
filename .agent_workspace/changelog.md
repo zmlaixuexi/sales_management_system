@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百四十九轮·自动循环）
+
+### 代码质量：后端 API 端点查询参数与分页参数命名规范验证测试（25 项）
+- 新增 `backend/tests/test_query_param_naming.py`
+- 验证分页参数定义：PaginationParams 是 dataclass、page/page_size 有 Query 约束、page 默认 1、page_size 默认合理
+- 验证分页注入一致性：核心列表端点使用 PaginationParams、报表/导出/角色不使用
+- 验证 keyword 参数命名：str | None 类型、搜索模块都有 keyword、默认 None、导出端点镜像、审计日志支持
+- 验证过滤参数类型：status 用 Literal、UUID 过滤用 uuid.UUID、日期过滤、报表 period、库存 movement_type
+- 验证 Query 参数约束：报表 limit 有 ge/le、库存阈值有约束、排序参数有默认值、过滤参数可选、无弃用命名
+- 后端测试总计：5763 项（新增 25 项）
+
 ## 2026-05-04（第八百四十八轮·自动循环）
 
 ### 代码质量：后端中间件链与执行顺序验证测试（25 项）
