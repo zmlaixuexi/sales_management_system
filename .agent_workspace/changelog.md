@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-04（第八百二十六轮·自动循环）
+
+### 部署体验：Makefile 命令完整性验证测试（25 项）
+- 新增 `backend/tests/test_makefile_commands.py`
+- 验证必需命令（dev/test/lint/build/install/help/clean）全部存在
+- 验证引用的 docker-compose 文件、部署脚本、Python 模块、npm scripts 实际存在
+- 验证命令按功能分类（开发/安装/测试/构建/数据库/Docker/安全/部署/清理）
+- 验证 help 目标使用 grep 模式、所有 target 有中文 ## 注释
+- 验证 .PHONY 声明覆盖所有 target、使用 $(PYTHON) 变量和 venv 回退
+- 修复：补充 typecheck-frontend 至 .PHONY 声明
+- 后端测试：5288 → 5313（+25），总计 6907 tests
+
 ## 2026-05-04（第八百二十五轮·自动循环）
 
 ### 文档完善：后端环境变量文档与 .env.example 一致性验证测试（25 项）
