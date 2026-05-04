@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-05-04（第七百九十九轮·自动循环）
+
+### 代码质量：前端常量映射与后端枚举值对齐验证测试（24 项）
+
+新增 `frontend/src/__tests__/frontend-constants-mapping.test.ts`，验证前端 statusMaps.ts 中 6 组映射与后端枚举/默认值完全对齐：订单状态（draft/confirmed/cancelled/partially_paid/completed 5 种，后端模型默认 draft）、商品状态（active/inactive/disabled 3 种，后端默认 active、disable 端点设 disabled）、收款状态（normal/reversed 2 种，后端默认 normal）、客户来源（referral/online/offline/ad/other 5 种，与后端 CustomerSource Literal 完全一致）、客户等级（vip/important/normal/potential 4 种，与后端 CustomerLevel Literal 一致，默认 normal）、收款方式（cash/transfer/wechat/alipay/other 5 种，与后端 VALID_PAYMENT_METHODS 和 PaymentCreate Literal 一致）。引入 `extractMapKeys` 辅助函数处理嵌套花括号提取。全部 24 项通过，前端测试 1369。
+
 ## 2026-05-04（第七百九十八轮·自动循环）
 
 ### 代码质量：前端页面组件与 API 调用对应关系验证测试（35 项）
