@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百二十七轮·自动循环）
+
+### 安全加固：前端 localStorage token 存储安全验证测试（25 项）
+- 新增 `frontend/src/__tests__/frontend-token-storage-security.test.ts`
+- 验证 auth store 和 client 使用相同的 access_token/refresh_token 键名
+- 验证 logout/fetchUser 失败/401 刷新失败三个路径均清除 token
+- 验证请求拦截器从 localStorage 注入 Bearer token 和 X-Request-ID
+- 验证 401 自动刷新流程（refresh_token POST body、双 token 更新、重试、防重复）
+- 验证 429 重试、login 后 fetchUser、hasPermission 权限检查
+- 前端测试：1594 → 1619（+25），总计 6932 tests
+
 ## 2026-05-04（第八百二十六轮·自动循环）
 
 ### 部署体验：Makefile 命令完整性验证测试（25 项）
