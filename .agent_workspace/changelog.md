@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-05-04（第八百二十一轮·自动循环）
+
+### 代码质量：前端 utils 工具函数实现完整性验证测试（25 项）
+
+覆盖 5 个维度：
+- **formatAmount/formatPercent 函数签名**（5 项）：联合类型参数、null/undefined 返回 --、NaN 返回 --、formatPercent 乘 100+toFixed(2)+%、两个函数均 toFixed(2)
+- **getApiErrorMessage 逻辑**（5 项）：ApiErrorResponse 接口、unknown + fallback 参数、提取 error/detail.message、Login 页面使用、useSubmit 使用
+- **isToastDisplayed 逻辑**（5 项）：unknown + boolean 类型、检查 _toastDisplayed 属性、typeof object + !== null、usePaginatedList 使用、useSubmit 使用
+- **常量映射完整性**（5 项）：productStatusMap 3 状态、orderStatusMap 5 状态、paymentStatusMap 2 状态、customerSourceMap 5 来源、StatusInfo 类型
+- **utils 模块使用覆盖**（5 项）：formatAmount 金额页面覆盖、formatPercent 毛利率列、4 个导出函数被使用、人民币符号前缀、hooks/pages 统一导入
+
+前端总计 1569 测试
+
+---
+
 ## 2026-05-04（第八百二十轮·自动循环）
 
 ### 异常路径：后端外键关联删除级联行为验证测试（25 项）
