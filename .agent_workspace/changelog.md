@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-04（第七百八十八轮·自动循环）
+
+### 需求符合性：后端 Pydantic Schema 字段约束与数据库模型列约束一致性验证测试（34 项）
+
+- 新增 `backend/tests/test_schema_model_consistency.py`
+- 商品（8 项）：name 长度匹配、sku schema ≤ model、sale_price/cost_price Numeric(12,2)、_MAX_PRICE 范围、status 枚举值、stock_quantity ge=0、sort_weight 范围
+- 客户（6 项）：name/phone/email 长度匹配、source 枚举值（5 种）、level 枚举值（4 种）、remark max_length=500
+- 订单（6 项）：remark max_length=500、quantity gt=0、total_amount/unit_price Numeric(12,2)、items min_length=1、order_no 不在 Create schema
+- 用户（5 项）：username/display_name 长度匹配、password max/min length、hashed_password 列存在
+- 收款（4 项）：amount Numeric(12,2)、payment_method 枚举值（5 种）、remark max_length=500、amount 正数验证
+- 模型统一约束（5 项）：所有模型有 UUID 主键、created_at 时间戳、金额字段统一 Numeric(12,2)、软删除 deleted_at 一致、String 列都有长度
+
 ## 2026-05-04（第七百八十七轮·自动循环）
 
 ### 代码质量：后端依赖注入模式一致性验证测试（45 项覆盖 8 类依赖模式）
