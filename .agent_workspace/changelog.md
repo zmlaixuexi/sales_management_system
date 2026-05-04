@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-04（第七百五十六轮·自动循环）
+
+### 测试补强：前端 utils 工具函数边界测试（59 项覆盖 formatAmount/formatPercent/getApiErrorMessage/isToastDisplayed 的 nullish/NaN/Infinity/科学计数法/类型转换边界）
+
+- 新增 `frontend/src/__tests__/utils-boundaries.test.ts`
+- formatAmount（19 项）：null/undefined/NaN/Infinity/-Infinity/0/正负整数小数/科学计数法字符串/parseFloat 部分匹配/空字符串/非数字字符串
+- formatPercent（12 项）：null/undefined/NaN/Infinity/0/正负值/超过 100%/字符串输入/极小值
+- getApiErrorMessage（16 项）：null/undefined 触发 TypeError、字符串/数字返回 fallback（对象盒装）、error.message 提取、detail.message 回退、优先级、空字符串回退、自定义 fallback、空对象/空 response/空 error 结构
+- isToastDisplayed（10 项）：null/undefined/字符串/数字/布尔值/空对象、_toastDisplayed true/false/truthy 非布尔值（严格 ===）/混合属性
+- 发现 getApiErrorMessage 对 null/undefined 输入不安全（as 类型转换），记录在测试中
+- 测试总计：后端 3738 + 前端 1197 = **4935**
+
 ## 2026-05-04（第七百五十五轮·自动循环）
 
 ### 需求符合性：前端错误码常量与后端一致性测试（46 项覆盖 26 种后端错误码逐一验证、格式规则、ApiError 结构完整性）
