@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-05-04（第八百零二轮·自动循环）
+
+### 代码质量：后端种子数据一致性验证测试（23 项）
+
+覆盖 5 个维度：
+- **权限码定义完整性**（5 项）：33 个权限码、唯一性、code:name:module 三元组、resource:action 格式、9 个业务模块覆盖
+- **角色权限分配合理性**（5 项）：6 个角色定义、admin 拥有全部权限、角色权限为已定义子集、sales 基本权限、finance 收款+报表权限
+- **种子权限覆盖 API 使用**（5 项）：API 权限在种子中存在、种子权限全部被使用、主要 CRUD 资源完整、product:view_cost 存在、报表权限存在
+- **角色层级验证**（4 项）：sales_manager 包含 sales、admin 包含所有角色、inventory 有 adjust、audit 仅查看
+- **admin 账号安全**（4 项）：is_superuser=True、is_active=True、密码哈希、获取 admin 角色
+
+技术要点：
+- 使用括号深度跟踪 `_extract_bracket_content` 正确解析 admin 角色的列表推导式 `[p[0] for p in PERMISSIONS]`
+- 同时提取 `require_permission` 和 `has_permission` 两种权限检查调用
+- 测试结果：23/23 通过，后端总计 4913 测试
+
+---
+
 ## 2026-05-04（第八百零一轮·自动循环）
 
 ### 代码质量：后端数据库迁移脚本与模型一致性验证测试（27 项）
