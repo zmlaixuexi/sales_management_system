@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百二十四轮·自动循环）
+
+### 可观测性：前端组件 loading 状态覆盖验证测试（25 项）
+- 新增 `frontend/src/__tests__/frontend-loading-state-coverage.test.ts`
+- 验证列表页（7 页）usePaginatedList loading 绑定 Table
+- 验证表单页（3 页）loading + submitting 双重状态绑定 Card/Button
+- 验证详情页（2 页）useState loading 绑定 Card
+- 验证操作按钮 loading（Login/CustomerDetail/OrderDetail/Users/Roles）
+- 验证路由级 Suspense fallback + ErrorBoundary 全局兜底
+- 前端测试：1569 → 1594（+25），总计 6858 tests
+
 ## 2026-05-04（第八百二十三轮·自动循环）
 
 ### 代码质量：后端异常处理器覆盖完整性验证测试（25 项）
