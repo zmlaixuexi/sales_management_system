@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-05-04（第八百五十五轮·自动循环）
+
+### 代码质量：后端权限检查函数实现与 API 端点覆盖验证测试（25 项）
+- 新增 `backend/tests/test_permission_check_coverage.py`
+- 验证权限辅助函数定义：require_permission/has_permission/check_owner_or_forbid/_get_user_permissions 函数签名与实现
+- 验证权限码使用对齐：require_permission 和 has_permission 使用码在种子数据中存在、种子码 >= 25、module:action 格式、CRUD 标准动作
+- 验证模块级权限覆盖：products/customers/orders/payments/inventory/audit_logs/exports 各使用正确权限码
+- 验证数据范围权限模式：product:view_cost 控制成本价、order:view_all/customer:view_all 数据过滤、check_owner_or_forbid 对象级权限
+- 验证超级管理员专用模块：users/roles 使用 is_superuser 直接检查、admin 角色通过 PERMISSIONS 推导拥有全部权限、种子角色覆盖所有模块
+- 后端测试总计：5913 项（新增 25 项）
+
+## 2026-05-04（第八百五十四轮·自动循环）
+
+### 代码质量：前端页面组件默认导出与路由懒加载引用一致性验证测试（25 项）
+- 新增 `backend/tests/test_frontend_route_component_alignment.py`
+- 验证路由懒加载引用：所有引用对应存在文件、所有文件被引用、引用数匹配、lazyPage 辅助、无裸 lazy
+- 验证组件默认导出：所有页面有 default export、导出格式标准、Login/NotFound/Dashboard 有默认导出
+- 验证路由路径规范：路径以 / 或相对、参数 snake_case、有 404 通配、有 login 路由、有 index 路由
+- 验证页面文件覆盖：CRUD 页面、详情页、管理页面、报表页面、.tsx 扩展名
+- 验证 Suspense 与路由结构：Spin 降级、ProtectedRoute 保护、AppLayout 布局、login 不受保护、routes default export
+- 后端测试总计：5888 项（新增 25 项）
+
 ## 2026-05-04（第八百五十三轮·自动循环）
 
 ### 代码质量：后端 API 端点函数参数注解与类型提示验证测试（25 项）
