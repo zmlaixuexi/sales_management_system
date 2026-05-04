@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百四十八轮·自动循环）
+
+### 代码质量：后端中间件链与执行顺序验证测试（25 项）
+- 新增 `backend/tests/test_middleware_chain_order.py`
+- 验证中间件注册顺序：至少 5 个中间件、CORS 最先注册、RequestID 最后注册、SecurityHeaders/BodyLimit 已注册
+- 验证中间件配置完整性：CORS 使用配置 origins、allow_credentials、速率限制可配置、请求体限制可配置、慢请求阈值可配置
+- 验证中间件功能覆盖：RequestID 设置头和上下文变量、RequestLog 添加响应时间、安全头覆盖 OWASP 推荐、速率限制返回 429、请求体超限返回 413
+- 验证异常处理器链：HTTPException/ValidationError/通用异常处理器均已注册、所有处理器包含 request_id、统一响应结构
+- 验证生命周期与启动安全：lifespan 上下文管理器、JWT 密钥检查、shutting_down 标志、engine.dispose、/api/v1 前缀
+- 后端测试总计：5738 项（新增 25 项）
+
 ## 2026-05-04（第八百四十七轮·自动循环）
 
 ### 代码质量：前端表单验证规则与后端 Schema 约束对齐验证测试（25 项）
