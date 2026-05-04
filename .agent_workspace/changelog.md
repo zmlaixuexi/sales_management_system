@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-05-04（第七百五十五轮·自动循环）
+
+### 需求符合性：前端错误码常量与后端一致性测试（46 项覆盖 26 种后端错误码逐一验证、格式规则、ApiError 结构完整性）
+
+**变更文件：**
+- `frontend/src/__tests__/error-codes-consistency.test.ts`（新建 46 项测试）
+  - 错误码完整性：总数 26/无重复
+  - 逐一验证：26 种错误码均可赋值给 ApiError.error.code
+  - 认证相关：AUTH_UNAUTHORIZED/AUTH_FORBIDDEN/ACCOUNT_LOCKED/INVALID_PASSWORD
+  - 资源相关：RESOURCE_NOT_FOUND/VALIDATION_FAILED
+  - 订单收款：ORDER_INVALID_STATUS/ORDER_HAS_PAYMENTS/PAYMENT_AMOUNT_EXCEEDED/PAYMENT_RATE_LIMITED
+  - 限流：RATE_LIMIT_EXCEEDED/PAYLOAD_TOO_LARGE
+  - 格式规则：全部大写下划线/不以数字开头
+  - ApiError 结构：success=false/code+message/details 可选/request_id 可选
+
+**测试计数：** 后端 3738、前端 1138（+46）、总计 4876
+
 ## 2026-05-04（第七百五十四轮·自动循环）
 
 ### 需求符合性：前端状态映射与后端状态常量一致性测试（16 项覆盖订单/商品/收款状态和收款方式的双向映射验证）
