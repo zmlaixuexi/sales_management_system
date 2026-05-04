@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-05-04（第七百八十四轮·自动循环）
+
+### 需求符合性：前端 TypeScript 接口与后端 Pydantic Schema 字段对齐验证测试（14 项覆盖商品/订单/客户/用户/角色/审计日志/收款/库存/报表）
+
+- 新增 `backend/tests/test_frontend_schema_field_alignment.py`
+- 商品（2 项）：Product 接口与 ProductItem schema 字段完全匹配、ProductDetail 包含 images
+- 订单（3 项）：Order 与 OrderDetail（排除 items/payments/item_count）匹配、OrderItem 与 OrderItemResponse 匹配、OrderPayment 与 OrderPaymentResponse 匹配
+- 客户（1 项）：Customer 包含 CustomerBrief 所有字段
+- 用户（1 项）：CurrentUser 包含 id/username/is_active/is_superuser/roles/permissions
+- 角色（1 项）：RoleItem 包含 id 等关键字段
+- 审计日志（1 项）：AuditLogItem 字段精确匹配
+- 收款（1 项）：Payment 包含 id 等关键字段
+- 库存（2 项）：InventoryMovement/InventoryAdjustedResult 结构存在
+- 报表（2 项）：SalesSummary/ProductRankingItem 结构存在
+- 修复：f-string 中 `\s{4}` 被解释为 f-string 表达式导致 regex 失效，改用 `\s{{4}}`
+
 ## 2026-05-04（第七百八十三轮·自动循环）
 
 ### 部署体验：部署脚本内容与权限验证测试（45 项覆盖 manage.sh/pre-deploy-check.sh/backup.sh/restore.sh/rollback.sh）
