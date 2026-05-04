@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-05-04（第七百九十一轮·自动循环）
+
+### 代码质量：后端 Pydantic Schema 与 API 响应序列化一致性验证测试（41 项）
+
+新增 `backend/tests/test_response_schema_consistency.py`，验证 response_model 声明引用正确的 Schema、输入 Schema 验证器覆盖、响应 Schema 字段完整性、Schema 类定义完整性、字段命名规范（snake_case / id: str / 金额: str / 时间: str）、Create/Update Schema 差异、ApiResponse 包装结构、resp() 辅助函数一致性。全部 41 项通过，后端测试 4681。
+
 ## 2026-05-04（第七百九十轮·自动循环）
 
 ### 需求符合性：后端 API 响应分页元数据一致性验证测试（46 项）
