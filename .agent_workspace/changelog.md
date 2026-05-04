@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百五十七轮·自动循环）
+
+### 代码质量：后端服务层函数调用链与事务边界一致性验证测试（25 项）
+- 新增 `backend/tests/test_transaction_boundary_consistency.py`
+- 验证事务提交模式：safe_commit 定义与 try/except/rollback、写入模块使用 safe_commit、无直接 db.commit、无手动 db.rollback
+- 验证实体获取模式：get_or_404/active_query/parse_uuid_or_400 定义、详情端点使用 get_or_404、并发资源使用 with_for_update
+- 验证写入端点事务一致性：flush+safe_commit 模式、审计日志伴随变更、软删除、products/orders 多 safe_commit 调用
+- 验证库存敏感操作：订单确认锁定产品行、取消恢复库存、库存调整验证非负、收款冲正更新已付金额、InventoryMovement 记录
+- 验证服务层共享模式：register_payment 不自行提交、线程锁防并发、resp/paginated_resp 标准响应格式
+- 后端测试总计：5963 项（新增 25 项）
+
 ## 2026-05-04（第八百五十六轮·自动循环）
 
 ### 可观测性：前端错误边界与全局异常捕获验证测试（25 项）
