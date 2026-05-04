@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-05-04（第七百九十六轮·自动循环）
+
+### 代码质量：后端报表模块结构与逻辑验证测试（32 项）
+
+新增 `backend/tests/test_reports_structure.py`，验证 reports.py 6 个报表端点：周期类型约束（Literal 类型含 today/7d/30d/this_month/last_month）、日期范围计算（timedelta 天数、replace(day=1)、400 错误处理）、有效订单状态（confirmed/completed/partially_paid，排除 pending/cancelled）、数据权限过滤（_apply_data_scope 检查 order:view_all 权限和 sales_user_id 过滤）、响应字段结构（total_amount/order_count/period、条件利润字段、rank 排名、日期填充、INVENTORY_WARNING_THRESHOLD 配置）、毛利率计算（Decimal 精度、零值处理、quantize 0.01）。修复 `_extract_function_source` 多行参数解析问题。全部 32 项通过，后端测试 4863。
+
 ## 2026-05-04（第七百九十五轮·自动循环）
 
 ### 需求符合性：后端 API 端点 HTTP 方法与路由模式验证测试（34 项）
