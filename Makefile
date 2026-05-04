@@ -1,4 +1,4 @@
-.PHONY: help dev dev-backend dev-frontend install test test-unit test-integration test-backend test-frontend coverage coverage-frontend lint lint-fix lint-backend lint-frontend typecheck typecheck-backend quality ci build build-frontend db-migrate db-check db-seed db-backup db-restore docker-up docker-down docker-dev docker-dev-down docker-logs audit deploy-check deploy-rollback clean
+.PHONY: help dev dev-backend dev-frontend install test test-unit test-integration test-backend test-frontend coverage coverage-frontend lint lint-fix lint-backend lint-frontend typecheck typecheck-backend typecheck-frontend quality ci build build-frontend db-migrate db-check db-seed db-backup db-restore docker-up docker-down docker-dev docker-dev-down docker-logs audit deploy-check deploy-rollback clean
 
 # 后端 Python：优先使用 venv，回退到系统 python
 PYTHON ?= $(shell [ -f backend/.venv/bin/python ] && echo ".venv/bin/python" || echo "python")
