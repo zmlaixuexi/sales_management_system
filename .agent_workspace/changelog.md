@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-04（第八百三十五轮·自动循环）
+
+### 代码质量：后端模型字段类型与默认值覆盖验证测试（25 项）
+- 新增 `backend/tests/test_model_field_defaults.py`
+- 验证 UUID 主键一致性：5 个核心模型 + 4 个辅助模型 + 4 个产品辅助模型
+- 验证状态字段默认值：Product=active、SalesOrder=draft、Payment=normal
+- 验证布尔字段默认值：is_active=True、is_superuser=False、is_primary=False
+- 验证时间戳模式：created_at server_default=func.now()、updated_at onupdate
+- 验证 Numeric 精度（金额 12,2、毛利率 8,4）和 String 长度约束
+
 ## 2026-05-04（第八百三十四轮·自动循环）
 
 ### 代码质量：前端状态显示映射与后端状态常量对齐验证测试（25 项）
