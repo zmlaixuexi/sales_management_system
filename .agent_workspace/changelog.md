@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百三十八轮·自动循环）
+
+### 安全加固：后端 JWT Token Claim 完整性静态验证测试（25 项）
+- 新增 `backend/tests/test_jwt_claim_completeness.py`
+- 验证 Token 创建 Claim 一致性：access/refresh 包含全部 7 项 claim（sub/exp/iat/jti/type/iss/aud）
+- 验证验证端点 Claim 校验：deps.py 和 auth.py 检查 sub/type/iss/aud
+- 验证签发者与受众配置：JWT_ISSUER/JWT_AUDIENCE 在创建和验证中一致使用
+- 验证过期时间配置：access 30 分钟、refresh 7 天、有 field_validator
+- 验证 Token 安全字段：jti 使用 uuid4、iat 使用 UTC、密钥有安全校验、HS256 算法
+- 修复：test_permissions.py _auth 函数懒加载登录，修复 test_24-26 独立运行时 401 问题
+
 ## 2026-05-04（第八百三十七轮·自动循环）
 
 ### 安全加固：后端 CSV 导出服务安全与注入防护验证测试（25 项）
