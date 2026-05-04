@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第七百七十三轮·自动循环）
+
+### 安全加固：后端 CORS 配置运行时验证测试（14 项覆盖预检请求、实际请求、无 Origin、允许方法/头部验证）
+
+- 新增 `backend/tests/test_cors_runtime.py`
+- 预检请求（6 项）：OPTIONS 200、allow-origin、allow-methods、allow-headers、allow-credentials、max-age
+- 实际请求（4 项）：GET/POST/404/422 均返回 CORS 头
+- 无 Origin（1 项）：无 Origin 不返回 CORS 头
+- 允许方法/头部（3 项）：OPTIONS/DELETE 允许、X-Request-ID 头允许
+- 后端测试 4048 → 4062（+14），总测试 5269 → 5283
+
 ## 2026-05-04（第七百七十二轮·自动循环）
 
 ### 可观测性：Prometheus 指标端点与配置验证测试（25 项覆盖 scrape 配置、instrumentator 排除、Prometheus 格式、命名规范）
