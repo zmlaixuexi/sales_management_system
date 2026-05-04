@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百三十一轮·自动循环）
+
+### 部署体验：前端构建与环境变量配置验证测试（25 项）
+- 新增 `backend/tests/test_frontend_build_config.py`
+- 验证 Vite 配置：react 插件、@ 路径别名、manualChunks 分包、dev proxy
+- 验证环境变量：.env.example 声明 VITE_API_BASE_URL/VITE_PROXY_TARGET、client.ts 使用
+- 验证 TypeScript：project references、strict + noUncheckedIndexedAccess、路径别名、排除测试目录
+- 验证 package.json：build/dev/test/lint/coverage 脚本齐全
+- 验证前端 Dockerfile：多阶段构建、npm build、nginx 服务、dist 复制
+- 后端测试：5338 → 5363（+25），总计 7032 tests
+
 ## 2026-05-04（第八百三十轮·自动循环）
 
 ### 安全加固：后端密码强度验证覆盖测试（25 项）
