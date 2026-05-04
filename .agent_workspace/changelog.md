@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-05-04（第七百九十八轮·自动循环）
+
+### 代码质量：前端页面组件与 API 调用对应关系验证测试（35 项）
+
+新增 `frontend/src/__tests__/frontend-page-api-mapping.test.ts`，验证 16 个页面组件与 API 模块的绑定关系：列表页分页函数（Products/Customers/Orders/Payments/Inventory/Users/AuditLogs 各使用正确 fetchFn）、表单页提交函数（ProductForm 用 createProduct/updateProduct、CustomerForm 用 createCustomer/updateCustomer、OrderForm 用 createOrder/updateOrder）、详情页加载（OrderDetail 用 fetchOrder、CustomerDetail 用 fetchCustomer）、导出功能（Products/Customers/Orders/Payments 各导入 downloadCsv）、API 模块导入正确性（各页面仅导入所需 API 模块、OrderForm 跨模块导入、OrderDetail 导入 orders+payments、ReportsCenter 导入全部 6 个报表函数）、页面组件默认导出（7 个列表页均有 export default）、动作端点调用（Products 的 deleteProduct/disableProduct、Customers 的 deleteCustomer、OrderDetail 的 confirmOrder/cancelOrder/createPayment/reversePayment）。全部 35 项通过，前端测试 1345。
+
 ## 2026-05-04（第七百九十七轮·自动循环）
 
 ### 代码质量：前端 Store / Hooks / API 调用一致性验证测试（40 项）
