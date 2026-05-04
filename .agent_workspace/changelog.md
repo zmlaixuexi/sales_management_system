@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百四十一轮·自动循环）
+
+### 安全加固：后端密码策略与哈希配置静态验证测试（25 项）
+- 新增 `backend/tests/test_password_policy_hashing.py`
+- 验证哈希函数安全性：bcrypt 使用、gensalt rounds>=12、72 字节截断、异常捕获、UTF-8 输出
+- 验证密码强度策略：大写/小写/数字/特殊字符要求、弱密码黑名单
+- 验证账户锁定配置：max_failures 3-10、window >= 300s、IP 限流、线程锁、429 状态码
+- 验证密码变更端点：旧密码验证、认证依赖、新密码哈希、时间戳记录、审计日志
+- 验证 Schema 集成：UserCreate/ChangePasswordRequest 密码强度验证、min_length >= 6、LoginRequest 不验证强度
+- 后端测试：5563 passed (+25)
+
 ## 2026-05-04（第八百四十轮·自动循环）
 
 ### 文档完善：后端 API 端点函数文档字符串覆盖验证测试（25 项）
