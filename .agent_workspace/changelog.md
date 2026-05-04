@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-05-04（第八百二十二轮·自动循环）
+
+### 安全加固：后端 logout token 失效机制验证测试（25 项）
+
+覆盖 5 个维度：
+- **token 类型区分**（5 项）：get_current_user 要求 access、refresh 端点要求 refresh、create_access_token 设置 type=access、create_refresh_token 设置 type=refresh、两个 token 均包含 iss/aud
+- **密码修改后旧 token 失效**（5 项）：get_current_user 检查 password_changed_at、refresh 端点检查、token_iat 与 changed_at 比较、时区感知比较、秒级精度截断
+- **logout 端点行为**（5 项）：POST /logout 存在、返回成功消息、不需要认证、登录生成新 token 对、刷新生成新 token 对
+- **token 结构安全字段**（5 项）：jti 唯一 ID、iat 签发时间、exp 过期时间、access 可配置过期、refresh 更长过期
+- **用户状态检查**（5 项）：get_current_user 检查 is_active、检查 deleted_at、refresh 检查 is_active、login 检查 is_active、User 模型有 password_changed_at
+
+后端总计 5239 测试
+
+---
+
 ## 2026-05-04（第八百二十一轮·自动循环）
 
 ### 代码质量：前端 utils 工具函数实现完整性验证测试（25 项）
