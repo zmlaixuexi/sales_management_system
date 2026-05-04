@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百五十六轮·自动循环）
+
+### 可观测性：前端错误边界与全局异常捕获验证测试（25 项）
+- 新增 `backend/tests/test_frontend_error_boundary_coverage.py`
+- 验证 ErrorBoundary 组件实现：getDerivedStateFromError class 组件、Ant Design Result 渲染、重试按钮、返回首页、路由变化自动重置
+- 验证 ErrorBoundary 集成使用：main.tsx 包裹 Outlet、Suspense + Spin fallback、createBrowserRouter/RouterProvider
+- 验证 API 客户端错误处理：401 token 刷新、429 自动重试、错误 toast 提示、_toastDisplayed 去重、网络错误提示、X-Request-ID
+- 验证 Hook 错误处理：usePaginatedList error/loading 状态、isToastDisplayed 检查、useSubmit 防重复提交、getApiErrorMessage 使用、参数变化自动重获取
+- 验证错误工具函数：isToastDisplayed/getApiErrorMessage 定义、downloadCsv JSON 错误检查、ProtectedRoute Spin 加载/token 检查/用户信息获取
+- 后端测试总计：5938 项（新增 25 项）
+
 ## 2026-05-04（第八百五十五轮·自动循环）
 
 ### 代码质量：后端权限检查函数实现与 API 端点覆盖验证测试（25 项）
