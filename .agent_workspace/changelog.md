@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-05-04（第七百七十六轮·自动循环）
+
+### 部署体验：docker-compose 配置一致性验证测试（33 项覆盖服务结构、端口、健康检查、环境变量、安全加固、网络）
+
+- 新增 `backend/tests/test_docker_compose_config.py`
+- 服务结构（4 项）：dev/prod 文件加载、dev 有 postgres/backend/frontend、prod 有 postgres/backend/nginx
+- Postgres 配置（4 项）：均使用 postgres:17、均有 pg_isready 健康检查、数据库名一致
+- Backend 配置（11 项）：均暴露 8000 端口、均有 /api/v1/health 健康检查、均依赖 postgres healthy、均设 DATABASE_URL/JWT_SECRET_KEY、APP_ENV 环境区分、prod 安全加固（no-new-privileges/资源限制/cap_drop ALL）
+- Nginx 配置（4 项）：依赖 backend、暴露 HTTP 80、使用 nginx 镜像、有健康检查
+- Dockerfile 健康检查（3 项）：/api/v1/health URL、EXPOSE 8000、非 root 用户
+- Prometheus 配置（4 项）：prod 有 prometheus、依赖 backend、配置文件挂载、资源限制
+- 网络配置（3 项）：backend/frontend 网络存在、backend 在两个网络上
+- 后端测试 4080 → 4114（+34），总测试 5320 → 5354
+
 ## 2026-05-04（第七百七十五轮·自动循环）
 
 ### 代码质量：前端路由守卫与路由配置验证测试（19 项覆盖路由结构、ProtectedRoute 包裹、子路由验证）
