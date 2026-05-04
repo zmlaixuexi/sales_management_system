@@ -178,8 +178,8 @@ class TestCustomer:
 # ========== 订单 ==========
 
 class TestOrder:
-    def test_01_create_draft_order(self):
-        """创建草稿订单"""
+    def test_01_create_confirmed_order(self):
+        """创建订单 — 自动确认并扣减库存"""
         resp = client.post("/api/v1/sales-orders", json={
             "customer_id": _customer_id,
             "items": [
@@ -188,10 +188,15 @@ class TestOrder:
         }, headers=_auth_header())
         assert resp.status_code == 200
         data = resp.json()["data"]
-        assert data["status"] == "draft"
+        assert data["status"] == "confirmed"
         assert data["total_amount"] == "300.00"
         global _order_id
         _order_id = data["id"]
+
+        # 库存已在创建时扣减
+        resp = client.get("/api/v1/products", headers=_auth_header())
+        product = next(p for p in resp.json()["data"]["items"] if p["id"] == _product_id)
+        assert product["stock_quantity"] == 97  # 100 - 3
 
     def test_02_get_order_detail(self):
         """订单详情"""
@@ -209,7 +214,7 @@ class TestOrder:
         assert resp.status_code == 200
         items = resp.json()["data"]["items"]
         assert len(items) >= 1
-        assert items[0]["status"] == "draft"
+        assert items[0]["status"] == "confirmed"
 
     def test_04_empty_items_fails(self):
         """订单明细为空失败"""
@@ -219,19 +224,13 @@ class TestOrder:
         }, headers=_auth_header())
         assert resp.status_code == 422
 
-    def test_05_confirm_order(self):
-        """确认订单 — 扣减库存"""
-        resp = client.post(f"/api/v1/sales-orders/{_order_id}/confirm", headers=_auth_header())
-        assert resp.status_code == 200
-        assert resp.json()["data"]["status"] == "confirmed"
-
-        # 验证库存扣减
-        resp = client.get("/api/v1/products", headers=_auth_header())
-        product = next(p for p in resp.json()["data"]["items"] if p["id"] == _product_id)
-        assert product["stock_quantity"] == 97  # 100 - 3
-
-    def test_06_cannot_confirm_twice(self):
+    def test_05_cannot_confirm_confirmed_order(self):
         """已确认订单不能再确认"""
+        resp = client.post(f"/api/v1/sales-orders/{_order_id}/confirm", headers=_auth_header())
+        assert resp.status_code == 400
+
+    def test_06_confirm_twice_still_fails(self):
+        """重复确认仍然失败"""
         resp = client.post(f"/api/v1/sales-orders/{_order_id}/confirm", headers=_auth_header())
         assert resp.status_code == 400
 
@@ -245,7 +244,7 @@ class TestInventory:
         assert resp.status_code == 200
         items = resp.json()["data"]["items"]
         assert len(items) >= 1
-        # 找到订单确认的库存扣减流水
+        # 订单创建时已自动确认，产生了 order_confirm 类型的库存扣减流水
         order_mov = next((m for m in items if m["movement_type"] == "order_confirm"), None)
         assert order_mov is not None
         assert order_mov["quantity_change"] == -3
@@ -272,7 +271,7 @@ class TestInventory:
 
 class TestPayment:
     def test_01_register_payment(self):
-        """登记收款"""
+        """登记收款 — 订单创建时已自动确认，可直接收款"""
         resp = client.post(f"/api/v1/payments/orders/{_order_id}/payments", json={
             "amount": "200.00",
             "payment_method": "cash",
@@ -362,10 +361,10 @@ class TestOrderLogs:
         resp = client.get(f"/api/v1/sales-orders/{_order_id}/logs", headers=_auth_header())
         assert resp.status_code == 200
         data = resp.json()["data"]
-        assert data["total"] >= 2  # 至少有 create + confirm
+        assert data["total"] >= 1  # 至少有 order_create
         actions = [item["action"] for item in data["items"]]
         assert "order_create" in actions
-        assert "order_confirm" in actions
+        # 新流程下订单创建即确认，不会有单独的 order_confirm 日志
 
     def test_02_order_logs_pagination(self):
         """订单日志分页"""
@@ -373,7 +372,7 @@ class TestOrderLogs:
         assert resp.status_code == 200
         data = resp.json()["data"]
         assert len(data["items"]) == 1
-        assert data["total"] >= 2
+        assert data["total"] >= 1
 
     def test_03_order_logs_not_found(self):
         """不存在的订单返回 404"""

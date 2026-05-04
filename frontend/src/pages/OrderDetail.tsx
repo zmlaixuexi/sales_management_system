@@ -248,6 +248,9 @@ export default function OrderDetail() {
           <Descriptions.Item label="创建时间">
             {order.created_at ? new Date(order.created_at).toLocaleString('zh-CN') : '--'}
           </Descriptions.Item>
+          <Descriptions.Item label="客户">
+            {order.customer_id ? '已关联' : '散客'}
+          </Descriptions.Item>
           <Descriptions.Item label="订单金额">¥{formatAmount(order.total_amount)}</Descriptions.Item>
           <Descriptions.Item label="已收金额">¥{formatAmount(order.paid_amount)}</Descriptions.Item>
           <Descriptions.Item label="剩余应收">¥{formatAmount(remaining)}</Descriptions.Item>

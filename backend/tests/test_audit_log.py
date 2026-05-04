@@ -208,7 +208,7 @@ def test_05_order_audit_logs():
     # 先重新启用商品
     client.put(f"/api/v1/products/{_product_id}", json={"status": "active"}, headers=_auth())
 
-    # 创建订单
+    # 创建订单（创建即确认）
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 2, "unit_price": "20.00"}],
@@ -219,14 +219,6 @@ def test_05_order_audit_logs():
 
     # 验证创建日志
     resp = client.get("/api/v1/audit-logs?action=order_create", headers=_auth())
-    assert resp.status_code == 200
-    items = resp.json()["data"]["items"]
-    assert len(items) >= 1
-
-    # 确认订单
-    client.post(f"/api/v1/sales-orders/{_order_id}/confirm", headers=_auth())
-
-    resp = client.get("/api/v1/audit-logs?action=order_confirm", headers=_auth())
     assert resp.status_code == 200
     items = resp.json()["data"]["items"]
     assert len(items) >= 1
@@ -413,11 +405,11 @@ def test_22_audit_log_requires_auth():
 
 
 def test_23_order_confirm_audit_log_fields():
-    """订单确认审计日志 after_data 含 order_no 和 status"""
+    """订单创建审计日志 after_data 含 order_no 和 status=confirmed"""
     # 重新启用商品
     client.put(f"/api/v1/products/{_product_id}", json={"status": "active"}, headers=_auth())
 
-    # 创建新订单
+    # 创建新订单（新流程：API 创建即为 confirmed）
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 1}],
@@ -426,12 +418,8 @@ def test_23_order_confirm_audit_log_fields():
     oid = resp.json()["data"]["id"]
     order_no = resp.json()["data"]["order_no"]
 
-    # 确认订单
-    resp = client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
-    assert resp.status_code == 200
-
-    # 查询确认审计日志
-    resp = client.get("/api/v1/audit-logs?action=order_confirm", headers=_auth())
+    # 查询创建审计日志（新流程下 order_create 的 after_data 包含 status=confirmed）
+    resp = client.get("/api/v1/audit-logs?action=order_create", headers=_auth())
     assert resp.status_code == 200
     items = resp.json()["data"]["items"]
     log = next(i for i in items if i["resource_id"] == oid)
@@ -594,9 +582,8 @@ def test_29_payment_create_audit_log_fields():
     }, headers=headers)
     assert resp.status_code == 200
     oid = resp.json()["data"]["id"]
-    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=headers)
 
-    # 登记收款
+    # 登记收款（API 创建的订单已是 confirmed，无需再次确认）
     resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
         "amount": "40.00",
         "payment_method": "cash",
@@ -956,14 +943,13 @@ def test_43_payment_reverse_audit_log_fields():
     assert resp.status_code == 200
     cust_id = resp.json()["data"]["id"]
 
-    # 创建并确认订单
+    # 创建订单（API 创建即为 confirmed）
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": cust_id,
         "items": [{"product_id": pid, "quantity": 3}],
     }, headers=headers)
     assert resp.status_code == 200
     oid = resp.json()["data"]["id"]
-    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=headers)
 
     # 登记收款
     resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
@@ -1362,7 +1348,7 @@ def test_57_order_create_audit_log_after_data():
     log = next(i for i in items if i["resource_id"] == oid)
     assert log["before_data"] is None
     assert log["after_data"]["order_no"] == order_no
-    assert log["after_data"]["status"] == "draft"
+    assert log["after_data"]["status"] == "confirmed"
     assert log["after_data"]["customer_id"] == cust_id
     assert log["after_data"]["total_amount"] == "75.00"
     assert log["resource_type"] == "order"
@@ -1460,13 +1446,33 @@ def test_61_order_update_audit_log_before_data():
     assert resp.status_code == 200
     cust_id = resp.json()["data"]["id"]
 
-    # 创建订单（2件 × 20.00 = 40.00）
-    resp = client.post("/api/v1/sales-orders", json={
-        "customer_id": cust_id,
-        "items": [{"product_id": pid, "quantity": 2, "unit_price": "20.00"}],
-    }, headers=headers)
-    assert resp.status_code == 200
-    oid = resp.json()["data"]["id"]
+    # 直接在数据库创建草稿订单（绕过 API 新流程，测试 update 端点审计日志）
+    from app.models.customer import Customer
+    from app.models.order import SalesOrder, SalesOrderItem
+    from app.models.user import User as UserModel
+
+    db = TestSession()
+    try:
+        user = db.query(UserModel).first()
+        customer = db.query(Customer).get(uuid.UUID(cust_id))
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=f"ORD-UPDATE-{uuid.uuid4().hex[:6]}",
+            customer_id=customer.id, sales_user_id=user.id,
+            status="draft", total_amount=40, total_cost=20,
+            gross_profit=20, gross_margin=0.5, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=uuid.UUID(pid),
+            product_name_snapshot="订单编辑审计商品", cost_price_snapshot=10,
+            quantity=2, unit_price=20, subtotal_amount=40, subtotal_cost=20,
+        ))
+        db.commit()
+        oid = str(order.id)
+    finally:
+        db.close()
 
     # 编辑订单（改为 3件 × 20.00 = 60.00）
     resp = client.put(f"/api/v1/sales-orders/{oid}", json={
@@ -1558,14 +1564,13 @@ def test_63_payment_create_audit_log_before_data_is_none():
     assert resp.status_code == 200
     cust_id = resp.json()["data"]["id"]
 
-    # 创建并确认订单
+    # 创建订单（API 创建即为 confirmed）
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": cust_id,
         "items": [{"product_id": pid, "quantity": 2}],
     }, headers=headers)
     assert resp.status_code == 200
     oid = resp.json()["data"]["id"]
-    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=headers)
 
     # 登记收款
     resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
@@ -1609,13 +1614,33 @@ def test_64_order_confirm_audit_log_before_data():
     assert resp.status_code == 200
     cust_id = resp.json()["data"]["id"]
 
-    # 创建订单
-    resp = client.post("/api/v1/sales-orders", json={
-        "customer_id": cust_id,
-        "items": [{"product_id": pid, "quantity": 2, "unit_price": "30.00"}],
-    }, headers=headers)
-    assert resp.status_code == 200
-    oid = resp.json()["data"]["id"]
+    # 直接在数据库创建草稿订单（绕过 API 新流程，测试 confirm 端点审计日志）
+    from app.models.customer import Customer
+    from app.models.order import SalesOrder, SalesOrderItem
+    from app.models.user import User as UserModel
+
+    db = TestSession()
+    try:
+        user = db.query(UserModel).first()
+        customer = db.query(Customer).get(uuid.UUID(cust_id))
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=f"ORD-CONFIRM-{uuid.uuid4().hex[:6]}",
+            customer_id=customer.id, sales_user_id=user.id,
+            status="draft", total_amount=60, total_cost=20,
+            gross_profit=40, gross_margin=0.6667, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=uuid.UUID(pid),
+            product_name_snapshot="确认审计商品", cost_price_snapshot=10,
+            quantity=2, unit_price=30, subtotal_amount=60, subtotal_cost=20,
+        ))
+        db.commit()
+        oid = str(order.id)
+    finally:
+        db.close()
 
     # 确认订单
     resp = client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=headers)
@@ -1655,14 +1680,13 @@ def test_65_order_cancel_audit_log_before_data():
     assert resp.status_code == 200
     cust_id = resp.json()["data"]["id"]
 
-    # 创建并确认订单
+    # 创建订单（API 创建即为 confirmed）
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": cust_id,
         "items": [{"product_id": pid, "quantity": 1}],
     }, headers=headers)
     assert resp.status_code == 200
     oid = resp.json()["data"]["id"]
-    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=headers)
 
     # 取消订单
     resp = client.post(f"/api/v1/sales-orders/{oid}/cancel", headers=headers)
@@ -1890,14 +1914,13 @@ def test_72_payment_reverse_order_status_audit_chain():
     assert resp.status_code == 200
     cust_id = resp.json()["data"]["id"]
 
-    # 创建并确认订单
+    # 创建订单（API 创建即为 confirmed）
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": cust_id,
         "items": [{"product_id": pid, "quantity": 2}],
     }, headers=headers)
     assert resp.status_code == 200
     oid = resp.json()["data"]["id"]
-    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=headers)
 
     # 登记收款
     resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
@@ -2035,19 +2058,40 @@ def test_77_order_update_audit_log_customer_id_change():
     assert resp.status_code == 200
     cid_b = resp.json()["data"]["id"]
 
-    # 创建商品 + 订单（客户A）
+    # 创建商品
     resp = client.post("/api/v1/products", json={
         "name": "订单CID商品", "sale_price": "50.00", "cost_price": "30.00", "stock_quantity": 100,
     }, headers=headers)
     assert resp.status_code == 200
     pid = resp.json()["data"]["id"]
 
-    resp = client.post("/api/v1/sales-orders", json={
-        "customer_id": cid_a,
-        "items": [{"product_id": pid, "quantity": 2, "unit_price": "50.00"}],
-    }, headers=headers)
-    assert resp.status_code == 200
-    order_id = resp.json()["data"]["id"]
+    # 直接在数据库创建草稿订单（绕过 API 新流程，测试 update 端点审计日志）
+    from app.models.customer import Customer
+    from app.models.order import SalesOrder, SalesOrderItem
+    from app.models.user import User as UserModel
+
+    db = TestSession()
+    try:
+        user = db.query(UserModel).first()
+        customer_a = db.query(Customer).get(uuid.UUID(cid_a))
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=f"ORD-CID-{uuid.uuid4().hex[:6]}",
+            customer_id=customer_a.id, sales_user_id=user.id,
+            status="draft", total_amount=100, total_cost=60,
+            gross_profit=40, gross_margin=0.4, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=uuid.UUID(pid),
+            product_name_snapshot="订单CID商品", cost_price_snapshot=30,
+            quantity=2, unit_price=50, subtotal_amount=100, subtotal_cost=60,
+        ))
+        db.commit()
+        order_id = str(order.id)
+    finally:
+        db.close()
 
     # 编辑订单：变更客户为客户B
     resp = client.put(f"/api/v1/sales-orders/{order_id}", json={
@@ -2166,7 +2210,6 @@ def test_81_payment_create_audit_log_after_data_completeness():
     }, headers=headers)
     assert resp.status_code == 200
     oid = resp.json()["data"]["id"]
-    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=headers)
 
     # 登记收款
     resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
@@ -2460,7 +2503,7 @@ def test_93_order_cancel_audit_log_after_data_has_cancelled_status():
     assert resp.status_code == 200
     items = resp.json()["data"]["items"]
     log = next(i for i in items if i["resource_id"] == oid)
-    assert log["before_data"]["status"] == "draft"
+    assert log["before_data"]["status"] == "confirmed"
     assert log["after_data"]["status"] == "cancelled"
     assert log["after_data"]["order_no"] == log["before_data"]["order_no"]
     assert log["resource_type"] == "order"
@@ -2484,7 +2527,6 @@ def test_94_payment_reverse_audit_log_before_data_has_amount():
     }, headers=headers)
     assert resp.status_code == 200
     oid = resp.json()["data"]["id"]
-    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=headers)
 
     resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
         "amount": "150.00", "payment_method": "cash",
@@ -2670,7 +2712,7 @@ def test_100_audit_log_actor_name_matches_display_name():
 def test_101_order_confirm_audit_log_before_data_has_customer_id():
     """订单确认审计日志 before_data 含 customer_id"""
     headers = _admin_auth()
-    # 创建客户+商品+订单
+    # 创建客户+商品
     resp = client.post("/api/v1/customers", json={"name": "确认审计客户101", "phone": "13801011010"}, headers=headers)
     assert resp.status_code == 200
     cid = resp.json()["data"]["id"]
@@ -2679,12 +2721,34 @@ def test_101_order_confirm_audit_log_before_data_has_customer_id():
     }, headers=headers)
     assert resp.status_code == 200
     pid = resp.json()["data"]["id"]
-    resp = client.post("/api/v1/sales-orders", json={
-        "customer_id": cid,
-        "items": [{"product_id": pid, "quantity": 1, "unit_price": "120.00"}],
-    }, headers=headers)
-    assert resp.status_code == 200
-    oid = resp.json()["data"]["id"]
+
+    # 直接在数据库创建草稿订单（绕过 API 新流程，测试 confirm 端点审计日志）
+    from app.models.customer import Customer
+    from app.models.order import SalesOrder, SalesOrderItem
+    from app.models.user import User as UserModel
+
+    db = TestSession()
+    try:
+        user = db.query(UserModel).first()
+        customer = db.query(Customer).get(uuid.UUID(cid))
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=f"ORD-CUST101-{uuid.uuid4().hex[:6]}",
+            customer_id=customer.id, sales_user_id=user.id,
+            status="draft", total_amount=120, total_cost=60,
+            gross_profit=60, gross_margin=0.5, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=uuid.UUID(pid),
+            product_name_snapshot="确认审计商品101", cost_price_snapshot=60,
+            quantity=1, unit_price=120, subtotal_amount=120, subtotal_cost=60,
+        ))
+        db.commit()
+        oid = str(order.id)
+    finally:
+        db.close()
 
     # 确认
     resp = client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=headers)
@@ -2753,13 +2817,33 @@ def test_103_order_update_audit_log_after_data_has_items():
     assert resp.status_code == 200
     pid_b = resp.json()["data"]["id"]
 
-    # 创建订单
-    resp = client.post("/api/v1/sales-orders", json={
-        "customer_id": cid,
-        "items": [{"product_id": pid_a, "quantity": 1, "unit_price": "80.00"}],
-    }, headers=headers)
-    assert resp.status_code == 200
-    oid = resp.json()["data"]["id"]
+    # 直接在数据库创建草稿订单（绕过 API 新流程，测试 update 端点审计日志）
+    from app.models.customer import Customer
+    from app.models.order import SalesOrder, SalesOrderItem
+    from app.models.user import User as UserModel
+
+    db = TestSession()
+    try:
+        user = db.query(UserModel).first()
+        customer = db.query(Customer).get(uuid.UUID(cid))
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=f"ORD-ITEMS-{uuid.uuid4().hex[:6]}",
+            customer_id=customer.id, sales_user_id=user.id,
+            status="draft", total_amount=80, total_cost=30,
+            gross_profit=50, gross_margin=0.625, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=uuid.UUID(pid_a),
+            product_name_snapshot="编辑明细审计商品A", cost_price_snapshot=30,
+            quantity=1, unit_price=80, subtotal_amount=80, subtotal_cost=30,
+        ))
+        db.commit()
+        oid = str(order.id)
+    finally:
+        db.close()
 
     # 编辑订单（改明细）
     resp = client.put(f"/api/v1/sales-orders/{oid}", json={
@@ -2794,7 +2878,7 @@ def test_103_order_update_audit_log_after_data_has_items():
 def test_104_order_update_remark_only_no_items_in_after_data():
     """订单编辑仅更新备注时 after_data 不含 items"""
     headers = _admin_auth()
-    # 创建客户+商品+订单
+    # 创建客户+商品
     resp = client.post("/api/v1/customers", json={"name": "备注编辑客户104", "phone": "13801040404"}, headers=headers)
     assert resp.status_code == 200
     cid = resp.json()["data"]["id"]
@@ -2803,12 +2887,34 @@ def test_104_order_update_remark_only_no_items_in_after_data():
     }, headers=headers)
     assert resp.status_code == 200
     pid = resp.json()["data"]["id"]
-    resp = client.post("/api/v1/sales-orders", json={
-        "customer_id": cid,
-        "items": [{"product_id": pid, "quantity": 1, "unit_price": "60.00"}],
-    }, headers=headers)
-    assert resp.status_code == 200
-    oid = resp.json()["data"]["id"]
+
+    # 直接在数据库创建草稿订单（绕过 API 新流程，测试 update 端点审计日志）
+    from app.models.customer import Customer
+    from app.models.order import SalesOrder, SalesOrderItem
+    from app.models.user import User as UserModel
+
+    db = TestSession()
+    try:
+        user = db.query(UserModel).first()
+        customer = db.query(Customer).get(uuid.UUID(cid))
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=f"ORD-REMARK-{uuid.uuid4().hex[:6]}",
+            customer_id=customer.id, sales_user_id=user.id,
+            status="draft", total_amount=60, total_cost=25,
+            gross_profit=35, gross_margin=0.5833, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=uuid.UUID(pid),
+            product_name_snapshot="备注编辑商品104", cost_price_snapshot=25,
+            quantity=1, unit_price=60, subtotal_amount=60, subtotal_cost=25,
+        ))
+        db.commit()
+        oid = str(order.id)
+    finally:
+        db.close()
 
     # 仅编辑备注
     resp = client.put(f"/api/v1/sales-orders/{oid}", json={"remark": "仅更新备注"}, headers=headers)
@@ -2871,9 +2977,8 @@ def test_106_payment_create_audit_log_before_data_is_none():
     }, headers=headers)
     assert resp.status_code == 200
     oid = resp.json()["data"]["id"]
-    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=headers)
 
-    # 登记收款
+    # 登记收款（API 创建的订单已是 confirmed，无需再次确认）
     resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
         "amount": "99.00", "payment_method": "cash",
     }, headers=headers)

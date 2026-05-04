@@ -124,7 +124,7 @@ def teardown_module(module):
 class TestOrderCreate:
     """创建订单"""
 
-    def test_01_create_draft_order(self):
+    def test_01_create_confirmed_order(self):
         resp = client.post("/api/v1/sales-orders", json={
             "customer_id": _customer_id,
             "items": [
@@ -134,7 +134,7 @@ class TestOrderCreate:
         }, headers=_auth())
         assert resp.status_code == 200
         data = resp.json()["data"]
-        assert data["status"] == "draft"
+        assert data["status"] == "confirmed"
         assert data["total_amount"] == "270.00"
         assert data["order_no"].startswith("ORD-")
         global _order_id
@@ -208,16 +208,16 @@ class TestOrderRead:
         assert len(items) >= 1
 
     def test_09_list_orders_filter_status(self):
-        resp = client.get("/api/v1/sales-orders?status=draft", headers=_auth())
+        resp = client.get("/api/v1/sales-orders?status=confirmed", headers=_auth())
         assert resp.status_code == 200
         items = resp.json()["data"]["items"]
-        assert all(o["status"] == "draft" for o in items)
+        assert all(o["status"] == "confirmed" for o in items)
 
 
 class TestOrderUpdate:
     """编辑草稿订单"""
 
-    def test_10_update_draft_order(self):
+    def test_10_update_confirmed_order_400(self):
         resp = client.put(f"/api/v1/sales-orders/{_order_id}", json={
             "items": [
                 {"product_id": _product_id, "quantity": 5, "unit_price": "85.00"},
@@ -225,26 +225,44 @@ class TestOrderUpdate:
             ],
             "remark": "修改后",
         }, headers=_auth())
-        assert resp.status_code == 200
+        assert resp.status_code == 400
 
-    def test_11_verify_update(self):
+    def test_11_verify_no_update(self):
         resp = client.get(f"/api/v1/sales-orders/{_order_id}", headers=_auth())
         assert resp.status_code == 200
         data = resp.json()["data"]
-        assert len(data["items"]) == 2
-        assert data["remark"] == "修改后"
-        # 5*85 + 2*200 = 425 + 400 = 825
-        assert data["total_amount"] == "825.00"
+        assert len(data["items"]) == 1
+        assert data["remark"] == "测试订单"
+        # 订单未被修改，仍为原始数据
+        assert data["total_amount"] == "270.00"
 
     def test_11b_update_order_negative_price_422(self):
         """验证 update_order 也拒绝负价（之前遗漏的 bug）"""
-        # 先创建一个新草稿订单
-        resp = client.post("/api/v1/sales-orders", json={
-            "customer_id": _customer_id,
-            "items": [{"product_id": _product_id, "quantity": 1}],
-        }, headers=_auth())
-        assert resp.status_code == 200
-        draft_id = resp.json()["data"]["id"]
+        # 直接在 DB 创建草稿订单（API 创建会自动确认）
+        db = TestSession()
+        user = db.query(User).first()
+        prod = db.query(Product).filter(Product.sku == "ORD-TEST-A").first()
+        order = SalesOrder(
+            id=uuid.uuid4(),
+            order_no=f"ORD-NEGBASE-{uuid.uuid4().hex[:8]}",
+            customer_id=uuid.UUID(_customer_id),
+            sales_user_id=user.id,
+            status="draft",
+            total_amount=100, total_cost=60,
+            gross_profit=40, gross_margin=0.4, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=prod.id,
+            product_sku_snapshot=prod.sku, product_name_snapshot=prod.name,
+            quantity=1, unit_price=100, discount_amount=0, discount_rate=0,
+            cost_price_snapshot=60, subtotal_amount=100, subtotal_cost=60,
+        ))
+        db.commit()
+        draft_id = str(order.id)
+        db.close()
 
         resp = client.put(f"/api/v1/sales-orders/{draft_id}", json={
             "items": [{"product_id": _product_id, "quantity": 1, "unit_price": "-5.00"}],
@@ -256,15 +274,14 @@ class TestOrderUpdate:
 class TestOrderConfirm:
     """确认订单 — 库存扣减"""
 
-    def test_12_confirm_draft_order(self):
+    def test_12_confirm_already_confirmed_400(self):
         resp = client.post(f"/api/v1/sales-orders/{_order_id}/confirm", headers=_auth())
-        assert resp.status_code == 200
-        assert resp.json()["data"]["status"] == "confirmed"
+        assert resp.status_code == 400
 
     def test_13_verify_inventory_deducted(self):
         resp = client.get(f"/api/v1/products/{_product_id}", headers=_auth())
         assert resp.status_code == 200
-        assert resp.json()["data"]["stock_quantity"] == 45  # 50 - 5
+        assert resp.json()["data"]["stock_quantity"] == 47  # 50 - 3（创建时即扣减）
 
     def test_14_confirm_already_confirmed_400(self):
         resp = client.post(f"/api/v1/sales-orders/{_order_id}/confirm", headers=_auth())
@@ -303,10 +320,6 @@ class TestOrderInventoryInsufficient:
             "customer_id": _customer_id,
             "items": [{"product_id": _product2_id, "quantity": 999}],
         }, headers=_auth())
-        assert resp.status_code == 200
-        order_id = resp.json()["data"]["id"]
-
-        resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
         assert resp.status_code == 400
         assert "库存不足" in resp.json()["error"]["message"]
 
@@ -335,13 +348,12 @@ class TestOrderFilterAndEdge:
 
     def test_22_order_detail_shows_payments(self):
         """订单详情显示收款记录"""
-        # 创建并确认订单
+        # 创建订单（自动确认）
         resp = client.post("/api/v1/sales-orders", json={
             "customer_id": _customer_id,
             "items": [{"product_id": _product_id, "quantity": 1}],
         }, headers=_auth())
         oid = resp.json()["data"]["id"]
-        client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
 
         # 登记收款
         client.post(f"/api/v1/payments/orders/{oid}/payments", json={
@@ -356,19 +368,38 @@ class TestOrderFilterAndEdge:
         assert payments[0]["amount"] == "100.00"
 
     def test_23_update_order_customer_id(self):
-        """编辑订单更换客户"""
+        """编辑订单更换客户（草稿订单直接创建于 DB）"""
         # 创建新客户
         resp = client.post("/api/v1/customers", json={
             "name": "换绑客户", "phone": "13800000099",
         }, headers=_auth())
         new_cust_id = resp.json()["data"]["id"]
 
-        # 创建草稿订单
-        resp = client.post("/api/v1/sales-orders", json={
-            "customer_id": _customer_id,
-            "items": [{"product_id": _product_id, "quantity": 1}],
-        }, headers=_auth())
-        draft_id = resp.json()["data"]["id"]
+        # 直接在 DB 创建草稿订单以测试 update 端点
+        db = TestSession()
+        user = db.query(User).first()
+        prod = db.query(Product).filter(Product.sku == "ORD-TEST-A").first()
+        order = SalesOrder(
+            id=uuid.uuid4(),
+            order_no=f"ORD-UPD-CUST-{uuid.uuid4().hex[:8]}",
+            customer_id=uuid.UUID(_customer_id),
+            sales_user_id=user.id,
+            status="draft",
+            total_amount=100, total_cost=60,
+            gross_profit=40, gross_margin=0.4, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=prod.id,
+            product_sku_snapshot=prod.sku, product_name_snapshot=prod.name,
+            quantity=1, unit_price=100, discount_amount=0, discount_rate=0,
+            cost_price_snapshot=60, subtotal_amount=100, subtotal_cost=60,
+        ))
+        db.commit()
+        draft_id = str(order.id)
+        db.close()
 
         # 更换客户
         resp = client.put(f"/api/v1/sales-orders/{draft_id}", json={
@@ -382,11 +413,31 @@ class TestOrderFilterAndEdge:
 
     def test_24_update_order_empty_items(self):
         """编辑订单明细为空"""
-        resp = client.post("/api/v1/sales-orders", json={
-            "customer_id": _customer_id,
-            "items": [{"product_id": _product_id, "quantity": 1}],
-        }, headers=_auth())
-        draft_id = resp.json()["data"]["id"]
+        # 直接在 DB 创建草稿订单（API 创建会自动确认）
+        db = TestSession()
+        user = db.query(User).first()
+        prod = db.query(Product).filter(Product.sku == "ORD-TEST-A").first()
+        order = SalesOrder(
+            id=uuid.uuid4(),
+            order_no=f"ORD-EMPTY-{uuid.uuid4().hex[:8]}",
+            customer_id=uuid.UUID(_customer_id),
+            sales_user_id=user.id,
+            status="draft",
+            total_amount=100, total_cost=60,
+            gross_profit=40, gross_margin=0.4, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=prod.id,
+            product_sku_snapshot=prod.sku, product_name_snapshot=prod.name,
+            quantity=1, unit_price=100, discount_amount=0, discount_rate=0,
+            cost_price_snapshot=60, subtotal_amount=100, subtotal_cost=60,
+        ))
+        db.commit()
+        draft_id = str(order.id)
+        db.close()
 
         resp = client.put(f"/api/v1/sales-orders/{draft_id}", json={
             "items": [],
@@ -397,16 +448,38 @@ class TestOrderFilterAndEdge:
     def test_25_confirm_order_product_deleted(self):
         """确认订单时商品已被硬删除 → 404"""
         from app.models.product import Product as ProdModel
-        # 创建草稿订单
-        resp = client.post("/api/v1/sales-orders", json={
-            "customer_id": _customer_id,
-            "items": [{"product_id": _product_id, "quantity": 1}],
-        }, headers=_auth())
-        draft_id = resp.json()["data"]["id"]
+        # 直接在 DB 创建独立商品和草稿订单
+        db = TestSession()
+        prod = ProdModel(
+            id=uuid.uuid4(), sku=f"ORD-DEL-{uuid.uuid4().hex[:6]}",
+            name="删除测试商品", sale_price=100, cost_price=50,
+            stock_quantity=10, status="active",
+        )
+        db.add(prod)
+        user = db.query(User).first()
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=f"ORD-DEL-{uuid.uuid4().hex[:8]}",
+            customer_id=uuid.UUID(_customer_id), sales_user_id=user.id,
+            status="draft", total_amount=100, total_cost=50,
+            gross_profit=50, gross_margin=0.5, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=prod.id,
+            product_sku_snapshot=prod.sku, product_name_snapshot=prod.name,
+            quantity=1, unit_price=100, discount_amount=0, discount_rate=0,
+            cost_price_snapshot=50, subtotal_amount=100, subtotal_cost=50,
+        ))
+        db.commit()
+        draft_id = str(order.id)
+        prod_id = str(prod.id)
+        db.close()
 
         # 硬删除商品（直接从数据库删除，模拟极端情况）
         db = TestSession()
-        db.query(ProdModel).filter(ProdModel.id == uuid.UUID(_product_id)).delete()
+        db.query(ProdModel).filter(ProdModel.id == uuid.UUID(prod_id)).delete()
         db.commit()
         db.close()
 
@@ -432,13 +505,12 @@ class TestOrderFilterAndEdge:
         pid = str(new_prod.id)
         db.close()
 
-        # 创建并确认订单
+        # 创建订单（自动确认并扣减库存）
         resp = client.post("/api/v1/sales-orders", json={
             "customer_id": _customer_id,
             "items": [{"product_id": pid, "quantity": 2}],
         }, headers=_auth())
         oid = resp.json()["data"]["id"]
-        client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
 
         # 硬删除商品
         db = TestSession()
@@ -453,7 +525,7 @@ class TestOrderFilterAndEdge:
     def test_26b_confirm_order_product_soft_deleted(self):
         """确认订单时商品已被软删除 → 404（deleted_at 过滤）"""
         from app.models.product import Product as ProdModel
-        # 创建独立商品避免被其他测试干扰
+        # 创建独立商品并直接在 DB 创建草稿订单
         db = TestSession()
         soft_del_prod = ProdModel(
             id=uuid.uuid4(),
@@ -465,15 +537,26 @@ class TestOrderFilterAndEdge:
             status="active",
         )
         db.add(soft_del_prod)
+        user = db.query(User).first()
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=f"ORD-SOFT-CONF-{uuid.uuid4().hex[:8]}",
+            customer_id=uuid.UUID(_customer_id), sales_user_id=user.id,
+            status="draft", total_amount=100, total_cost=50,
+            gross_profit=50, gross_margin=0.5, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=soft_del_prod.id,
+            product_sku_snapshot=soft_del_prod.sku, product_name_snapshot=soft_del_prod.name,
+            quantity=1, unit_price=100, discount_amount=0, discount_rate=0,
+            cost_price_snapshot=50, subtotal_amount=100, subtotal_cost=50,
+        ))
         db.commit()
         pid = str(soft_del_prod.id)
+        draft_id = str(order.id)
         db.close()
-
-        resp = client.post("/api/v1/sales-orders", json={
-            "customer_id": _customer_id,
-            "items": [{"product_id": pid, "quantity": 1}],
-        }, headers=_auth())
-        draft_id = resp.json()["data"]["id"]
 
         # 软删除商品
         db = TestSession()
@@ -503,12 +586,12 @@ class TestOrderFilterAndEdge:
         pid = str(new_prod.id)
         db.close()
 
+        # 创建订单（自动确认并扣减库存）
         resp = client.post("/api/v1/sales-orders", json={
             "customer_id": _customer_id,
             "items": [{"product_id": pid, "quantity": 2}],
         }, headers=_auth())
         oid = resp.json()["data"]["id"]
-        client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
 
         # 软删除商品
         db = TestSession()
@@ -1521,7 +1604,7 @@ def test_60_order_list_data_scope_non_owner():
 
 def test_61_double_confirm_second_fails():
     """同一订单确认两次：第一次成功，第二次返回 400"""
-    # 创建新鲜数据避免依赖被前序测试软删除的共享数据
+    # 直接在 DB 创建草稿订单
     db = TestSession()
     try:
         user = db.query(User).first()
@@ -1538,18 +1621,26 @@ def test_61_double_confirm_second_fails():
         db.flush()
         cust = Customer(id=uuid.uuid4(), name="双确认测试客户", owner_user_id=user.id, created_by=user.id)
         db.add(cust)
+        db.flush()
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=f"CONF-{uuid.uuid4().hex[:8]}",
+            customer_id=cust.id, sales_user_id=user.id,
+            status="draft", total_amount=100, total_cost=50,
+            gross_profit=50, gross_margin=0.5, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=prod.id,
+            product_sku_snapshot=prod.sku, product_name_snapshot=prod.name,
+            quantity=1, unit_price=100, discount_amount=0, discount_rate=0,
+            cost_price_snapshot=50, subtotal_amount=100, subtotal_cost=50,
+        ))
         db.commit()
-        prod_id = str(prod.id)
-        cust_id = str(cust.id)
+        order_id = str(order.id)
     finally:
         db.close()
-
-    resp = client.post("/api/v1/sales-orders", json={
-        "customer_id": cust_id,
-        "items": [{"product_id": prod_id, "quantity": 1}],
-    }, headers=_auth())
-    assert resp.status_code == 200
-    order_id = resp.json()["data"]["id"]
 
     # 第一次确认成功
     resp1 = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
@@ -1593,10 +1684,7 @@ def test_62_cancel_confirmed_order_restores_stock():
     assert resp.status_code == 200
     order_id = resp.json()["data"]["id"]
 
-    # 确认 → 扣减库存
-    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
-    assert resp.status_code == 200
-
+    # 创建时已自动确认并扣减库存
     db = TestSession()
     try:
         prod = db.query(Product).filter(Product.id == uuid.UUID(prod_id)).first()

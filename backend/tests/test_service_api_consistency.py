@@ -155,10 +155,10 @@ class TestServiceCallAlignment:
     def test_orders_api_calls_register_payment(self):
         source = (API_DIR / "orders.py").read_text()
         calls = _extract_function_calls(source, "register_payment")
-        assert len(calls) == 1, f"orders.py 应调用 register_payment 1 次，实际 {len(calls)}"
-        call = calls[0]
-        assert "db" in call
-        assert "current_user" in call
+        assert len(calls) == 2, f"orders.py 应调用 register_payment 2 次（创建+收款端点），实际 {len(calls)}"
+        for call in calls:
+            assert "db" in call
+            assert "current_user" in call
 
     def test_files_api_calls_upload_image(self):
         source = (API_DIR / "files.py").read_text()

@@ -1,11 +1,14 @@
 import uuid as _uuid
 from decimal import Decimal, InvalidOperation
+from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
 from app.core.sanitize import sanitize_text as _sanitize
 
 _MAX_PRICE = Decimal("9999999999.99")
+
+_VALID_PAYMENT_METHODS = ("cash", "transfer", "wechat", "alipay", "other")
 
 
 class OrderItemInput(BaseModel):
@@ -38,9 +41,12 @@ class OrderItemInput(BaseModel):
 
 
 class OrderCreate(BaseModel):
-    customer_id: str = Field(..., description="客户 ID")
+    customer_id: str | None = Field(None, description="客户 ID（可选）")
     items: list[OrderItemInput] = Field(..., min_length=1, max_length=500, description="订单明细")
     remark: str | None = Field(None, max_length=500, description="备注")
+    payment_method: Literal["cash", "transfer", "wechat", "alipay", "other"] | None = Field(
+        None, description="收款方式，提供时自动创建收款记录"
+    )
 
     @field_validator("remark")
     @classmethod
@@ -49,11 +55,12 @@ class OrderCreate(BaseModel):
 
     @field_validator("customer_id")
     @classmethod
-    def validate_customer_id(cls, v: str) -> str:
-        try:
-            _uuid.UUID(v)
-        except (ValueError, AttributeError):
-            raise ValueError("客户 ID 格式不正确") from None
+    def validate_customer_id(cls, v: str | None) -> str | None:
+        if v:
+            try:
+                _uuid.UUID(v)
+            except (ValueError, AttributeError):
+                raise ValueError("客户 ID 格式不正确") from None
         return v
 
 

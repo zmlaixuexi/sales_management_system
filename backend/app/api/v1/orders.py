@@ -254,7 +254,7 @@ def list_orders(
         row: dict = {
             "id": str(o.id),
             "order_no": o.order_no,
-            "customer_id": str(o.customer_id),
+            "customer_id": str(o.customer_id) if o.customer_id else None,
             "sales_user_id": str(o.sales_user_id),
             "status": o.status,
             "status_label": STATUS_LABELS.get(o.status, o.status),
@@ -281,10 +281,12 @@ def create_order(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("order:create")),
 ):
-    """创建草稿订单"""
+    """创建订单 — 自动确认（扣减库存），可选自动收款"""
     customer_id = data.customer_id
 
-    get_or_404(db, Customer, str(customer_id), "客户")  # validate customer exists
+    # 客户可选：仅当提供时校验
+    if customer_id:
+        get_or_404(db, Customer, customer_id, "客户")
 
     raw_items = data.items
 
@@ -300,11 +302,13 @@ def create_order(
     totals = _calc_order_totals(prepared_items)
     order_no = _generate_order_no(db)
 
+    parsed_customer_id = parse_uuid_or_400(customer_id, "客户 ID") if customer_id else None
+
     order = SalesOrder(
         order_no=order_no,
-        customer_id=parse_uuid_or_400(customer_id, "客户 ID"),
+        customer_id=parsed_customer_id,
         sales_user_id=current_user.id,
-        status="draft",
+        status="confirmed",
         total_amount=totals["total_amount"],
         total_cost=totals["total_cost"],
         gross_profit=totals["gross_profit"],
@@ -319,6 +323,11 @@ def create_order(
 
     for pi in prepared_items:
         db.add(SalesOrderItem(order_id=order.id, **pi))
+    db.flush()
+
+    # 扣减库存
+    order_items = db.query(SalesOrderItem).filter(SalesOrderItem.order_id == order.id).all()
+    _deduct_inventory(db, order.id, order_items, current_user.id)
 
     log_user_action(
         db, request, current_user,
@@ -326,8 +335,8 @@ def create_order(
         resource_id=str(order.id),
         after_data={
             "order_no": order_no,
-            "status": order.status,
-            "customer_id": str(order.customer_id),
+            "status": "confirmed",
+            "customer_id": str(order.customer_id) if order.customer_id else None,
             "total_amount": str(order.total_amount),
             "items": [
                 {"product_id": str(pi["product_id"]), "quantity": pi["quantity"], "unit_price": str(pi["unit_price"])}
@@ -335,8 +344,32 @@ def create_order(
             ],
         },
     )
+    ORDER_CREATED.labels(status="confirmed").inc()
+    ORDER_CONFIRMED.inc()
+
+    # 可选：自动创建收款记录
+    if data.payment_method:
+        payment_data = PaymentCreate(
+            amount=str(order.total_amount),
+            payment_method=data.payment_method,
+        )
+        register_payment(db, str(order.id), payment_data, current_user)
+
+        log_user_action(
+            db, request, current_user,
+            action="payment_create", resource_type="payment",
+            resource_id=str(order.id),
+            after_data={
+                "order_id": str(order.id),
+                "amount": str(order.total_amount),
+                "method": data.payment_method,
+            },
+        )
+
     safe_commit(db)
-    ORDER_CREATED.labels(status="draft").inc()
+
+    # 刷新获取最新状态（register_payment 可能已更新为 completed）
+    db.refresh(order)
 
     can_view_cost = has_permission(current_user, "product:view_cost")
     result: dict = {
@@ -398,7 +431,7 @@ def get_order(
     data: dict = {
         "id": str(order.id),
         "order_no": order.order_no,
-        "customer_id": str(order.customer_id),
+        "customer_id": str(order.customer_id) if order.customer_id else None,
         "sales_user_id": str(order.sales_user_id),
         "status": order.status,
         "status_label": STATUS_LABELS.get(order.status, order.status),
@@ -440,7 +473,7 @@ def update_order(
         "status": order.status,
         "total_amount": str(order.total_amount),
         "remark": order.remark,
-        "customer_id": str(order.customer_id),
+        "customer_id": str(order.customer_id) if order.customer_id else None,
     }
     if raw_items is not None:
 
@@ -461,14 +494,17 @@ def update_order(
     if data.remark is not None:
         order.remark = data.remark
     if data.customer_id is not None:
-        new_cid = parse_uuid_or_400(data.customer_id, "客户 ID")
-        get_or_404(db, Customer, new_cid, "客户")
-        order.customer_id = new_cid
+        if data.customer_id:
+            new_cid = parse_uuid_or_400(data.customer_id, "客户 ID")
+            get_or_404(db, Customer, new_cid, "客户")
+            order.customer_id = new_cid
+        else:
+            order.customer_id = None
 
     order.updated_by = current_user.id
     after_payload: dict = {
         "order_no": order.order_no, "status": order.status,
-        "total_amount": str(order.total_amount), "customer_id": str(order.customer_id),
+        "total_amount": str(order.total_amount), "customer_id": str(order.customer_id) if order.customer_id else None,
     }
     if raw_items is not None:
         after_payload["items"] = [
@@ -517,11 +553,11 @@ def confirm_order(
         resource_id=str(order.id),
         before_data={
             "order_no": order.order_no, "status": "draft",
-            "total_amount": str(order.total_amount), "customer_id": str(order.customer_id),
+            "total_amount": str(order.total_amount), "customer_id": str(order.customer_id) if order.customer_id else None,
         },
         after_data={
             "order_no": order.order_no, "status": "confirmed",
-            "total_amount": str(order.total_amount), "customer_id": str(order.customer_id),
+            "total_amount": str(order.total_amount), "customer_id": str(order.customer_id) if order.customer_id else None,
         },
     )
     safe_commit(db)
@@ -582,11 +618,11 @@ def cancel_order(
         resource_id=str(order.id),
         before_data={
             "order_no": order.order_no, "status": old_status,
-            "total_amount": str(order.total_amount), "customer_id": str(order.customer_id),
+            "total_amount": str(order.total_amount), "customer_id": str(order.customer_id) if order.customer_id else None,
         },
         after_data={
             "order_no": order.order_no, "status": "cancelled",
-            "total_amount": str(order.total_amount), "customer_id": str(order.customer_id),
+            "total_amount": str(order.total_amount), "customer_id": str(order.customer_id) if order.customer_id else None,
         },
     )
     safe_commit(db)

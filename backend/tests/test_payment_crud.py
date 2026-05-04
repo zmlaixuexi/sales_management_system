@@ -188,14 +188,13 @@ class TestPaymentCreate:
 
     def test_03_payment_exceed_remaining_400(self):
         """超额收款"""
-        # 新建一个已确认订单
+        # 新建一个已确认订单（API 创建即为 confirmed）
         resp = client.post("/api/v1/sales-orders", json={
             "customer_id": _customer_id,
             "items": [{"product_id": _product_id, "quantity": 1}],
         }, headers=_auth())
         assert resp.status_code == 200
         oid = resp.json()["data"]["id"]
-        client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
 
         resp = client.post(f"/api/v1/sales-orders/{oid}/payments", json={
             "amount": "999.00",
@@ -624,16 +623,13 @@ def test_25_reverse_payment_invalid_uuid():
 
 def test_26_reverse_completed_order_to_partially_paid():
     """冲正部分金额后 completed → partially_paid"""
-    # 创建并确认订单
+    # 创建订单（API 创建即为 confirmed，自动扣减库存）
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 2}],
     }, headers=_auth())
     assert resp.status_code == 200
     order_id = resp.json()["data"]["id"]
-
-    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
-    assert resp.status_code == 200
 
     # 分两笔收款：先收 150 再收剩余
     resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
@@ -659,16 +655,13 @@ def test_26_reverse_completed_order_to_partially_paid():
 
 def test_27_reverse_all_payments_order_back_to_confirmed():
     """冲正全部收款后订单回到 confirmed"""
-    # 创建并确认订单
+    # 创建订单（API 创建即为 confirmed，自动扣减库存）
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 1}],
     }, headers=_auth())
     assert resp.status_code == 200
     order_id = resp.json()["data"]["id"]
-
-    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
-    assert resp.status_code == 200
 
     # 全额收款
     resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
@@ -777,16 +770,13 @@ def test_29_non_owner_payment_rejected():
 
 def test_30_payment_list_excludes_reversed():
     """收款列表不包含已冲正的收款记录"""
-    # 创建并确认新订单
+    # 创建新订单（API 创建即为 confirmed，自动扣减库存）
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 1}],
     }, headers=_auth())
     assert resp.status_code == 200
     order_id = resp.json()["data"]["id"]
-
-    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
-    assert resp.status_code == 200
 
     # 创建两笔收款
     resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
@@ -816,16 +806,13 @@ def test_30_payment_list_excludes_reversed():
 
 def test_31_payment_decimal_precision():
     """收款金额多小数位精度处理"""
-    # 创建并确认新订单
+    # 创建新订单（API 创建即为 confirmed，自动扣减库存）
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 1}],
     }, headers=_auth())
     assert resp.status_code == 200
     order_id = resp.json()["data"]["id"]
-
-    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
-    assert resp.status_code == 200
 
     # 金额带 3 位小数，系统应接受或截断
     resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
@@ -844,16 +831,13 @@ def test_31_payment_decimal_precision():
 
 def test_32_payment_list_desc_order():
     """收款列表按创建时间降序排列"""
-    # 创建并确认新订单
+    # 创建新订单（API 创建即为 confirmed，自动扣减库存）
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 1}],
     }, headers=_auth())
     assert resp.status_code == 200
     order_id = resp.json()["data"]["id"]
-
-    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
-    assert resp.status_code == 200
 
     # 分两笔收款
     resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
@@ -887,16 +871,13 @@ def test_33_payment_list_page_size_100():
 
 def test_34_payment_remark_xss_sanitized():
     """收款备注 HTML 标签被清理"""
-    # 创建并确认新订单
+    # 创建新订单（API 创建即为 confirmed，自动扣减库存）
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 1}],
     }, headers=_auth())
     assert resp.status_code == 200
     order_id = resp.json()["data"]["id"]
-
-    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
-    assert resp.status_code == 200
 
     # 创建带 HTML 标签备注的收款
     resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
@@ -924,14 +905,13 @@ def test_36_reverse_payment_audit_log():
     """冲正收款产生审计日志"""
     from app.models.audit import AuditLog
 
-    # 创建并确认订单 + 收款
+    # 创建订单（API 创建即为 confirmed，自动扣减库存） + 收款
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 1}],
     }, headers=_auth())
     assert resp.status_code == 200
     oid = resp.json()["data"]["id"]
-    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
     pay_resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
         "amount": "10", "payment_method": "cash",
     }, headers=_auth())
@@ -1147,14 +1127,13 @@ def test_45_create_payment_empty_amount_422():
 
 def test_46_double_reverse_second_returns_404():
     """同一笔收款冲正两次：第一次成功，第二次返回 404"""
-    # 创建并确认订单 + 收款
+    # 创建订单（API 创建即为 confirmed，自动扣减库存）+ 收款
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 1}],
     }, headers=_auth())
     assert resp.status_code == 200
     order_id = resp.json()["data"]["id"]
-    client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
 
     pay_resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
         "amount": "50", "payment_method": "cash",

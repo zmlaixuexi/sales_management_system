@@ -28,7 +28,7 @@ export interface OrderPayment {
 export interface Order {
   id: string
   order_no: string
-  customer_id: string
+  customer_id: string | null
   sales_user_id: string
   status: string
   status_label: string
@@ -49,13 +49,14 @@ export interface OrderDetail extends Order {
 }
 
 export interface OrderFormValues {
-  customer_id: string
+  customer_id?: string
   items: Array<{
     product_id: string
     quantity: number
     unit_price?: string
   }>
   remark?: string
+  payment_method?: string
 }
 
 export async function fetchOrders(params?: {

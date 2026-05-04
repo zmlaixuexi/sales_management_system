@@ -36,10 +36,10 @@ describe('必填字段对齐', () => {
     )
   })
 
-  it('OrderForm 必填字段覆盖后端 CreateSchema 必填项', () => {
+  it('OrderForm customer_id 为可选字段', () => {
     const form = read('frontend/src/pages/OrderForm.tsx')
-    // 后端 OrderCreate: customer_id 为必填
-    expect(form, 'OrderForm customer_id 应有 required 规则').toMatch(
+    // 后端 OrderCreate: customer_id 为可选
+    expect(form, 'OrderForm customer_id 不应有 required 规则').not.toMatch(
       /name=["']customer_id["'][\s\S]*?required:\s*true/,
     )
   })

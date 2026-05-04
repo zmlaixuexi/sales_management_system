@@ -14,6 +14,7 @@ import { fetchProducts } from '@/api/products'
 import type { Product } from '@/api/products'
 import { formatAmount, getApiErrorMessage, isToastDisplayed } from '@/utils'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
+import { paymentMethodMap } from '@/constants/statusMaps'
 
 interface OrderLine {
   key: string
@@ -75,7 +76,7 @@ export default function OrderForm() {
           if (!res.success) return
           const order: OrderDetail = res.data
           form.setFieldsValue({
-            customer_id: order.customer_id,
+            customer_id: order.customer_id || undefined,
             remark: order.remark,
           })
           setLines(order.items.map((item, idx) => ({
@@ -140,19 +141,21 @@ export default function OrderForm() {
   const totalAmount = lines.reduce((sum, l) => sum + l.subtotal, 0)
 
   const { submitting, handleSubmit: submitOrder } = useSubmit(async () => {
-    const values = await form.validateFields()
+    await form.validateFields()
     if (lines.length === 0) {
       message.error('请添加至少一个商品')
       return
     }
+    const values = form.getFieldsValue()
     const payload = {
-      customer_id: values.customer_id,
+      customer_id: values.customer_id || undefined,
       items: lines.map((l) => ({
         product_id: l.product_id,
         quantity: l.quantity,
         unit_price: String(l.unit_price),
       })),
       remark: values.remark,
+      payment_method: values.payment_method,
     }
     if (isEdit && id) {
       const res = await updateOrder(id, payload)
@@ -231,14 +234,17 @@ export default function OrderForm() {
       </div>
 
       <Card title={isEdit ? '编辑订单' : '新建订单'} loading={loading || submitting}>
-        <Form form={form} layout="vertical" style={{ maxWidth: 600 }}>
-          <Form.Item label="客户" name="customer_id" rules={[{ required: true, message: '请选择客户' }]}>
+        <Form form={form} layout="vertical" style={{ maxWidth: 600 }}
+          initialValues={{ payment_method: 'cash' }}
+        >
+          <Form.Item label="客户（可选）" name="customer_id">
             <Select
               showSearch
-              placeholder="搜索并选择客户"
+              placeholder="搜索并选择客户，不选则为散客"
               filterOption={false}
               onSearch={setCustomerSearch}
               notFoundContent="未找到客户"
+              allowClear
             >
               {customers.map((c) => (
                 <Select.Option key={c.id} value={c.id}>
@@ -246,6 +252,14 @@ export default function OrderForm() {
                 </Select.Option>
               ))}
             </Select>
+          </Form.Item>
+
+          <Form.Item label="收款方式" name="payment_method">
+            <Select
+              placeholder="选择收款方式"
+              options={Object.entries(paymentMethodMap).map(([value, label]) => ({ label, value }))}
+              allowClear
+            />
           </Form.Item>
         </Form>
 
@@ -278,7 +292,7 @@ export default function OrderForm() {
         <Form.Item>
           <Space>
             <Button type="primary" onClick={submitOrder} loading={loading || submitting}>
-              {isEdit ? '保存修改' : '创建订单'}
+              {isEdit ? '保存修改' : '确认销售'}
             </Button>
             <Button onClick={() => navigate('/orders')}>取消</Button>
           </Space>

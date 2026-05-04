@@ -177,7 +177,7 @@ describe('OrderForm', () => {
 
   it('渲染创建订单按钮', () => {
     renderNewOrder()
-    expect(screen.getByText('创建订单')).toBeInTheDocument()
+    expect(screen.getByText('确认销售')).toBeInTheDocument()
   })
 
   it('渲染取消按钮', () => {
@@ -289,7 +289,7 @@ describe('OrderForm', () => {
   it('创建按钮有 loading 状态支持', () => {
     renderNewOrder()
     const buttons = screen.getAllByTestId('button')
-    const createBtn = buttons.find((b) => b.textContent?.includes('创建订单'))
+    const createBtn = buttons.find((b) => b.textContent?.includes('确认销售'))
     expect(createBtn).toBeTruthy()
     expect(createBtn?.getAttribute('data-type')).toBe('primary')
   })
@@ -478,7 +478,6 @@ describe('OrderForm', () => {
       await waitFor(() => {
         expect(_orderApi.createOrder).toHaveBeenCalledWith(
           expect.objectContaining({
-            customer_id: 'c1',
             items: expect.arrayContaining([
               expect.objectContaining({ product_id: 'p1', quantity: 1 }),
             ]),
@@ -523,7 +522,9 @@ describe('OrderForm', () => {
       await waitFor(() => {
         expect(_orderApi.updateOrder).toHaveBeenCalledWith(
           'o-123',
-          expect.objectContaining({ customer_id: 'c1' }),
+          expect.objectContaining({
+            items: expect.any(Array),
+          }),
         )
         expect(antdMessage.success).toHaveBeenCalledWith('更新成功')
       })

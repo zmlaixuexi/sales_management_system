@@ -258,9 +258,9 @@ describe('商品表单验证', () => {
  * ═══════════════════════════════════════════════════════ */
 
 describe('订单表单验证', () => {
-  it('OrderForm customer_id required', () => {
+  it('OrderForm customer_id optional', () => {
     const src = source('OrderForm.tsx')
-    expect(src).toContain('请选择客户')
+    expect(src).toContain('散客')
   })
 
   it('OrderForm 空商品行校验', () => {

@@ -244,12 +244,29 @@ def test_08_token_inactive_user():
 
 def test_09_order_cancel_draft():
     """取消草稿订单"""
-    resp = client.post("/api/v1/sales-orders", json={
-        "customer_id": _customer_id,
-        "items": [{"product_id": _product_id, "quantity": 1}],
-    }, headers=_auth())
-    assert resp.status_code == 200
-    order_id = resp.json()["data"]["id"]
+    # API 创建的订单已自动确认，需在 DB 中创建草稿订单
+    db = TestSession()
+    try:
+        from app.api.deps import generate_sequential_code
+        order_no = generate_sequential_code(db, SalesOrder, SalesOrder.order_no, "ORD-")
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=order_no,
+            customer_id=uuid.UUID(_customer_id), status="draft",
+            total_amount=100, paid_amount=0,
+            sales_user_id=uuid.UUID(_user_id),
+            created_by=uuid.UUID(_user_id), updated_by=uuid.UUID(_user_id),
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=uuid.UUID(_product_id),
+            product_name_snapshot="边界商品", cost_price_snapshot=50,
+            quantity=1, unit_price=100, subtotal_amount=100, subtotal_cost=50,
+        ))
+        db.commit()
+        order_id = str(order.id)
+    finally:
+        db.close()
 
     resp = client.post(f"/api/v1/sales-orders/{order_id}/cancel", headers=_auth())
     assert resp.status_code == 200
@@ -258,16 +275,13 @@ def test_09_order_cancel_draft():
 
 def test_10_order_cancel_confirmed():
     """取消已确认订单应回滚库存"""
-    # 创建 + 确认
+    # API 创建即已确认（自动扣减库存）
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 5}],
     }, headers=_auth())
     assert resp.status_code == 200
     order_id = resp.json()["data"]["id"]
-
-    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
-    assert resp.status_code == 200
 
     # 取消已确认订单
     resp = client.post(f"/api/v1/sales-orders/{order_id}/cancel", headers=_auth())
@@ -277,22 +291,14 @@ def test_10_order_cancel_confirmed():
 
 def test_11_order_cancel_completed():
     """取消已完成订单应被拒绝"""
-    # 创建 → 确认 → 全额收款 → 完成
+    # 创建 + payment_method 自动收款 → 完成
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 1}],
+        "payment_method": "cash",
     }, headers=_auth())
     assert resp.status_code == 200
     order_id = resp.json()["data"]["id"]
-
-    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
-    assert resp.status_code == 200
-
-    resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
-        "amount": "100", "payment_method": "cash",
-    }, headers=_auth())
-    assert resp.status_code == 200
-    assert resp.json()["data"]["order_status"] == "completed"
 
     # 取消已完成订单
     resp = client.post(f"/api/v1/sales-orders/{order_id}/cancel", headers=_auth())
@@ -330,24 +336,8 @@ def test_15_order_list_with_keyword():
 
 # ─── 收款边界 ────────────────────────────────────────────────
 
-def test_16_payment_on_draft_order():
-    """草稿订单不允许收款"""
-    resp = client.post("/api/v1/sales-orders", json={
-        "customer_id": _customer_id,
-        "items": [{"product_id": _product_id, "quantity": 1}],
-    }, headers=_auth())
-    assert resp.status_code == 200
-    draft_order_id = resp.json()["data"]["id"]
-
-    resp = client.post(f"/api/v1/payments/orders/{draft_order_id}/payments", json={
-        "amount": "100", "payment_method": "cash",
-    }, headers=_auth())
-    assert resp.status_code == 400
-
-
-def test_17_payment_on_completed_order():
-    """已完成订单不允许收款"""
-    # 创建并完成订单
+def test_16_payment_on_auto_confirmed_order():
+    """API 创建的订单自动确认，收款应成功"""
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 1}],
@@ -355,13 +345,23 @@ def test_17_payment_on_completed_order():
     assert resp.status_code == 200
     order_id = resp.json()["data"]["id"]
 
-    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
-    assert resp.status_code == 200
-
+    # 订单已自动确认，收款应成功
     resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
         "amount": "100", "payment_method": "cash",
     }, headers=_auth())
-    assert resp.status_code == 200  # 全额支付 → completed
+    assert resp.status_code == 200
+
+
+def test_17_payment_on_completed_order():
+    """已完成订单不允许收款"""
+    # 创建 + payment_method 自动收款 → 完成
+    resp = client.post("/api/v1/sales-orders", json={
+        "customer_id": _customer_id,
+        "items": [{"product_id": _product_id, "quantity": 1}],
+        "payment_method": "cash",
+    }, headers=_auth())
+    assert resp.status_code == 200
+    order_id = resp.json()["data"]["id"]
 
     # 再次收款应失败
     resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
@@ -372,6 +372,7 @@ def test_17_payment_on_completed_order():
 
 def test_18_payment_on_cancelled_order():
     """已取消订单不允许收款"""
+    # API 创建自动确认
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 1}],
@@ -399,23 +400,21 @@ def test_19_payment_exact_amount():
 
 def test_20_payment_reverse_and_status_rollback():
     """冲正收款后订单状态回退"""
-    # 创建新订单 → 确认 → 全额收款 → 冲正 → 状态应回退
+    # API 创建自动确认 + payment_method 自动全额收款 → 完成
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 3}],
+        "payment_method": "cash",
     }, headers=_auth())
     assert resp.status_code == 200
     order_id = resp.json()["data"]["id"]
 
-    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
+    # 查找收款记录
+    resp = client.get(f"/api/v1/sales-orders/{order_id}", headers=_auth())
     assert resp.status_code == 200
-
-    resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
-        "amount": "300", "payment_method": "cash",
-    }, headers=_auth())
-    assert resp.status_code == 200
-    payment_id = resp.json()["data"]["id"]
-    assert resp.json()["data"]["order_status"] == "completed"
+    payments = resp.json()["data"]["payments"]
+    assert len(payments) >= 1
+    payment_id = payments[0]["id"]
 
     # 冲正
     resp = client.post(f"/api/v1/payments/{payment_id}/reverse", headers=_auth())
@@ -431,22 +430,20 @@ def test_20_payment_reverse_and_status_rollback():
 
 def test_21_payment_reverse_already_reversed():
     """冲正已冲正的收款返回 404"""
-    # 创建 → 确认 → 收款 → 冲正 → 再次冲正
+    # API 创建自动确认 + payment_method 自动收款
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 1}],
+        "payment_method": "cash",
     }, headers=_auth())
     assert resp.status_code == 200
     order_id = resp.json()["data"]["id"]
 
-    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
+    # 查找收款记录
+    resp = client.get(f"/api/v1/sales-orders/{order_id}", headers=_auth())
     assert resp.status_code == 200
-
-    resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
-        "amount": "100", "payment_method": "cash",
-    }, headers=_auth())
-    assert resp.status_code == 200
-    payment_id = resp.json()["data"]["id"]
+    payments = resp.json()["data"]["payments"]
+    payment_id = payments[0]["id"]
 
     resp = client.post(f"/api/v1/payments/{payment_id}/reverse", headers=_auth())
     assert resp.status_code == 200
@@ -458,15 +455,13 @@ def test_21_payment_reverse_already_reversed():
 
 def test_22_payment_negative_amount():
     """收款金额为负数"""
+    # API 创建自动确认
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 1}],
     }, headers=_auth())
     assert resp.status_code == 200
     order_id = resp.json()["data"]["id"]
-
-    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
-    assert resp.status_code == 200
 
     resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
         "amount": "-50", "payment_method": "cash",
@@ -622,13 +617,30 @@ def test_34b_inventory_movements_by_type():
 # ─── 订单编辑边界 ────────────────────────────────────────────
 
 def test_35_order_update_remark_only():
-    """仅更新订单备注"""
-    resp = client.post("/api/v1/sales-orders", json={
-        "customer_id": _customer_id,
-        "items": [{"product_id": _product_id, "quantity": 1}],
-    }, headers=_auth())
-    assert resp.status_code == 200
-    order_id = resp.json()["data"]["id"]
+    """仅更新草稿订单备注"""
+    # API 创建的订单已确认，需在 DB 中创建草稿订单
+    db = TestSession()
+    try:
+        from app.api.deps import generate_sequential_code
+        order_no = generate_sequential_code(db, SalesOrder, SalesOrder.order_no, "ORD-")
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=order_no,
+            customer_id=uuid.UUID(_customer_id), status="draft",
+            total_amount=100, paid_amount=0,
+            sales_user_id=uuid.UUID(_user_id),
+            created_by=uuid.UUID(_user_id), updated_by=uuid.UUID(_user_id),
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=uuid.UUID(_product_id),
+            product_name_snapshot="边界商品", cost_price_snapshot=50,
+            quantity=1, unit_price=100, subtotal_amount=100, subtotal_cost=50,
+        ))
+        db.commit()
+        order_id = str(order.id)
+    finally:
+        db.close()
 
     resp = client.put(f"/api/v1/sales-orders/{order_id}", json={
         "remark": "新备注",
@@ -666,16 +678,13 @@ def test_37_cancel_partially_paid_restores_inventory():
         assert resp.status_code == 200
         _tokens["access"] = resp.json()["data"]["access_token"]
 
-    # 创建 + 确认
+    # API 创建自动确认
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 3}],
     }, headers=_auth())
     assert resp.status_code == 200
     order_id = resp.json()["data"]["id"]
-
-    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
-    assert resp.status_code == 200
 
     # 部分收款（订单变为 partially_paid）
     resp = client.post(f"/api/v1/payments/orders/{order_id}/payments", json={
@@ -718,16 +727,13 @@ def test_38_cancelled_order_rejects_payment():
         assert resp.status_code == 200
         _tokens["access"] = resp.json()["data"]["access_token"]
 
-    # 创建 + 确认 + 取消（无收款）
+    # API 创建自动确认 + 取消
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 2}],
     }, headers=_auth())
     assert resp.status_code == 200
     order_id = resp.json()["data"]["id"]
-
-    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
-    assert resp.status_code == 200
 
     resp = client.post(f"/api/v1/sales-orders/{order_id}/cancel", headers=_auth())
     assert resp.status_code == 200
@@ -843,13 +849,29 @@ def test_43_order_update_deleted_customer_rejected():
     resp = client.delete(f"/api/v1/customers/{deleted_cid}", headers=_auth())
     assert resp.status_code == 200
 
-    # 创建草稿订单
-    resp = client.post("/api/v1/sales-orders", json={
-        "customer_id": _customer_id,
-        "items": [{"product_id": _product_id, "quantity": 1, "unit_price": "100"}],
-    }, headers=_auth())
-    assert resp.status_code == 200
-    order_id = resp.json()["data"]["id"]
+    # 在 DB 中创建草稿订单（API 创建的订单已确认，无法编辑）
+    db = TestSession()
+    try:
+        from app.api.deps import generate_sequential_code
+        order_no = generate_sequential_code(db, SalesOrder, SalesOrder.order_no, "ORD-")
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=order_no,
+            customer_id=uuid.UUID(_customer_id), status="draft",
+            total_amount=100, paid_amount=0,
+            sales_user_id=uuid.UUID(_user_id),
+            created_by=uuid.UUID(_user_id), updated_by=uuid.UUID(_user_id),
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=uuid.UUID(_product_id),
+            product_name_snapshot="边界商品", cost_price_snapshot=50,
+            quantity=1, unit_price=100, subtotal_amount=100, subtotal_cost=50,
+        ))
+        db.commit()
+        order_id = str(order.id)
+    finally:
+        db.close()
 
     # 更新客户 ID 为已删除客户
     resp = client.put(f"/api/v1/sales-orders/{order_id}", json={
@@ -1055,13 +1077,29 @@ def test_54_customer_create_nonexistent_owner_user_id_400():
 def test_55_order_update_nonexistent_customer_404():
     """更新草稿订单 customer_id 为不存在的客户返回 404"""
     _ensure_login()
-    # 创建草稿订单
-    resp = client.post("/api/v1/sales-orders", json={
-        "customer_id": _customer_id,
-        "items": [{"product_id": _product_id, "quantity": 1}],
-    }, headers=_auth())
-    assert resp.status_code == 200
-    order_id = resp.json()["data"]["id"]
+    # 在 DB 中创建草稿订单（API 创建的订单已确认，无法编辑）
+    db = TestSession()
+    try:
+        from app.api.deps import generate_sequential_code
+        order_no = generate_sequential_code(db, SalesOrder, SalesOrder.order_no, "ORD-")
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=order_no,
+            customer_id=uuid.UUID(_customer_id), status="draft",
+            total_amount=100, paid_amount=0,
+            sales_user_id=uuid.UUID(_user_id),
+            created_by=uuid.UUID(_user_id), updated_by=uuid.UUID(_user_id),
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=uuid.UUID(_product_id),
+            product_name_snapshot="边界商品", cost_price_snapshot=50,
+            quantity=1, unit_price=100, subtotal_amount=100, subtotal_cost=50,
+        ))
+        db.commit()
+        order_id = str(order.id)
+    finally:
+        db.close()
 
     # 更新为不存在的客户
     resp = client.put(f"/api/v1/sales-orders/{order_id}", json={
@@ -1074,13 +1112,29 @@ def test_55_order_update_nonexistent_customer_404():
 def test_56_order_update_nonexistent_product_in_items_404():
     """更新草稿订单 items 含不存在的商品返回 404"""
     _ensure_login()
-    # 创建草稿订单
-    resp = client.post("/api/v1/sales-orders", json={
-        "customer_id": _customer_id,
-        "items": [{"product_id": _product_id, "quantity": 1}],
-    }, headers=_auth())
-    assert resp.status_code == 200
-    order_id = resp.json()["data"]["id"]
+    # 在 DB 中创建草稿订单（API 创建的订单已确认，无法编辑）
+    db = TestSession()
+    try:
+        from app.api.deps import generate_sequential_code
+        order_no = generate_sequential_code(db, SalesOrder, SalesOrder.order_no, "ORD-")
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=order_no,
+            customer_id=uuid.UUID(_customer_id), status="draft",
+            total_amount=100, paid_amount=0,
+            sales_user_id=uuid.UUID(_user_id),
+            created_by=uuid.UUID(_user_id), updated_by=uuid.UUID(_user_id),
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=uuid.UUID(_product_id),
+            product_name_snapshot="边界商品", cost_price_snapshot=50,
+            quantity=1, unit_price=100, subtotal_amount=100, subtotal_cost=50,
+        ))
+        db.commit()
+        order_id = str(order.id)
+    finally:
+        db.close()
 
     # 更新为不存在的商品
     resp = client.put(f"/api/v1/sales-orders/{order_id}", json={
@@ -1096,6 +1150,7 @@ def test_56_order_update_nonexistent_product_in_items_404():
 def test_57_confirm_confirmed_order_rejected():
     """重复确认已确认订单返回 400"""
     _ensure_login()
+    # API 创建自动确认
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 1}],
@@ -1103,9 +1158,7 @@ def test_57_confirm_confirmed_order_rejected():
     assert resp.status_code == 200
     oid = resp.json()["data"]["id"]
 
-    resp = client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
-    assert resp.status_code == 200
-
+    # 已确认订单再次确认应被拒绝
     resp = client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
     assert resp.status_code == 400
     assert "草稿" in resp.json()["error"]["message"]
@@ -1148,15 +1201,13 @@ def test_59_cancel_already_cancelled_rejected():
 def test_60_update_confirmed_order_rejected():
     """编辑已确认订单返回 400"""
     _ensure_login()
+    # API 创建自动确认
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 1}],
     }, headers=_auth())
     assert resp.status_code == 200
     oid = resp.json()["data"]["id"]
-
-    resp = client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
-    assert resp.status_code == 200
 
     resp = client.put(f"/api/v1/sales-orders/{oid}", json={
         "remark": "已确认不可编辑",
@@ -1190,14 +1241,13 @@ def test_61_update_cancelled_order_rejected():
 def test_62_reverse_partial_payment_back_to_confirmed():
     """部分收款冲正全部收款后订单状态回到 confirmed"""
     _ensure_login()
-    # 创建并确认订单（总价 200）
+    # API 创建自动确认（总价 200）
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 2}],
     }, headers=_auth())
     assert resp.status_code == 200
     oid = resp.json()["data"]["id"]
-    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
 
     # 部分收款 50（状态变为 partially_paid）
     resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
@@ -1221,14 +1271,13 @@ def test_62_reverse_partial_payment_back_to_confirmed():
 def test_63_reverse_full_payment_back_to_partially_paid():
     """全额收款后冲正部分收款，状态回到 partially_paid"""
     _ensure_login()
-    # 创建并确认订单（总价 100）
+    # API 创建自动确认（总价 100）
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 1}],
     }, headers=_auth())
     assert resp.status_code == 200
     oid = resp.json()["data"]["id"]
-    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
 
     # 分两笔收款
     resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
@@ -1292,12 +1341,30 @@ def test_66_order_update_remark_max_length_boundary():
     }, headers=headers)
     assert resp.status_code == 200
     pid = resp.json()["data"]["id"]
-    resp = client.post("/api/v1/sales-orders", json={
-        "customer_id": cid,
-        "items": [{"product_id": pid, "quantity": 1, "unit_price": "60.00"}],
-    }, headers=headers)
-    assert resp.status_code == 200
-    oid = resp.json()["data"]["id"]
+
+    # 在 DB 中创建草稿订单（API 创建的订单已确认，无法编辑）
+    db = TestSession()
+    try:
+        from app.api.deps import generate_sequential_code
+        order_no = generate_sequential_code(db, SalesOrder, SalesOrder.order_no, "ORD-")
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=order_no,
+            customer_id=uuid.UUID(cid), status="draft",
+            total_amount=60, paid_amount=0,
+            sales_user_id=uuid.UUID(_user_id),
+            created_by=uuid.UUID(_user_id), updated_by=uuid.UUID(_user_id),
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=uuid.UUID(pid),
+            product_name_snapshot="订单编辑备注商品", cost_price_snapshot=25,
+            quantity=1, unit_price=60, subtotal_amount=60, subtotal_cost=25,
+        ))
+        db.commit()
+        oid = str(order.id)
+    finally:
+        db.close()
 
     # 恰好 500 字符
     resp = client.put(f"/api/v1/sales-orders/{oid}", json={"remark": "U" * 500}, headers=headers)
@@ -1311,7 +1378,7 @@ def test_66_order_update_remark_max_length_boundary():
 def test_67_payment_remark_max_length_boundary():
     """收款备注恰好 500 字符通过，501 字符返回 422"""
     headers = _auth_for_user(_user_id)
-    # 创建客户+商品+订单+确认
+    # 创建客户+商品+订单（API 创建自动确认）
     resp = client.post("/api/v1/customers", json={"name": "收款备注边界客户", "phone": "13900676767"}, headers=headers)
     assert resp.status_code == 200
     cid = resp.json()["data"]["id"]
@@ -1326,7 +1393,6 @@ def test_67_payment_remark_max_length_boundary():
     }, headers=headers)
     assert resp.status_code == 200
     oid = resp.json()["data"]["id"]
-    client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=headers)
 
     # 恰好 500 字符
     resp = client.post(f"/api/v1/payments/orders/{oid}/payments", json={
@@ -2206,12 +2272,29 @@ def test_128_product_update_main_image_url_max_length():
 def test_129_order_update_explicit_empty_items():
     """订单编辑显式传空 items 列表返回 422（schema min_length=1）"""
     headers = _auth_for_user(_user_id)
-    resp = client.post("/api/v1/sales-orders", json={
-        "customer_id": _customer_id,
-        "items": [{"product_id": _product_id, "quantity": 1}],
-    }, headers=headers)
-    assert resp.status_code == 200
-    oid = resp.json()["data"]["id"]
+    # 在 DB 中创建草稿订单（API 创建的订单已确认，无法编辑）
+    db = TestSession()
+    try:
+        from app.api.deps import generate_sequential_code
+        order_no = generate_sequential_code(db, SalesOrder, SalesOrder.order_no, "ORD-")
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=order_no,
+            customer_id=uuid.UUID(_customer_id), status="draft",
+            total_amount=100, paid_amount=0,
+            sales_user_id=uuid.UUID(_user_id),
+            created_by=uuid.UUID(_user_id), updated_by=uuid.UUID(_user_id),
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=uuid.UUID(_product_id),
+            product_name_snapshot="边界商品", cost_price_snapshot=50,
+            quantity=1, unit_price=100, subtotal_amount=100, subtotal_cost=50,
+        ))
+        db.commit()
+        oid = str(order.id)
+    finally:
+        db.close()
 
     # 显式传空 items（schema 有 min_length=1，Pydantic 拦截）
     resp = client.put(f"/api/v1/sales-orders/{oid}", json={"items": []}, headers=headers)

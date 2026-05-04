@@ -142,12 +142,12 @@ class TestRequiredFieldAlignment:
         assert fe_required, "CustomerForm name 字段应有 required 规则"
         assert be_required, "CustomerCreate name 字段应为 required"
 
-    def test_order_customer_id_required_matches(self):
-        """订单客户 ID：前端 required 与后端 Field(...) 一致"""
+    def test_order_customer_id_now_optional(self):
+        """订单客户 ID：前后端均为可选"""
         fe_required = _has_required_rule(ORDER_FORM_TSX, "customer_id")
         be_required = _schema_has_constraint(ORDER_SCH, "customer_id", "...")
-        assert fe_required, "OrderForm customer_id 字段应有 required 规则"
-        assert be_required, "OrderCreate customer_id 字段应为 required"
+        assert not fe_required, "OrderForm customer_id 字段应为可选"
+        assert not be_required, "OrderCreate customer_id 字段应为可选"
 
     def test_users_username_password_required_on_create(self):
         """用户创建：username/password 前端 required 与后端一致"""

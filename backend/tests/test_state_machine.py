@@ -95,21 +95,43 @@ def teardown_module(module):
 
 
 def _create_draft(extra_items=None):
-    """创建草稿订单并返回 order_id"""
+    """直接在数据库创建草稿订单并返回 order_id"""
+    db = _db()
+    try:
+        prod = db.query(Product).first()
+        cust = db.query(Customer).first()
+        user = db.query(User).first()
+        qty = 1
+        if extra_items:
+            qty = extra_items[0].get("quantity", 1)
+        order = SalesOrder(
+            id=uuid.uuid4(), order_no=f"ORD-DRAFT-{uuid.uuid4().hex[:6]}",
+            customer_id=cust.id, sales_user_id=user.id,
+            status="draft", total_amount=100, total_cost=60,
+            gross_profit=40, gross_margin=0.4, paid_amount=0,
+            created_by=user.id, updated_by=user.id,
+        )
+        db.add(order)
+        db.flush()
+        db.add(SalesOrderItem(
+            id=uuid.uuid4(), order_id=order.id, product_id=prod.id,
+            product_name_snapshot=prod.name, cost_price_snapshot=60,
+            quantity=qty, unit_price=100, subtotal_amount=100, subtotal_cost=60,
+        ))
+        db.commit()
+        return str(order.id)
+    finally:
+        db.close()
+
+
+def _create_confirmed(extra_items=None):
+    """通过 API 创建已确认订单（新流程：API 创建即为 confirmed），返回 order_id"""
     items = extra_items or [{"product_id": _product_id, "quantity": 1}]
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id, "items": items,
     }, headers=_auth())
     assert resp.status_code == 200
     return resp.json()["data"]["id"]
-
-
-def _create_confirmed(extra_items=None):
-    """创建并确认订单，返回 order_id"""
-    oid = _create_draft(extra_items)
-    resp = client.post(f"/api/v1/sales-orders/{oid}/confirm", headers=_auth())
-    assert resp.status_code == 200
-    return oid
 
 
 def _create_cancelled_from_draft():

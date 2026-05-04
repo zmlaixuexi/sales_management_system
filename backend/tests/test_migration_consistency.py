@@ -56,7 +56,7 @@ class TestMigrationChain:
 
     def test_7_migrations_exist(self):
         files = list(MIGRATIONS_DIR.glob("*.py"))
-        assert len(files) == 7
+        assert len(files) == 8
 
     def test_chain_is_linear(self):
         """每条迁移只有一个 down_revision"""

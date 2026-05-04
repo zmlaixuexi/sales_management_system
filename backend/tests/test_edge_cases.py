@@ -180,11 +180,11 @@ def test_10_customer_get_not_found():
 # ─── 订单异常路径 ────────────────────────────────────────────
 
 def test_11_order_create_no_customer():
-    """创建订单未选客户"""
+    """创建订单未选客户 — customer_id 可选，应成功"""
     resp = client.post("/api/v1/sales-orders", json={
         "items": [{"product_id": _product_id, "quantity": 1}],
     }, headers=_auth())
-    assert resp.status_code == 422
+    assert resp.status_code == 200
 
 
 def test_12_order_create_empty_items():
@@ -224,22 +224,18 @@ def test_15_order_create_negative_price():
 
 
 def test_16_order_confirm_insufficient_stock():
-    """确认订单库存不足"""
+    """创建订单库存不足 — 库存检查在创建时发生"""
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 999}],
     }, headers=_auth())
-    assert resp.status_code == 200
-    order_id = resp.json()["data"]["id"]
-
-    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
     assert resp.status_code == 400
     assert resp.json()["error"]["code"] == "INVENTORY_NOT_ENOUGH"
 
 
 def test_17_order_confirm_not_draft():
-    """确认非草稿订单"""
-    # 创建并确认一个订单
+    """确认已确认订单 — API 创建即为 confirmed，再次确认返回 400"""
+    # 创建订单（新流程：直接 confirmed）
     resp = client.post("/api/v1/sales-orders", json={
         "customer_id": _customer_id,
         "items": [{"product_id": _product_id, "quantity": 1}],
@@ -249,10 +245,7 @@ def test_17_order_confirm_not_draft():
     global _order_id
     _order_id = order_id
 
-    resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
-    assert resp.status_code == 200
-
-    # 再次确认
+    # 订单已经是 confirmed，尝试确认返回 400
     resp = client.post(f"/api/v1/sales-orders/{order_id}/confirm", headers=_auth())
     assert resp.status_code == 400
     assert resp.json()["error"]["code"] == "ORDER_INVALID_STATUS"

@@ -53,9 +53,9 @@ def _get_all_migrations():
 
 class TestMigrationFiles:
     def test_migration_count(self):
-        """迁移文件数量为 7"""
+        """迁移文件数量为 8"""
         migrations = _get_all_migrations()
-        assert len(migrations) == 7
+        assert len(migrations) == 8
 
     def test_all_have_revision(self):
         """所有迁移文件都有 revision ID"""
@@ -107,7 +107,7 @@ class TestMigrationChain:
         all_downs = {m["down_revision"] for m in migrations if m["down_revision"]}
         heads = [m for m in migrations if m["revision"] not in all_downs]
         assert len(heads) == 1, f"存在多个头迁移: {[h['revision'] for h in heads]}"
-        assert heads[0]["revision"] == "a1b2c3d4e5f6"
+        assert heads[0]["revision"] == "b2c3d4e5f6a7"
 
     def test_no_orphan_down_revisions(self):
         """所有 down_revision 都指向存在的 revision"""
@@ -144,8 +144,8 @@ class TestMigrationChain:
         while current in by_down:
             current = by_down[current]["revision"]
             chain.append(current)
-        assert len(chain) == 7, f"链长度 {len(chain)}，预期 7"
-        assert chain[-1] == "a1b2c3d4e5f6"
+        assert len(chain) == 8, f"链长度 {len(chain)}，预期 8"
+        assert chain[-1] == "b2c3d4e5f6a7"
 
     def test_expected_chain_order(self):
         """迁移链顺序符合预期"""
@@ -157,6 +157,7 @@ class TestMigrationChain:
             "c3f8a1d2e9b4",
             "519c97faaed2",
             "a1b2c3d4e5f6",
+            "b2c3d4e5f6a7",
         ]
         migrations = _get_all_migrations()
         by_down = {m["down_revision"]: m for m in migrations if m["down_revision"]}
