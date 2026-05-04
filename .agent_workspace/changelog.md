@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百二十九轮·自动循环）
+
+### 代码质量：前端表单验证规则与后端 Schema 约束对齐验证测试（25 项）
+- 新增 `frontend/src/__tests__/frontend-form-schema-alignment.test.ts`
+- 验证 ProductForm/CustomerForm/OrderForm/Login 必填字段与后端 Create Schema 对齐
+- 验证 name/sku/remark/phone/email 的 HTML maxLength 与后端 max_length 一致
+- 验证手机号正则 `^1[3-9]\d{9}$` 前后端一致、email 验证器存在
+- 验证 status/source/level/follow_status 的 Select 选项与后端 Literal 类型对齐
+- 验证 cost_price/sale_price/stock_quantity min=0 和 quantity min=1 与后端 ge/gt 对齐
+- 前端测试：1644 → 1669（+25），总计 6982 tests
+
 ## 2026-05-04（第八百二十八轮·自动循环）
 
 ### 可观测性：前端 API 错误处理与重试逻辑验证测试（25 项）
