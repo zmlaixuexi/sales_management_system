@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-05-04（第七百八十七轮·自动循环）
+
+### 代码质量：后端依赖注入模式一致性验证测试（45 项覆盖 8 类依赖模式）
+
+- 新增 `backend/tests/test_dep_injection_patterns.py`
+- deps 公共 API（8 项）：PaginationParams/get_db/get_current_user/require_permission/get_or_404/safe_commit/resp/paginated_resp 存在性
+- 分页参数（5 项）：默认 page=1/page_size=20、ge=1 约束、page_size le=100
+- 鉴权依赖（5 项）：OAuth2 tokenUrl、返回类型 User、token type 检查、password_changed_at 检查、superuser 绕过
+- get_db 覆盖（6 项）：所有 CRUD/库存/报表/文件/导出/审计日志模块使用 Depends(get_db)
+- 鉴权覆盖（5 项）：商品/客户/订单/收款/用户模块使用 require_permission 或 get_current_user
+- safe_commit 使用（5 项）：所有写操作模块使用 safe_commit、健康检查不使用
+- 辅助函数（5 项）：get_or_404 用于 CRUD 模块、active_query 覆盖 ≥3 模块、resp/paginated_resp 覆盖、fmt_dt 覆盖
+- 响应格式（6 项）：request_id 包含、默认消息、分页结构、success=True、错误码 RESOURCE_NOT_FOUND/AUTH_FORBIDDEN
+
 ## 2026-05-04（第七百八十六轮·自动循环）
 
 ### 代码质量：FastAPI 应用结构验证测试（42 项覆盖中间件/异常处理/路由/生命周期/安全/模块注册）
