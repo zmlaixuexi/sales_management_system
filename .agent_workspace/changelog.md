@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百五十轮·自动循环）
+
+### 可观测性：后端 Prometheus 指标与业务计数器覆盖验证测试（25 项）
+- 新增 `backend/tests/test_prometheus_metrics_coverage.py`
+- 验证指标定义与命名：至少 6 个自定义指标、Counter _total 后缀、business_ 前缀、snake_case、中文描述
+- 验证指标类型与标签：订单生命周期（created/confirmed/cancelled）、收款生命周期、LOGIN_ATTEMPTS result 标签、ORDER_CREATED status 标签、PAYMENT_REGISTERED method 标签
+- 验证业务层埋点：orders 模块递增创建/确认/取消指标、payments 模块递增收款指标、auth 模块追踪登录尝试
+- 验证 /metrics 端点：expose() 调用、排除 OpenAPI、排除 health/version、状态码分组、业务指标导入
+- 验证 Instrumentator 配置：Instrumentator 类使用、prometheus 依赖、采集配置、采集间隔、指标导出
+- 后端测试总计：5788 项（新增 25 项）
+
 ## 2026-05-04（第八百四十九轮·自动循环）
 
 ### 代码质量：后端 API 端点查询参数与分页参数命名规范验证测试（25 项）
