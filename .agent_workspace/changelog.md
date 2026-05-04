@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百二十五轮·自动循环）
+
+### 文档完善：后端环境变量文档与 .env.example 一致性验证测试（25 项）
+- 新增 `backend/tests/test_env_example_consistency.py`
+- 验证 .env.example 变量名与 config.py Settings 字段完全双向对齐
+- 验证整数/字符串/数据库 URL 默认值一致
+- 验证验证器覆盖（JWT 过期时间、连接池、速率限制、CORS、JWT 密钥）
+- 验证 .env.example 格式规范（注释分段、无空值、无行内注释、大写下划线命名）
+- 验证敏感配置安全约束（JWT 密钥生产警告、HSTS HTTPS 注释、CORS 非通配符）
+- 后端测试：5264 → 5288（+24），总计 6882 tests
+
 ## 2026-05-04（第八百二十四轮·自动循环）
 
 ### 可观测性：前端组件 loading 状态覆盖验证测试（25 项）
