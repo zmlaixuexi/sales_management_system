@@ -144,10 +144,20 @@ def teardown_module(module):
 client = TestClient(app)
 
 
+def _ensure_token(username: str, store: dict):
+    """确保 token 存在，不存在则自动登录"""
+    if not store.get("access"):
+        resp = client.post("/api/v1/auth/login", json={"username": username, "password": "TestPass123!"})
+        assert resp.status_code == 200, f"自动登录 {username} 失败: {resp.status_code}"
+        store["access"] = resp.json()["data"]["access_token"]
+
+
 def _auth(username="sale01"):
     if username == "perm_admin":
-        return {"Authorization": f"Bearer {_admin_tokens.get('access', '')}"}
-    return {"Authorization": f"Bearer {_tokens.get('access', '')}"}
+        _ensure_token("perm_admin", _admin_tokens)
+        return {"Authorization": f"Bearer {_admin_tokens['access']}"}
+    _ensure_token("sale01", _tokens)
+    return {"Authorization": f"Bearer {_tokens['access']}"}
 
 
 def test_01_login_both_users():
