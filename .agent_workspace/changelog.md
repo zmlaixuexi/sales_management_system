@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第七百七十二轮·自动循环）
+
+### 可观测性：Prometheus 指标端点与配置验证测试（25 项覆盖 scrape 配置、instrumentator 排除、Prometheus 格式、命名规范）
+
+- 新增 `backend/tests/test_prometheus_config.py`
+- scrape 配置（6 项）：YAML 加载、scrape/evaluation interval、job_name、metrics_path、target 对齐
+- instrumentator 配置（5 项）：/metrics 200、状态码分组、/health 和 /version 排除、不在 OpenAPI 中
+- Prometheus 格式（12 项）：content-type、HELP/TYPE 注释、每个 business_ 指标有 HELP+TYPE、counter/gauge 类型、histogram bucket/sum/count、数值格式
+- 命名规范（3 项）：business_ 前缀一致、counter _total 后缀、gauge 无 _total
+- 后端测试 4023 → 4048（+25），总测试 5244 → 5269
+
 ## 2026-05-04（第七百七十一轮·自动循环）
 
 ### 文档完善：后端端点响应 message 一致性测试（47 项覆盖全模块成功/错误结构验证、request_id 存在性、message 语义化）
