@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-05-04（第七百五十八轮·自动循环）
+
+### 安全加固：速率限制滑动窗口 _SlidingWindow 单元测试（18 项覆盖窗口计数、过期清理、边界条件、性能、幂等性）
+
+- 新增 `backend/tests/test_sliding_window_unit.py`
+- _SlidingWindow 纯单元测试（18 项）：空窗口、record 累加、过期清理、部分过期、精确边界（等于/略超）、零窗口行为、大窗口、过期清理效果、不同时间戳、窗口滑动、性能（1000 条 < 1s）、插入顺序、__slots__ 验证、边缘值、同时间戳、count 幂等性
+- 测试总计：后端 3756 + 前端 1208 = **4964**
+
 ## 2026-05-04（第七百五十七轮·自动循环）
 
 ### 安全加固：前端 XSS 防护回归测试（11 项覆盖 dangerouslySetInnerHTML/innerHTML/eval/new Function/document.write/insertAdjacentHTML/javascript 协议/location.href 赋值安全）
