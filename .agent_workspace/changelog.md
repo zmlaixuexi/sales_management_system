@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-05-04（第七百九十七轮·自动循环）
+
+### 代码质量：前端 Store / Hooks / API 调用一致性验证测试（40 项）
+
+新增 `frontend/src/__tests__/frontend-api-integration.test.ts`，验证前端 API 层完整性：API 函数 HTTP 方法一致性（products/orders/customers/payments/roles/inventory/reports 各模块函数使用正确 HTTP 方法辅助函数）、auth store 与 authApi 调用对齐（login/logout/fetchUser 正确调用 authApi）、usePaginatedList 参数传递（page/page_size/keyword 参数传递和 items/total 解构）、client 拦截器逻辑（Bearer token、X-Request-ID、401 刷新、429 重试、失败清理）、request.ts 辅助函数覆盖（6 个函数导出、ApiResponse 返回、downloadCsv 错误处理、upload multipart）、useSubmit 防重复提交（locked ref、finally 重置、errorFields 跳过、toast 去重）、API 模块导入一致性（request.ts 导入、auth 使用 apiClient、PaginatedData 导入）。全部 40 项通过，前端测试 1310。
+
 ## 2026-05-04（第七百九十六轮·自动循环）
 
 ### 代码质量：后端报表模块结构与逻辑验证测试（32 项）
