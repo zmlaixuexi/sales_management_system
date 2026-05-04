@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-05-04（第八百零一轮·自动循环）
+
+### 代码质量：后端数据库迁移脚本与模型一致性验证测试（27 项）
+
+新增 `backend/tests/test_migration_consistency.py`，验证 Alembic 迁移与 SQLAlchemy 模型一致性：迁移链完整性（7 条迁移线性链接、唯一 base 和 head、链长等于文件数）、表名覆盖（所有模型 __tablename__ 均在迁移中创建、初始迁移 10 表、客户迁移 1 表、订单迁移 4 表、审计迁移 1 表）、关键列存在（password_changed_at 增量列、order_no 唯一约束、4 表软删除 deleted_at）、索引覆盖（复合索引 10 个、软删除索引 8 个、审计/订单/收款必需索引、唯一约束）、Alembic 配置（ini 存在、script_location、env.py 导入 models 和 target_metadata、run_migrations 函数）。修复 revision 正则从 `\w+` 到 `[0-9a-f]+` 避免匹配类型注解。全部 27 项通过，后端测试 4890。
+
 ## 2026-05-04（第八百轮·自动循环）
 
 ### 代码质量：前端权限码与后端权限定义对齐验证测试（25 项）
