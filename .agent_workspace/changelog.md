@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-05-04（第八百零五轮·自动循环）
+
+### 代码质量：后端配置项与环境变量引用一致性验证测试（25 项）+ 修复
+
+覆盖 5 个维度：
+- **配置字段定义**（5 项）：33 个配置项、JWT/DB/安全/上传分组完整性
+- **settings 引用覆盖**（5 项）：所有使用的 settings 均已定义、JWT 在 security/deps 使用、DB URL 在 session 使用、上传在 file_service 使用、速率限制在 main 使用
+- **env.example 完整性**（5 项）：文件存在、覆盖所有使用的 settings、有注释、默认值匹配、有安全警告
+- **验证器覆盖**（5 项）：JWT_SECRET_KEY/JWT_EXPIRE/CORS_ORIGINS/DB_POOL_SIZE/RATE_LIMIT_MAX 均有验证器
+- **配置引用模块覆盖**（5 项）：security/main/body_limit/security_headers/auth 正确引用对应配置
+
+修复：
+- `.env.example` 补充缺失的 `ACCOUNT_LOCK_MAX_FAILURES`、`ACCOUNT_LOCK_WINDOW_SECONDS`、`JWT_ISSUER`、`JWT_AUDIENCE` 四项
+
+---
+
 ## 2026-05-04（第八百零四轮·自动循环）
 
 ### 可观测性：前端 API 错误处理与重试逻辑验证测试（25 项）
