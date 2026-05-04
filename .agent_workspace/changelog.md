@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百三十二轮·自动循环）
+
+### 部署体验：后端 Dockerfile 多阶段构建配置验证测试（25 项）
+- 新增 `backend/tests/test_backend_dockerfile.py`
+- 验证多阶段构建：builder + runtime 两阶段、python:3.13-slim、COPY --from=builder
+- 验证安全配置：非 root 用户 appuser、专用用户组、slim 镜像、apt 缓存清理、无登录 shell
+- 验证健康检查：HEALTHCHECK 指令、/health 端点、interval/timeout/retries 配置
+- 验证文件复制：app/ 目录、alembic/ + alembic.ini、uploads 目录、EXPOSE 8000
+- 验证 pyproject.toml：Python 版本要求、核心依赖、dev 依赖、ruff/pytest 配置
+- 后端测试：5363 → 5388（+25），总计 7057 tests
+
 ## 2026-05-04（第八百三十一轮·自动循环）
 
 ### 部署体验：前端构建与环境变量配置验证测试（25 项）
