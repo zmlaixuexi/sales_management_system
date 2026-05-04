@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-04（第七百八十轮·自动循环）
+
+### 代码质量：前端页面组件导出与路由引用一致性验证测试（30 项覆盖模块存在性、默认导出、路由对应、结构完整性）
+
+- 新增 `frontend/src/__tests__/page-module-structure.test.ts`
+- 模块存在性（1 项）：17 个页面模块均可动态导入
+- 默认导出（17 项）：每个页面模块都有 default 导出且为函数组件
+- 路由对应（8 项）：Login/Dashboard/ProductForm/OrderForm/CustomerForm/CustomerDetail/OrderDetail/NotFound 与路由配置对应
+- 结构完整性（3 项）：受保护路由 18 个子路由、17 个页面模块无遗漏、ProtectedRoute 包裹验证
+- 无循环依赖（1 项）：Login 不依赖 ProtectedRoute
+- 前端测试 1240 → 1270（+30），总测试 5528 → 5558
+
 ## 2026-05-04（第七百七十九轮·自动循环）
 
 ### 部署体验：nginx 配置与 Docker 镜像构建参数一致性验证测试（70 项覆盖 nginx/Dockerfile/Prometheus/部署脚本）
