@@ -2,13 +2,14 @@
 
 最后更新时间：2026-05-04
 当前阶段：MVP 后续扩展
-当前任务编号：ROUND-760
-当前任务名称：自动循环：完成第 760 轮开发推进
+当前任务编号：ROUND-761
+当前任务名称：自动循环：完成第 761 轮开发推进
 当前 Agent：Claude
 任务状态：已完成
 
 ## 最近完成
 
+- Round 761：需求符合性 — 前端客户来源/等级映射与后端常量一致性测试（13 项覆盖 customerSourceMap/customerLevelMap 双向映射验证）
 - Round 760：安全加固 — 后端 API 敏感字段泄露回归测试（13 项覆盖用户列表/详情/创建/登录/审计日志/商品/客户/错误响应不含密码哈希/密钥/堆栈信息）
 - Round 759：安全加固 — 后端配置安全默认值回归测试（50 项覆盖 JWT/CORS/速率限制/请求体限制/文件上传/数据库连接池/账户锁定/HSTS/可观测性配置默认值和值域约束）
 - Round 758：安全加固 — 速率限制滑动窗口 _SlidingWindow 单元测试（18 项覆盖窗口计数、过期清理、边界条件、性能、幂等性）
@@ -25,18 +26,18 @@
 | 门禁 | 结果 |
 |---|---|
 | 后端测试 | 3819/3819 ✓ |
-| 前端测试 | 1208/1208 ✓ |
+| 前端测试 | 1221/1221 ✓ |
 | ruff | 0 new errors ✓ |
 | tsc (strict + noUncheckedIndexedAccess) | 0 errors ✓ |
 | eslint | 0 errors ✓ |
-| 总计 | **5027 tests** |
+| 总计 | **5040 tests** |
 
 ## 下一步第一动作
 
 继续 keep-going 模式。可选方向：
-- 测试补强：前端 constants/customerSourceMap/customerLevelMap 一致性测试
+- 测试补强：前端 API 层 mock 测试覆盖补全
 - 代码质量：前端组件页面渲染快照回归测试
-- 安全加固：后端 password verify 边界测试（空字符串/超长/Bcrypt 格式错误）
+- 安全加固：后端 JWT token type 区分验证（access vs refresh 不可混用）
 - 需求符合性：后端健康检查端点信息完整性测试
 
 ## 阻塞问题

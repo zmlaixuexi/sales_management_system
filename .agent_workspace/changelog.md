@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第七百六十一轮·自动循环）
+
+### 需求符合性：前端客户来源/等级映射与后端常量一致性测试（13 项覆盖 customerSourceMap/customerLevelMap 双向映射验证）
+
+- 新增 `frontend/src/__tests__/customer-maps-consistency.test.ts`
+- customerSourceMap（6 项）：双向映射完整性、数量一致、label 非空、关键值验证
+- customerLevelMap（5 项）：双向映射完整性、数量一致、color/label 非空、关键值验证、默认值 normal 存在
+- 后端常量完整性（2 项）：来源 5 项、等级 4 项
+- 补齐 Round 754 遗漏的 customerSourceMap 和 customerLevelMap 一致性验证
+- 测试总计：后端 3819 + 前端 1221 = **5040**
+
 ## 2026-05-04（第七百六十轮·自动循环）
 
 ### 安全加固：后端 API 敏感字段泄露回归测试（13 项覆盖用户列表/详情/创建/登录/审计日志/商品/客户/错误响应不含密码哈希/密钥/堆栈信息）
