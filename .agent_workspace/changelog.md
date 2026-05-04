@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-05-04（第七百八十三轮·自动循环）
+
+### 部署体验：部署脚本内容与权限验证测试（45 项覆盖 manage.sh/pre-deploy-check.sh/backup.sh/restore.sh/rollback.sh）
+
+- 新增 `backend/tests/test_deploy_scripts_content.py`
+- manage.sh（21 项）：shebang、可执行权限、strict mode、prod compose 引用、start/stop/restart/status/logs/migrate/backup/restore/check 命令、monitoring 命令（start/stop/status）、profile monitoring、pre-deploy-check 调用、--build、help、COMPOSE_FILE 变量、.env 要求、cleanup-files
+- pre-deploy-check.sh（8 项）：shebang、可执行权限、strict mode、--skip-tests/--skip-build 标志、Docker 检查、.env 检查、PASS/FAIL 追踪
+- backup.sh（5 项）：shebang、可执行权限、strict mode、pg_dump、时间戳文件名
+- restore.sh（4 项）：shebang、可执行权限、strict mode、备份文件参数要求
+- rollback.sh（3 项）：shebang、可执行权限、strict mode
+- 脚本一致性（4 项）：manage 引用 backup/restore/pre-deploy-check、compose 文件一致性
+- 后端测试 4335 → 4380（+45），总测试 5605 → 5650
+
 ## 2026-05-04（第七百八十二轮·自动循环）
 
 ### 需求符合性：前端 API 路径与后端路由前缀一致性验证测试（27 项覆盖 11 个模块路径对齐）
