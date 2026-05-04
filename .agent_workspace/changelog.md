@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-05-04（第八百零九轮·自动循环）
+
+### 部署体验：后端 Dockerfile 多阶段构建配置验证测试（25 项）
+
+覆盖 5 个维度：
+- **多阶段构建结构**（5 项）：Dockerfile 存在、2 个 FROM 指令（builder + runtime）、python:3.13-slim 基础镜像、pip install 依赖、COPY --from=builder
+- **安全配置**（5 项）：非 root 用户 appuser、专用用户创建、无登录 shell、apt 缓存清理、运行时仅安装 libpq（无 gcc）
+- **健康检查**（5 项）：HEALTHCHECK 指令存在、检查 /health 端点、interval/timeout 配置、验证 database=ok
+- **应用文件复制**（5 项）：app/ 目录、alembic/ 目录、alembic.ini、uploads 目录创建、uploads 目录权限
+- **pyproject.toml 配置**（5 项）：项目名和版本、Python 版本要求、核心依赖列表、ruff 配置、pytest 配置
+
+---
+
 ## 2026-05-04（第八百零八轮·自动循环）
 
 ### 安全加固：后端速率限制运行时验证测试（25 项）
