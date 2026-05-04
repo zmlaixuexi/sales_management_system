@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-05-04（第七百九十五轮·自动循环）
+
+### 需求符合性：后端 API 端点 HTTP 方法与路由模式验证测试（34 项）
+
+新增 `backend/tests/test_api_http_methods.py`，验证 59 个 API 端点：CRUD 方法规范（list 用 GET、create 用 POST、update 用 PUT、delete 用 DELETE）、动作端点用 POST（confirm/cancel/disable/transfer/reverse/adjust）、公开端点无 auth（health/version/login/refresh）、导出端点用 GET、路由路径命名（{resource_id} 格式、无尾部斜杠、导入路径为子资源）、路由注册完整性（13 模块全部注册、≥55 端点、无 PATCH）。全部 34 项通过，后端测试 4831。
+
 ## 2026-05-04（第七百九十四轮·自动循环）
 
 ### 代码质量：后端模型关系与外键约束一致性验证测试（36 项）
