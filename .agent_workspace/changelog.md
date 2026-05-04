@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百五十三轮·自动循环）
+
+### 代码质量：后端 API 端点函数参数注解与类型提示验证测试（25 项）
+- 新增 `backend/tests/test_endpoint_type_annotations.py`
+- 验证路径参数类型：UUID/str 类型注解、无默认值、参数在签名中、snake_case 命名
+- 验证依赖注入类型：Session/User/PaginationParams 类型、Request 类型、依赖函数已导入
+- 验证请求体类型：POST 创建端点有 body、PUT 端点有 Update 模型、Pydantic 模型导入、无 raw dict
+- 验证参数默认值：Optional 默认 None、Query 有默认值、Depends 模式一致、无 bare self/cls、CRUD 模块有 get_db
+- 验证额外规范：Session/uuid 导入、动作端点用 POST、无 bare except、async 端点数量少
+- 后端测试总计：5863 项（新增 25 项）
+
 ## 2026-05-04（第八百五十二轮·自动循环）
 
 ### 代码质量：后端数据库会话管理与连接池配置验证测试（25 项）
