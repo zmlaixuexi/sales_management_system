@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-04（第七百六十二轮·自动循环）
+
+### 需求符合性：应用生命周期管理边界测试（17 项覆盖关闭状态转换 503/SHUTTING_DOWN、版本端点结构、健康检查响应字段完整性）
+
+- 新增 `backend/tests/test_lifespan_boundaries.py`
+- 关闭状态转换（4 项）：正常 200、关闭 503+SHUTTING_DOWN、中文消息、状态恢复
+- 版本端点（5 项）：200/success/data 存在/版本号格式/revision 字符串
+- 健康检查响应结构（8 项）：全部字段存在、pool 结构（size/checked_in/checked_out/overflow）、pool 数值类型、database 状态、status 值、success=true、message 存在、content-type json
+- 测试总计：后端 3836 + 前端 1221 = **5057**
+
 ## 2026-05-04（第七百六十一轮·自动循环）
 
 ### 需求符合性：前端客户来源/等级映射与后端常量一致性测试（13 项覆盖 customerSourceMap/customerLevelMap 双向映射验证）
