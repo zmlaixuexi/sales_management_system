@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-04（第八百三十九轮·自动循环）
+
+### 代码质量：后端 API 端点 Request 参数与审计日志一致性验证测试（25 项）
+- 新增 `backend/tests/test_request_audit_consistency.py`
+- 验证变更端点 Request 参数声明：products/customers/orders/users/inventory 创建端点
+- 验证审计日志调用覆盖：9 个变更模块均导入 audit_service 并调用 log_user_action
+- 验证审计 action 命名规范：snake_case、create/delete/update 前缀、resource_type 匹配模块
+- 验证审计参数传递一致性：log_user_action 接受 db/request/user 参数、所有调用传递 db
+- 验证列表端点无审计日志：GET 列表端点不记录审计、auth 使用 log_action 而非 log_user_action
+
 ## 2026-05-04（第八百三十八轮·自动循环）
 
 ### 安全加固：后端 JWT Token Claim 完整性静态验证测试（25 项）
