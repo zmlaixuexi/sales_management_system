@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-05-04（第八百二十三轮·自动循环）
+
+### 代码质量：后端异常处理器覆盖完整性验证测试（25 项）
+
+覆盖 5 个维度：
+- **HTTPException 处理器**（5 项）：注册、提取 dict detail 的 code/message、非 dict fallback、包含 request_id、JSONResponse + status_code
+- **Starlette 异常处理器**（5 项）：注册、404→RESOURCE_NOT_FOUND、405→METHOD_NOT_ALLOWED、包含 request_id、JSONResponse
+- **RequestValidationError 处理器**（5 项）：注册、VALIDATION_FAILED 码、→ 箭头格式化 loc、422 状态码、包含 request_id
+- **全局未处理异常**（5 项）：注册 Exception、500 状态码、不泄露内部错误、logger.exception 记录、包含 request_id
+- **响应结构一致性**（5 项）：4 处 success: False、4 处 error 对象、4 处 request_id 导入、4 处 JSONResponse、3 种异常类型导入
+
+后端总计 5264 测试
+
+---
+
 ## 2026-05-04（第八百二十二轮·自动循环）
 
 ### 安全加固：后端 logout token 失效机制验证测试（25 项）
