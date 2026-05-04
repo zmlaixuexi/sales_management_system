@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-05-04（第八百零八轮·自动循环）
+
+### 安全加固：后端速率限制运行时验证测试（25 项）
+
+覆盖 5 个维度：
+- **中间件注册**（5 项）：main.py 调用 add_rate_limit、正确导入、注册在路由之后、RateLimitMiddleware 类存在、读取 settings 配置
+- **429 响应结构**（5 项）：状态码 429、错误码 RATE_LIMIT_EXCEEDED、success: false、中文消息、使用 JSONResponse
+- **速率限制头部**（5 项）：成功响应有 X-RateLimit-Limit/Remaining、使用 max(0,...) 防负数、429 响应也包含头部、429 Remaining 为 0
+- **非 API 路径豁免**（5 项）：仅限 /api/ 路径、健康检查/指标/上传不受限、基于 IP 跟踪
+- **配置控制**（5 项）：RATE_LIMIT_MAX/WINDOW 配置存在、默认值 1000/60、设为 0 可禁用
+
+---
+
 ## 2026-05-04（第八百零七轮·自动循环）
 
 ### 部署体验：前端构建与环境变量配置验证测试（25 项）
