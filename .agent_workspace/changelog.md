@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百四十六轮·自动循环）
+
+### 代码质量：后端 Pydantic Schema 字段约束边界验证测试（25 项）
+- 新增 `backend/tests/test_schema_field_constraints.py`
+- 验证文本字段约束：name max_length、remark max_length<=500、sku max_length、email/phone max_length、Create schema min_length
+- 验证数值字段边界：stock_quantity ge=0、quantity gt=0、价格上限常量、sort_weight 对称边界、quantity_change 对称边界
+- 验证列表长度约束：items min_length/max_length、role_ids max_length、payment_method Literal、无界列表检查
+- 验证密码与认证字段约束：password min_length>=6/max_length>=50、username 长度约束、LoginRequest min_length=1、refresh_token max_length
+- 验证字段验证器覆盖：sanitize_text 文本清洗、UUID 格式验证、价格非负验证、邮箱格式验证、手机号格式验证
+- 后端测试总计：5688 项（新增 25 项）
+
 ## 2026-05-04（第八百四十五轮·自动循环）
 
 ### 代码质量：后端模型默认值与数据库列默认对齐验证测试（25 项）
