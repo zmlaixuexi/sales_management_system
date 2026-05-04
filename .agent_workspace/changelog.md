@@ -1,6 +1,15 @@
 # Changelog
 
-## 2026-05-04（第七百六十七轮·自动循环）
+## 2026-05-04（第七百六十八轮·自动循环）
+
+### 需求符合性：OpenAPI tag 与路由模块覆盖验证测试（16 项覆盖 tag 双向一致性、模块路由存在性、OpenAPI 结构）+ 补充缺失的「角色管理」和「健康检查」tag
+
+- 新增 `backend/tests/test_openapi_tag_coverage.py`
+- 修复 `backend/app/main.py`：OPENAPI_TAGS 补充缺失的「角色管理」和「健康检查」tag
+- tag 覆盖（4 项）：路由 tag 都在 OPENAPI_TAGS 中、OPENAPI_TAGS 都被使用、所有 tag 有描述、关键模块 tag 存在
+- 路由模块（8 项）：auth/roles/inventory/exports/files/audit-logs/health/version 路由存在
+- OpenAPI 结构（4 项）：版本 3.x、info 正确、securitySchemes 存在、所有路径在 /api/v1/ 下
+- 测试总计：后端 3930 + 前端 1221 = **5151**
 
 ### 安全加固：用户名/角色/权限唯一约束回归测试（9 项覆盖用户名重复拒绝、模型层 unique/index 约束、大小写敏感性）
 
