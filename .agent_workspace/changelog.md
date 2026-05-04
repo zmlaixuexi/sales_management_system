@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百四十五轮·自动循环）
+
+### 代码质量：后端模型默认值与数据库列默认对齐验证测试（25 项）
+- 新增 `backend/tests/test_model_db_default_alignment.py`
+- 验证状态字段默认值：Product status="active"、SalesOrder status="draft"、Payment status="normal"、String 类型、长度约束
+- 验证布尔字段默认值：User is_active=True/is_superuser=False、ProductImage is_primary=False、Boolean 类型、显式 default
+- 验证时间戳字段默认值：created_at server_default=func.now()、updated_at onupdate、deleted_at 可空无默认、DateTime 类型
+- 验证数值字段默认值：金额默认 0、Numeric 类型（非 Float）、stock 默认 0、折扣默认 0
+- 验证主键默认值：UUID 类型、uuid.uuid4 默认、primary_key 声明、无 server_default
+- 后端测试：5663 passed (+25)
+
 ## 2026-05-04（第八百四十四轮·自动循环）
 
 ### 文档完善：后端 API 端点 HTTP 状态码覆盖验证测试（25 项）
