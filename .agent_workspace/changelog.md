@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百二十八轮·自动循环）
+
+### 可观测性：前端 API 错误处理与重试逻辑验证测试（25 项）
+- 新增 `frontend/src/__tests__/frontend-api-error-retry.test.ts`
+- 验证 apiClient 配置（baseURL 环境变量回退、15 秒超时、Bearer token + X-Request-ID）
+- 验证 429 自动重试（retry-after 上限 5 秒）和 401 刷新流程（refresh_token POST body、重试、防重复）
+- 验证统一错误提示覆盖 429/403/404/500/网络断开
+- 验证 request.ts 导出 6 个请求函数、upload multipart、downloadCsv blob + JSON 错误处理
+- 验证 usePaginatedList loading/error 状态管理和 useSubmit locked ref 防重复提交
+- 前端测试：1619 → 1644（+25），总计 6957 tests
+
 ## 2026-05-04（第八百二十七轮·自动循环）
 
 ### 安全加固：前端 localStorage token 存储安全验证测试（25 项）
