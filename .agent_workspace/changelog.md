@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-04（第七百六十五轮·自动循环）
+
+### 需求符合性：后端分页参数默认值运行时验证测试（18 项覆盖 3 端点默认 page/page_size、自定义值、边界拒绝、响应结构）
+
+- 新增 `backend/tests/test_pagination_defaults.py`
+- 默认值验证（6 项）：products/customers/users 默认 page=1, page_size=20
+- 自定义值和边界（8 项）：page=2、page_size=5/100、page_size=101/0/page=-1/10001 拒绝
+- 响应结构（4 项）：items 存在且为列表、total 存在且非负
+- 测试总计：后端 3885 + 前端 1221 = **5106**
+
 ## 2026-05-04（第七百六十四轮·自动循环）
 
 ### 安全加固：request_id 一致性测试（12 项覆盖 X-Request-ID 响应头、透传、UUID 格式、响应体一致性）
