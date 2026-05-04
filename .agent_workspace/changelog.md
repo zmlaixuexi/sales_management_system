@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-05-04（第七百七十九轮·自动循环）
+
+### 部署体验：nginx 配置与 Docker 镜像构建参数一致性验证测试（70 项覆盖 nginx/Dockerfile/Prometheus/部署脚本）
+
+- 新增 `backend/tests/test_deploy_infra_structure.py`
+- nginx upstream（2 项）：backend:8000、upstream 块定义
+- nginx 安全头（8 项）：X-Content-Type-Options/X-Frame-Options/XSS-Protection/Referrer-Policy/Permissions-Policy/CSP/server_tokens_off
+- nginx 代理（10 项）：api/uploads/health/metrics 代理路径、proxy_set_header 完整性
+- nginx 前端（7 项）：SPA fallback、根目录、gzip、缓存、hidden files、client_max_body_size
+- nginx 监听（3 项）：80 端口、HTTPS 模板、TLS 1.2/1.3
+- 后端 Dockerfile（20 项）：多阶段构建、python:3.13-slim、gcc/libpq-dev/libpq5、COPY --from=builder、appuser 非 root、EXPOSE 8000、HEALTHCHECK 配置、uvicorn CMD、apt 清理、uploads 目录
+- 前端 Dockerfile（8 项）：多阶段构建、node alpine、npm ci、VITE_API_BASE_URL、dist 复制、第二阶段最小化
+- 前端 dev Dockerfile（4 项）：node alpine、5173 端口、dev server、host 0.0.0.0
+- Prometheus（5 项）：scrape interval、job name、metrics path、target、evaluation interval
+- 部署脚本（5 项）：manage.sh/backup.sh/restore.sh/rollback.sh/pre-deploy-check.sh 存在性
+- 后端测试 4218 → 4288（+70），总测试 5458 → 5528
+
 ## 2026-05-04（第七百七十八轮·自动循环）
 
 ### 代码质量：后端 API 路由注册与鉴权覆盖静态验证测试（42 项覆盖路由注册、前缀、tag、HTTP 方法、端点路径）
