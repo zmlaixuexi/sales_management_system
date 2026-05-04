@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-05-04（第八百一十六轮·自动循环）
+
+### 代码质量：前端 API 函数返回类型标注完整性验证测试（25 项）
+
+覆盖 5 个维度：
+- **request 封装类型签名**（5 项）：get/post/put/del/upload 泛型 T、Promise<ApiResponse<T>> 返回、ApiResponse/PaginatedData/ApiError 类型定义完整
+- **API 函数泛型标注**（5 项）：fetchProducts PagedData<Product>、fetchOrders PagedData<Order>、详情类型标注、报表具体类型、create/update 实体类型
+- **接口导出完整性**（5 项）：Product/ProductDetail/ProductFormValues、Order/OrderDetail/OrderFormValues、auth 三接口、报表所有类型、async function 导出模式
+- **分页函数一致性**（5 项）：PaginatedData 泛型统一、page? 参数、从 request 导入、从 @/types 导入、ProductListParams 完整参数
+- **HTTP 方法一致性**（5 项）：create 用 post、update 用 put、delete 用 del、动作端点用 post、业务模块不直接引用 apiClient
+
+前端总计 1494 测试
+
+---
+
 ## 2026-05-04（第八百一十五轮·自动循环）
 
 ### 文档完善：README 与项目文档完整性验证测试（25 项）
