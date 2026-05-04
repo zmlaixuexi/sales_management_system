@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第七百六十七轮·自动循环）
+
+### 安全加固：用户名/角色/权限唯一约束回归测试（9 项覆盖用户名重复拒绝、模型层 unique/index 约束、大小写敏感性）
+
+- 新增 `backend/tests/test_unique_constraint_regression.py`
+- 用户名唯一（4 项）：重复用户名拒绝 400+VALIDATION_FAILED、新用户名接受、大小写敏感性、模型层 unique=True
+- 角色唯一（1 项）：Role.name unique=True
+- 权限唯一（1 项）：Permission.code unique=True
+- 数据库完整性（3 项）：username index、permission.code index、role.name not nullable
+- 测试总计：后端 3914 + 前端 1221 = **5135**
+
 ## 2026-05-04（第七百六十六轮·自动循环）
 
 ### 部署体验：Docker 健康检查配置一致性测试（20 项覆盖 Dockerfile/dev/prod compose 健康检查与 /health 端点对齐）
