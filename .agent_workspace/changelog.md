@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-05-04（第七百七十八轮·自动循环）
+
+### 代码质量：后端 API 路由注册与鉴权覆盖静态验证测试（42 项覆盖路由注册、前缀、tag、HTTP 方法、端点路径）
+
+- 新增 `backend/tests/test_api_route_registration.py`
+- 路由注册（3 项）：13 个模块全部在 router.py 中注册、include_router 调用数匹配
+- 前缀一致性（1 项）：13 个模块的 prefix 参数正确性
+- Tag 对齐（14 项）：13 个模块 tag 与 main.py OPENAPI_TAGS 一致、所有 tag 在 OPENAPI_TAGS 中有定义
+- HTTP 方法（12 项）：各模块拥有预期的 HTTP 方法集合
+- 端点路径（12 项）：关键端点路径存在性验证（health/version、auth/login/refresh/logout/me、products CRUD、customers CRUD 等）
+- 统计与约束（2 项）：端点总数 ≥55、不使用 PATCH 方法
+- main.py 挂载（8 项）：api_v1 前缀、CORS/RequestID/RequestLog/SecurityHeaders/BodyLimit 中间件、Prometheus、静态文件
+- 后端测试 4176 → 4218（+42），总测试 5416 → 5458
+
 ## 2026-05-04（第七百七十七轮·自动循环）
 
 ### 需求符合性：后端审计日志 action 覆盖率与命名规范验证测试（62 项覆盖命名规范、资源类型、敏感字段、模型约束、CRUD 完整性）
