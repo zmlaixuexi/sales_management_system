@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-05-04（第八百一十三轮·自动循环）
+
+### 代码质量：后端 Schema 验证器覆盖完整性验证测试（25 项）
+
+覆盖 5 个维度：
+- **文本字段清洗覆盖**（5 项）：客户/商品/订单/收款 remark 清洗、sanitize_text 调用 strip_html + strip_control_chars
+- **UUID 外键验证覆盖**（5 项）：订单 product_id/customer_id、客户 owner_user_id、商品 category_id、库存 product_id 均有 UUID 格式校验
+- **金额/价格验证逻辑**（5 项）：商品 sale_price/cost_price Decimal 验证、负数拒绝、上限约束、收款 amount 正数验证
+- **密码强度与邮箱/手机验证**（5 项）：UserCreate/ChangePassword 密码强度、role_ids UUID 校验、客户邮箱/手机格式正则
+- **Create/Update 验证器一致性**（5 项）：商品价格、客户清洗、订单 remark、客户邮箱、用户 role_ids 在 Create/Update 中均有验证
+
+后端总计 5114 测试
+
+---
+
 ## 2026-05-04（第八百一十二轮·自动循环）
 
 ### 可观测性：后端请求日志中间件验证测试（25 项）
