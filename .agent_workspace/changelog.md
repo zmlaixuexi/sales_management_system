@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-05-04（第七百九十四轮·自动循环）
+
+### 代码质量：后端模型关系与外键约束一致性验证测试（36 项）
+
+新增 `backend/tests/test_model_fk_consistency.py`，验证 SQLAlchemy 2.x 模型：外键引用完整性（Customer/Product/SalesOrder/SalesOrderItem/Payment/AuditLog 的 FK 引用正确表列）、back_populates 双向配对（Product↔ProductImage、SalesOrder↔SalesOrderItem、SalesOrder↔Payment、User↔Role M2M、Role↔Permission M2M）、级联删除（ORM cascade + DB ondelete）、唯一约束（username/role.name/permission.code/sku/order_no）、索引覆盖、关联表 FK 与索引、模型注册。全部 36 项通过，后端测试 4797。
+
 ## 2026-05-04（第七百九十三轮·自动循环）
 
 ### 代码质量：前端 TypeScript 类型定义与 API 响应类型一致性验证测试（38 项）
