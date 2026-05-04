@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第七百六十六轮·自动循环）
+
+### 部署体验：Docker 健康检查配置一致性测试（20 项覆盖 Dockerfile/dev/prod compose 健康检查与 /health 端点对齐）
+
+- 新增 `backend/tests/test_docker_health_consistency.py`
+- Dockerfile（6 项）：存在、HEALTHCHECK 指令、使用 /health 端点、检查 database=ok、参数（15s/5s/3）、暴露 8000
+- dev compose（3 项）：存在、backend 健康检查使用 /health、postgres 使用 pg_isready
+- prod compose（6 项）：存在、backend 健康检查、检查 database、postgres pg_isready、nginx wget、start_period 30s
+- 端点对齐（5 项）：200 响应、database 字段存在、Dockerfile 解析逻辑匹配、路径匹配、dockerignore 排除测试
+- 测试总计：后端 3905 + 前端 1221 = **5126**
+
 ## 2026-05-04（第七百六十五轮·自动循环）
 
 ### 需求符合性：后端分页参数默认值运行时验证测试（18 项覆盖 3 端点默认 page/page_size、自定义值、边界拒绝、响应结构）
