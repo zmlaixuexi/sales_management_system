@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-05-04（第八百一十八轮·自动循环）
+
+### 可观测性：前端错误边界与全局异常处理验证测试（25 项）
+
+覆盖 5 个维度：
+- **ErrorBoundary 组件逻辑**（5 项）：class 组件 getDerivedStateFromError、State 接口、Result 组件+重试/首页按钮、handleReload 重置、Props 接口
+- **路由感知重置**（5 项）：useLocation pathname resetKey、componentDidUpdate 检测变化、函数组件包装器、resetKey 传递、错误信息展示
+- **全局 HTTP 错误拦截**（5 项）：429/403/404/500 全覆盖、中文提示、网络错误独立提示、_toastDisplayed 标记、error.message/message 字段提取
+- **401 刷新重试逻辑**（5 项）：refresh_token 刷新、成功更新 localStorage+重试、失败清除 token+跳转、429 自动重试、_retry 防循环
+- **应用顶层包裹结构**（5 项）：StrictMode、ConfigProvider 中文、ErrorBoundary 路由顶层、createBrowserRouter、downloadCsv blob 错误处理
+
+前端总计 1544 测试
+
+---
+
 ## 2026-05-04（第八百一十七轮·自动循环）
 
 ### 代码质量：前端路由懒加载与代码拆分验证测试（25 项）
