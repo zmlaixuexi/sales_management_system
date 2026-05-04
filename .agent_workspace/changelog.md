@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百三十三轮·自动循环）
+
+### 代码质量：前端路由守卫与菜单配置一致性验证测试（25 项）
+- 新增 `frontend/src/__tests__/frontend-route-guard-menu.test.ts`
+- 验证 ProtectedRoute 鉴权逻辑：无 token 重定向、有 token 加载用户、loading Spin
+- 验证菜单项 key 与路由 path 完全对齐（10 个菜单项）
+- 验证 /login 和 NotFound 不包裹 ProtectedRoute、业务路由受保护
+- 验证菜单图标/标签完整性、使用 antd 图标、useLocation 菜单高亮
+- 验证 lazyPage 动态加载、RouteObject 类型、ErrorBoundary 全局兜底
+- 前端测试：1669 → 1694（+25），总计 7082 tests
+
 ## 2026-05-04（第八百三十二轮·自动循环）
 
 ### 部署体验：后端 Dockerfile 多阶段构建配置验证测试（25 项）
