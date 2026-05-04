@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-05-04（第八百一十九轮·自动循环）
+
+### 部署体验：前端生产环境 Docker 镜像优化验证测试（25 项）
+
+覆盖 5 个维度：
+- **Dockerfile 多阶段构建**（5 项）：≥2 阶段、node alpine 构建、npm ci 确定性构建、npm run build、输出阶段 alpine 最小镜像
+- **构建参数**（5 项）：ARG VITE_API_BASE_URL、ENV 传递、先 COPY package 再 npm ci、输出复制到 nginx 路径、输出阶段无 dev 依赖
+- **dev Dockerfile**（5 项）：node alpine、npm install（非 ci）、EXPOSE 5173、CMD dev --host、单阶段
+- **docker-compose prod 前端服务**（5 项）：frontend-build 服务、使用 Dockerfile、传递 VITE_ARG、nginx 服务、frontend_dist 卷挂载
+- **构建脚本一致性**（5 项）：package.json build/dev/test/lint 脚本、Dockerfile npm run build 与 package.json 一致
+
+后端总计 5189 测试
+
+---
+
 ## 2026-05-04（第八百一十八轮·自动循环）
 
 ### 可观测性：前端错误边界与全局异常处理验证测试（25 项）
