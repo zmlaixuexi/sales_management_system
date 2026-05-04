@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百五十二轮·自动循环）
+
+### 代码质量：后端数据库会话管理与连接池配置验证测试（25 项）
+- 新增 `backend/tests/test_db_session_pool_config.py`
+- 验证引擎创建：create_engine、pool_size/max_overflow/pool_recycle 引用配置、pool_pre_ping=True
+- 验证会话工厂：sessionmaker、bind=engine、autocommit=False、autoflush=False、Base 继承 DeclarativeBase
+- 验证连接池默认值：pool_size 1-20、max_overflow 5-30、pool_recycle 300-7200s、PostgreSQL 协议、慢查询阈值 >= 50ms
+- 验证会话生命周期：get_db yield+close、SessionLocal 创建、safe_commit commit+rollback、engine.dispose 关闭、engine 导入 main
+- 验证慢查询监控：register_slow_query_listener 注册、before/after 事件、monotonic 计时、request_id 关联、SQL 截断
+- 后端测试总计：5838 项（新增 25 项）
+
 ## 2026-05-04（第八百五十一轮·自动循环）
 
 ### 代码质量：后端 API 路由模块注册与标签命名一致性验证测试（25 项）
