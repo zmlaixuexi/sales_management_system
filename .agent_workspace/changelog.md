@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百三十四轮·自动循环）
+
+### 代码质量：前端状态显示映射与后端状态常量对齐验证测试（25 项）
+- 新增 `frontend/src/__tests__/frontend-status-display-coverage.test.ts`
+- 验证商品状态（active/inactive/disabled）映射：color 语义、中文标签
+- 验证订单状态（draft/confirmed/cancelled/partially_paid/completed）映射完整性
+- 验证收款状态（normal/reversed）映射：green/red 颜色语义
+- 验证客户来源（5 种）和等级（4 种）映射：中文标签、VIP gold 颜色
+- 验证收款方式（cash/transfer/wechat/alipay/other）映射和导出命名
+- 前端测试：1694 → 1719（+25），总计 7107 tests
+
 ## 2026-05-04（第八百三十三轮·自动循环）
 
 ### 代码质量：前端路由守卫与菜单配置一致性验证测试（25 项）
