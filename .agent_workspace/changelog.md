@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-05-04（第八百一十轮·自动循环）
+
+### 代码质量：前端 Store 状态管理与 Hooks 逻辑验证测试（25 项）
+
+覆盖 5 个维度：
+- **auth store 状态定义**（5 项）：AuthState 接口有 token/user/loading 字段、四个方法、create 泛型、初始 token 从 localStorage 读取、初始 user 为 null
+- **auth store 业务逻辑**（5 项）：login 调用 authApi 并存储 token、login 后调用 fetchUser、loading 状态管理、logout 清除 localStorage 和 store、fetchUser 失败清除状态
+- **auth API 接口定义**（5 项）：三个接口（LoginParams/TokenData/CurrentUser）、TokenData 包含三个 token 字段、CurrentUser 包含 id/username/permissions、authApi 有 5 个方法、login 调用 POST
+- **usePaginatedList 逻辑**（5 项）：返回完整状态对象、fetchFnRef 避免闭包过期、返回控制方法、setKeyword 重置 page、isToastDisplayed 去重
+- **useDocumentTitle 逻辑**（5 项）：默认导出、可选 title 参数、useRef 保存之前标题、卸载时恢复、标题格式正确
+
+前端总计 1469 测试
+
+---
+
 ## 2026-05-04（第八百零九轮·自动循环）
 
 ### 部署体验：后端 Dockerfile 多阶段构建配置验证测试（25 项）
