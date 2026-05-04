@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-05-04（第七百七十轮·自动循环）
+
+### 异常路径：后端缺失必需字段 422 测试（33 项覆盖商品/客户/订单/收款/用户/登录端点缺失字段拒绝、空值拒绝、格式错误一致性验证）
+
+- 新增 `backend/tests/test_missing_required_fields.py`
+- 商品（4 项）：空 body、空 name、null name、纯空格 name
+- 客户（3 项）：空 body、空 name、null name
+- 订单（8 项）：空 body、缺 customer_id、缺 items、空 items、item 缺 product_id/quantity、零/负 quantity
+- 收款（5 项）：空 body、缺 amount/method、无效 method、null amount
+- 用户（5 项）：空 body、缺 username/password、短 username/password
+- 登录（5 项）：空 body、缺 username/password、空 username/password
+- 错误格式（3 项）：字段路径包含于 message、无堆栈泄露、多字段缺失仍 422
+- 后端测试 3943 → 3976（+33），总测试 5164 → 5197
+
 ## 2026-05-04（第七百六十九轮·自动循环）
 
 ### 异常路径：后端无效 UUID 格式输入测试（13 项覆盖商品/客户/订单/收款/用户端点无效 UUID 拒绝、错误结构验证、无堆栈泄露）
