@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-05-04（第七百八十一轮·自动循环）
+
+### 需求符合性：后端状态常量跨模块与前端一致性验证测试（20 项覆盖商品/订单/收款/客户/收款方式状态双向映射）
+
+- 新增 `backend/tests/test_status_constants_consistency.py`
+- 商品状态（2 项）：schema ProductStatus 与前端 productStatusMap 一致
+- 订单状态（5 项）：endpoint Literal 与前端 orderStatusMap、STATUS_LABELS、VALID_TRANSITIONS、export_service STATUS_MAP 一致
+- 收款状态（3 项）：payment_service 使用 normal、payments API 使用 reversed、前端 paymentStatusMap 一致
+- 客户来源（2 项）：schema CustomerSource 与前端 customerSourceMap 一致
+- 客户等级（2 项）：schema CustomerLevel 与前端 customerLevelMap 一致
+- 收款方式（2 项）：schema Literal 与前端 paymentMethodMap 一致
+- 标签完整性（4 项）：订单 labels 数量、商品/订单/收款前端标签存在性
+- 后端测试 4288 → 4308（+20），总测试 5558 → 5578
+
 ## 2026-05-04（第七百八十轮·自动循环）
 
 ### 代码质量：前端页面组件导出与路由引用一致性验证测试（30 项覆盖模块存在性、默认导出、路由对应、结构完整性）
