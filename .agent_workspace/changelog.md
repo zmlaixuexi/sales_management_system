@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百四十二轮·自动循环）
+
+### 代码质量：后端服务层异常处理模式一致性验证测试（25 项）
+- 新增 `backend/tests/test_service_exception_patterns.py`
+- 验证 HTTPException detail 结构：payment/file/csv_import 服务使用统一 code+message 格式
+- 验证错误码命名规范：PAYMENT_/ORDER_/FILE_/RESOURCE_/VALIDATION_ 前缀、UPPER_SNAKE_CASE
+- 验证 safe_commit 使用模式：服务层用 flush、路由层用 safe_commit、export_service 只读
+- 验证辅助异常函数：get_or_404/parse_uuid_or_400/require_permission/check_owner_or_forbid 规范
+- 验证服务层异常处理：payment 并发锁+finally 清理+行锁、file 魔数字节、csv UTF-8 编码
+- 后端测试：5588 passed (+25)
+
 ## 2026-05-04（第八百四十一轮·自动循环）
 
 ### 安全加固：后端密码策略与哈希配置静态验证测试（25 项）
