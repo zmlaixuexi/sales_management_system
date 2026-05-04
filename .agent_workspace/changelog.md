@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百三十轮·自动循环）
+
+### 安全加固：后端密码强度验证覆盖测试（25 项）
+- 新增 `backend/tests/test_password_strength_coverage.py`
+- 验证密码强度规则：大写字母、小写字母、数字、特殊字符四项检查
+- 验证 Schema 集成：UserCreate/ChangePasswordRequest 使用相同验证器、UserUpdate 无 password 字段
+- 验证哈希安全：bcrypt rounds=12、72 字节截断、UTF-8 编码、错误优雅处理
+- 验证密码修改流程：验证旧密码、哈希新密码、更新 password_changed_at
+- 验证黑名单覆盖：50+ 条目、大小写不敏感、数字/常见词/l33t 变体覆盖
+- 后端测试：5313 → 5338（+25），总计 7007 tests
+
 ## 2026-05-04（第八百二十九轮·自动循环）
 
 ### 代码质量：前端表单验证规则与后端 Schema 约束对齐验证测试（25 项）
