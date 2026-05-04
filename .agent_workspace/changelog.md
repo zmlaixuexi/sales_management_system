@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-05-04（第八百轮·自动循环）
+
+### 代码质量：前端权限码与后端权限定义对齐验证测试（25 项）
+
+新增 `frontend/src/__tests__/frontend-permission-auth-alignment.test.ts`，验证前后端权限系统一致性：前端 hasPermission 调用码在后端存在（product:view_cost、report:profit 均在后端 has_permission 调用和 seed.py 中定义，共提取 20+ 权限码）、CurrentUser 接口与后端 /auth/me 响应对齐（7 个字段 id/username/display_name/is_active/is_superuser/roles/permissions、roles 对象结构、permissions string[]、后端 get_me 端点存在、返回 is_superuser 和 permissions）、auth store 逻辑正确性（is_superuser 返回 true、permissions.includes 检查、logout 清除 token/user、login 存储 access_token/refresh_token、fetchUser 失败清除状态）、ProtectedRoute 鉴权行为（使用 useAuthStore、检查 token、无 token 重定向 /login、有 token 调用 fetchUser、加载中显示 Spin）、后端权限码覆盖完整性（商品 CRUD、订单 CRUD+确认取消、收款客户、报表库存审计）。全部 25 项通过，前端测试 1394。
+
 ## 2026-05-04（第七百九十九轮·自动循环）
 
 ### 代码质量：前端常量映射与后端枚举值对齐验证测试（24 项）
