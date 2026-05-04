@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百四十三轮·自动循环）
+
+### 可观测性：后端日志格式与结构化输出验证测试（25 项）
+- 新增 `backend/tests/test_logging_format.py`
+- 验证日志格式配置：JSON 格式器字段（timestamp/level/logger/message/app_env）、ISO 时间戳、文本格式、配置切换、stdout 输出
+- 验证请求 ID 中间件：ContextVar 定义、X-Request-ID 头读写、UUID 生成、main.py 注册
+- 验证结构化日志字段：请求日志 method/path/status/duration_ms/client_ip、慢查询 sql/duration_ms、user_id 关联
+- 验证日志级别与阈值：LOG_LEVEL 可配置、SLOW_REQUEST_THRESHOLD_MS >= 100ms、SLOW_SQL_THRESHOLD_MS >= 50ms、WARNING 级别、第三方库抑制
+- 验证异常处理器集成：错误响应含 request_id、中间件注册、慢查询监听器注册、API 路径过滤、X-Response-Time 头
+- 后端测试：5613 passed (+25)
+
 ## 2026-05-04（第八百四十二轮·自动循环）
 
 ### 代码质量：后端服务层异常处理模式一致性验证测试（25 项）
