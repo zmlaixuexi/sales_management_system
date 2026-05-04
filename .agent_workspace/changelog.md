@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百五十一轮·自动循环）
+
+### 代码质量：后端 API 路由模块注册与标签命名一致性验证测试（25 项）
+- 新增 `backend/tests/test_router_registration_consistency.py`
+- 验证路由注册完整性：所有 13 模块在 router.py 导入和注册、api_router 挂载 /api/v1、模块文件存在、include_router 数匹配
+- 验证前缀与标签：kebab-case 前缀、中文标签、每模块一个标签、/ 开头、health 无前缀
+- 验证 CRUD 端点覆盖：products/customers/orders 完整 CRUD、auth 有 login+refresh、核心模块最低端点数
+- 验证 responses 声明：核心模块 401 声明、中文描述、router 变量名、业务模块有文档字符串、无硬编码 /api/v1
+- 验证装饰器规范：导入 APIRouter、不直接用 app、{param} 格式、snake_case 路径参数、无重复路由
+- 后端测试总计：5813 项（新增 25 项）
+
 ## 2026-05-04（第八百五十轮·自动循环）
 
 ### 可观测性：后端 Prometheus 指标与业务计数器覆盖验证测试（25 项）
