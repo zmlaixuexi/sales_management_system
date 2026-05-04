@@ -40,4 +40,13 @@ export default defineConfig([
       'react-refresh/only-export-components': 'off',
     },
   },
+  {
+    files: ['src/__tests__/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-unused-vars': 'off',
+      'no-empty': ['error', { allowEmptyCatch: true }],
+      'no-useless-escape': 'off',
+      'prefer-const': 'off',
+    },
+  },
 ])

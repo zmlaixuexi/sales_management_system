@@ -11,6 +11,10 @@ export interface TokenData {
   token_type: string;
 }
 
+interface AuthErrorBody {
+  message?: string;
+}
+
 export interface CurrentUser {
   id: string;
   username: string;
@@ -23,7 +27,7 @@ export interface CurrentUser {
 
 export const authApi = {
   login: (params: LoginParams) =>
-    apiClient.post<{ success: boolean; data: TokenData }>('/auth/login', params),
+    apiClient.post<{ success: boolean; data: TokenData; error?: AuthErrorBody }>('/auth/login', params),
 
   refresh: (refreshToken: string) =>
     apiClient.post<{ success: boolean; data: TokenData }>('/auth/refresh', { refresh_token: refreshToken }),

@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     DB_POOL_SIZE: int = 5
     DB_MAX_OVERFLOW: int = 10
     DB_POOL_RECYCLE_SECONDS: int = 1800
+    DB_CONNECT_TIMEOUT_SECONDS: int = 3
     MAX_JSON_BODY_MB: int = 1
     HSTS_MAX_AGE: int = 31536000  # 1 年，仅在 HTTPS 生产环境生效
 
@@ -49,7 +50,7 @@ class Settings(BaseSettings):
             raise ValueError("必须为正整数")
         return v
 
-    @field_validator("DB_POOL_SIZE", "MAX_IMAGE_SIZE_MB", "MAX_CSV_IMPORT_ROWS")
+    @field_validator("DB_POOL_SIZE", "MAX_IMAGE_SIZE_MB", "MAX_CSV_IMPORT_ROWS", "DB_CONNECT_TIMEOUT_SECONDS")
     @classmethod
     def _strictly_positive(cls, v: int) -> int:
         if v <= 0:

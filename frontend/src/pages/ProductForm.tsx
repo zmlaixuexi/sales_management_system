@@ -3,7 +3,7 @@ import { Form, Input, InputNumber, Button, Card, Space, Upload, Image, message, 
 import { PlusOutlined, ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import { fetchProduct, createProduct, updateProduct, uploadImage } from '@/api/products'
-import type { ProductDetail } from '@/api/products'
+import type { ProductDetail, ProductFormValues } from '@/api/products'
 import { useSubmit } from '@/hooks/useSubmit'
 import { getApiErrorMessage, isToastDisplayed } from '@/utils'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
@@ -73,7 +73,7 @@ export default function ProductForm() {
     const status = values.status as string | undefined
     const sort_weight = values.sort_weight as number | undefined
     const remark = values.remark as string | undefined
-    const payload = {
+    const payload: Partial<ProductFormValues> = {
       name,
       cost_price: cost_price !== null && cost_price !== undefined ? String(cost_price) : undefined,
       sale_price: sale_price !== null && sale_price !== undefined ? String(sale_price) : undefined,
@@ -91,7 +91,15 @@ export default function ProductForm() {
         navigate('/products')
       }
     } else {
-      const res = await createProduct(payload)
+      if (payload.cost_price === undefined || payload.sale_price === undefined) {
+        throw new Error('请输入成本价和销售价')
+      }
+      const res = await createProduct({
+        ...payload,
+        name,
+        cost_price: payload.cost_price,
+        sale_price: payload.sale_price,
+      })
       if (res.success) {
         message.success('创建成功')
         navigate('/products')

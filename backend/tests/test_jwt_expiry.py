@@ -338,7 +338,7 @@ def test_e2e_refresh_token_returns_new_tokens():
     from app.models.user import User
 
     engine = create_engine("sqlite:///./test_jwt_refresh.db", connect_args={"check_same_thread": False})
-    TestSession = sessionmaker(bind=engine, autocommit=False, autoflush=False)  # noqa: N806
+    TestSession = sessionmaker(bind=engine, autocommit=False, autoflush=False)
     original = app.dependency_overrides.get(get_db)
 
     def _override():
@@ -400,7 +400,7 @@ def test_e2e_access_token_as_refresh_rejected():
     from app.models.user import User
 
     engine = create_engine("sqlite:///./test_jwt_access_as_refresh.db", connect_args={"check_same_thread": False})
-    TestSession = sessionmaker(bind=engine, autocommit=False, autoflush=False)  # noqa: N806
+    TestSession = sessionmaker(bind=engine, autocommit=False, autoflush=False)
     original = app.dependency_overrides.get(get_db)
 
     def _override():

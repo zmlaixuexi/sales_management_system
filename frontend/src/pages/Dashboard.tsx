@@ -63,7 +63,10 @@ export default function Dashboard() {
   // 计算趋势汇总
   const trendTotal = trend.reduce((s, t) => s + parseFloat(t.amount), 0)
   const maxDay = trend.length > 0
-    ? trend.reduce((max, t) => parseFloat(t.amount) > parseFloat(max.amount) ? t : max, trend[0])
+    ? trend.reduce(
+      (max, t) => parseFloat(t.amount) > parseFloat(max.amount) ? t : max,
+      trend[0] as SalesTrendItem,
+    )
     : null
 
   const rankingColumns: ColumnsType<ProductRankingItem> = [

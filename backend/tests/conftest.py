@@ -1,7 +1,22 @@
 """pytest 配置：确保速率限制测试最后运行 + 自动标记分类"""
 
+import pytest
+
 
 _prev_module = None
+
+
+@pytest.fixture(autouse=True)
+def _fast_health_database_probe(monkeypatch):
+    """测试环境默认跳过真实 PostgreSQL 探测，避免无数据库时健康检查阻塞。"""
+    from unittest.mock import MagicMock
+
+    from app.api.v1 import health as health_mod
+
+    mock_session = MagicMock()
+    mock_session.execute.return_value = None
+    mock_session.close.return_value = None
+    monkeypatch.setattr(health_mod, "SessionLocal", lambda: mock_session)
 
 
 def pytest_runtest_setup(item):

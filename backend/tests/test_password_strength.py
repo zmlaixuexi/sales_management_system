@@ -294,7 +294,7 @@ def test_e2e_change_password_weak_new_password_rejected():
     from app.models.user import User
 
     engine = create_engine("sqlite:///./test_pwd_str1.db", connect_args={"check_same_thread": False})
-    TestSession = sessionmaker(bind=engine, autocommit=False, autoflush=False)  # noqa: N806
+    TestSession = sessionmaker(bind=engine, autocommit=False, autoflush=False)
     original = app.dependency_overrides.get(get_db)
 
     def _override():
@@ -355,7 +355,7 @@ def test_e2e_change_password_missing_digit_rejected():
     from app.models.user import User
 
     engine = create_engine("sqlite:///./test_pwd_str2.db", connect_args={"check_same_thread": False})
-    TestSession = sessionmaker(bind=engine, autocommit=False, autoflush=False)  # noqa: N806
+    TestSession = sessionmaker(bind=engine, autocommit=False, autoflush=False)
     original = app.dependency_overrides.get(get_db)
 
     def _override():
@@ -416,7 +416,7 @@ def test_e2e_change_password_too_short_rejected():
     from app.models.user import User
 
     engine = create_engine("sqlite:///./test_pwd_str3.db", connect_args={"check_same_thread": False})
-    TestSession = sessionmaker(bind=engine, autocommit=False, autoflush=False)  # noqa: N806
+    TestSession = sessionmaker(bind=engine, autocommit=False, autoflush=False)
     original = app.dependency_overrides.get(get_db)
 
     def _override():

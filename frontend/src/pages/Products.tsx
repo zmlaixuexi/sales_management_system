@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
 import { fetchProducts, deleteProduct, disableProduct } from '@/api/products'
 import { getApiErrorMessage, isToastDisplayed } from '@/utils'
-import type { Product } from '@/api/products'
+import type { Product, ProductListParams } from '@/api/products'
 import { formatAmount, formatPercent } from '@/utils'
 import { downloadCsv } from '@/api/request'
 import apiClient from '@/api/client'
@@ -23,7 +23,16 @@ export default function ProductsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { data, total, loading, error, page, pageSize, keyword, setPage, setKeyword, onPageChange, refresh: loadData } = usePaginatedList<Product>(
-    async (params) => { const r = await fetchProducts(params); return r.data },
+    async (params) => {
+      const query: ProductListParams = {
+        page: typeof params.page === 'number' ? params.page : undefined,
+        page_size: typeof params.page_size === 'number' ? params.page_size : undefined,
+        keyword: typeof params.keyword === 'string' ? params.keyword : undefined,
+        status: typeof params.status === 'string' ? params.status : undefined,
+      }
+      const r = await fetchProducts(query)
+      return r.data
+    },
     { status: statusFilter },
     '加载商品列表失败',
   )

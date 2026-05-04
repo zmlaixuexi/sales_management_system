@@ -52,9 +52,9 @@ def _extract_validated_fields() -> list[str]:
 class TestConfigFields:
     """验证配置字段定义完整"""
 
-    def test_33_settings_defined(self):
+    def test_34_settings_defined(self):
         defined = _extract_defined_settings()
-        assert len(defined) == 33
+        assert len(defined) == 34
 
     def test_jwt_settings_complete(self):
         defined = _extract_defined_settings()
@@ -65,7 +65,7 @@ class TestConfigFields:
     def test_database_settings_complete(self):
         defined = _extract_defined_settings()
         for s in ["DATABASE_URL", "DATABASE_ASYNC_URL", "DB_POOL_SIZE",
-                   "DB_MAX_OVERFLOW", "DB_POOL_RECYCLE_SECONDS"]:
+                   "DB_MAX_OVERFLOW", "DB_POOL_RECYCLE_SECONDS", "DB_CONNECT_TIMEOUT_SECONDS"]:
             assert s in defined, f"缺少 {s}"
 
     def test_security_settings_complete(self):

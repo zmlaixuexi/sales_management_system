@@ -44,6 +44,7 @@ export interface ProductFormValues {
 }
 
 export interface ProductListParams {
+  [key: string]: string | number | undefined
   page?: number
   page_size?: number
   keyword?: string
