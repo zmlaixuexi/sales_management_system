@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-04（第八百三十七轮·自动循环）
+
+### 安全加固：后端 CSV 导出服务安全与注入防护验证测试（25 项）
+- 新增 `backend/tests/test_csv_export_security.py`
+- 验证 CSV 公式注入防护：sanitize_csv_cell 用于所有文本字段、_str 辅助函数调用
+- 验证 BOM 编码头：所有导出函数首个 chunk 包含 UTF-8 BOM
+- 验证 LIKE 注入防护：关键字过滤使用 escape_like、ilike 不区分大小写
+- 验证敏感字段可见性：can_view_cost 控制成本价/毛利输出、NO_COST 表头变体
+- 验证流式生成：yield 生成器、yield_per(500) 分批、active_query 过滤软删除
+
 ## 2026-05-04（第八百三十六轮·自动循环）
 
 ### 代码质量：后端 API 错误码全局唯一性与命名规范验证测试（25 项）
