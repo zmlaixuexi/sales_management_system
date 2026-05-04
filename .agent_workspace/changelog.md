@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-05-04（第七百七十七轮·自动循环）
+
+### 需求符合性：后端审计日志 action 覆盖率与命名规范验证测试（62 项覆盖命名规范、资源类型、敏感字段、模型约束、CRUD 完整性）
+
+- 新增 `backend/tests/test_audit_action_coverage.py`
+- 命名规范（13 项）：10 个模块 action 前缀一致性、snake_case 格式、无连续下划线、长度限制
+- 资源类型一致性（10 项）：product/customer/order/payment/user/role/auth/inventory/file/export 的 resource_type 对应正确
+- 审计服务导入（1 项）：所有修改类模块均导入 log_user_action 或 log_action
+- 敏感字段脱敏（10 项）：6 种敏感字段存在性、_mask_sensitive 函数行为（None/空/嵌套键匹配）
+- 模型约束（11 项）：6 个字段长度限制、action/created_at 非空、actor_id SET NULL 外键、复合索引
+- CRUD 完整性（15 项）：product/customer/order/payment/user/role/auth/inventory/file/export 的关键 action 存在性
+- 总数统计（2 项）：至少 26 种 action、跨模块无重复
+- 后端测试 4114 → 4176（+62），总测试 5354 → 5416
+
 ## 2026-05-04（第七百七十六轮·自动循环）
 
 ### 部署体验：docker-compose 配置一致性验证测试（33 项覆盖服务结构、端口、健康检查、环境变量、安全加固、网络）
