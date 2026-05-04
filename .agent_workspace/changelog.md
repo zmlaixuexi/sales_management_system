@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-05-04（第八百一十七轮·自动循环）
+
+### 代码质量：前端路由懒加载与代码拆分验证测试（25 项）
+
+覆盖 5 个维度：
+- **lazy/dynamic import 使用**（5 项）：react lazy/Suspense 导入、lazyPage 辅助函数、所有页面使用 lazyPage（≥17 个）、独立 import 代码拆分（≥10 页面）、AppLayout 静态导入
+- **Suspense fallback 配置**（5 项）：Loading 组件使用 Ant Design Spin 居中显示、Suspense 包裹 lazy 组件、ProtectedRoute loading 使用 Spin、main.tsx 使用 BrowserRouter
+- **manualChunks 分包策略**（5 项）：manualChunks 定义、vendor-react 拆分、vendor-antd 拆分、chunkSizeWarningLimit=1500、rollupOptions 输出配置
+- **ProtectedRoute 鉴权行为**（5 项）：无 token 重定向 /login、有 token 无 user 调 fetchUser、loading 期间 Spin、fetchUser 失败重定向、useAuthStore 认证状态
+- **路由结构完整性**（5 项）：根路径 ProtectedRoute+AppLayout、所有业务模块路由（10 个）、新建/编辑/详情子路由、通配符 NotFound、AppLayout Outlet
+
+前端总计 1519 测试
+
+---
+
 ## 2026-05-04（第八百一十六轮·自动循环）
 
 ### 代码质量：前端 API 函数返回类型标注完整性验证测试（25 项）
