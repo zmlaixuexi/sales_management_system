@@ -1,5 +1,33 @@
 # Changelog
 
+## 2026-05-04（第八百一十二轮·自动循环）
+
+### 可观测性：后端请求日志中间件验证测试（25 项）
+
+覆盖 5 个维度：
+- **请求日志中间件逻辑**（5 项）：仅记录 /api/ 路径、使用 time.monotonic 计时、慢请求 WARNING 级别、结构化 extra_fields、X-Response-Time 头
+- **请求 ID 中间件逻辑**（5 项）：无头时生成 UUID、ContextVar 存取、set 先于 call_next、响应头返回、默认空字符串
+- **结构化日志格式器**（5 项）：JSON 格式 ensure_ascii=False、标准字段、APP_ENV、request_id/user_id 关联、extra_fields 合并
+- **慢查询日志监听**（5 项）：SQLAlchemy 事件注册、可配阈值、长 SQL 截断、request_id 关联、条件注册
+- **中间件注册与配置约束**（5 项）：RequestID 先于 RequestLog、全部注册、LOG_LEVEL/LOG_FORMAT/SLOW_REQUEST_THRESHOLD_MS 可配
+
+后端总计 5089 测试
+
+---
+
+## 2026-05-04（第八百一十一轮·自动循环）
+
+### 安全加固：后端 CORS 配置与安全头验证测试（25 项）
+
+覆盖 5 个维度：
+- **CORS 中间件配置**（5 项）：CORSMiddleware 导入、origins 从 settings 读取并 split、allow_credentials=True、限制 HTTP 方法、限制请求头
+- **安全响应头完整性**（5 项）：X-Content-Type-Options: nosniff、X-Frame-Options: DENY、CSP 阻止所有来源、Referrer-Policy、Permissions-Policy
+- **HSTS 条件逻辑**（5 项）：仅 HTTPS 时添加、使用 settings.HSTS_MAX_AGE、includeSubDomains、默认 1 年、中间件已注册
+- **安全头不泄露信息**（5 项）：Cache-Control: no-store、Cross-Origin-Opener-Policy、Cross-Origin-Resource-Policy、X-XSS-Protection、CSP 阻止 framing
+- **配置项约束**（5 项）：CORS 禁止通配符、origin 必须以 http(s):// 开头、默认 localhost、HSTS 正整数、JWT 密钥最少 8 字符
+
+---
+
 ## 2026-05-04（第八百一十轮·自动循环）
 
 ### 代码质量：前端 Store 状态管理与 Hooks 逻辑验证测试（25 项）
