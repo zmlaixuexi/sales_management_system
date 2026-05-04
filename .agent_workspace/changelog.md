@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-04（第七百六十四轮·自动循环）
+
+### 安全加固：request_id 一致性测试（12 项覆盖 X-Request-ID 响应头、透传、UUID 格式、响应体一致性）
+
+- 新增 `backend/tests/test_request_id_consistency.py`
+- X-Request-ID 响应头（5 项）：health/products/401/404/422 都含头
+- 透传（3 项）：自定义 ID 保留、自动生成 UUID 格式、不同请求不同 ID
+- 响应体一致性（4 项）：health body 含 request_id、products body 含 request_id、error 至少有头、body 与 header 匹配
+- 测试总计：后端 3867 + 前端 1221 = **5088**
+
 ## 2026-05-04（第七百六十三轮·自动循环）
 
 ### 安全加固：JWT token type 区分验证测试（19 项覆盖 access/refresh 类型不可混用、共有 claim 一致性、token 格式和唯一性）
