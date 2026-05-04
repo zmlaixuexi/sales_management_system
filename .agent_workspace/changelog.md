@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-05-04（第七百八十五轮·自动循环）
+
+### 安全加固：认证安全回归测试（48 项覆盖密码哈希/账户锁定/登录流程/密码修改/Schema 集成）
+
+- 新增 `backend/tests/test_auth_security_regression.py`
+- 密码哈希静态验证（8 项）：bcrypt 使用、hashpw/checkpw 调用、rounds=12、72 字节截断双函数、异常捕获、返回类型、UTF-8 编码
+- 账户锁定配置（6 项）：阈值/窗口正值、IP 限流正值、账户阈值 ≤ IP 阈值、config 字段存在性
+- 登录流程完整性（10 项）：IP 限流检查、账户锁定检查、限流在凭证验证前、锁定在凭证验证前、失败记录、审计日志（成功/失败）、verify_password 使用、线程锁（IP/账户）
+- 密码强度 Schema 集成（6 项）：UserCreate/ChangePasswordRequest 密码验证器、min_length=6、max_length=100、Login 不验证强度
+- 修改密码安全性（5 项）：旧密码验证、新密码哈希、password_changed_at 更新、审计记录、refresh token 失效检查
+- 密码哈希运行时（7 项）：bcrypt $2b$ 格式、rounds=12、72 字节截断一致、Unicode 支持、不可逆、空密码哈希、确定性验证
+- 账户锁定运行时（6 项）：成功登录不锁定、错误密码 401、连续失败后 429 ACCOUNT_LOCKED、错误消息语义、不同用户独立、锁定后正确密码仍被拒
+
 ## 2026-05-04（第七百八十四轮·自动循环）
 
 ### 需求符合性：前端 TypeScript 接口与后端 Pydantic Schema 字段对齐验证测试（14 项覆盖商品/订单/客户/用户/角色/审计日志/收款/库存/报表）
