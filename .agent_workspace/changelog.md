@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百四十四轮·自动循环）
+
+### 文档完善：后端 API 端点 HTTP 状态码覆盖验证测试（25 项）
+- 新增 `backend/tests/test_http_status_codes.py`
+- 验证成功响应状态码：GET/POST/PUT/DELETE 全部使用 200、resp() 辅助函数
+- 验证客户端错误状态码：400 验证错误（>=5 模块）、401 认证、403 权限（>=3 模块）、404 资源不存在（>=4 模块）、409 冲突（>=2 模块）
+- 验证特殊状态码：422 验证处理器、429 速率限制、500 未处理异常、503 关闭状态、无重定向
+- 验证错误响应结构：HTTPException 处理器、RequestValidationError 处理器、SYSTEM_INTERNAL_ERROR、request_id、success=false
+- 验证状态码常量：auth/users 使用 status 模块、detail 使用 dict 结构、状态码范围 200-599、health 关闭状态
+- 后端测试：5638 passed (+25)
+
 ## 2026-05-04（第八百四十三轮·自动循环）
 
 ### 可观测性：后端日志格式与结构化输出验证测试（25 项）
