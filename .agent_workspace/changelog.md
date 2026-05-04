@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-05-04（第八百零四轮·自动循环）
+
+### 可观测性：前端 API 错误处理与重试逻辑验证测试（25 项）
+
+覆盖 5 个维度：
+- **client.ts 拦截器逻辑**（6 项）：请求附加 token/X-Request-ID、429 重试有上限保护、401 刷新 token、刷新失败清除并跳转
+- **统一错误提示覆盖**（5 项）：覆盖 429/403/404/500 状态码、两种错误格式、网络断连、_toastDisplayed 去重、401 不重复提示
+- **request.ts 辅助函数**（5 项）：6 个导出函数、使用 apiClient、downloadCsv 处理 JSON 错误、提取文件名、过滤空参数
+- **usePaginatedList 错误处理**（5 项）：loading/error 状态管理、isToastDisplayed 去重、fetchFn ref 避免闭包、参数传递、refresh 函数
+- **useSubmit 防重复提交**（4 项）：locked ref 防重复、锁获取释放、表单校验错误不弹提示、getApiErrorMessage 提取错误
+
+技术要点：
+- extractFnBody 使用大括号深度跟踪提取函数体
+- 前端总计 1419 测试
+
+---
+
 ## 2026-05-04（第八百零三轮·自动循环）
 
 ### 代码质量：后端服务层函数签名与 API 层调用一致性验证测试（25 项）
