@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第八百四十轮·自动循环）
+
+### 文档完善：后端 API 端点函数文档字符串覆盖验证测试（25 项）
+- 新增 `backend/tests/test_endpoint_docstring_coverage.py`
+- 验证端点函数 docstring 存在性：products/customers/orders/auth 及全部模块端点
+- 验证中文描述：products/orders/customers/auth docstring 包含中文字符
+- 验证路由模块级文档：核心业务模块有模块级 docstring
+- 验证文档内容语义：POST/PUT/DELETE/GET 端点 docstring 包含对应操作语义关键词
+- 验证 responses 声明覆盖：products/orders/auth 有 responses、变更模块有 400/401、所有模块有 tags
+- 后端测试：5538 passed (+25)
+
 ## 2026-05-04（第八百三十九轮·自动循环）
 
 ### 代码质量：后端 API 端点 Request 参数与审计日志一致性验证测试（25 项）
