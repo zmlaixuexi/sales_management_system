@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-04（第七百八十九轮·自动循环）
+
+### 安全加固：后端文件上传安全回归测试（32 项覆盖类型/文件名/大小/魔数字节/API 安全/错误码）
+
+- 新增 `backend/tests/test_file_upload_security.py`
+- 类型白名单（5 项）：仅 image/jpeg/png/webp、排除 gif/bmp/svg/exe/php/html、魔数字节覆盖所有允许类型、类型和扩展名数量一致、无 octet-stream
+- 文件名安全（6 项）：UUID 存储文件名、Path.suffix 提取扩展名、扩展名转小写、原始文件名不进入路径、按日期分目录、object_key 使用相对路径
+- 大小限制（5 项）：从配置读取 MAX_IMAGE_SIZE_MB、配置存在性、正值验证、上限 ≤50MB、MAX_SIZE_BYTES 与配置一致
+- 魔数字节（6 项）：空内容拒绝、JPEG/PNG/WebP 正确头部通过、JPEG 伪装 PNG 拒绝、随机二进制拒绝
+- API 安全（6 项）：上传需 product:create 权限、删除检查 owner/superuser、查询检查 owner/superuser、已绑定图片不可删除、上传/删除审计日志
+- 错误码（4 项）：FILE_INVALID_TYPE/FILE_TOO_LARGE/FILE_NOT_FOUND 一致性、FILE_ 前缀统一
+
 ## 2026-05-04（第七百八十八轮·自动循环）
 
 ### 需求符合性：后端 Pydantic Schema 字段约束与数据库模型列约束一致性验证测试（34 项）
