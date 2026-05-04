@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第七百六十三轮·自动循环）
+
+### 安全加固：JWT token type 区分验证测试（19 项覆盖 access/refresh 类型不可混用、共有 claim 一致性、token 格式和唯一性）
+
+- 新增 `backend/tests/test_jwt_type_distinction.py`
+- token 类型区分（5 项）：access type=access、refresh type=refresh、类型不同、access 不能用作 refresh、refresh 不是 access
+- claim 一致性（8 项）：iss/aud/sub 一致、jti 存在且不同、iat 存在、refresh 过期晚于 access、exp 存在
+- token 格式（6 项）：字符串类型、三段式 JWT 格式、多次生成 jti 唯一
+- 验证后端 refresh 端点检查 token_type == "refresh" 防止 access token 被混用
+- 测试总计：后端 3855 + 前端 1221 = **5076**
+
 ## 2026-05-04（第七百六十二轮·自动循环）
 
 ### 需求符合性：应用生命周期管理边界测试（17 项覆盖关闭状态转换 503/SHUTTING_DOWN、版本端点结构、健康检查响应字段完整性）
