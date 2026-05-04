@@ -76,6 +76,7 @@ async def lifespan(_app: FastAPI):
 OPENAPI_TAGS = [
     {"name": "认证", "description": "用户登录、令牌刷新、获取当前用户信息"},
     {"name": "用户管理", "description": "用户 CRUD、角色分配"},
+    {"name": "角色管理", "description": "角色 CRUD、权限分配"},
     {"name": "商品管理", "description": "商品 CRUD、批量导入、价格历史"},
     {"name": "客户管理", "description": "客户 CRUD、批量导入、归属转移"},
     {"name": "订单管理", "description": "订单 CRUD、确认/取消、库存联动"},
@@ -85,6 +86,7 @@ OPENAPI_TAGS = [
     {"name": "操作日志", "description": "操作审计日志查询"},
     {"name": "数据导出", "description": "CSV/Excel 数据导出"},
     {"name": "文件管理", "description": "文件上传"},
+    {"name": "健康检查", "description": "服务健康检查、版本信息"},
 ]
 
 app = FastAPI(
