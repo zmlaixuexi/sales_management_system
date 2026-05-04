@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-05-04（第八百零三轮·自动循环）
+
+### 代码质量：后端服务层函数签名与 API 层调用一致性验证测试（25 项）
+
+覆盖 5 个维度：
+- **服务模块公共 API**（5 项）：5 个服务模块存在、payment_service 有 register_payment/reset_payment_debounce、签名包含 db/order_id/data/current_user、file_service 有 upload_image/delete_file/cleanup_orphan_files、audit_service 有 4 个公共函数
+- **服务函数调用参数对齐**（5 项）：payments.py 和 orders.py 对 register_payment 的调用参数正确、files.py 对 upload_image/delete_file 的调用参数正确、log_user_action 位置参数数量正确
+- **导出服务调用完整性**（5 项）：4 个导出函数全部导入、export_products/orders 传入 can_view_cost、export_customers 传入 owner_user_id、export_payments 传入 sales_user_id
+- **审计服务使用覆盖**（5 项）：9 个写操作模块均导入审计服务、auth 模块使用 log_action、products/orders/customers 各至少 4 次日志记录
+- **API 层直接 DB 操作审计**（5 项）：payments list 和 reverse_payment 使用直接查询+行锁、audit_logs 直接查询、exports 不直接操作 DB、csv_import 在商品和客户模块使用
+
+技术要点：
+- `_extract_function_calls` 使用括号深度跟踪正确解析嵌套函数调用
+- `_count_positional_args` 统计位置参数数量验证调用签名一致性
+- 测试结果：25/25 通过，后端总计 4938 测试
+
+---
+
 ## 2026-05-04（第八百零二轮·自动循环）
 
 ### 代码质量：后端种子数据一致性验证测试（23 项）
