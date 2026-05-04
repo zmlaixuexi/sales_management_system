@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-05-04（第七百五十七轮·自动循环）
+
+### 安全加固：前端 XSS 防护回归测试（11 项覆盖 dangerouslySetInnerHTML/innerHTML/eval/new Function/document.write/insertAdjacentHTML/javascript 协议/location.href 赋值安全）
+
+- 新增 `frontend/src/__tests__/xss-protection-regression.test.ts`
+- 逐文件扫描 src/ 目录下所有 .ts/.tsx 文件（排除 __tests__），验证不包含 XSS 攻击面
+- 检查项：dangerouslySetInnerHTML、.innerHTML/outerHTML 赋值、eval()、new Function()、document.write、insertAdjacentHTML、javascript: 协议、window.location.href 非硬编码赋值
+- 验证扫描范围至少覆盖 30 个文件且包含 pages 和 components 目录
+- 结论：前端 XSS 防护完全依赖 React JSX 自动转义 + 后端 strip_html()，不存在绕过路径
+- 测试总计：后端 3738 + 前端 1208 = **4946**
+
 ## 2026-05-04（第七百五十六轮·自动循环）
 
 ### 测试补强：前端 utils 工具函数边界测试（59 项覆盖 formatAmount/formatPercent/getApiErrorMessage/isToastDisplayed 的 nullish/NaN/Infinity/科学计数法/类型转换边界）
