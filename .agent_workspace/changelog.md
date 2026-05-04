@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-05-04（第七百五十九轮·自动循环）
+
+### 安全加固：后端配置安全默认值回归测试（50 项覆盖 JWT/CORS/速率限制/请求体限制/文件上传/数据库连接池/账户锁定/HSTS/可观测性配置默认值和值域约束）
+
+- 新增 `backend/tests/test_config_security_defaults.py`
+- JWT（11 项）：algorithm/issuer/audience/expire 默认值、secret 最小长度和空值/空白/过短拒绝
+- CORS（7 项）：非通配符、协议前缀、非空、拒绝通配符/无协议/空、接受多值
+- 速率限制（7 项）：max/window 正值、默认值（1000/60）、拒绝负数、接受零和正值
+- 请求体限制（2 项）：正值、默认 1MB
+- 文件上传（5 项）：图片大小/CVS 大小/行数正值及默认值
+- 数据库连接池（4 项）：pool_size/max_overflow/pool_recycle 正值及默认值
+- 账户锁定（4 项）：LOGIN_FAIL_MAX/WINDOW、ACCOUNT_LOCK_MAX/WINDOW 正值
+- HSTS（2 项）：正值、默认 31536000
+- 可观测性（4 项）：slow_request/slow_sql 正值及默认值
+- 配置完整性（4 项）：singleton、全部字段存在、JWT 算法白名单、APP_ENV 默认值
+- 测试总计：后端 3806 + 前端 1208 = **5014**
+
 ## 2026-05-04（第七百五十八轮·自动循环）
 
 ### 安全加固：速率限制滑动窗口 _SlidingWindow 单元测试（18 项覆盖窗口计数、过期清理、边界条件、性能、幂等性）
