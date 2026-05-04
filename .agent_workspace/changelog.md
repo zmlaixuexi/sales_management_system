@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-05-04（第八百零七轮·自动循环）
+
+### 部署体验：前端构建与环境变量配置验证测试（25 项）
+
+覆盖 5 个维度：
+- **Vite 构建配置**（5 项）：react 插件、@ 路径别名、manualChunks 代码分割、API 代理转发、VITE_PROXY_TARGET 读取
+- **环境变量声明**（5 项）：.env.example 存在、包含 VITE_API_BASE_URL/VITE_PROXY_TARGET、源码使用 import.meta.env、有回退默认值
+- **TypeScript 配置**（5 项）：strict 模式、noUnusedLocals/Parameters、noUncheckedIndexedAccess、@ 路径别名一致、include 覆盖 src
+- **package.json 脚本**（5 项）：dev/build/lint/test 脚本、build 含 tsc 类型检查、ESM 模块系统、核心依赖完整、devDependencies 完整
+- **前端 Dockerfile 配置**（5 项）：Dockerfile 存在、多阶段构建、npm run build 指令、nginx 生产服务器、dev Dockerfile 存在
+
+前端总计 1444 测试
+
+---
+
 ## 2026-05-04（第八百零六轮·自动循环）
 
 ### 文档完善：后端 API 端点 OpenAPI 描述完整性验证测试（25 项）
