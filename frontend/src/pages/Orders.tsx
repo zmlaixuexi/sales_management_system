@@ -93,26 +93,26 @@ export default function OrdersPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-        <Space>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
+        <Space wrap>
           <Input
             placeholder="搜索订单号"
             prefix={<SearchOutlined />}
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            style={{ width: 240 }}
+            style={{ width: 240, maxWidth: '100%' }}
             allowClear
           />
           <Select
             placeholder="状态筛选"
             value={statusFilter}
             onChange={(v) => { setStatusFilter(v); setPage(1) }}
-            style={{ width: 120 }}
+            style={{ width: 120, minWidth: 100 }}
             allowClear
             options={Object.entries(statusMap).map(([value, { label }]) => ({ label, value }))}
           />
         </Space>
-        <Space>
+        <Space wrap>
           <Button icon={<DownloadOutlined />} onClick={() => downloadCsv('/exports/orders', { keyword: keyword || undefined, status: statusFilter })}>
             导出
           </Button>
@@ -126,6 +126,7 @@ export default function OrdersPage() {
         dataSource={data}
         rowKey="id"
         loading={loading}
+        scroll={{ x: 'max-content' }}
         locale={{ emptyText: error && !loading ? <span>加载失败，<a onClick={refresh}>重试</a></span> : loading ? '加载中...' : keyword || statusFilter ? '没有匹配的订单' : '暂无订单，点击"新建订单"添加' }}
         pagination={{
           current: page,

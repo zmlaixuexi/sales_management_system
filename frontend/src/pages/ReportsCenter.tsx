@@ -200,19 +200,19 @@ export default function ReportsCenter() {
             label: '销售概览',
             children: (
               <div>
-                <Row gutter={16} style={{ marginBottom: 16 }}>
-                  <Col span={6}>
+                <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+                  <Col xs={24} sm={12} md={6}>
                     <Card><Statistic title="销售总额" value={summary?.total_amount ? parseFloat(summary.total_amount) : 0} precision={2} prefix="¥" loading={loading === 'summary'} /></Card>
                   </Col>
-                  <Col span={6}>
+                  <Col xs={24} sm={12} md={6}>
                     <Card><Statistic title="订单数" value={summary?.order_count ?? 0} loading={loading === 'summary'} /></Card>
                   </Col>
                   {summary?.total_cost !== undefined && (
                     <>
-                      <Col span={6}>
+                      <Col xs={24} sm={12} md={6}>
                         <Card><Statistic title="总成本" value={parseFloat(summary.total_cost)} precision={2} prefix="¥" loading={loading === 'summary'} /></Card>
                       </Col>
-                      <Col span={6}>
+                      <Col xs={24} sm={12} md={6}>
                         <Card><Statistic title="毛利" value={parseFloat(summary.gross_profit)} precision={2} prefix="¥" loading={loading === 'summary'} /></Card>
                       </Col>
                     </>
@@ -226,6 +226,7 @@ export default function ReportsCenter() {
                     size="small"
                     loading={loading === 'trend'}
                     pagination={{ pageSize: 10 }}
+                    scroll={{ x: 400 }}
                     locale={{ emptyText: '暂无趋势数据' }}
                   />
                 </Card>

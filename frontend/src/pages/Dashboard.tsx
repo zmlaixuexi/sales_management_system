@@ -108,33 +108,42 @@ export default function Dashboard() {
       </div>
 
       <Spin spinning={loading}>
-        <Row gutter={16} style={{ marginBottom: 16 }}>
-          <Col span={6}>
-            <Card>
+        <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+          <Col xs={24} sm={12} md={6}>
+            <Card
+              style={{ background: 'linear-gradient(135deg, #e6f4ff 0%, #ffffff 100%)' }}
+              styles={{ body: { padding: '20px 24px' } }}
+            >
               <Statistic
                 title="销售总额"
-                prefix={<DollarOutlined />}
+                prefix={<DollarOutlined style={{ color: '#1677ff' }} />}
                 value={summary ? parseFloat(summary.total_amount) : 0}
                 precision={2}
                 suffix="元"
               />
             </Card>
           </Col>
-          <Col span={6}>
-            <Card>
+          <Col xs={24} sm={12} md={6}>
+            <Card
+              style={{ background: 'linear-gradient(135deg, #f6ffed 0%, #ffffff 100%)' }}
+              styles={{ body: { padding: '20px 24px' } }}
+            >
               <Statistic
                 title="订单数"
-                prefix={<ShoppingCartOutlined />}
+                prefix={<ShoppingCartOutlined style={{ color: '#52c41a' }} />}
                 value={summary?.order_count || 0}
                 suffix="单"
               />
             </Card>
           </Col>
-          <Col span={6}>
-            <Card>
+          <Col xs={24} sm={12} md={6}>
+            <Card
+              style={{ background: 'linear-gradient(135deg, #fff7e6 0%, #ffffff 100%)' }}
+              styles={{ body: { padding: '20px 24px' } }}
+            >
               <Statistic
                 title="毛利"
-                prefix={<RiseOutlined />}
+                prefix={<RiseOutlined style={{ color: summary && parseFloat(summary.gross_profit) >= 0 ? '#52c41a' : '#ff4d4f' }} />}
                 value={summary ? parseFloat(summary.gross_profit) : 0}
                 precision={2}
                 suffix="元"
@@ -143,8 +152,11 @@ export default function Dashboard() {
             </Card>
           </Col>
           {canViewProfit && (
-            <Col span={6}>
-              <Card>
+            <Col xs={24} sm={12} md={6}>
+              <Card
+                style={{ background: 'linear-gradient(135deg, #fff1f0 0%, #ffffff 100%)' }}
+                styles={{ body: { padding: '20px 24px' } }}
+              >
                 <Statistic
                   title="毛利率"
                   value={summary ? parseFloat(summary.gross_margin) : 0}
@@ -157,8 +169,8 @@ export default function Dashboard() {
           )}
         </Row>
 
-        <Row gutter={16} style={{ marginBottom: 16 }}>
-          <Col span={12}>
+        <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+          <Col xs={24} md={12}>
             <Card title="销售趋势" size="small">
               {trend.length === 0 ? (
                 <Empty description="暂无数据" />
@@ -211,7 +223,7 @@ export default function Dashboard() {
               )}
             </Card>
           </Col>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Card
               title={<span><AlertOutlined style={{ marginRight: 8, color: '#fa8c16' }} />库存预警（≤{warningThreshold ?? '—'}）</span>}
               size="small"

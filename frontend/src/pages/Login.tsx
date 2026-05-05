@@ -29,9 +29,20 @@ export default function Login() {
   }
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#f0f2f5' }}>
-      <Card style={{ width: 400 }}>
-        <Title level={3} style={{ textAlign: 'center', marginBottom: 24 }}>
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    }}>
+      <Card style={{
+        width: '90%',
+        maxWidth: 420,
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+        borderRadius: 12,
+      }}>
+        <Title level={3} style={{ textAlign: 'center', marginBottom: 24, color: '#1677ff' }}>
           销售管理系统
         </Title>
         <Form onFinish={onFinish} autoComplete="off" size="large">

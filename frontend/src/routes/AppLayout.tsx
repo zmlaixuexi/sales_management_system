@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Layout, Menu, Space, Typography } from 'antd'
+import { Layout, Menu, Space, Typography, Grid, Button } from 'antd'
 import {
   DashboardOutlined,
   ShoppingCartOutlined,
@@ -13,11 +13,14 @@ import {
   UserSwitchOutlined,
   InboxOutlined,
   SafetyOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
 } from '@ant-design/icons'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { authApi, type CurrentUser } from '@/api/auth'
 
 const { Text } = Typography
+const { useBreakpoint } = Grid
 
 const { Header, Sider, Content } = Layout
 
@@ -37,16 +40,23 @@ const menuItems = [
 export default function AppLayout() {
   const navigate = useNavigate()
   const location = useLocation()
+  const screens = useBreakpoint()
   const [user, setUser] = useState<CurrentUser | null>(null)
+  const [collapsed, setCollapsed] = useState(false)
 
+  // 小屏幕自动折叠侧边栏
   useEffect(() => {
-    authApi.getMe().then((res) => {
-      if (res.data?.success) setUser(res.data.data)
-    }).catch(() => {})
-  }, [])
+    if (!screens.md) {
+      setCollapsed(true)
+    }
+  }, [screens.md])
 
   const handleMenuClick = ({ key }: { key: string }) => {
     navigate(key)
+    // 小屏幕点击菜单后自动收起侧边栏
+    if (!screens.md) {
+      setCollapsed(true)
+    }
   }
 
   const handleLogout = () => {
@@ -61,9 +71,26 @@ export default function AppLayout() {
   const displayName = user?.display_name || user?.username || ''
   const roleLabel = user?.roles?.[0]?.display_name || ''
 
+  useEffect(() => {
+    authApi.getMe().then((res) => {
+      if (res.data?.success) setUser(res.data.data)
+    }).catch(() => {})
+  }, [])
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider theme="light" width={200}>
+      <Sider
+        theme="light"
+        width={200}
+        breakpoint="lg"
+        collapsedWidth={0}
+        collapsed={collapsed}
+        trigger={null}
+        onBreakpoint={(broken) => {
+          if (broken) setCollapsed(true)
+        }}
+        style={{ position: screens.md ? 'relative' : 'fixed', zIndex: screens.md ? undefined : 100, height: screens.md ? undefined : '100vh' }}
+      >
         <div style={{ height: 48, margin: 16, textAlign: 'center', fontSize: 18, fontWeight: 600 }}>
           销售管理系统
         </div>
@@ -76,6 +103,15 @@ export default function AppLayout() {
       </Sider>
       <Layout>
         <Header style={{ background: '#fff', padding: '0 24px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 16 }}>
+          {!screens.md && (
+            <Button
+              type="text"
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              onClick={() => setCollapsed(!collapsed)}
+              style={{ fontSize: 16, marginRight: 'auto' }}
+            />
+          )}
+          <div style={{ flex: 1 }} />
           {user && (
             <Space>
               <UserOutlined />
@@ -85,7 +121,7 @@ export default function AppLayout() {
           )}
           <LogoutOutlined style={{ fontSize: 18, cursor: 'pointer' }} onClick={handleLogout} title="退出登录" />
         </Header>
-        <Content style={{ margin: 24, padding: 24, background: '#fff', borderRadius: 8 }}>
+        <Content style={{ margin: screens.md ? 24 : 16, padding: screens.md ? 24 : 16, background: '#fff', borderRadius: 8 }}>
           <Outlet />
         </Content>
       </Layout>

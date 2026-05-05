@@ -240,7 +240,7 @@ export default function OrderDetail() {
       </div>
 
       <Card title={`订单 ${order.order_no}`} loading={loading}>
-        <Descriptions column={3} size="small" bordered>
+        <Descriptions column={{ xs: 1, sm: 2, md: 3 }} size="small" bordered>
           <Descriptions.Item label="订单号">{order.order_no}</Descriptions.Item>
           <Descriptions.Item label="状态">
             <Tag color={statusInfo.color}>{statusInfo.label}</Tag>
@@ -270,6 +270,7 @@ export default function OrderDetail() {
           rowKey="id"
           size="small"
           pagination={false}
+          scroll={{ x: 500 }}
           locale={{ emptyText: '暂无订单明细' }}
           footer={() => (
             <div style={{ textAlign: 'right', fontWeight: 600 }}>
@@ -287,6 +288,7 @@ export default function OrderDetail() {
             rowKey="id"
             size="small"
             pagination={false}
+            scroll={{ x: 400 }}
           />
         </Card>
       )}

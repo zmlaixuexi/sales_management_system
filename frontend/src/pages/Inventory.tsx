@@ -75,7 +75,7 @@ export default function InventoryPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
         <h2 style={{ margin: 0 }}>库存流水</h2>
         <Space>
           <span style={{ color: '#888' }}>共 {total} 条记录</span>
@@ -86,6 +86,7 @@ export default function InventoryPage() {
         dataSource={data}
         rowKey="id"
         loading={loading}
+        scroll={{ x: 'max-content' }}
         locale={{ emptyText: error && !loading ? <span>加载失败，<a onClick={refresh}>重试</a></span> : loading ? '加载中...' : '暂无库存变动记录' }}
         pagination={{
           current: page,

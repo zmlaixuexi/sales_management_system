@@ -18,6 +18,8 @@ vi.mock('antd', () => {
   Layout.Content = Content
   return {
     Layout,
+    Grid: { useBreakpoint: () => ({ md: true }) },
+    Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
     Menu: ({ items, onClick, selectedKeys }: any) => (
       <nav data-testid="menu" data-selected={selectedKeys?.[0]}>
         {items?.map((item: any) => (
@@ -45,6 +47,8 @@ vi.mock('@ant-design/icons', () => ({
   UserSwitchOutlined: () => null,
   InboxOutlined: () => null,
   SafetyOutlined: () => null,
+  MenuFoldOutlined: () => null,
+  MenuUnfoldOutlined: () => null,
 }))
 
 import { authApi } from '@/api/auth'

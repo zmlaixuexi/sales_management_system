@@ -101,26 +101,26 @@ export default function CustomersPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-        <Space>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
+        <Space wrap>
           <Input
             placeholder="搜索客户名称/电话"
             prefix={<SearchOutlined />}
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            style={{ width: 240 }}
+            style={{ width: 240, maxWidth: '100%' }}
             allowClear
           />
           <Select
             placeholder="来源筛选"
             value={sourceFilter}
             onChange={(v) => { setSourceFilter(v); setPage(1) }}
-            style={{ width: 120 }}
+            style={{ width: 120, minWidth: 100 }}
             allowClear
             options={Object.entries(sourceMap).map(([value, label]) => ({ value, label }))}
           />
         </Space>
-        <Space>
+        <Space wrap>
           <Button icon={<UploadOutlined />} onClick={() => fileInputRef.current?.click()}>
             导入
           </Button>
@@ -138,6 +138,7 @@ export default function CustomersPage() {
         dataSource={data}
         rowKey="id"
         loading={loading}
+        scroll={{ x: 'max-content' }}
         locale={{ emptyText: error && !loading ? <span>加载失败，<a onClick={loadData}>重试</a></span> : loading ? '加载中...' : keyword || sourceFilter ? '没有匹配的客户' : '暂无客户，点击"新增客户"添加' }}
         pagination={{
           current: page,

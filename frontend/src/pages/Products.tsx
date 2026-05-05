@@ -142,21 +142,21 @@ export default function ProductsPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-        <Space>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
+        <Space wrap>
           <Input
             placeholder="搜索商品名称"
             prefix={<SearchOutlined />}
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            style={{ width: 240 }}
+            style={{ width: 240, maxWidth: '100%' }}
             allowClear
           />
           <Select
             placeholder="状态筛选"
             value={statusFilter}
             onChange={(v) => { setStatusFilter(v); setPage(1) }}
-            style={{ width: 120 }}
+            style={{ width: 120, minWidth: 100 }}
             allowClear
             options={[
               { label: '上架', value: 'active' },
@@ -165,7 +165,7 @@ export default function ProductsPage() {
             ]}
           />
         </Space>
-        <Space>
+        <Space wrap>
           <Button icon={<UploadOutlined />} onClick={() => fileInputRef.current?.click()}>
             导入
           </Button>
@@ -183,6 +183,7 @@ export default function ProductsPage() {
         dataSource={data}
         rowKey="id"
         loading={loading}
+        scroll={{ x: 'max-content' }}
         locale={{ emptyText: error && !loading ? <span>加载失败，<a onClick={loadData}>重试</a></span> : loading ? '加载中...' : keyword || statusFilter ? '没有匹配的商品' : '暂无商品，点击"新增商品"添加' }}
         pagination={{
           current: page,

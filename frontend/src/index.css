@@ -9,3 +9,25 @@ body {
 #root {
   min-height: 100vh;
 }
+
+/* 更精致的滚动条 */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #d9d9d9; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #bfbfbf; }
+
+/* 卡片悬停阴影过渡 */
+.ant-card { transition: box-shadow 0.3s; }
+.ant-card:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09); }
+
+/* 统计数值排版优化 */
+.ant-statistic-title { color: rgba(0, 0, 0, 0.45) !important; font-size: 14px !important; }
+.ant-statistic-content { font-weight: 600 !important; }
+
+/* 标签圆角 */
+.ant-tag { border-radius: 4px; }
+
+/* 内容区基础间距 */
+.site-layout-content {
+  padding: 24px;
+  min-height: calc(100vh - 64px - 48px);
+}

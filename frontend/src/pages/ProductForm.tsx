@@ -118,7 +118,7 @@ export default function ProductForm() {
           layout="vertical"
           onFinish={handleSubmit}
           initialValues={{ status: 'active', stock_quantity: 0, sort_weight: 0 }}
-          style={{ maxWidth: 600 }}
+          style={{ maxWidth: 600, width: '100%' }}
         >
           <Form.Item label="商品名称" name="name" rules={[{ required: true, message: '请输入商品名称' }]}>
             <Input placeholder="请输入商品名称" maxLength={100} />
@@ -141,7 +141,7 @@ export default function ProductForm() {
             </Space>
           </Form.Item>
 
-          <Space size="large">
+          <Space size="large" wrap>
             <Form.Item label="成本价" name="cost_price" rules={[{ required: true, message: '请输入成本价' }]}>
               <InputNumber min={0} precision={2} prefix="¥" style={{ width: 180 }} />
             </Form.Item>
@@ -159,7 +159,7 @@ export default function ProductForm() {
               <Form.Item label="SKU（留空自动生成）" name="sku">
                 <Input placeholder="留空自动生成" maxLength={50} disabled={isEdit} />
               </Form.Item>
-              <Space size="large">
+              <Space size="large" wrap>
                 <Form.Item label="库存数量" name="stock_quantity">
                   <InputNumber min={0} precision={0} style={{ width: 180 }} />
                 </Form.Item>

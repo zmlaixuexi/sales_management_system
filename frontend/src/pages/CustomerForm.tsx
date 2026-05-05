@@ -68,13 +68,13 @@ export default function CustomerForm() {
           layout="vertical"
           onFinish={handleSubmit}
           initialValues={{ level: 'normal', follow_status: 'new', source: 'other' }}
-          style={{ maxWidth: 600 }}
+          style={{ maxWidth: 600, width: '100%' }}
         >
           <Form.Item label="客户名称" name="name" rules={[{ required: true, message: '请输入客户名称' }]}>
             <Input placeholder="请输入客户名称" maxLength={100} />
           </Form.Item>
 
-          <Space size="large">
+          <Space size="large" wrap>
             <Form.Item label="联系人" name="contact_name">
               <Input placeholder="联系人姓名" maxLength={100} style={{ width: 250 }} />
             </Form.Item>
@@ -87,7 +87,7 @@ export default function CustomerForm() {
             <Input placeholder="邮箱地址" maxLength={100} />
           </Form.Item>
 
-          <Space size="large">
+          <Space size="large" wrap>
             <Form.Item label="来源" name="source">
               <Select
                 style={{ width: 200 }}

@@ -234,7 +234,7 @@ export default function OrderForm() {
       </div>
 
       <Card title={isEdit ? '编辑订单' : '新建订单'} loading={loading || submitting}>
-        <Form form={form} layout="vertical" style={{ maxWidth: 600 }}
+        <Form form={form} layout="vertical" style={{ maxWidth: 600, width: '100%' }}
           initialValues={{ payment_method: 'cash' }}
         >
           <Form.Item label="客户（可选）" name="customer_id">
@@ -261,42 +261,41 @@ export default function OrderForm() {
               allowClear
             />
           </Form.Item>
-        </Form>
 
-        <div style={{ marginBottom: 16 }}>
-          <Space style={{ marginBottom: 12 }}>
-            <Button icon={<PlusOutlined />} onClick={() => setProductPickerOpen(true)}>添加商品</Button>
-            <span style={{ color: '#999' }}>共 {lines.length} 项</span>
-          </Space>
-          <Table
-            columns={lineColumns}
-            dataSource={lines}
-            rowKey="key"
-            size="small"
-            pagination={false}
-            locale={{ emptyText: '请点击"添加商品"选择商品' }}
-            footer={() => (
-              <div style={{ textAlign: 'right', fontWeight: 600 }}>
-                合计：¥{formatAmount(totalAmount)}
-              </div>
-            )}
-          />
-        </div>
+          <div style={{ marginBottom: 16 }}>
+            <Space style={{ marginBottom: 12 }}>
+              <Button icon={<PlusOutlined />} onClick={() => setProductPickerOpen(true)}>添加商品</Button>
+              <span style={{ color: '#999' }}>共 {lines.length} 项</span>
+            </Space>
+            <Table
+              columns={lineColumns}
+              dataSource={lines}
+              rowKey="key"
+              size="small"
+              pagination={false}
+              scroll={{ x: 500 }}
+              locale={{ emptyText: '请点击"添加商品"选择商品' }}
+              footer={() => (
+                <div style={{ textAlign: 'right', fontWeight: 600 }}>
+                  合计：¥{formatAmount(totalAmount)}
+                </div>
+              )}
+            />
+          </div>
 
-        <Form form={form} layout="vertical" style={{ maxWidth: 600 }}>
           <Form.Item label="备注" name="remark">
             <Input.TextArea rows={3} maxLength={500} />
           </Form.Item>
-        </Form>
 
-        <Form.Item>
-          <Space>
-            <Button type="primary" onClick={submitOrder} loading={loading || submitting}>
-              {isEdit ? '保存修改' : '确认销售'}
-            </Button>
-            <Button onClick={() => navigate('/orders')}>取消</Button>
-          </Space>
-        </Form.Item>
+          <Form.Item>
+            <Space>
+              <Button type="primary" onClick={submitOrder} loading={loading || submitting}>
+                {isEdit ? '保存修改' : '确认销售'}
+              </Button>
+              <Button onClick={() => navigate('/orders')}>取消</Button>
+            </Space>
+          </Form.Item>
+        </Form>
       </Card>
 
       {/* 商品选择弹窗 */}
@@ -312,7 +311,7 @@ export default function OrderForm() {
             prefix={<SearchOutlined />}
             value={productSearch}
             onChange={(e) => setProductSearch(e.target.value)}
-            style={{ width: 240, marginBottom: 12 }}
+            style={{ width: 240, maxWidth: '100%', marginBottom: 12 }}
             allowClear
           />
           <Table
@@ -345,6 +344,7 @@ export default function OrderForm() {
             size="small"
             loading={productLoading}
             pagination={false}
+            scroll={{ x: 500 }}
             locale={{ emptyText: '暂无匹配商品' }}
           />
         </Card>

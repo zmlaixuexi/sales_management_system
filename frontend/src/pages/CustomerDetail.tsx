@@ -115,7 +115,7 @@ export default function CustomerDetail() {
       </div>
 
       <Card title={customer.name} loading={loading}>
-        <Descriptions column={3} size="small" bordered>
+        <Descriptions column={{ xs: 1, sm: 2, md: 3 }} size="small" bordered>
           <Descriptions.Item label="联系人">{customer.contact_name || '--'}</Descriptions.Item>
           <Descriptions.Item label="电话">{customer.phone || '--'}</Descriptions.Item>
           <Descriptions.Item label="邮箱">{customer.email || '--'}</Descriptions.Item>
@@ -146,6 +146,7 @@ export default function CustomerDetail() {
           rowKey="id"
           size="small"
           pagination={false}
+          scroll={{ x: 400 }}
           locale={{ emptyText: '暂无关联订单' }}
         />
       </Card>
