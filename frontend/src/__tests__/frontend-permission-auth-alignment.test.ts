@@ -31,6 +31,9 @@ function extractBackendPermissions(): Set<string> {
     const source = backendSrc(mod)
     for (const m of source.matchAll(/require_permission\("([^"]+)"\)/g)) perms.add(m[1])
     for (const m of source.matchAll(/has_permission\([^,]+,\s*"([^"]+)"\)/g)) perms.add(m[1])
+    // seed.py 中的 ("code", "name", "module") 元组格式
+    for (const m of source.matchAll(/\("([^a-z][^"]*)",\s*"/g)) perms.add(m[1])
+    for (const m of source.matchAll(/\("([a-z][a-z_]+:[a-z_]+)",/g)) perms.add(m[1])
   }
   return perms
 }

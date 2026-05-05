@@ -18,6 +18,9 @@ export default function RolesPage() {
   const [saving, setSaving] = useState(false)
   const [form] = Form.useForm()
   const isSuperuser = useAuthStore(s => s.user?.is_superuser === true)
+  const canCreateRole = useAuthStore(s => s.hasPermission('role:create'))
+  const canUpdateRole = useAuthStore(s => s.hasPermission('role:update'))
+  const canDeleteRole = useAuthStore(s => s.hasPermission('role:delete'))
 
   const loadRoles = useCallback(async () => {
     setLoading(true)
@@ -154,15 +157,19 @@ export default function RolesPage() {
       width: 140,
       render: (_, record) => (
         <Space>
-          <Button type="link" size="small" onClick={() => openEdit(record)}>编辑</Button>
-          <Popconfirm
-            title="确认删除该角色？"
-            onConfirm={() => handleDelete(record.id)}
-            okText="确认"
-            cancelText="取消"
-          >
-            <Button type="link" size="small" danger disabled={record.user_count > 0}>删除</Button>
-          </Popconfirm>
+          {canUpdateRole && (
+            <Button type="link" size="small" onClick={() => openEdit(record)}>编辑</Button>
+          )}
+          {canDeleteRole && (
+            <Popconfirm
+              title="确认删除该角色？"
+              onConfirm={() => handleDelete(record.id)}
+              okText="确认"
+              cancelText="取消"
+            >
+              <Button type="link" size="small" danger disabled={record.user_count > 0}>删除</Button>
+            </Popconfirm>
+          )}
         </Space>
       ),
     },
@@ -176,7 +183,7 @@ export default function RolesPage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
         <h3 style={{ margin: 0 }}>角色权限管理</h3>
-        {isSuperuser && (
+        {canCreateRole && (
           <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
             新建角色
           </Button>

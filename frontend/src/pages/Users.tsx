@@ -17,6 +17,8 @@ export default function UsersPage() {
   const [saving, setSaving] = useState(false)
   const [form] = Form.useForm()
   const isSuperuser = useAuthStore(s => s.user?.is_superuser === true)
+  const canCreateUser = useAuthStore(s => s.hasPermission('user:create'))
+  const canUpdateUser = useAuthStore(s => s.hasPermission('user:update'))
 
   const { data, total, loading, error, page, pageSize, keyword, setKeyword, onPageChange, refresh } = usePaginatedList<User>(
     async (params) => { const r = await fetchUsers(params); return r.data },
@@ -157,12 +159,16 @@ export default function UsersPage() {
       width: 120,
       render: (_, record) => (
         <Space>
-          <Button type="link" size="small" onClick={() => openEdit(record)}>编辑</Button>
-          <Switch
-            size="small"
-            checked={record.is_active}
-            onChange={(checked) => handleToggleActive(record, checked)}
-          />
+          {canUpdateUser && (
+            <Button type="link" size="small" onClick={() => openEdit(record)}>编辑</Button>
+          )}
+          {canUpdateUser && (
+            <Switch
+              size="small"
+              checked={record.is_active}
+              onChange={(checked) => handleToggleActive(record, checked)}
+            />
+          )}
         </Space>
       ),
     },
@@ -181,7 +187,7 @@ export default function UsersPage() {
             allowClear
           />
         </Space>
-        {isSuperuser && (
+        {canCreateUser && (
           <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
             新建用户
           </Button>

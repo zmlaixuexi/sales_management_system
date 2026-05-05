@@ -117,6 +117,13 @@ vi.mock('@ant-design/icons', () => ({
   SearchOutlined: () => <span>🔍</span>,
 }))
 
+const _authStore = {
+  hasPermission: vi.fn((code: string) => ['customer:list', 'payment:create'].includes(code)),
+}
+vi.mock('@/stores/auth', () => ({
+  useAuthStore: (selector: any) => selector(_authStore),
+}))
+
 import OrderForm from '@/pages/OrderForm'
 
 // 从已 mock 的 antd 获取 message 引用

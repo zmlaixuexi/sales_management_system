@@ -35,6 +35,7 @@ export default function OrderForm() {
   const { id } = useParams<{ id: string }>()
   const isEdit = Boolean(id)
   const canCreatePayment = useAuthStore(s => s.hasPermission('payment:create'))
+  const canViewCustomers = useAuthStore(s => s.hasPermission('customer:list'))
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [customers, setCustomers] = useState<Customer[]>([])
@@ -47,12 +48,13 @@ export default function OrderForm() {
   const [productSearch, setProductSearch] = useState('')
   const [productLoading, setProductLoading] = useState(false)
 
-  // 加载客户列表
+  // 加载客户列表（仅在有权限时）
   useEffect(() => {
+    if (!canViewCustomers) return
     fetchCustomers({ page: 1, page_size: 50, keyword: customerSearch || undefined })
       .then((res) => { if (res.success) setCustomers(res.data.items) })
       .catch(() => { /* 客户列表加载失败，静默处理 */ })
-  }, [customerSearch])
+  }, [customerSearch, canViewCustomers])
 
   // 加载商品列表
   const loadProducts = useCallback(async () => {
@@ -239,6 +241,7 @@ export default function OrderForm() {
         <Form form={form} layout="vertical" style={{ maxWidth: 600, width: '100%' }}
           initialValues={{ payment_method: 'cash' }}
         >
+          {canViewCustomers && (
           <Form.Item label="客户（可选）" name="customer_id">
             <Select
               showSearch
@@ -255,6 +258,7 @@ export default function OrderForm() {
               ))}
             </Select>
           </Form.Item>
+          )}
 
           {canCreatePayment && (
           <Form.Item label="收款方式" name="payment_method">
