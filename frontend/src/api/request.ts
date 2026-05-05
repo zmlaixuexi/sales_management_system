@@ -58,8 +58,14 @@ export async function downloadCsv(path: string, params: Record<string, string | 
   }
 
   const disposition = resp.headers['content-disposition'] || ''
-  const match = disposition.match(/filename=(.+)/)
-  const filename = match ? match[1] : 'export.csv'
+  const utf8Match = disposition.match(/filename\*=UTF-8''(.+)/)
+  const asciiMatch = disposition.match(/filename=(.+)/)
+  let filename = 'export.csv'
+  if (utf8Match) {
+    filename = decodeURIComponent(utf8Match[1])
+  } else if (asciiMatch) {
+    filename = asciiMatch[1]
+  }
 
   const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)

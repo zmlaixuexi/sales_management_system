@@ -3,6 +3,7 @@
 import uuid
 from datetime import date, datetime
 from typing import Literal
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
@@ -32,6 +33,11 @@ def _csv_filename(prefix: str) -> str:
     return f"{prefix}_{ts}.csv"
 
 
+def _disposition(filename: str) -> str:
+    """生成兼容中文的 Content-Disposition 头（RFC 5987）"""
+    return f"attachment; filename*=UTF-8''{quote(filename)}"
+
+
 @router.get("/products")
 def export_products_csv(
     request: Request,
@@ -54,7 +60,7 @@ def export_products_csv(
     return StreamingResponse(
         generator,
         media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": f"attachment; filename={_csv_filename('products')}"},
+        headers={"Content-Disposition": _disposition(_csv_filename("商品列表"))},
     )
 
 
@@ -76,7 +82,7 @@ def export_customers_csv(
     return StreamingResponse(
         generator,
         media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": f"attachment; filename={_csv_filename('customers')}"},
+        headers={"Content-Disposition": _disposition(_csv_filename("客户列表"))},
     )
 
 
@@ -108,7 +114,7 @@ def export_orders_csv(
     return StreamingResponse(
         generator,
         media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": f"attachment; filename={_csv_filename('orders')}"},
+        headers={"Content-Disposition": _disposition(_csv_filename("销售订单"))},
     )
 
 
@@ -136,5 +142,5 @@ def export_payments_csv(
     return StreamingResponse(
         generator,
         media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": f"attachment; filename={_csv_filename('payments')}"},
+        headers={"Content-Disposition": _disposition(_csv_filename("收款记录"))},
     )
