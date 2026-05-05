@@ -6,12 +6,14 @@ import { fetchCustomer, createCustomer, updateCustomer, type CustomerFormValues 
 import { useSubmit } from '@/hooks/useSubmit'
 import { getApiErrorMessage, isToastDisplayed } from '@/utils'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
+import { useAuthStore } from '@/stores/auth'
 
 export default function CustomerForm() {
   useDocumentTitle('客户编辑')
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const isEdit = Boolean(id)
+  const canSubmit = useAuthStore(s => s.hasPermission(isEdit ? 'customer:update' : 'customer:create'))
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
 
@@ -131,7 +133,7 @@ export default function CustomerForm() {
 
           <Form.Item>
             <Space>
-              <Button type="primary" htmlType="submit" loading={loading || submitting}>
+              <Button type="primary" htmlType="submit" loading={loading || submitting} disabled={!canSubmit}>
                 {isEdit ? '保存修改' : '创建客户'}
               </Button>
               <Button onClick={() => navigate('/customers')}>取消</Button>

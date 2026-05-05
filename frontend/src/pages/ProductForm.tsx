@@ -7,12 +7,14 @@ import type { ProductDetail, ProductFormValues } from '@/api/products'
 import { useSubmit } from '@/hooks/useSubmit'
 import { getApiErrorMessage, isToastDisplayed } from '@/utils'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
+import { useAuthStore } from '@/stores/auth'
 
 export default function ProductForm() {
   useDocumentTitle('商品编辑')
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const isEdit = Boolean(id)
+  const canSubmit = useAuthStore(s => s.hasPermission(isEdit ? 'product:update' : 'product:create'))
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [_detail, setDetail] = useState<ProductDetail | null>(null)
@@ -185,7 +187,7 @@ export default function ProductForm() {
 
           <Form.Item>
             <Space>
-              <Button type="primary" htmlType="submit" loading={loading || submitting}>
+              <Button type="primary" htmlType="submit" loading={loading || submitting} disabled={!canSubmit}>
                 {isEdit ? '保存修改' : '创建商品'}
               </Button>
               <Button onClick={() => navigate('/products')}>取消</Button>

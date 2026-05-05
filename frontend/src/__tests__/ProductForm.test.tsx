@@ -83,6 +83,13 @@ vi.mock('@ant-design/icons', () => ({
   ArrowLeftOutlined: () => <span>←</span>,
 }))
 
+const _authStore = {
+  hasPermission: vi.fn(() => true),
+}
+vi.mock('@/stores/auth', () => ({
+  useAuthStore: (selector: any) => selector(_authStore),
+}))
+
 import ProductForm from '@/pages/ProductForm'
 
 function renderNewProduct() {
