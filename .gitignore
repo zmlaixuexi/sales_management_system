@@ -1,5 +1,11 @@
 temp/
-.agent_workspace/loop/
+
+# Claude Code 工作目录
+.agent_workspace/
+.claude/
+
+# 环境变量
+.env
 
 # 环境变量
 .env
