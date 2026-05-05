@@ -47,6 +47,7 @@ services:
       LOG_FORMAT: ${LOG_FORMAT:-text}
     volumes:
       - ../backend/app:/app/app
+      - ../backend/alembic:/app/alembic
       - uploads_data:/app/uploads
     depends_on:
       postgres:
