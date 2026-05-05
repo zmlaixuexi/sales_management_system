@@ -53,6 +53,7 @@ export default function CustomersPage() {
   }
 
   const canCreateCustomer = useAuthStore(s => s.hasPermission('customer:create'))
+  const canUpdateCustomer = useAuthStore(s => s.hasPermission('customer:update'))
   const canDeleteCustomer = useAuthStore(s => s.hasPermission('customer:delete'))
 
   const columns: ColumnsType<Customer> = [
@@ -94,7 +95,9 @@ export default function CustomersPage() {
       width: 140,
       render: (_, record) => (
         <Space size="small">
-          <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/customers/${record.id}/edit`)}>编辑</Button>
+          {canUpdateCustomer && (
+            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/customers/${record.id}/edit`)}>编辑</Button>
+          )}
           {canDeleteCustomer && (
             <Popconfirm title="确定删除该客户？" onConfirm={() => handleDelete(record.id)}>
               <Button type="link" size="small" danger icon={<DeleteOutlined />}>删除</Button>
@@ -127,10 +130,14 @@ export default function CustomersPage() {
           />
         </Space>
         <Space wrap>
-          <Button icon={<UploadOutlined />} onClick={() => fileInputRef.current?.click()}>
-            导入
-          </Button>
-          <input ref={fileInputRef} type="file" accept=".csv" style={{ display: 'none' }} onChange={handleImport} />
+          {canCreateCustomer && (
+            <Button icon={<UploadOutlined />} onClick={() => fileInputRef.current?.click()}>
+              导入
+            </Button>
+          )}
+          {canCreateCustomer && (
+            <input ref={fileInputRef} type="file" accept=".csv" style={{ display: 'none' }} onChange={handleImport} />
+          )}
           <Button icon={<DownloadOutlined />} onClick={() => downloadCsv('/exports/customers', { keyword: keyword || undefined, source: sourceFilter })}>
             导出
           </Button>

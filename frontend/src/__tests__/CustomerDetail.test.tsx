@@ -26,6 +26,10 @@ vi.mock('@/utils', () => ({
   isToastDisplayed: (e: any) => !!e?._toastDisplayed,
 }))
 
+vi.mock('@/stores/auth', () => ({
+  useAuthStore: (selector: any) => selector({ hasPermission: () => true }),
+}))
+
 const _messageError = vi.fn()
 vi.mock('antd', () => ({
   Card: ({ title, children }: any) => (

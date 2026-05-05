@@ -27,7 +27,7 @@ vi.mock('@/api/client', () => ({
 }))
 
 vi.mock('@/stores/auth', () => ({
-  useAuthStore: (selector: any) => selector({ hasPermission: (code: string) => code === 'customer:create' || code === 'customer:delete' || code === 'customer:view_all' }),
+  useAuthStore: (selector: any) => selector({ hasPermission: (code: string) => ['customer:create', 'customer:update', 'customer:delete', 'customer:view_all'].includes(code) }),
 }))
 
 const _paginatedListReturn = {

@@ -9,7 +9,13 @@ vi.mock('@/api/auth', () => ({
 }))
 
 vi.mock('@/stores/auth', () => ({
-  useAuthStore: () => (code: string) => code === 'product:list' || code === 'customer:list' || code === 'order:list' || code === 'payment:list' || code === 'report:sales' || code === 'audit:view' || code === 'inventory:list',
+  useAuthStore: (selector: any) => {
+    const store = {
+      hasPermission: (code: string) => ['product:list', 'customer:list', 'order:list', 'payment:list', 'report:sales', 'audit:view', 'inventory:list'].includes(code),
+      user: null,
+    }
+    return selector(store)
+  },
 }))
 
 vi.mock('antd', () => {
@@ -35,6 +41,7 @@ vi.mock('antd', () => {
     ),
     Space: ({ children }: any) => <span>{children}</span>,
     Typography: { Text: ({ children, ...props }: any) => <span {...props}>{children}</span> },
+    Result: ({ title, subTitle, extra }: any) => <div data-testid="result-403">{title}{subTitle}{extra}</div>,
   }
 })
 

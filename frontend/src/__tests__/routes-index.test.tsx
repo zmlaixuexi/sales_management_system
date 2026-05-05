@@ -11,6 +11,7 @@ const MockNotFound = () => <div data-testid="page-notfound">404</div>
 
 vi.mock('@/routes/ProtectedRoute', () => ({
   default: ({ children }: any) => <div data-testid="protected">{children}</div>,
+  RouteGuard: ({ children }: any) => <>{children}</>,
 }))
 
 vi.mock('@/routes/AppLayout', () => ({

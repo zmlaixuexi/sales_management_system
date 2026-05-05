@@ -11,11 +11,14 @@ import { fetchOrders } from '@/api/orders'
 import type { Order } from '@/api/orders'
 import { formatAmount, getApiErrorMessage, isToastDisplayed } from '@/utils'
 import { customerSourceMap as sourceMap, customerLevelMap as levelMap, orderStatusMap } from '@/constants/statusMaps'
+import { useAuthStore } from '@/stores/auth'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function CustomerDetail() {
   useDocumentTitle('客户详情')
   const navigate = useNavigate()
+  const canUpdate = useAuthStore(s => s.hasPermission('customer:update'))
+  const canDelete = useAuthStore(s => s.hasPermission('customer:delete'))
   const { id } = useParams<{ id: string }>()
   const [customer, setCustomer] = useState<Customer | null>(null)
   const [orders, setOrders] = useState<Order[]>([])
@@ -107,10 +110,14 @@ export default function CustomerDetail() {
       <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
         <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/customers')}>返回列表</Button>
         <Space>
-          <Button icon={<EditOutlined />} onClick={() => navigate(`/customers/${id}/edit`)}>编辑</Button>
-          <Popconfirm title="确定删除该客户？删除后不可恢复。" onConfirm={handleDelete}>
-            <Button danger icon={<DeleteOutlined />} loading={deleting}>删除</Button>
-          </Popconfirm>
+          {canUpdate && (
+            <Button icon={<EditOutlined />} onClick={() => navigate(`/customers/${id}/edit`)}>编辑</Button>
+          )}
+          {canDelete && (
+            <Popconfirm title="确定删除该客户？删除后不可恢复。" onConfirm={handleDelete}>
+              <Button danger icon={<DeleteOutlined />} loading={deleting}>删除</Button>
+            </Popconfirm>
+          )}
         </Space>
       </div>
 

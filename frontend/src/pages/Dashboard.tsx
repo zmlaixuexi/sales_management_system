@@ -136,6 +136,7 @@ export default function Dashboard() {
               />
             </Card>
           </Col>
+          {canViewProfit && (
           <Col xs={24} sm={12} md={6}>
             <Card
               style={{ background: 'linear-gradient(135deg, #fff7e6 0%, #ffffff 100%)' }}
@@ -151,6 +152,7 @@ export default function Dashboard() {
               />
             </Card>
           </Col>
+          )}
           {canViewProfit && (
             <Col xs={24} sm={12} md={6}>
               <Card

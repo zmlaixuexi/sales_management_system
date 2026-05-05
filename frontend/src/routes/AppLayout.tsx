@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Layout, Menu, Space, Typography, Grid, Button } from 'antd'
+import { Layout, Menu, Space, Typography, Grid, Button, Result } from 'antd'
 import {
   DashboardOutlined,
   ShoppingCartOutlined,
@@ -25,6 +25,35 @@ const { useBreakpoint } = Grid
 
 const { Header, Sider, Content } = Layout
 
+// 路径 -> 所需权限映射（null 表示所有用户可访问）
+const PATH_PERMISSIONS: Record<string, string | null> = {
+  '/': null,
+  '/products': 'product:list',
+  '/products/new': 'product:create',
+  '/inventory': 'inventory:list',
+  '/customers': 'customer:list',
+  '/customers/new': 'customer:create',
+  '/orders': 'order:list',
+  '/orders/new': 'order:create',
+  '/payments': 'payment:list',
+  '/audit-logs': 'audit:view',
+  '/reports': 'report:sales',
+  '/users': '__superuser__',
+  '/roles': '__superuser__',
+}
+
+// 匹配动态路径
+function getPathPermission(pathname: string): string | null {
+  if (PATH_PERMISSIONS[pathname] !== undefined) return PATH_PERMISSIONS[pathname]
+  const segments = pathname.split('/').filter(Boolean)
+  for (const [pattern, perm] of Object.entries(PATH_PERMISSIONS)) {
+    const pSegs = pattern.split('/').filter(Boolean)
+    if (pSegs.length !== segments.length) continue
+    if (pSegs.every((seg, i) => seg.startsWith(':') || seg === segments[i])) return perm
+  }
+  return null
+}
+
 // 菜单项定义，permission 为 null 表示所有登录用户可见
 const allMenuItems = [
   { key: '/', icon: <DashboardOutlined />, label: '首页看板', permission: null as string | null },
@@ -38,6 +67,22 @@ const allMenuItems = [
   { key: '/users', icon: <UserSwitchOutlined />, label: '用户管理', permission: '__superuser__' },
   { key: '/roles', icon: <SafetyOutlined />, label: '角色权限', permission: '__superuser__' },
 ]
+
+function PermissionGuard({ children }: { children: React.ReactNode }) {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const hasPermission = useAuthStore(s => s.hasPermission)
+  const user = useAuthStore(s => s.user)
+  const perm = getPathPermission(location.pathname)
+  if (perm === null) return <>{children}</>
+  if (perm === '__superuser__' && user?.is_superuser !== true) {
+    return <Result status="403" title="无访问权限" subTitle="您没有权限访问此页面" extra={<Button type="primary" onClick={() => navigate('/')}>返回首页</Button>} />
+  }
+  if (perm !== '__superuser__' && !hasPermission(perm)) {
+    return <Result status="403" title="无访问权限" subTitle="您没有权限访问此页面" extra={<Button type="primary" onClick={() => navigate('/')}>返回首页</Button>} />
+  }
+  return <>{children}</>
+}
 
 export default function AppLayout() {
   const navigate = useNavigate()
@@ -124,7 +169,9 @@ export default function AppLayout() {
           <LogoutOutlined style={{ fontSize: 18, cursor: 'pointer' }} onClick={handleLogout} title="退出登录" />
         </Header>
         <Content style={{ margin: isMobile ? 16 : 24, padding: isMobile ? 16 : 24, background: '#fff', borderRadius: 8 }}>
-          <Outlet />
+          <PermissionGuard>
+            <Outlet />
+          </PermissionGuard>
         </Content>
       </Layout>
     </Layout>

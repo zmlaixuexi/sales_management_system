@@ -18,6 +18,7 @@ import type {
   InventoryWarningItem,
 } from '@/api/reports'
 import { formatAmount, isToastDisplayed } from '@/utils'
+import { useAuthStore } from '@/stores/auth'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 const periodOptions = [
@@ -30,6 +31,7 @@ const periodOptions = [
 
 export default function ReportsCenter() {
   useDocumentTitle('报表中心')
+  const canViewProfit = useAuthStore(s => s.hasPermission('report:profit'))
   const [period, setPeriod] = useState('30d')
   const [summary, setSummary] = useState<SalesSummary | null>(null)
   const [trendItems, setTrendItems] = useState<SalesTrendItem[]>([])
@@ -140,7 +142,7 @@ export default function ReportsCenter() {
     { title: '商品名称', dataIndex: 'product_name', ellipsis: true },
     { title: '销量', dataIndex: 'total_quantity', width: 80 },
     { title: '销售额', dataIndex: 'total_sales', width: 120, render: (v: string) => `¥${formatAmount(v)}` },
-    ...(summary?.total_cost !== undefined ? [{
+    ...(summary?.total_cost !== undefined && canViewProfit ? [{
       title: '成本' as const,
       dataIndex: 'total_cost' as const,
       width: 120,
@@ -153,7 +155,7 @@ export default function ReportsCenter() {
     { title: '客户名称', dataIndex: 'customer_name', ellipsis: true },
     { title: '订单数', dataIndex: 'order_count', width: 80 },
     { title: '销售额', dataIndex: 'total_sales', width: 120, render: (v: string) => `¥${formatAmount(v)}` },
-    ...(summary?.total_cost !== undefined ? [
+    ...(summary?.total_cost !== undefined && canViewProfit ? [
       { title: '成本' as const, dataIndex: 'total_cost' as const, width: 120, render: (v?: string) => v ? `¥${formatAmount(v)}` : '--' },
       { title: '毛利' as const, dataIndex: 'gross_profit' as const, width: 120, render: (v?: string) => v ? `¥${formatAmount(v)}` : '--' },
     ] : []),
@@ -164,7 +166,7 @@ export default function ReportsCenter() {
     { title: '销售员', dataIndex: 'name', ellipsis: true },
     { title: '订单数', dataIndex: 'order_count', width: 80 },
     { title: '销售额', dataIndex: 'total_sales', width: 120, render: (v: string) => `¥${formatAmount(v)}` },
-    ...(summary?.total_cost !== undefined ? [
+    ...(summary?.total_cost !== undefined && canViewProfit ? [
       { title: '成本' as const, dataIndex: 'total_cost' as const, width: 120, render: (v?: string) => v ? `¥${formatAmount(v)}` : '--' },
       { title: '毛利' as const, dataIndex: 'gross_profit' as const, width: 120, render: (v?: string) => v ? `¥${formatAmount(v)}` : '--' },
     ] : []),
@@ -207,7 +209,7 @@ export default function ReportsCenter() {
                   <Col xs={24} sm={12} md={6}>
                     <Card><Statistic title="订单数" value={summary?.order_count ?? 0} loading={loading === 'summary'} /></Card>
                   </Col>
-                  {summary?.total_cost !== undefined && (
+                  {summary?.total_cost !== undefined && canViewProfit && (
                     <>
                       <Col xs={24} sm={12} md={6}>
                         <Card><Statistic title="总成本" value={parseFloat(summary.total_cost)} precision={2} prefix="¥" loading={loading === 'summary'} /></Card>

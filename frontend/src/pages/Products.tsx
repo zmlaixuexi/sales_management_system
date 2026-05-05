@@ -76,6 +76,7 @@ export default function ProductsPage() {
 
   const canViewCost = useAuthStore(s => s.hasPermission('product:view_cost'))
   const canCreateProduct = useAuthStore(s => s.hasPermission('product:create'))
+  const canUpdateProduct = useAuthStore(s => s.hasPermission('product:update'))
   const canDeleteProduct = useAuthStore(s => s.hasPermission('product:delete'))
 
   const columns: ColumnsType<Product> = [
@@ -130,8 +131,10 @@ export default function ProductsPage() {
       width: 160,
       render: (_, record) => (
         <Space size="small">
-          <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/products/${record.id}/edit`)}>编辑</Button>
-          {record.status === 'active' && (
+          {canUpdateProduct && (
+            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/products/${record.id}/edit`)}>编辑</Button>
+          )}
+          {canUpdateProduct && record.status === 'active' && (
             <Button type="link" size="small" icon={<StopOutlined />} onClick={() => handleDisable(record.id)}>停用</Button>
           )}
           {canDeleteProduct && (
@@ -170,10 +173,14 @@ export default function ProductsPage() {
           />
         </Space>
         <Space wrap>
-          <Button icon={<UploadOutlined />} onClick={() => fileInputRef.current?.click()}>
-            导入
-          </Button>
-          <input ref={fileInputRef} type="file" accept=".csv" style={{ display: 'none' }} onChange={handleImport} />
+          {canCreateProduct && (
+            <Button icon={<UploadOutlined />} onClick={() => fileInputRef.current?.click()}>
+              导入
+            </Button>
+          )}
+          {canCreateProduct && (
+            <input ref={fileInputRef} type="file" accept=".csv" style={{ display: 'none' }} onChange={handleImport} />
+          )}
           <Button icon={<DownloadOutlined />} onClick={() => downloadCsv('/exports/products', { keyword: keyword || undefined, status: statusFilter })}>
             导出
           </Button>
