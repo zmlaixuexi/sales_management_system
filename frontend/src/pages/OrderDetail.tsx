@@ -22,6 +22,7 @@ export default function OrderDetail() {
   const canCreatePayment = useAuthStore(s => s.hasPermission('payment:create'))
   const canReversePayment = useAuthStore(s => s.hasPermission('payment:reverse'))
   const canViewLogs = useAuthStore(s => s.hasPermission('order:view'))
+  const canUpdateOrder = useAuthStore(s => s.hasPermission('order:update'))
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const [order, setOrder] = useState<OrderDetailData | null>(null)
@@ -152,7 +153,7 @@ export default function OrderDetail() {
   const statusInfo = statusMap[order.status] || { color: 'default', label: order.status }
   const isDraft = order.status === 'draft'
   const isActive = ['draft', 'confirmed', 'partially_paid'].includes(order.status)
-  const canEdit = isDraft
+  const canEdit = isDraft && canUpdateOrder
   const showConfirm = isDraft && canConfirm
   const showCancel = isActive && canCancel
   const showPay = ['confirmed', 'partially_paid'].includes(order.status) && canCreatePayment

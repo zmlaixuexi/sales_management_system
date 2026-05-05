@@ -15,6 +15,7 @@ import type { Product } from '@/api/products'
 import { formatAmount, getApiErrorMessage, isToastDisplayed } from '@/utils'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
 import { paymentMethodMap } from '@/constants/statusMaps'
+import { useAuthStore } from '@/stores/auth'
 
 interface OrderLine {
   key: string
@@ -33,6 +34,7 @@ export default function OrderForm() {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const isEdit = Boolean(id)
+  const canCreatePayment = useAuthStore(s => s.hasPermission('payment:create'))
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [customers, setCustomers] = useState<Customer[]>([])
@@ -155,7 +157,7 @@ export default function OrderForm() {
         unit_price: String(l.unit_price),
       })),
       remark: values.remark,
-      payment_method: values.payment_method,
+      ...(canCreatePayment && values.payment_method ? { payment_method: values.payment_method } : {}),
     }
     if (isEdit && id) {
       const res = await updateOrder(id, payload)
@@ -254,6 +256,7 @@ export default function OrderForm() {
             </Select>
           </Form.Item>
 
+          {canCreatePayment && (
           <Form.Item label="收款方式" name="payment_method">
             <Select
               placeholder="选择收款方式"
@@ -261,6 +264,7 @@ export default function OrderForm() {
               allowClear
             />
           </Form.Item>
+          )}
 
           <div style={{ marginBottom: 16 }}>
             <Space style={{ marginBottom: 12 }}>

@@ -115,10 +115,9 @@ export default function AppLayout() {
   const roleLabel = user?.roles?.[0]?.display_name || ''
   const hasPermission = useAuthStore(s => s.hasPermission)
 
-  // 根据权限过滤菜单
+  // 根据权限过滤菜单（hasPermission 已处理 superuser 逻辑）
   const menuItems = allMenuItems.filter((item) => {
     if (!item.permission) return true
-    if (item.permission === '__superuser__') return user?.is_superuser === true
     return hasPermission(item.permission)
   })
 
