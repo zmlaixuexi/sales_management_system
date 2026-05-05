@@ -22,7 +22,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U test -d test_ci"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 5
@@ -36,6 +36,7 @@ jobs:
       - name: 运行测试
         env:
           DATABASE_URL: postgresql+psycopg://test:test@localhost:5432/test_ci
+          DATABASE_ASYNC_URL: postgresql+asyncpg://test:test@localhost:5432/test_ci
         run: python -m pytest tests/ -q --tb=short -x
 
   frontend:

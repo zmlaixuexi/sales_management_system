@@ -33,9 +33,17 @@ def _csv_filename(prefix: str) -> str:
     return f"{prefix}_{ts}.csv"
 
 
-def _disposition(filename: str) -> str:
+def _disposition(filename: str, fallback_filename: str | None = None) -> str:
     """生成兼容中文的 Content-Disposition 头（RFC 5987）"""
-    return f"attachment; filename*=UTF-8''{quote(filename)}"
+    encoded = quote(filename)
+    if fallback_filename:
+        return f"attachment; filename=\"{fallback_filename}\"; filename*=UTF-8''{encoded}"
+    return f"attachment; filename*=UTF-8''{encoded}"
+
+
+def _csv_disposition(display_prefix: str, fallback_prefix: str) -> str:
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return _disposition(f"{display_prefix}_{ts}.csv", f"{fallback_prefix}_{ts}.csv")
 
 
 @router.get("/products")
@@ -60,7 +68,7 @@ def export_products_csv(
     return StreamingResponse(
         generator,
         media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": _disposition(_csv_filename("商品列表"))},
+        headers={"Content-Disposition": _csv_disposition("商品列表", "products")},
     )
 
 
@@ -82,7 +90,7 @@ def export_customers_csv(
     return StreamingResponse(
         generator,
         media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": _disposition(_csv_filename("客户列表"))},
+        headers={"Content-Disposition": _csv_disposition("客户列表", "customers")},
     )
 
 
@@ -114,7 +122,7 @@ def export_orders_csv(
     return StreamingResponse(
         generator,
         media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": _disposition(_csv_filename("销售订单"))},
+        headers={"Content-Disposition": _csv_disposition("销售订单", "orders")},
     )
 
 
@@ -142,5 +150,5 @@ def export_payments_csv(
     return StreamingResponse(
         generator,
         media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": _disposition(_csv_filename("收款记录"))},
+        headers={"Content-Disposition": _csv_disposition("收款记录", "payments")},
     )
