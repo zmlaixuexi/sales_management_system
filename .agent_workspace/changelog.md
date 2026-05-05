@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-05-05
+
+### 权限优化：菜单过滤修正、编辑/收款按钮权限门控、RBAC 矩阵测试
+- AppLayout 菜单过滤统一使用 hasPermission（移除对本地 useState user 的 is_superuser 检查）
+- OrderDetail 编辑按钮增加 order:update 权限检查
+- OrderForm 收款方式字段根据 payment:create 权限条件显示
+- 新增 rbac-permission-matrix.test.tsx（48 项覆盖角色权限完整性、菜单可见性、路由拦截、按钮门控、前后端权限码一致性）
+
+### 权限守卫：路由级权限拦截、按钮权限门控、测试修复
+- AppLayout 新增 PermissionGuard 组件，无权限路由显示 403 页面
+- 修复 AppLayout.tsx 重复 import Result 导致 OXC 解析错误
+- 修复 AppLayout/ProtectedRoute mock 更新支持 hasPermission/user
+- CustomerDetail/Customers/Products 按钮按权限显示隐藏
+- Dashboard 利润卡片、ReportsCenter 成本数据权限检查
+
+### 权限优化：菜单/按钮按角色权限控制、销售人员权限扩展
+- 菜单项根据用户权限动态过滤
+- 销售角色扩展：新增 customer:delete、order:confirm、order:cancel、order:view、payment:create
+- 各页面按钮增加权限门控（编辑、删除、停用、导入）
+
 ## 2026-05-04（第八百五十七轮·自动循环）
 
 ### 代码质量：后端服务层函数调用链与事务边界一致性验证测试（25 项）
