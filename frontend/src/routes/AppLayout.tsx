@@ -41,22 +41,18 @@ export default function AppLayout() {
   const navigate = useNavigate()
   const location = useLocation()
   const screens = useBreakpoint()
+  const isMobile = screens.md === false // 明确为 false 才算移动端（undefined 不算）
   const [user, setUser] = useState<CurrentUser | null>(null)
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(isMobile)
 
   // 小屏幕自动折叠侧边栏
   useEffect(() => {
-    if (!screens.md) {
-      setCollapsed(true)
-    }
-  }, [screens.md])
+    if (isMobile) setCollapsed(true)
+  }, [isMobile])
 
   const handleMenuClick = ({ key }: { key: string }) => {
     navigate(key)
-    // 小屏幕点击菜单后自动收起侧边栏
-    if (!screens.md) {
-      setCollapsed(true)
-    }
+    if (isMobile) setCollapsed(true)
   }
 
   const handleLogout = () => {
@@ -82,14 +78,10 @@ export default function AppLayout() {
       <Sider
         theme="light"
         width={200}
-        breakpoint="lg"
-        collapsedWidth={0}
+        collapsedWidth={isMobile ? 0 : 80}
         collapsed={collapsed}
         trigger={null}
-        onBreakpoint={(broken) => {
-          if (broken) setCollapsed(true)
-        }}
-        style={{ position: screens.md ? 'relative' : 'fixed', zIndex: screens.md ? undefined : 100, height: screens.md ? undefined : '100vh' }}
+        style={isMobile ? { position: 'fixed', zIndex: 100, height: '100vh' } : undefined}
       >
         <div style={{ height: 48, margin: 16, textAlign: 'center', fontSize: 18, fontWeight: 600 }}>
           销售管理系统
@@ -103,7 +95,7 @@ export default function AppLayout() {
       </Sider>
       <Layout>
         <Header style={{ background: '#fff', padding: '0 24px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 16 }}>
-          {!screens.md && (
+          {isMobile && (
             <Button
               type="text"
               icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
@@ -121,7 +113,7 @@ export default function AppLayout() {
           )}
           <LogoutOutlined style={{ fontSize: 18, cursor: 'pointer' }} onClick={handleLogout} title="退出登录" />
         </Header>
-        <Content style={{ margin: screens.md ? 24 : 16, padding: screens.md ? 24 : 16, background: '#fff', borderRadius: 8 }}>
+        <Content style={{ margin: isMobile ? 16 : 24, padding: isMobile ? 16 : 24, background: '#fff', borderRadius: 8 }}>
           <Outlet />
         </Content>
       </Layout>
