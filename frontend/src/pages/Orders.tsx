@@ -16,6 +16,7 @@ export default function OrdersPage() {
   useDocumentTitle('订单管理')
   const navigate = useNavigate()
   const canViewCost = useAuthStore(s => s.hasPermission('product:view_cost'))
+  const canCreate = useAuthStore(s => s.hasPermission('order:create'))
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined)
 
   const { data, total, loading, error, page, pageSize, keyword, setPage, setKeyword, onPageChange, refresh } = usePaginatedList<Order>(
@@ -116,9 +117,11 @@ export default function OrdersPage() {
           <Button icon={<DownloadOutlined />} onClick={() => downloadCsv('/exports/orders', { keyword: keyword || undefined, status: statusFilter })}>
             导出
           </Button>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/orders/new')}>
-            新建订单
-          </Button>
+          {canCreate && (
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/orders/new')}>
+              新建订单
+            </Button>
+          )}
         </Space>
       </div>
       <Table

@@ -300,10 +300,12 @@ def test_view_all_separate_from_list():
 
 
 def test_sales_no_delete_permissions():
-    """sales 角色没有删除权限"""
+    """sales 角色没有产品和角色删除权限（客户删除已开放）"""
     sales_perms = set(ROLE_PERMISSIONS["sales"])
-    for code in ["user:delete", "product:delete", "customer:delete", "role:delete"]:
+    for code in ["user:delete", "product:delete", "role:delete"]:
         assert code not in sales_perms
+    # sales 可以删除自己创建的客户
+    assert "customer:delete" in sales_perms
 
 
 def test_inventory_no_customer_or_payment():

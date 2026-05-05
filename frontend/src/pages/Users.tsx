@@ -6,6 +6,7 @@ import { fetchUsers, createUser, updateUser, fetchRoles } from '@/api/users'
 import type { User, RoleItem } from '@/api/users'
 import { usePaginatedList } from '@/hooks/usePaginatedList'
 import { getApiErrorMessage, isToastDisplayed } from '@/utils'
+import { useAuthStore } from '@/stores/auth'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function UsersPage() {
@@ -15,6 +16,7 @@ export default function UsersPage() {
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [saving, setSaving] = useState(false)
   const [form] = Form.useForm()
+  const isSuperuser = useAuthStore(s => s.user?.is_superuser === true)
 
   const { data, total, loading, error, page, pageSize, keyword, setKeyword, onPageChange, refresh } = usePaginatedList<User>(
     async (params) => { const r = await fetchUsers(params); return r.data },
@@ -179,9 +181,11 @@ export default function UsersPage() {
             allowClear
           />
         </Space>
-        <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
-          新建用户
-        </Button>
+        {isSuperuser && (
+          <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
+            新建用户
+          </Button>
+        )}
       </div>
 
       <Table

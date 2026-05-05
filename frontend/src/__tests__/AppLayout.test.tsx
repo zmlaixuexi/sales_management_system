@@ -8,6 +8,10 @@ vi.mock('@/api/auth', () => ({
   authApi: { getMe: vi.fn() },
 }))
 
+vi.mock('@/stores/auth', () => ({
+  useAuthStore: () => (code: string) => code === 'product:list' || code === 'customer:list' || code === 'order:list' || code === 'payment:list' || code === 'report:sales' || code === 'audit:view' || code === 'inventory:list',
+}))
+
 vi.mock('antd', () => {
   function Layout({ children }: any) { return <div>{children}</div> }
   function Sider({ children }: any) { return <aside>{children}</aside> }
@@ -161,7 +165,7 @@ describe('AppLayout', () => {
     expect(screen.getByText('销售管理系统')).toBeInTheDocument()
   })
 
-  it('菜单包含全部 10 个导航项', () => {
+  it('菜单根据权限过滤，非超管不显示用户管理和角色权限', () => {
     ;(authApi.getMe as any).mockResolvedValue({ data: { success: false } })
 
     render(
@@ -174,7 +178,8 @@ describe('AppLayout', () => {
 
     const menu = screen.getByTestId('menu')
     const buttons = menu.querySelectorAll('button[data-testid^="menu-"]')
-    expect(buttons.length).toBe(10)
+    // 首页 + 7 个有权限的菜单（不含用户管理、角色权限）
+    expect(buttons.length).toBe(8)
   })
 
   it('当前路径对应的菜单项高亮', () => {

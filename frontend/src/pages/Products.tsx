@@ -75,6 +75,8 @@ export default function ProductsPage() {
   }
 
   const canViewCost = useAuthStore(s => s.hasPermission('product:view_cost'))
+  const canCreateProduct = useAuthStore(s => s.hasPermission('product:create'))
+  const canDeleteProduct = useAuthStore(s => s.hasPermission('product:delete'))
 
   const columns: ColumnsType<Product> = [
     {
@@ -132,9 +134,11 @@ export default function ProductsPage() {
           {record.status === 'active' && (
             <Button type="link" size="small" icon={<StopOutlined />} onClick={() => handleDisable(record.id)}>停用</Button>
           )}
-          <Popconfirm title="确定删除该商品？" onConfirm={() => handleDelete(record.id)}>
-            <Button type="link" size="small" danger icon={<DeleteOutlined />}>删除</Button>
-          </Popconfirm>
+          {canDeleteProduct && (
+            <Popconfirm title="确定删除该商品？" onConfirm={() => handleDelete(record.id)}>
+              <Button type="link" size="small" danger icon={<DeleteOutlined />}>删除</Button>
+            </Popconfirm>
+          )}
         </Space>
       ),
     },
@@ -173,9 +177,11 @@ export default function ProductsPage() {
           <Button icon={<DownloadOutlined />} onClick={() => downloadCsv('/exports/products', { keyword: keyword || undefined, status: statusFilter })}>
             导出
           </Button>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/products/new')}>
-            新增商品
-          </Button>
+          {canCreateProduct && (
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/products/new')}>
+              新增商品
+            </Button>
+          )}
         </Space>
       </div>
       <Table

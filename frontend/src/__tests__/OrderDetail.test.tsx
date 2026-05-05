@@ -26,7 +26,7 @@ vi.mock('@/api/payments', () => ({
   reversePayment: (...args: any[]) => _paymentMocks.reversePayment(...args),
 }))
 
-const _authStore = { hasPermission: vi.fn(() => false) }
+const _authStore = { hasPermission: vi.fn(() => true) }
 vi.mock('@/stores/auth', () => ({
   useAuthStore: (selector: any) => selector(_authStore),
 }))
@@ -173,6 +173,7 @@ function renderOrderDetail() {
 describe('OrderDetail', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    _authStore.hasPermission.mockImplementation(() => true)
     _orderMocks.fetchOrder.mockResolvedValue(mockOrderData)
     _orderMocks.fetchOrderLogs.mockResolvedValue(mockLogsData)
   })
@@ -424,7 +425,7 @@ describe('OrderDetail', () => {
   })
 
   it('canViewCost 为 true 时显示成本信息', async () => {
-    _authStore.hasPermission.mockReturnValue(true)
+    _authStore.hasPermission.mockImplementation(() => true)
     renderOrderDetail()
     await waitFor(() => {
       const descItems = screen.getAllByTestId('desc-item')
@@ -436,7 +437,7 @@ describe('OrderDetail', () => {
   })
 
   it('canViewCost 为 false 时不显示成本信息', async () => {
-    _authStore.hasPermission.mockReturnValue(false)
+    _authStore.hasPermission.mockImplementation(() => false)
     renderOrderDetail()
     await waitFor(() => {
       expect(screen.getByText(/ORD-20260501-001/)).toBeInTheDocument()

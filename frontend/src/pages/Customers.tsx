@@ -10,6 +10,7 @@ import { downloadCsv } from '@/api/request'
 import apiClient from '@/api/client'
 import { usePaginatedList } from '@/hooks/usePaginatedList'
 import { customerSourceMap as sourceMap, customerLevelMap as levelMap } from '@/constants/statusMaps'
+import { useAuthStore } from '@/stores/auth'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function CustomersPage() {
@@ -51,6 +52,9 @@ export default function CustomersPage() {
     }
   }
 
+  const canCreateCustomer = useAuthStore(s => s.hasPermission('customer:create'))
+  const canDeleteCustomer = useAuthStore(s => s.hasPermission('customer:delete'))
+
   const columns: ColumnsType<Customer> = [
     {
       title: '客户名称',
@@ -91,9 +95,11 @@ export default function CustomersPage() {
       render: (_, record) => (
         <Space size="small">
           <Button type="link" size="small" icon={<EditOutlined />} onClick={() => navigate(`/customers/${record.id}/edit`)}>编辑</Button>
-          <Popconfirm title="确定删除该客户？" onConfirm={() => handleDelete(record.id)}>
-            <Button type="link" size="small" danger icon={<DeleteOutlined />}>删除</Button>
-          </Popconfirm>
+          {canDeleteCustomer && (
+            <Popconfirm title="确定删除该客户？" onConfirm={() => handleDelete(record.id)}>
+              <Button type="link" size="small" danger icon={<DeleteOutlined />}>删除</Button>
+            </Popconfirm>
+          )}
         </Space>
       ),
     },
@@ -128,9 +134,11 @@ export default function CustomersPage() {
           <Button icon={<DownloadOutlined />} onClick={() => downloadCsv('/exports/customers', { keyword: keyword || undefined, source: sourceFilter })}>
             导出
           </Button>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/customers/new')}>
-            新增客户
-          </Button>
+          {canCreateCustomer && (
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/customers/new')}>
+              新增客户
+            </Button>
+          )}
         </Space>
       </div>
       <Table

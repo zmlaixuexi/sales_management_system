@@ -17,6 +17,11 @@ import useDocumentTitle from '@/hooks/useDocumentTitle'
 export default function OrderDetail() {
   useDocumentTitle('订单详情')
   const canViewCost = useAuthStore(s => s.hasPermission('product:view_cost'))
+  const canConfirm = useAuthStore(s => s.hasPermission('order:confirm'))
+  const canCancel = useAuthStore(s => s.hasPermission('order:cancel'))
+  const canCreatePayment = useAuthStore(s => s.hasPermission('payment:create'))
+  const canReversePayment = useAuthStore(s => s.hasPermission('payment:reverse'))
+  const canViewLogs = useAuthStore(s => s.hasPermission('order:view'))
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const [order, setOrder] = useState<OrderDetailData | null>(null)
@@ -145,10 +150,12 @@ export default function OrderDetail() {
 
   const remaining = parseFloat(order.total_amount) - parseFloat(order.paid_amount)
   const statusInfo = statusMap[order.status] || { color: 'default', label: order.status }
-  const canEdit = order.status === 'draft'
-  const canConfirm = order.status === 'draft'
-  const canCancel = ['draft', 'confirmed', 'partially_paid'].includes(order.status)
-  const canPay = ['confirmed', 'partially_paid'].includes(order.status)
+  const isDraft = order.status === 'draft'
+  const isActive = ['draft', 'confirmed', 'partially_paid'].includes(order.status)
+  const canEdit = isDraft
+  const showConfirm = isDraft && canConfirm
+  const showCancel = isActive && canCancel
+  const showPay = ['confirmed', 'partially_paid'].includes(order.status) && canCreatePayment
 
   const itemColumns: ColumnsType<OrderItem> = [
     {
@@ -208,9 +215,11 @@ export default function OrderDetail() {
       title: '操作',
       width: 80,
       render: (_, record) => (
-        <Popconfirm title="确定冲正该笔收款？" onConfirm={() => handleReversePayment(record.id)}>
-          <Button type="link" size="small" danger loading={actionLoading === 'reverse'} disabled={!!actionLoading}>冲正</Button>
-        </Popconfirm>
+        canReversePayment ? (
+          <Popconfirm title="确定冲正该笔收款？" onConfirm={() => handleReversePayment(record.id)}>
+            <Button type="link" size="small" danger loading={actionLoading === 'reverse'} disabled={!!actionLoading}>冲正</Button>
+          </Popconfirm>
+        ) : null
       ),
     },
   ]
@@ -223,15 +232,15 @@ export default function OrderDetail() {
           {canEdit && (
             <Button icon={<EditOutlined />} onClick={() => navigate(`/orders/${id}/edit`)}>编辑</Button>
           )}
-          {canConfirm && (
+          {showConfirm && (
             <Popconfirm title="确认订单将扣减库存，确定？" onConfirm={handleConfirm}>
               <Button type="primary" loading={actionLoading === 'confirm'} disabled={!!actionLoading}>确认订单</Button>
             </Popconfirm>
           )}
-          {canPay && (
+          {showPay && (
             <Button icon={<DollarOutlined />} onClick={() => setPayModalOpen(true)} disabled={!!actionLoading}>登记收款</Button>
           )}
-          {canCancel && (
+          {showCancel && (
             <Popconfirm title="确定取消该订单？" onConfirm={handleCancel}>
               <Button danger loading={actionLoading === 'cancel'} disabled={!!actionLoading}>取消订单</Button>
             </Popconfirm>
@@ -293,6 +302,7 @@ export default function OrderDetail() {
         </Card>
       )}
 
+      {canViewLogs && (
       <Card title="操作日志" style={{ marginTop: 16 }} size="small">
         <Table
           columns={[
@@ -323,6 +333,7 @@ export default function OrderDetail() {
           } : false}
         />
       </Card>
+      )}
 
       {/* 收款弹窗 */}
       <Modal

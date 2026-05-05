@@ -26,6 +26,10 @@ vi.mock('@/api/client', () => ({
   default: { post: vi.fn() },
 }))
 
+vi.mock('@/stores/auth', () => ({
+  useAuthStore: (selector: any) => selector({ hasPermission: (code: string) => code === 'customer:create' || code === 'customer:delete' || code === 'customer:view_all' }),
+}))
+
 const _paginatedListReturn = {
   data: [
     { id: 'c1', name: '客户甲', contact_name: '张三', phone: '13800001111', source: 'referral', level: 'vip', owner_name: '销售A', follow_status: '活跃' },

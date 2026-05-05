@@ -62,17 +62,17 @@ ROLE_PERMISSIONS = {
     "admin": [p[0] for p in PERMISSIONS],
     "sales_manager": [
         "product:list", "product:view_cost",
-        "customer:list", "customer:create", "customer:update", "customer:view_all",
+        "customer:list", "customer:create", "customer:update", "customer:delete", "customer:view_all",
         "order:list", "order:create", "order:update", "order:confirm", "order:cancel", "order:view", "order:view_all",
-        "payment:list",
+        "payment:list", "payment:create",
         "report:sales", "report:profit",
         "inventory:list",
     ],
     "sales": [
         "product:list",
-        "customer:list", "customer:create", "customer:update",
-        "order:list", "order:create", "order:update", "order:confirm",
-        "payment:list",
+        "customer:list", "customer:create", "customer:update", "customer:delete",
+        "order:list", "order:create", "order:update", "order:confirm", "order:cancel", "order:view",
+        "payment:list", "payment:create",
     ],
     "inventory": [
         "product:list", "product:create", "product:update",
@@ -136,15 +136,15 @@ def _seed_roles(db: Session) -> None:
             db.add(role)
             db.flush()
 
-            for code in perm_codes:
-                perm = db.query(Permission).filter(Permission.code == code).first()
-                if perm:
-                    existing_rp = db.query(RolePermission).filter(
-                        RolePermission.role_id == role.id,
-                        RolePermission.permission_id == perm.id,
-                    ).first()
-                    if not existing_rp:
-                        db.add(RolePermission(role_id=role.id, permission_id=perm.id))
+        for code in perm_codes:
+            perm = db.query(Permission).filter(Permission.code == code).first()
+            if perm:
+                existing_rp = db.query(RolePermission).filter(
+                    RolePermission.role_id == role.id,
+                    RolePermission.permission_id == perm.id,
+                ).first()
+                if not existing_rp:
+                    db.add(RolePermission(role_id=role.id, permission_id=perm.id))
 
 
 def _seed_admin_user(db: Session) -> None:

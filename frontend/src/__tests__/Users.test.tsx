@@ -22,6 +22,10 @@ vi.mock('@/utils', () => ({
   isToastDisplayed: (e: any) => !!e?._toastDisplayed,
 }))
 
+vi.mock('@/stores/auth', () => ({
+  useAuthStore: (selector: any) => selector({ user: { is_superuser: true }, hasPermission: () => true }),
+}))
+
 const _paginatedListReturn: any = {
   data: [],
   total: 0,

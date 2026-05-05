@@ -23,6 +23,10 @@ vi.mock('@/utils', () => ({
   isToastDisplayed: (e: unknown) => !!(e as Record<string, boolean>)?._toastDisplayed,
 }))
 
+vi.mock('@/stores/auth', () => ({
+  useAuthStore: (selector: any) => selector({ user: { is_superuser: true }, hasPermission: () => true }),
+}))
+
 vi.mock('@/hooks/usePaginatedList', () => ({
   usePaginatedList: () => ({
     data: [], total: 0, loading: false, error: null,

@@ -5,6 +5,7 @@ import type { ColumnsType } from 'antd/es/table'
 import { fetchRoles, fetchPermissions, createRole, updateRole, deleteRole } from '@/api/roles'
 import type { RoleItem, PermissionItem } from '@/api/roles'
 import { getApiErrorMessage, isToastDisplayed } from '@/utils'
+import { useAuthStore } from '@/stores/auth'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function RolesPage() {
@@ -16,6 +17,7 @@ export default function RolesPage() {
   const [editingRole, setEditingRole] = useState<RoleItem | null>(null)
   const [saving, setSaving] = useState(false)
   const [form] = Form.useForm()
+  const isSuperuser = useAuthStore(s => s.user?.is_superuser === true)
 
   const loadRoles = useCallback(async () => {
     setLoading(true)
@@ -174,9 +176,11 @@ export default function RolesPage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
         <h3 style={{ margin: 0 }}>角色权限管理</h3>
-        <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
-          新建角色
-        </Button>
+        {isSuperuser && (
+          <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
+            新建角色
+          </Button>
+        )}
       </div>
 
       <Table

@@ -18,23 +18,25 @@ import {
 } from '@ant-design/icons'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { authApi, type CurrentUser } from '@/api/auth'
+import { useAuthStore } from '@/stores/auth'
 
 const { Text } = Typography
 const { useBreakpoint } = Grid
 
 const { Header, Sider, Content } = Layout
 
-const menuItems = [
-  { key: '/', icon: <DashboardOutlined />, label: '首页看板' },
-  { key: '/products', icon: <ShopOutlined />, label: '商品管理' },
-  { key: '/inventory', icon: <InboxOutlined />, label: '库存流水' },
-  { key: '/customers', icon: <TeamOutlined />, label: '客户管理' },
-  { key: '/orders', icon: <ShoppingCartOutlined />, label: '销售订单' },
-  { key: '/payments', icon: <WalletOutlined />, label: '收款记录' },
-  { key: '/reports', icon: <BarChartOutlined />, label: '报表中心' },
-  { key: '/audit-logs', icon: <FileTextOutlined />, label: '操作日志' },
-  { key: '/users', icon: <UserSwitchOutlined />, label: '用户管理' },
-  { key: '/roles', icon: <SafetyOutlined />, label: '角色权限' },
+// 菜单项定义，permission 为 null 表示所有登录用户可见
+const allMenuItems = [
+  { key: '/', icon: <DashboardOutlined />, label: '首页看板', permission: null as string | null },
+  { key: '/products', icon: <ShopOutlined />, label: '商品管理', permission: 'product:list' },
+  { key: '/inventory', icon: <InboxOutlined />, label: '库存流水', permission: 'inventory:list' },
+  { key: '/customers', icon: <TeamOutlined />, label: '客户管理', permission: 'customer:list' },
+  { key: '/orders', icon: <ShoppingCartOutlined />, label: '销售订单', permission: 'order:list' },
+  { key: '/payments', icon: <WalletOutlined />, label: '收款记录', permission: 'payment:list' },
+  { key: '/reports', icon: <BarChartOutlined />, label: '报表中心', permission: 'report:sales' },
+  { key: '/audit-logs', icon: <FileTextOutlined />, label: '操作日志', permission: 'audit:view' },
+  { key: '/users', icon: <UserSwitchOutlined />, label: '用户管理', permission: '__superuser__' },
+  { key: '/roles', icon: <SafetyOutlined />, label: '角色权限', permission: '__superuser__' },
 ]
 
 export default function AppLayout() {
@@ -66,6 +68,14 @@ export default function AppLayout() {
 
   const displayName = user?.display_name || user?.username || ''
   const roleLabel = user?.roles?.[0]?.display_name || ''
+  const hasPermission = useAuthStore(s => s.hasPermission)
+
+  // 根据权限过滤菜单
+  const menuItems = allMenuItems.filter((item) => {
+    if (!item.permission) return true
+    if (item.permission === '__superuser__') return user?.is_superuser === true
+    return hasPermission(item.permission)
+  })
 
   useEffect(() => {
     authApi.getMe().then((res) => {
