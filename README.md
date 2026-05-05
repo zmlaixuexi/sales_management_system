@@ -22,7 +22,7 @@
 - **库存管理**：库存流水追踪、手工调整、可配置预警阈值。
 - **报表看板**：销售汇总、趋势、商品排行、客户排行、销售人员排行、库存预警。
 - **操作日志**：关键业务操作日志查询，记录 IP/user_agent/request_id，手机号和邮箱自动脱敏，用户管理操作审计。
-- **数据导出**：商品、客户、订单、收款 CSV 导出，按权限过滤数据范围。
+- **数据导出**：商品、客户、订单、收款 CSV 导出，按权限过滤数据范围，支持日期范围筛选，中文文件名（如 `销售订单_20260505_160749.csv`）。
 - **批量导入**：商品/客户 CSV 批量导入，支持中英文表头，逐行校验和错误收集。
 - **工程化**：前端代码拆分（lazy loading）、TypeScript strict 模式、Vitest 测试框架、ruff lint、ESLint、结构化 JSON 日志、Pydantic 请求/响应模型、分页响应辅助函数、文件上传所有权检查。
 
@@ -280,6 +280,72 @@ npm run build
 | 报表 | `/api/v1/reports` | 销售汇总、趋势、排行、客户排行、销售人员排行、库存预警 |
 | 操作日志 | `/api/v1/audit-logs` | 操作日志查询 |
 | 数据导出 | `/api/v1/exports` | 商品、客户、订单、收款 CSV 导出 |
+
+## 部署运维
+
+### 重启服务
+
+```bash
+cd /home/zml/sales_management_system/deploy
+
+# 重启后端（代码改动后）
+docker compose -f docker-compose.dev.yml restart backend
+
+# 重新构建 + 重启后端（改了依赖或 Dockerfile）
+docker compose -f docker-compose.dev.yml up -d --build backend
+
+# 重启所有服务
+docker compose -f docker-compose.dev.yml restart
+
+# 完整重建所有服务
+docker compose -f docker-compose.dev.yml down
+docker compose -f docker-compose.dev.yml up -d --build
+```
+
+### 数据存储
+
+数据通过 Docker 命名卷持久化，**容器重启/停止不会丢失数据**，仅 `docker compose down -v` 会删除。
+
+| 数据 | 容器内路径 | 宿主机路径 | 卷名 |
+|---|---|---|---|
+| PostgreSQL | `/var/lib/postgresql/data` | `/var/lib/docker/volumes/deploy_postgres_data/_data` | `deploy_postgres_data` |
+| 上传文件 | `/app/uploads` | `/var/lib/docker/volumes/deploy_uploads_data/_data` | `deploy_uploads_data` |
+
+### 数据库备份与恢复
+
+```bash
+# 备份
+docker compose -f docker-compose.dev.yml exec postgres \
+  pg_dump -U postgres sales_management > backup_$(date +%Y%m%d).sql
+
+# 恢复
+docker compose -f docker-compose.dev.yml exec -T postgres \
+  psql -U postgres sales_management < backup_20260505.sql
+```
+
+也可使用部署目录下的脚本：
+
+```bash
+cd deploy
+./backup.sh    # 备份
+./restore.sh   # 恢复
+```
+
+### 数据库迁移
+
+```bash
+# 运行迁移
+docker compose -f docker-compose.dev.yml exec backend alembic upgrade head
+
+# 查看迁移状态
+docker compose -f docker-compose.dev.yml exec backend alembic current
+
+# 创建新迁移
+docker compose -f docker-compose.dev.yml exec backend alembic revision --autogenerate -m "描述"
+
+# 重新初始化种子数据
+docker compose -f docker-compose.dev.yml exec backend python -m app.db.seed
+```
 
 ## 监控（Prometheus + Grafana）
 
