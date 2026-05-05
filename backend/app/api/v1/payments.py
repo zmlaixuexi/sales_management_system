@@ -1,6 +1,7 @@
 """收款登记和冲正 API"""
 
 import uuid
+from datetime import date, timedelta
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -42,6 +43,8 @@ router = APIRouter(
 def list_payments(
     pagination: PaginationParams = Depends(),
     order_id: uuid.UUID | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("payment:list")),
 ):
@@ -59,6 +62,10 @@ def list_payments(
         )
     if order_id:
         query = query.filter(Payment.order_id == order_id)
+    if start_date:
+        query = query.filter(Payment.created_at >= start_date)
+    if end_date:
+        query = query.filter(Payment.created_at < end_date + timedelta(days=1))
     query = query.order_by(Payment.created_at.desc())
 
     items, total = paginate(query, pagination.page, pagination.page_size)

@@ -16,6 +16,8 @@ export async function fetchPayments(params?: {
   page?: number
   page_size?: number
   order_id?: string
+  start_date?: string
+  end_date?: string
 }) {
   return get<PaginatedData<Payment>>('/payments', params)
 }

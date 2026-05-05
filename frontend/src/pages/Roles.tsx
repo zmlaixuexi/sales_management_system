@@ -17,7 +17,6 @@ export default function RolesPage() {
   const [editingRole, setEditingRole] = useState<RoleItem | null>(null)
   const [saving, setSaving] = useState(false)
   const [form] = Form.useForm()
-  const isSuperuser = useAuthStore(s => s.user?.is_superuser === true)
   const canCreateRole = useAuthStore(s => s.hasPermission('role:create'))
   const canUpdateRole = useAuthStore(s => s.hasPermission('role:update'))
   const canDeleteRole = useAuthStore(s => s.hasPermission('role:delete'))

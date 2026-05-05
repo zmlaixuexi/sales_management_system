@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Table, Button, Input, Select, Space, Tag } from 'antd'
+import { Table, Button, Input, Select, Space, Tag, DatePicker } from 'antd'
 import { PlusOutlined, SearchOutlined, EyeOutlined, DownloadOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
@@ -18,9 +18,10 @@ export default function OrdersPage() {
   const canViewCost = useAuthStore(s => s.hasPermission('product:view_cost'))
   const canCreate = useAuthStore(s => s.hasPermission('order:create'))
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined)
+  const [dateRange, setDateRange] = useState<[string, string] | undefined>(undefined)
 
   const { data, total, loading, error, page, pageSize, keyword, setPage, setKeyword, onPageChange, refresh } = usePaginatedList<Order>(
-    async (params) => { const r = await fetchOrders(params); return r.data },
+    async (params) => { const r = await fetchOrders({ ...params, start_date: dateRange?.[0], end_date: dateRange?.[1] }); return r.data },
     { status: statusFilter },
     '加载订单列表失败',
   )
@@ -112,9 +113,14 @@ export default function OrdersPage() {
             allowClear
             options={Object.entries(statusMap).map(([value, { label }]) => ({ label, value }))}
           />
+          <DatePicker.RangePicker
+            placeholder={['开始日期', '结束日期']}
+            onChange={(_, ds) => { setDateRange(ds as [string, string] | undefined); setPage(1) }}
+            allowClear
+          />
         </Space>
         <Space wrap>
-          <Button icon={<DownloadOutlined />} onClick={() => downloadCsv('/exports/orders', { keyword: keyword || undefined, status: statusFilter })}>
+          <Button icon={<DownloadOutlined />} onClick={() => downloadCsv('/exports/orders', { keyword: keyword || undefined, status: statusFilter, start_date: dateRange?.[0], end_date: dateRange?.[1] })}>
             导出
           </Button>
           {canCreate && (

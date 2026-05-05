@@ -1,4 +1,5 @@
-import { Table, Button, Tag, Space } from 'antd'
+import { useState } from 'react'
+import { Table, Button, Tag, Space, DatePicker } from 'antd'
 import { DownloadOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import type { ColumnsType } from 'antd/es/table'
@@ -13,9 +14,10 @@ import useDocumentTitle from '@/hooks/useDocumentTitle'
 export default function PaymentsPage() {
   useDocumentTitle('收款管理')
   const navigate = useNavigate()
+  const [dateRange, setDateRange] = useState<[string, string] | undefined>(undefined)
 
-  const { data, total, loading, error, page, pageSize, onPageChange, refresh } = usePaginatedList<Payment>(
-    async (params) => { const r = await fetchPayments(params); return r.data },
+  const { data, total, loading, error, page, pageSize, setPage, onPageChange, refresh } = usePaginatedList<Payment>(
+    async (params) => { const r = await fetchPayments({ ...params, start_date: dateRange?.[0], end_date: dateRange?.[1] }); return r.data },
     {},
     '加载收款列表失败',
   )
@@ -80,8 +82,13 @@ export default function PaymentsPage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
         <h2 style={{ margin: 0 }}>收款记录</h2>
-        <Space>
-          <Button icon={<DownloadOutlined />} onClick={() => downloadCsv('/exports/payments')}>导出</Button>
+        <Space wrap>
+          <DatePicker.RangePicker
+            placeholder={['开始日期', '结束日期']}
+            onChange={(_, ds) => { setDateRange(ds as [string, string] | undefined); setPage(1) }}
+            allowClear
+          />
+          <Button icon={<DownloadOutlined />} onClick={() => downloadCsv('/exports/payments', { start_date: dateRange?.[0], end_date: dateRange?.[1] })}>导出</Button>
           <span style={{ color: '#888' }}>共 {total} 条记录</span>
         </Space>
       </div>

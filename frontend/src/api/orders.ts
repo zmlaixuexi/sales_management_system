@@ -65,6 +65,8 @@ export async function fetchOrders(params?: {
   keyword?: string
   status?: string
   customer_id?: string
+  start_date?: string
+  end_date?: string
 }) {
   return get<PaginatedData<Order>>('/sales-orders', params)
 }

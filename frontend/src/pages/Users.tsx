@@ -16,7 +16,6 @@ export default function UsersPage() {
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [saving, setSaving] = useState(false)
   const [form] = Form.useForm()
-  const isSuperuser = useAuthStore(s => s.user?.is_superuser === true)
   const canCreateUser = useAuthStore(s => s.hasPermission('user:create'))
   const canUpdateUser = useAuthStore(s => s.hasPermission('user:update'))
 

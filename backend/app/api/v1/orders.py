@@ -2,6 +2,7 @@
 
 import json
 import uuid
+from datetime import date, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Literal
 
@@ -229,6 +230,8 @@ def list_orders(
     keyword: str | None = None,
     status: Literal["draft", "confirmed", "cancelled", "partially_paid", "completed"] | None = None,
     customer_id: uuid.UUID | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("order:list")),
 ):
@@ -245,6 +248,10 @@ def list_orders(
         query = query.filter(SalesOrder.status == status)
     if customer_id:
         query = query.filter(SalesOrder.customer_id == customer_id)
+    if start_date:
+        query = query.filter(SalesOrder.created_at >= start_date)
+    if end_date:
+        query = query.filter(SalesOrder.created_at < end_date + timedelta(days=1))
 
     query = query.order_by(SalesOrder.created_at.desc())
     orders, total = paginate(query, pagination.page, pagination.page_size)
